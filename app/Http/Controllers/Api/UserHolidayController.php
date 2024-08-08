@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreUserHolidayRequest;
-use App\Http\Requests\UpdateUserHolidayRequest;
+use App\Http\Requests\Api\StoreUserHolidayRequest;
+use App\Http\Requests\Api\UpdateUserHolidayRequest;
 use App\Models\UserHoliday;
 use App\Traits\ResponseTrait;
 
@@ -45,12 +45,7 @@ class UserHolidayController extends Controller
      */
     public function update(UpdateUserHolidayRequest $request, UserHoliday $userHoliday)
     {
-        $userHoliday->update([
-            'name' => $request->name,
-            'date_of_holiday' => $request->date_of_holiday,
-            'user_id' => $request->user_id,
-
-        ]);
+        $userHoliday->update($request->validated());
         return $this->returnData('UserHoliday', $userHoliday, 'User Holiday Updated');
 
     }

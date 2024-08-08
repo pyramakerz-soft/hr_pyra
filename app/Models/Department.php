@@ -20,4 +20,10 @@ class Department extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public function user_holidays()
+    {
+        return $this->hasMany(UserHoliday::class);
+    }
+
 }

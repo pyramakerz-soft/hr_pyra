@@ -29,12 +29,12 @@ class UserDetailController extends Controller
     public function store(StoreUserDetailRequest $request)
     {
         $salary = $request->salary; //24000
-        $working_hours = $request->working_hours_day; //8
-        $hourly_rate = ($salary / 30) / $working_hours;
+        $working_hours_day = $request->working_hours_day; //8
+        $hourly_rate = ($salary / 30) / $working_hours_day;
         // dd($request->toArray());
         $userDetail = UserDetail::create([
             'salary' => $salary,
-            'working_hours_day' => $working_hours,
+            'working_hours_day' => $working_hours_day,
             'hourly_rate' => $hourly_rate,
             'overtime_hours' => $request->overtime_hours,
             'emp_type' => $request->emp_type,

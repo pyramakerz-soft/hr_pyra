@@ -3,35 +3,32 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreUserVacationRequest;
-use App\Http\Requests\UpdateUserVacationRequest;
+use App\Http\Requests\Api\StoreUserVacationRequest;
+use App\Http\Requests\Api\UpdateUserVacationRequest;
 use App\Models\UserVacation;
+use App\Traits\ResponseTrait;
 
 class UserVacationController extends Controller
 {
+    use ResponseTrait;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $userVacations = UserVacation::all();
-        dd($userVacations->toArray());
+        if ($userVacations->isEmpty()) {
+            return $this->returnError('No User Vacations Found');
+        }
+        return $this->returnData('userVacations', $userVacations, 'User Vacations Data');
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
     /**
      * Store a newly created resource in storage.
      */
     public function store(StoreUserVacationRequest $request)
     {
-        //
+        $userVacation = UserVacation::create($request->validated());
+        return $this->returnData('userVacation', $userVacation, 'User Vacation Stored');
     }
 
     /**
@@ -39,15 +36,8 @@ class UserVacationController extends Controller
      */
     public function show(UserVacation $userVacation)
     {
-        //
-    }
+        return $this->returnData('UserVacation', $userVacation, 'User Vacation Data');
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(UserVacation $userVacation)
-    {
-        //
     }
 
     /**
@@ -55,7 +45,8 @@ class UserVacationController extends Controller
      */
     public function update(UpdateUserVacationRequest $request, UserVacation $userVacation)
     {
-        //
+        $userVacation->update($request->validated());
+        return $this->returnData('UserVacation', $userVacation, 'User Vacation Updated');
     }
 
     /**
@@ -63,6 +54,7 @@ class UserVacationController extends Controller
      */
     public function destroy(UserVacation $userVacation)
     {
-        //
+        $userVacation->delete();
+        return $this->returnData('UserVacation', $userVacation, 'User Vacation deleted');
     }
 }

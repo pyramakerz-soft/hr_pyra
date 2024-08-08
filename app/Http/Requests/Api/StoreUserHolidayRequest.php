@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -24,7 +24,7 @@ class StoreUserHolidayRequest extends FormRequest
         return [
             'name' => ['required', 'string'],
             'date_of_holiday' => ['required', 'date'],
-            'user_id' => ['required', 'exists:users,id'],
+            'department_id' => ['required', 'exists:departments,id'],
         ];
     }
 }

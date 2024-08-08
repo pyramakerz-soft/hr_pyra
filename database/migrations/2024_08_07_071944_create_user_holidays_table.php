@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->date('date_of_holiday');
             $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
 
             $table->timestamps();
         });

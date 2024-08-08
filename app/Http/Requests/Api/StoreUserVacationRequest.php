@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateUserVacationRequest extends FormRequest
+class StoreUserVacationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,10 +22,10 @@ class UpdateUserVacationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'sick_left' => ['nullable', 'integer'],
-            'paid_left' => ['nullable', 'integer'],
-            'deduction_left' => ['nullable', 'integer'],
-            'user_id' => ['nullable', 'exists:users,id'],
+            'sick_left' => ['required', 'integer', 'max:5'],
+            'paid_left' => ['required', 'integer', 'max:15'],
+            'deduction_left' => ['required', 'integer', 'max:1'],
+            'user_id' => ['required', 'exists:users,id'],
 
         ];
     }
