@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\ClockController;
 use App\Http\Controllers\DepartmentController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,4 +35,9 @@ Route::group(['prefix' => 'auth'], function () {
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
     Route::apiResource('departments', DepartmentController::class)->except('update');
+    Route::post('users/{user}/clock-in', [ClockController::class, 'clockIn'])->name('users.clock-in');
+    Route::post('user/{user}/clock-out', [ClockController::class,'clockOut'])->name('users.clock-out');
 });
+
+
+
