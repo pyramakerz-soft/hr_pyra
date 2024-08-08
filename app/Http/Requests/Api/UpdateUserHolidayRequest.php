@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -24,7 +24,7 @@ class UpdateUserHolidayRequest extends FormRequest
         return [
             'name' => ['nullable', 'string'],
             'date_of_holiday' => ['nullable', 'date'],
-            'user_id' => ['nullable', 'exists:users,id'],
+            'department_id' => ['nullable', 'exists:departments,id'],
         ];
     }
 }
