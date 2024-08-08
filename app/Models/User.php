@@ -86,31 +86,31 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsToMany(User::class, 'user_managers', 'manager_id', 'user_id');
     }
 
-    public function detail()
+    public function user_detail()
     {
         return $this->hasOne(UserDetail::class);
     }
-    public function vacations()
+    public function user_vacations()
     {
         return $this->hasMany(UserVacation::class);
     }
-    public function holidays()
+    public function user_holidays()
     {
         return $this->hasMany(UserHoliday::class);
     }
-    public function locations()
+    public function user_locations()
     {
         return $this->belongsToMany(Location::class, 'user_locations', 'user_id', 'location_id');
     }
-    public function requests()
+    public function user_requests()
     {
         return $this->hasMany(Request::class);
     }
-    public function clocks()
+    public function user_clocks()
     {
         return $this->hasMany(ClockInOut::class);
     }
-    public function overtimes()
+    public function user_overtimes()
     {
         return $this->hasMany(OverTimeInOut::class);
     }

@@ -11,7 +11,7 @@ class StoreUserHolidayRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,9 @@ class StoreUserHolidayRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['required', 'string'],
+            'date_of_holiday' => ['required', 'date'],
+            'user_id' => ['required', 'exists:users,id'],
         ];
     }
 }

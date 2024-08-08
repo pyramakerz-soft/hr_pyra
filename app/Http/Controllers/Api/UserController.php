@@ -15,16 +15,23 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class UserController extends Controller
 {
     use ResponseTrait;
+
+    public function __construct()
+    {
+        $this->middleware('auth:api')->except(['store', 'login']);
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $users = User::all();
+        $users = User::with('user_detail', 'user_holidays')->get();
         if ($users->isEmpty()) {
             return $this->returnError('No Users Found');
         }
-        return $this->returnData("users", $users, "Users Data");
+        $data['users'] = $users;
+
+        return $this->returnData("data", $data, "Users Data");
     }
 
     /**
@@ -43,35 +50,7 @@ class UserController extends Controller
 
         ]);
 
-        return $this->returnData("users", $user, "User Created");
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show()
-    {
-        $authUser = Auth::user();
-        return response()->json(["result" => 'true', 'message' => 'User Profile', 'user' => $authUser], Response::HTTP_OK);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateUserRequest $request, User $user)
-    {
-        dd($user->toArray());
-        $user->update($request->validated());
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(User $user)
-    {
-        $user->delete();
-        return $this->returnData("user", $user, "user deleted");
-
+        return $this->returnData("user", $user, "User Created");
     }
     public function login(LoginRequest $request)
     {
@@ -86,10 +65,43 @@ class UserController extends Controller
             'token' => $token,
         ], Response::HTTP_OK);
     }
+    /**
+     * Display the specified resource.
+     */
+    public function show(User $user)
+    {
+        $user = $user->with('user_detail')->first();
+        return $this->returnData("User", $user, "User Data");
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateUserRequest $request, User $user)
+    {
+        $user->update($request->validated());
+        return $this->returnData("user", $user, "User Updated");
+
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(User $user)
+    {
+        $user->delete();
+        return $this->returnData("user", $user, "user deleted");
+    }
+
     public function logout()
     {
         $user = auth()->user();
         Auth::logout();
         return $this->returnData("user", $user, "You are logged out");
+    }
+    public function profile()
+    {
+        $authUser = Auth::user();
+        return response()->json(["result" => 'true', 'message' => 'User Profile', 'user' => $authUser], Response::HTTP_OK);
     }
 }

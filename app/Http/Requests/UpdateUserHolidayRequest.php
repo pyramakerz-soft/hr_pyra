@@ -11,7 +11,7 @@ class UpdateUserHolidayRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,9 @@ class UpdateUserHolidayRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['nullable', 'string'],
+            'date_of_holiday' => ['nullable', 'date'],
+            'user_id' => ['nullable', 'exists:users,id'],
         ];
     }
 }

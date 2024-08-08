@@ -11,7 +11,7 @@ class UpdateUserVacationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,11 @@ class UpdateUserVacationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'sick_left' => ['nullable', 'integer'],
+            'paid_left' => ['nullable', 'integer'],
+            'deduction_left' => ['nullable', 'integer'],
+            'user_id' => ['nullable', 'exists:users,id'],
+
         ];
     }
 }

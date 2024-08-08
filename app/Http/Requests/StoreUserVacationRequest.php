@@ -11,7 +11,7 @@ class StoreUserVacationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,11 @@ class StoreUserVacationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'sick_left' => ['required', 'integer'],
+            'paid_left' => ['required', 'integer'],
+            'deduction_left' => ['required', 'integer'],
+            'user_id' => ['required', 'exists:users,id'],
+
         ];
     }
 }

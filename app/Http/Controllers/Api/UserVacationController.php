@@ -1,19 +1,21 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\UserHoliday;
-use App\Http\Requests\StoreUserHolidayRequest;
-use App\Http\Requests\UpdateUserHolidayRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUserVacationRequest;
+use App\Http\Requests\UpdateUserVacationRequest;
+use App\Models\UserVacation;
 
-class UserHolidayController extends Controller
+class UserVacationController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        $userVacations = UserVacation::all();
+        dd($userVacations->toArray());
     }
 
     /**
@@ -27,7 +29,7 @@ class UserHolidayController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreUserHolidayRequest $request)
+    public function store(StoreUserVacationRequest $request)
     {
         //
     }
@@ -35,7 +37,7 @@ class UserHolidayController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(UserHoliday $userHoliday)
+    public function show(UserVacation $userVacation)
     {
         //
     }
@@ -43,7 +45,7 @@ class UserHolidayController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(UserHoliday $userHoliday)
+    public function edit(UserVacation $userVacation)
     {
         //
     }
@@ -51,7 +53,7 @@ class UserHolidayController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateUserHolidayRequest $request, UserHoliday $userHoliday)
+    public function update(UpdateUserVacationRequest $request, UserVacation $userVacation)
     {
         //
     }
@@ -59,7 +61,7 @@ class UserHolidayController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(UserHoliday $userHoliday)
+    public function destroy(UserVacation $userVacation)
     {
         //
     }

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->integer('sick_left');
             $table->integer('paid_left');
             $table->integer('deduction_left');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
