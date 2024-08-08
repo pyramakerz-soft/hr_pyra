@@ -12,6 +12,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        User::factory()->count(100)->create();
         User::create([
             'name' => 'Manager',
             'email' => 'manager@test.com',
@@ -30,6 +31,5 @@ class UserSeeder extends Seeder
             'gender' => 'M',
             'department_id' => null,
         ]);
-
     }
 }
