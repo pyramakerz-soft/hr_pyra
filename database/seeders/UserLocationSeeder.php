@@ -15,7 +15,7 @@ class UserLocationSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = User::inRandomOrder()->limit(10)->get();
+        $users = User::inRandomOrder()->limit(5)->get();
         $locations = Location::inRandomOrder()->limit(10)->get();
 
         foreach ($locations as $location) {

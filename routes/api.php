@@ -36,7 +36,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
     Route::apiResource('departments', DepartmentController::class)->except('update');
     Route::post('users/{user}/clock-in', [ClockController::class, 'clockIn'])->name('users.clock-in');
-    Route::post('user/{user}/clock-out', [ClockController::class,'clockOut'])->name('users.clock-out');
+    Route::post('users/{user}/clock-out', [ClockController::class,'clockOut'])->name('users.clock-out');
 });
 
 
