@@ -30,6 +30,7 @@ class UpdateUserRequest extends FormRequest
             'gender' => ['nullable', 'in:m,M,F,f'],
             'department_id' => ['nullable', 'exists:departments,id'],
             'image' => ['nullable'],
+            'roles' => ['required'],
 
         ];
     }

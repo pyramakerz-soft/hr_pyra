@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\Request;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRequestRequest;
 use App\Http\Requests\UpdateRequestRequest;
+use App\Models\Request;
 
 class RequestController extends Controller
 {
@@ -51,7 +52,7 @@ class RequestController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateRequestRequest $request, Request $request)
+    public function update(UpdateRequestRequest $request, Request $Request)
     {
         //
     }

@@ -1,16 +1,17 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Traits\ResponseTrait;
-use Illuminate\Http\Request;
 
 class ClockController extends Controller
 {
 
     use ResponseTrait;
-    public function clockIn(){
+    public function clockIn()
+    {
         $currentUser = auth()->user();
 
         $allowedLocations = $currentUser->locations()->toArray();

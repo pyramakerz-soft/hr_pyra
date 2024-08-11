@@ -30,6 +30,7 @@ class RegisterRequest extends FormRequest
             'gender' => ['required', 'in:m,M,F,f'],
             'department_id' => ['required', 'exists:departments,id'],
             'image' => ['nullable'],
+            'roles' => ['required'],
 
         ];
     }

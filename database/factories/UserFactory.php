@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Department;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -31,6 +32,7 @@ class UserFactory extends Factory
             'phone' => $this->faker->phoneNumber(),
             'contact_phone' => $this->faker->phoneNumber(),
             'image' => $this->faker->imageUrl(),
+            'department_id' => Department::factory(),
             'remember_token' => Str::random(10),
         ];
     }
