@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\ClockInOut;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClockInOutRequest;
 use App\Http\Requests\UpdateClockInOutRequest;
+use App\Models\ClockInOut;
 
 class ClockInOutController extends Controller
 {

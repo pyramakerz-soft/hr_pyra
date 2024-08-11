@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
@@ -25,7 +26,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with('user_detail', 'user_vacations', 'department.user_holidays')->get();
+        $users = User::with('user_detail', 'user_vacations', 'department.user_holidays', 'roles')->get();
         if ($users->isEmpty()) {
             return $this->returnError('No Users Found');
         }
@@ -50,7 +51,11 @@ class UserController extends Controller
             'department_id' => (int) $request->department_id,
 
         ]);
+        if (!$user) {
+            return $this->returnError('Failed to Store User');
 
+        }
+        $user->assignRole($request->input('roles'));
         return $this->returnData("user", $user, "User Created");
     }
     public function login(LoginRequest $request)
@@ -71,7 +76,8 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        $user = $user->with('user_detail')->first();
+        $user = $user->with('user_detail', 'user_vacations', 'department.user_holidays', 'roles')->where('id', $user->id)->get();
+        // $user->getRoleNames()->pluck('name');
         return $this->returnData("User", $user, "User Data");
     }
 
@@ -81,6 +87,11 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user)
     {
         $user->update($request->validated());
+        if (!$user) {
+            return $this->returnError('User Not Found');
+        }
+        DB::table('model_has_roles')->where('model_id', $user->id)->delete();
+        $user->assignRole($request->input('roles'));
         return $this->returnData("user", $user, "User Updated");
 
     }

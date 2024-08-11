@@ -1,8 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\ClockController;
 use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\ClockController;
 use App\Http\Controllers\Api\UserDetailController;
 use App\Http\Controllers\Api\UserHolidayController;
 use App\Http\Controllers\Api\UserVacationController;
@@ -36,14 +37,14 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/user_details/{user_detail}', [UserDetailController::class, 'update'])->name('user_details.update');
     Route::post('/user_holidays/{user_holiday}', [UserHolidayController::class, 'update'])->name('user_holidays.update');
     Route::post('/user_vacations/{user_vacation}', [UserVacationController::class, 'update'])->name('user_vacations.update');
+    Route::post('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
 
-    Route::apiResource('departments', DepartmentController::class)->except('update');
     Route::post('users/{user}/clock-in', [ClockController::class, 'clockIn'])->name('users.clock-in');
-    Route::post('users/{user}/clock-out', [ClockController::class,'clockOut'])->name('users.clock-out');
+    Route::post('users/{user}/clock-out', [ClockController::class, 'clockOut'])->name('users.clock-out');
+    Route::apiResource('roles', RoleController::class)->except('update');
+    Route::apiResource('departments', DepartmentController::class)->except('update');
     Route::apiResource('user_details', UserDetailController::class)->except('update');
     Route::apiResource('user_holidays', UserHolidayController::class)->except('update');
     Route::apiResource('user_vacations', UserVacationController::class)->except('update');
 
 });
-
-

@@ -14,5 +14,6 @@ class DepartmentSeeder extends Seeder
     {
         Department::create(['name' => 'Software']);
         Department::create(['name' => 'Academic']);
+        Department::factory()->count(10)->create();
     }
 }

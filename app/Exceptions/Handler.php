@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\RoleDoesNotExist;
 use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -85,6 +86,10 @@ class Handler extends ExceptionHandler
                 'message' => $firstErrorMessage,
                 'errors' => $errorArray,
             ], Response::HTTP_BAD_REQUEST);
+        }
+        if ($exception instanceof RoleDoesNotExist) {
+            return $this->returnError('There is no role by this name', Response::HTTP_BAD_REQUEST);
+
         }
 
         return parent::render($request, $exception);

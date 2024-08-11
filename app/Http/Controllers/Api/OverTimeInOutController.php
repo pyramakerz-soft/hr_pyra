@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\OverTimeInOut;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOverTimeInOutRequest;
 use App\Http\Requests\UpdateOverTimeInOutRequest;
+use App\Models\OverTimeInOut;
 
 class OverTimeInOutController extends Controller
 {
