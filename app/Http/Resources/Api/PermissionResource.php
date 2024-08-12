@@ -5,7 +5,7 @@ namespace App\Http\Resources\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class DepartmentResource extends JsonResource
+class PermissionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,8 +17,6 @@ class DepartmentResource extends JsonResource
         return [
             "id" => $this->id,
             "name" => $this->name,
-            "manager_id" => $this->manager_id,
-            'userHolidays' => UserHolidayResource::collection($this->whenLoaded('user_holidays')),
         ];
     }
 }
