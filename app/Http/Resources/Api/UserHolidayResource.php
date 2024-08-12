@@ -19,6 +19,8 @@ class UserHolidayResource extends JsonResource
             "name" => $this->name,
             "date_of_holiday" => $this->date_of_holiday,
             "department_id" => $this->department_id,
+            "user" => new UserResource($this->whenLoaded('user')),
+
         ];
     }
 }

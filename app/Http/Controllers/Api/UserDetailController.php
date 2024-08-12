@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreUserDetailRequest;
 use App\Http\Requests\Api\UpdateUserDetailRequest;
+use App\Http\Resources\Api\UserDetailResource;
 use App\Models\UserDetail;
 use App\Traits\ResponseTrait;
 
@@ -20,7 +21,8 @@ class UserDetailController extends Controller
         if ($user_details->isEmpty()) {
             return $this->returnError('No User Details Found');
         }
-        return $this->returnData('user_details', $user_details, 'User Details Data');
+        $data['user_details'] = UserDetailResource::collection($user_details);
+        return $this->returnData('data', ($data), 'User Details Data');
     }
 
     /**

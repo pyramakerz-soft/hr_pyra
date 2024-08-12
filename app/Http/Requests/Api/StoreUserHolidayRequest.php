@@ -25,6 +25,8 @@ class StoreUserHolidayRequest extends FormRequest
             'name' => ['required', 'string'],
             'date_of_holiday' => ['required', 'date'],
             'department_id' => ['required', 'exists:departments,id'],
+            'user_id' => ['nullable', 'exists:users,id'],
+
         ];
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreUserHolidayRequest;
 use App\Http\Requests\Api\UpdateUserHolidayRequest;
+use App\Http\Resources\Api\UserHolidayResource;
 use App\Models\UserHoliday;
 use App\Traits\ResponseTrait;
 
@@ -16,11 +17,12 @@ class UserHolidayController extends Controller
      */
     public function index()
     {
-        $userHolidays = UserHoliday::all();
+        $userHolidays = UserHoliday::with('department', 'user')->get();
         if ($userHolidays->isEmpty()) {
             return $this->returnError('No User Holidays Found');
         }
-        return $this->returnData('user_holidays', $userHolidays, 'User Holidays Data');
+        $data['user_holidays'] = UserHolidayResource::collection($userHolidays);
+        return $this->returnData('data', $data, 'User Holidays Data');
     }
 
     /**
