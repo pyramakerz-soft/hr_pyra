@@ -15,12 +15,11 @@ class UserVacationResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-
             'id' => $this->id,
+            "user_id" => $this->user_id,
             "sick_left" => $this->sick_left,
             "paid_left" => $this->paid_left,
             "deduction_left" => $this->deduction_left,
-            "user_id" => $this->user_id,
         ];
     }
 }
