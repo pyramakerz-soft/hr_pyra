@@ -18,20 +18,30 @@
                 </thead>
                 <tbody>
                     <tr class="border-t border-gray-300" *ngFor="let user of users; let index = index">
-                        <td class="px-4 py-2">{{user.id}}</td>
-                        <td class="px-4 py-2">{{user.name}}</td>
-                        <td class="px-4 py-2">{{user.email}}</td>
-                        <td class="px-4 py-2">{{user.phone}}</td>
-                        <td class="px-4 py-2">{{user.contact_phone}}</td>
-                        <td *ngFor="let roleId of user.roleId; let i = index">
-                            {{roleId}}
+                        <td class="px-4 py-2">{{user.id || '-'}}</td>
+                        <td class="px-4 py-2">{{user.name || '-'}}</td>
+                        <td class="px-4 py-2">{{user.email || '-'}}</td>
+                        <td class="px-4 py-2">{{user.phone || '-'}}</td>
+                        <td class="px-4 py-2">{{user.contact_phone || '-'}}</td>
+                        <td class="px-4 py-2">
+                            <ul>
+                                <li *ngFor="let role of user.Role; let i = index">
+                                    {{ role.id }}
+                                </li>
+                                <li *ngIf="user.Role.length === 0">-</li>
+                            </ul>
                         </td>
-                        <td *ngFor="let roleName of user.roleName; let i = index">
-                            {{roleName}}
+                        <td class="px-4 py-2">
+                            <ul>
+                                <li *ngFor="let role of user.Role; let i = index">
+                                    {{ role.name }}
+                                </li>
+                                <li *ngIf="user.Role.length === 0">-</li>
+                            </ul>
                         </td>
                         <td>
                             <button class="w-20 p-2 bg-[#5185f7] text-white rounded-md text-center mr-3 my-3">Edit</button>
-                            <button class="w-20 p-2 bg-[#d85656] text-white rounded-md text-center my-3">Delete</button>
+                            <button class="w-20 p-2 bg-[#d85656] text-white rounded-md text-center my-3" (click)="DeleteUser(user.id)">Delete</button>
                         </td>
                     </tr>
                 </tbody>
@@ -40,6 +50,6 @@
     </div>  
 
     <div class="text-end">
-        <button class="w-20 p-3 bg-[#2a974f] text-white rounded-md text-center">Delete</button>
+        <button class="w-20 p-3 bg-[#2a974f] text-white rounded-md text-center">Add</button>
     </div>
 </div>

@@ -12,7 +12,6 @@ import { CommonModule } from '@angular/common';
 })
 export class UserComponent implements OnInit {
   users: UserModel[] = []
-  response: any
 
   constructor(public userService: UserServiceService){}
 
@@ -22,19 +21,21 @@ export class UserComponent implements OnInit {
 
   UploadData(){
     this.userService.GetAllusers().subscribe({
-      next: (users) => {
-        this.response = users
-        console.log(this.response.data.users)
-        this.users = this.response.data.users
-
-        for(let i=0; i < this.response.length; i++){
-          for(let j=0; j < this.response.roles.length; j++){
-            this.users[i].roleId[j] = this.response.data.users.roles.id
-            this.users[i].roleName[j] = this.response.data.users.roles.name
-          }
-        }
-
+      next: (users:any) => {
+        this.users = users.data.users
         console.log(this.users)
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    })
+  }
+
+  DeleteUser(id: number){
+    console.log(id)
+    this.userService.DeleteUser(id).subscribe({
+      next: () => {
+        this.users = this.users.filter(user => user.id !== id);
       },
       error: (error) => {
         console.log(error);
