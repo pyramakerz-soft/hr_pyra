@@ -6,23 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLocationRequest;
 use App\Http\Requests\UpdateLocationRequest;
 use App\Models\Location;
+use App\Traits\ResponseTrait;
 
 class LocationController extends Controller
 {
+    use ResponseTrait;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $locations = Location::all();
+        if ($locations->isEmpty()) {
+            return $this->returnError('No locations Found');
+        }
+        return $this->returnData('locations', $locations, 'Locations Data');
     }
 
     /**
@@ -30,7 +28,9 @@ class LocationController extends Controller
      */
     public function store(StoreLocationRequest $request)
     {
-        //
+        $location = Location::create($request->validated());
+        return $this->returnData('location', $location, 'Location Stored Successfully');
+
     }
 
     /**
@@ -38,15 +38,8 @@ class LocationController extends Controller
      */
     public function show(Location $location)
     {
-        //
-    }
+        return $this->returnData('location', $location, 'Location Data');
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Location $location)
-    {
-        //
     }
 
     /**
@@ -54,7 +47,8 @@ class LocationController extends Controller
      */
     public function update(UpdateLocationRequest $request, Location $location)
     {
-        //
+        $location->update($request->validated());
+        return $this->returnData('location', $location, 'Location updated Successfully');
     }
 
     /**
@@ -62,6 +56,7 @@ class LocationController extends Controller
      */
     public function destroy(Location $location)
     {
-        //
+        $location->delete();
+        return $this->returnData('location', $location, 'Location deleted Successfully');
     }
 }
