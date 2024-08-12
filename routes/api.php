@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ClockController;
 use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\HrController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
@@ -55,5 +56,5 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('user_details', UserDetailController::class)->except('update');
     Route::apiResource('user_holidays', UserHolidayController::class)->except('update');
     Route::apiResource('user_vacations', UserVacationController::class)->except('update');
-
+    Route::post('users/{user}/locations', [HrController::class, 'assignLocationToUser'])->name('users.assignLocation');
 });
