@@ -11,7 +11,7 @@ class StoreClockInOutRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,11 +22,9 @@ class StoreClockInOutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'clock_in' => ['required', ''],
-            'clock_out' => [],
-            'duration' => [],
-            'user_id' => [],
-            'location_id' => [],
+
+            'user_id' => ['required', 'exists:users,id'],
+            'location_id' => ['required', 'exists:locations,id'],
 
         ];
     }
