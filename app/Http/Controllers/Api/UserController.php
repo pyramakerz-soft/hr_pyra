@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\LoginRequest;
 use App\Http\Requests\Api\RegisterRequest;
 use App\Http\Requests\Api\UpdateUserRequest;
+use App\Http\Resources\Api\UserResource;
 use App\Models\User;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Response;
@@ -26,12 +27,12 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with('user_detail', 'user_vacations', 'department.user_holidays', 'roles')->get();
+        $users = User::with('user_detail', 'user_vacations', 'department.user_holidays', 'roles.permissions')->get();
         if ($users->isEmpty()) {
             return $this->returnError('No Users Found');
         }
-        // $data['users'] = UserResource::collection($users);
-        $data['users'] = $users;
+        $data['users'] = UserResource::collection($users);
+        // $data['users'] = $users;
 
         return $this->returnData("data", $data, "Users Data");
     }
@@ -76,9 +77,8 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        $user = $user->with('user_detail', 'user_vacations', 'department.user_holidays', 'roles')->where('id', $user->id)->get();
-        // $user->getRoleNames()->pluck('name');
-        return $this->returnData("User", $user, "User Data");
+        $user = $user->with('user_detail', 'user_vacations', 'department.user_holidays', 'roles.permissions')->where('id', $user->id)->get();
+        return $this->returnData("User", UserResource::collection($user), "User Data");
     }
 
     /**

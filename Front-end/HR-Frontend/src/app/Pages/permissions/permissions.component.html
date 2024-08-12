@@ -20,13 +20,15 @@
                         <td class="px-4 py-2">{{ permission.name }}</td>
                         <td>
                             <button
-                                class="w-20 p-2 bg-[#5185f7] text-white rounded-md text-center mr-3 my-3"
+                                class="w-20 p-2 bg-[#5185f7] text-white rounded-md text-center mr-3 my-3" 
+                                (click)="editPermission(permission.id,permission)"
                             >
                                 Edit
                             </button>
                             <button
-                                class="w-20 p-2 bg-[#d85656] text-white rounded-md text-center my-3"
-                            >
+                                class="w-20 p-2 bg-[#d85656] text-white rounded-md text-center my-3" 
+                                (click)="delete(permission.id)"
+                                >
                                 Delete
                             </button>
                         </td>

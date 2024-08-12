@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ClockController;
 use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\HrController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
@@ -42,16 +43,18 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
     Route::post('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
     Route::post('/locations/{location}', [LocationController::class, 'update'])->name('locations.update');
+    Route::post('/clocks/{clock}', [ClockController::class, 'update'])->name('clocks.update');
 
-    Route::post('users/{user}/clock-in', [ClockController::class, 'clockIn'])->name('users.clock-in');
-    Route::post('users/{user}/clock-out', [ClockController::class, 'clockOut'])->name('users.clock-out');
+    // Route::post('users/{user}/clock-in', [ClockController::class, 'clockIn'])->name('users.clock-in');
+    // Route::post('users/{user}/clock-out', [ClockController::class, 'clockOut'])->name('users.clock-out');
     Route::apiResource('roles', RoleController::class)->except('update');
     Route::apiResource('permissions', PermissionController::class)->except('update');
     Route::apiResource('locations', LocationController::class)->except('update');
+    Route::apiResource('clocks', ClockController::class)->except('update');
 
     Route::apiResource('departments', DepartmentController::class)->except('update');
     Route::apiResource('user_details', UserDetailController::class)->except('update');
     Route::apiResource('user_holidays', UserHolidayController::class)->except('update');
     Route::apiResource('user_vacations', UserVacationController::class)->except('update');
-
+    Route::post('users/{user}/locations', [HrController::class, 'assignLocationToUser'])->name('users.assignLocation');
 });

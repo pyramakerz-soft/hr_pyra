@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Requests\UpdateDepartmentRequest;
+use App\Http\Resources\Api\DepartmentResource;
 use App\Models\Department;
 use App\Traits\ResponseTrait;
 
@@ -20,7 +21,7 @@ class DepartmentController extends Controller
         if ($departments->isEmpty()) {
             return $this->returnError('No departments Found');
         }
-        $data['departments'] = $departments;
+        $data['departments'] = DepartmentResource::collection($departments);
         return $this->returnData("data", $data, "departments Data");
 
     }
@@ -45,7 +46,7 @@ class DepartmentController extends Controller
      */
     public function show(Department $department)
     {
-        return $this->returnData("department", $department, "department Data");
+        return $this->returnData("department", new DepartmentResource($department), "department Data");
     }
 
     /**
