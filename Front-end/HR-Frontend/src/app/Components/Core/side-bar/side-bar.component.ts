@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-side-bar',
   standalone: true,
-  imports: [],
+  imports: [RouterLink, RouterOutlet, RouterLinkActive],
   templateUrl: './side-bar.component.html',
   styleUrl: './side-bar.component.css'
 })

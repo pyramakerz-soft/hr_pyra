@@ -4,7 +4,7 @@ import { UserComponent } from './Pages/user/user.component';
 import { RolesComponent } from './Pages/roles/roles.component';
 import { PermissionsComponent } from './Pages/permissions/permissions.component';
 import { PermissionEditComponent } from './Pages/permission-edit/permission-edit.component';
-import { SideBarComponent } from './Pages/side-bar/side-bar.component';
+import { SideBarComponent } from './Components/Core/side-bar/side-bar.component';
 
 export const routes: Routes = [
     {path: "", component:DashboardComponent, title:"Dashboard", children:[
