@@ -100,7 +100,7 @@ class User extends Authenticatable implements JWTSubject
     }
     public function user_locations()
     {
-        return $this->belongsToMany(Location::class, 'user_locations', 'user_id', 'location_id');
+        return $this->belongsToMany(Location::class, 'user_locations', 'user_id', 'location_id')->withTimestamps();
     }
     public function user_requests()
     {

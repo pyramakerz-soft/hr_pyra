@@ -1,8 +1,26 @@
-<div class="flex items-start">
-    <nav class="h-screen  w-[373px] p-[20px] border-r-[1.33px] border-[#2E3545] bg-[#17253E] flex flex-col gap-[20px] ">
-
-    </nav>
-    <div class="flex-1 p-7">
-        <router-outlet></router-outlet>
+<div class="sidebar">
+    <div class="logo">
+      <img src="../../../../assets/Paragraphcontainer.png" class="imagee" />
+      <i class="fa-solid fa-bell" style="color: #FF7519;"></i>
     </div>
-</div>
+  
+    <nav class="flex flex-col">
+      <p class="menu_style">Menu Items</p>
+  
+      <!-- Loop through menu items -->
+      <div
+        *ngFor="let item of menuItems; let i = index"
+        class="text_Style"
+        [ngClass]="{ active: activeIndex === i }"
+        (click)="setActiveIndex(i)"
+      >
+        <i [ngClass]="item.icon"></i>
+        <a [routerLink]="item.route">{{ item.label }}</a>
+    </div>
+    </nav>
+  
+    <div class="flex-1 p-7">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+  

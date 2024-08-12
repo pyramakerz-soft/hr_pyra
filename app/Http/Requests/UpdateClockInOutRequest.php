@@ -11,7 +11,7 @@ class UpdateClockInOutRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,11 @@ class UpdateClockInOutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            // 'clock_out' => ['required', 'date_format:h:ia'],
+            // 'duration' => ['required', 'numeric'],
+            'user_id' => ['required', 'exists:users,id'],
+            'location_id' => ['required', 'exists:locations,id'],
+
         ];
     }
 }
