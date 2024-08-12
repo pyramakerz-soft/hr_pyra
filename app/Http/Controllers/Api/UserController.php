@@ -77,8 +77,8 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        $user = $user->with('user_detail', 'user_vacations', 'department.user_holidays', 'roles')->where('id', $user->id)->get();
-        return $this->returnData("User", $user, "User Data");
+        $user = $user->with('user_detail', 'user_vacations', 'department.user_holidays', 'roles.permissions')->where('id', $user->id)->get();
+        return $this->returnData("User", UserResource::collection($user), "User Data");
     }
 
     /**
