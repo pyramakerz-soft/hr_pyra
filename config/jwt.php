@@ -23,7 +23,7 @@ return [
     | Note: This will be used for Symmetric algorithms only (HMAC),
     | since RSA and ECDSA use a private/public key combo (See below).
     |
-    */
+     */
 
     'secret' => env('JWT_SECRET'),
 
@@ -42,7 +42,7 @@ return [
     | Asymmetric Algorithms:
     | RS256, RS384 & RS512 / ES256, ES384 & ES512 will use the keys below.
     |
-    */
+     */
 
     'keys' => [
 
@@ -55,7 +55,7 @@ return [
         |
         | E.g. 'file://path/to/public/key'
         |
-        */
+         */
 
         'public' => env('JWT_PUBLIC_KEY'),
 
@@ -68,7 +68,7 @@ return [
         |
         | E.g. 'file://path/to/private/key'
         |
-        */
+         */
 
         'private' => env('JWT_PRIVATE_KEY'),
 
@@ -79,7 +79,7 @@ return [
         |
         | The passphrase for your private key. Can be null if none set.
         |
-        */
+         */
 
         'passphrase' => env('JWT_PASSPHRASE'),
 
@@ -99,7 +99,7 @@ return [
     | systems in place to revoke the token if necessary.
     | Notice: If you set this to null you should remove 'exp' element from 'required_claims' list.
     |
-    */
+     */
 
     'ttl' => env('JWT_TTL', 60),
 
@@ -118,7 +118,7 @@ return [
     | This is not particularly recommended, so make sure you have appropriate
     | systems in place to revoke the token if necessary.
     |
-    */
+     */
 
     'refresh_ttl' => env('JWT_REFRESH_TTL', 20160),
 
@@ -129,7 +129,7 @@ return [
     |
     | Specify the hashing algorithm that will be used to sign the token.
     |
-    */
+     */
 
     'algo' => env('JWT_ALGO', Tymon\JWTAuth\Providers\JWT\Provider::ALGO_HS256),
 
@@ -142,7 +142,7 @@ return [
     | A TokenInvalidException will be thrown if any of these claims are not
     | present in the payload.
     |
-    */
+     */
 
     'required_claims' => [
         'iss',
@@ -164,7 +164,7 @@ return [
     |
     | Note: If a claim does not exist then it will be ignored.
     |
-    */
+     */
 
     'persistent_claims' => [
         // 'foo',
@@ -186,7 +186,7 @@ return [
     | e.g. if you only have one authentication model, then you would save
     | a little on token size.
     |
-    */
+     */
 
     'lock_subject' => true,
 
@@ -203,7 +203,7 @@ return [
     |
     | Specify in seconds - only if you know you need it.
     |
-    */
+     */
 
     'leeway' => env('JWT_LEEWAY', 0),
 
@@ -215,7 +215,7 @@ return [
     | In order to invalidate tokens, you must have the blacklist enabled.
     | If you do not want or need this functionality, then set this to false.
     |
-    */
+     */
 
     'blacklist_enabled' => env('JWT_BLACKLIST_ENABLED', true),
 
@@ -230,7 +230,7 @@ return [
     |
     | Set grace period in seconds to prevent parallel request failure.
     |
-    */
+     */
 
     'blacklist_grace_period' => env('JWT_BLACKLIST_GRACE_PERIOD', 0),
 
@@ -248,7 +248,7 @@ return [
     |
     | Set it to true if you want to decrypt cookies.
     |
-    */
+     */
 
     'decrypt_cookies' => false,
 
@@ -259,7 +259,7 @@ return [
     |
     | Specify the various providers used throughout the package.
     |
-    */
+     */
 
     'providers' => [
 
@@ -270,7 +270,7 @@ return [
         |
         | Specify the provider that is used to create and decode the tokens.
         |
-        */
+         */
 
         'jwt' => Tymon\JWTAuth\Providers\JWT\Lcobucci::class,
 
@@ -281,7 +281,7 @@ return [
         |
         | Specify the provider that is used to authenticate users.
         |
-        */
+         */
 
         'auth' => Tymon\JWTAuth\Providers\Auth\Illuminate::class,
 
@@ -292,7 +292,7 @@ return [
         |
         | Specify the provider that is used to store tokens in the blacklist.
         |
-        */
+         */
 
         'storage' => Tymon\JWTAuth\Providers\Storage\Illuminate::class,
 
