@@ -5,7 +5,8 @@ export class UserModel {
         public email: string,
         public phone: string,
         public contact_phone: string,
-        public gender: string,
+        public roleId: number[],
+        public roleName: string[],
     ){}
 }
 
