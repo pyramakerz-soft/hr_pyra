@@ -22,7 +22,7 @@ class StoreClockInOutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'clock_in' => [],
+            'clock_in' => ['required', ''],
             'clock_out' => [],
             'duration' => [],
             'user_id' => [],
