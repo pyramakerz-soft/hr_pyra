@@ -1,0 +1,11 @@
+.arial{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.Inter{
+    font-family: "Inter";
+}
+
+.bgLinearGradient{
+    background: linear-gradient(to right top, #2E5EB5 10%, #17253E 60%);
+}
