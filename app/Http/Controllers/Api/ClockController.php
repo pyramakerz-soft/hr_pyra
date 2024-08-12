@@ -32,15 +32,20 @@ class ClockController extends Controller
      */
     public function clockIn(StoreClockInOutRequest $request)
     {
-        // User::whereHas('locations', function ($query) {
-        //     $query->where('location_id', $request->location_id);
-        // })->get();
-        // $exists = $user->user_locations->contains($request->location_id);
-        // dd($exists);
-        $user = Auth::user();
 
-        $location = Location::with('users.user_locations')->where('id', '=', 'users.location_id')->get();
-        dd($location->toArray());
+        $location = Location::whereHas('users', function ($q) {
+            // dd($q->get())
+
+        })->find($request->location_id);
+        $location_users = $location->users[0]->pivot;
+        // foreach($location->users)
+        if (!$location) {
+            return $this->returnError("Location not found");
+        }
+        $user = $location->users->firstWhere('id', Auth::user()->id);
+        $pivotData = $user->pivot;
+        // dd($user->toArray());
+
         $clock = ClockInOut::create([
             'clock_in' => Carbon::now()->addRealHour(3),
             'clock_out' => null,
