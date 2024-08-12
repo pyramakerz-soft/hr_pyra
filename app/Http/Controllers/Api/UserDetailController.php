@@ -31,7 +31,10 @@ class UserDetailController extends Controller
         $salary = $request->salary; //24000
         $working_hours_day = $request->working_hours_day; //8
         $hourly_rate = ($salary / 30) / $working_hours_day;
+        $start_time = $request->start_time; //7.00
+        $end_time = $start_time + $working_hours_day; //15.00
         // dd($request->toArray());
+        dd($end_time);
         $userDetail = UserDetail::create([
             'salary' => $salary,
             'working_hours_day' => $working_hours_day,

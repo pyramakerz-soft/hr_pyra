@@ -13,12 +13,17 @@ class UserDetailSeeder extends Seeder
     public function run(): void
     {
         $salary = 24000; //24000
-        $working_hours = 8; //8
+        $working_hours = 8.00; //8
         $hourly_rate = ($salary / 30) / $working_hours;
+        $start_time = 7.00;
+        $end_time = $start_time + $working_hours;
+        // dd($start_time);
         UserDetail::create([
             'salary' => $salary,
             'working_hours_day' => $working_hours,
             'hourly_rate' => $hourly_rate,
+            'start_time' => $start_time,
+            'end_time' => $end_time,
             'overtime_hours' => 1.5,
             'emp_type' => "Backend developer",
             'hiring_date' => "2024-7-8",
@@ -28,6 +33,8 @@ class UserDetailSeeder extends Seeder
             'salary' => $salary,
             'working_hours_day' => $working_hours,
             'hourly_rate' => $hourly_rate,
+            'start_time' => $start_time,
+            'end_time' => $end_time,
             'overtime_hours' => 1.5,
             'emp_type' => "Front developer",
             'hiring_date' => "2024-8-8",
