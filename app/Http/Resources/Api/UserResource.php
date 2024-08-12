@@ -33,8 +33,9 @@ class UserResource extends JsonResource
             'image' => $this->image,
             'gender' => $gender,
             'userDetail' => new UserDetailResource($this->whenLoaded('user_detail')),
-            'userVacations' => new UserVacationResource($this->whenLoaded('user_vacations')),
-            // 'Department' => new DepartmentResource($this->whenLoaded('departments')),
+            'userVacations' => UserVacationResource::collection($this->whenLoaded('user_vacations')),
+            'Department' => new DepartmentResource($this->whenLoaded('department')),
+            'Role' => RoleResource::collection($this->whenLoaded('roles')),
 
         ];
     }

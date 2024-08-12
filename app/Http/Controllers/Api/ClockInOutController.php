@@ -6,23 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClockInOutRequest;
 use App\Http\Requests\UpdateClockInOutRequest;
 use App\Models\ClockInOut;
+use App\Traits\ResponseTrait;
 
 class ClockInOutController extends Controller
 {
+    use ResponseTrait;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $clocks = ClockInOut::all();
+        if ($clocks->isEmpty()) {
+            return $this->returnError('No clocks Found');
+        }
+        $data['clocks'] = $clocks;
+        return $this->returnData("data", $data, "clocks Data");
     }
 
     /**
@@ -30,21 +29,13 @@ class ClockInOutController extends Controller
      */
     public function store(StoreClockInOutRequest $request)
     {
-        //
+
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(ClockInOut $clockInOut)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(ClockInOut $clockInOut)
+    public function show(ClockInOut $clock)
     {
         //
     }
@@ -52,7 +43,7 @@ class ClockInOutController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateClockInOutRequest $request, ClockInOut $clockInOut)
+    public function update(UpdateClockInOutRequest $request, ClockInOut $clock)
     {
         //
     }
@@ -60,7 +51,7 @@ class ClockInOutController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ClockInOut $clockInOut)
+    public function destroy(ClockInOut $clock)
     {
         //
     }
