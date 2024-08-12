@@ -33,13 +33,13 @@ class UserDetailController extends Controller
         $hourly_rate = ($salary / 30) / $working_hours_day;
         $start_time = $request->start_time; //7.00
         $end_time = $start_time + $working_hours_day; //15.00
-        // dd($request->toArray());
-        dd($end_time);
         $userDetail = UserDetail::create([
             'salary' => $salary,
             'working_hours_day' => $working_hours_day,
             'hourly_rate' => $hourly_rate,
             'overtime_hours' => $request->overtime_hours,
+            'start_time' => $start_time,
+            'end_time' => $end_time,
             'emp_type' => $request->emp_type,
             'hiring_date' => $request->hiring_date,
             'user_id' => $request->user_id,
