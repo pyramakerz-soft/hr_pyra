@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\RoleResource;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
@@ -17,11 +18,11 @@ class RoleController extends Controller
     public function index()
     {
 
-        $roles = Role::all();
+        $roles = Role::with('permissions')->get();
         if ($roles->isEmpty()) {
             return $this->returnError('No Roles Found');
         }
-        return $this->returnData('roles', $roles, 'Roles Data');
+        return $this->returnData('roles', RoleResource::collection($roles), 'Roles Data');
 
     }
 
@@ -40,7 +41,7 @@ class RoleController extends Controller
         if (!$role) {
             return $this->returnError('Failed to Store Role');
         }
-        return $this->returnData('role', $role, 'Role Stored Successfully');
+        return $this->returnData('role', new RoleResource($role), 'Role Stored Successfully');
 
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\PermissionResource;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
@@ -19,7 +20,7 @@ class PermissionController extends Controller
         if ($permissions->isEmpty()) {
             return $this->returnError("No Permissions Found");
         }
-        return $this->returnData('permissions', $permissions, "Permissions Data");
+        return $this->returnData('permissions', PermissionResource::collection($permissions), "Permissions Data");
 
     }
 

@@ -32,7 +32,10 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::post('login', [UserController::class, 'login'])->name('users.login');
     Route::post('logout', [UserController::class, 'logout'])->name('users.logout');
+    Route::post('assign_role/{user}', [UserController::class, 'AssignRole'])->name('users.role');
+
     Route::apiResource('users', UserController::class)->except('update');
+
 });
 Route::group(['middleware' => 'auth:api'], function () {
 

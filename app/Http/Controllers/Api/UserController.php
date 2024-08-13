@@ -7,11 +7,14 @@ use App\Http\Requests\Api\LoginRequest;
 use App\Http\Requests\Api\RegisterRequest;
 use App\Http\Requests\Api\UpdateUserRequest;
 use App\Http\Resources\Api\UserResource;
+// use App\Models\Request;
 use App\Models\User;
 use App\Traits\ResponseTrait;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
@@ -115,5 +118,14 @@ class UserController extends Controller
     {
         $authUser = Auth::user();
         return response()->json(["result" => 'true', 'message' => 'User Profile', 'user' => $authUser], Response::HTTP_OK);
+    }
+    public function AssignRole(Request $request, User $user)
+    {
+        $this->validate($request, [
+            'role' => ['required', 'string', 'exists:roles,name'],
+        ]);
+        $role = Role::findByName($request->role);
+        $user->assignRole($role);
+        return $this->returnData('user', $user, 'Role assigned to user successfully.');
     }
 }

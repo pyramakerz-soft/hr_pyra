@@ -17,8 +17,8 @@ class UserDetailResource extends JsonResource
         $salary = $this->salary;
         $working_hours_day = $this->working_hours_day;
         $hourly_rate = ($salary / 30) / $working_hours_day;
-        $start_time = $this->start_time; //7.00
-        $end_time = $start_time + $working_hours_day; //15.00
+        $start_time = $this->start_time; //07:00
+        $end_time = $this->end_time; //15:00
         return [
             "id" => $this->id,
             "user_id" => $this->user_id,
