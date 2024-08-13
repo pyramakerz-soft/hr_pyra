@@ -7,12 +7,14 @@ use App\Http\Requests\StoreClockInOutRequest;
 use App\Http\Requests\UpdateClockInOutRequest;
 use App\Models\ClockInOut;
 use App\Models\User;
+use App\Traits\HelperTrait;
 use App\Traits\ResponseTrait;
 use Illuminate\Support\Carbon;
 
 class ClockController extends Controller
 {
     use ResponseTrait;
+    use HelperTrait;
     /**
      * Display a listing of the resource.
      */
@@ -59,11 +61,18 @@ class ClockController extends Controller
 
         $user = User::findorFail($user_id);
         $user_locations = $user->user_locations()->wherePivot('location_id', $location_id)->first();
-
+        // dd($latitude);
+        // dd($user_locations['longitude']);
         if (!$user_locations) {
             return $this->returnError('Not found');
         }
-        if ($user_locations['latitude'] == $latitude && $user_locations['longitude'] == $longitude) {
+        $userLongitude = $user_location->longitude;
+        $userLatitude = $user_location->latitude;
+
+        $distanceBetweenUserAndLocation = $this->
+            haversineDistance($userLatitude, $userLongitude, $latitude, $longitude);
+
+        if ($distanceBetweenUserAndLocation < 50) {
             $clock = ClockInOut::create([
                 'clock_in' => Carbon::now()->addRealHour(3),
                 'clock_out' => null,
@@ -95,7 +104,6 @@ class ClockController extends Controller
         if (!$user_locations) {
             return $this->returnError('Not Found');
         }
-
         if ($user_locations['latitude'] == $latitude && $user_locations['longitude'] == $longitude) {
 
             $clock_in = $clock->clock_in;
