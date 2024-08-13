@@ -60,10 +60,8 @@ class ClockController extends Controller
         $longitude = $request->longitude;
 
         $user = User::findorFail($user_id);
-        $user_locations = $user->user_locations()->wherePivot('location_id', $location_id)->first();
-        // dd($latitude);
-        // dd($user_locations['longitude']);
-        if (!$user_locations) {
+        $user_location = $user->user_locations()->wherePivot('location_id', $location_id)->first();
+        if (!$user_location) {
             return $this->returnError('Not found');
         }
         $userLongitude = $user_location->longitude;
@@ -71,7 +69,7 @@ class ClockController extends Controller
 
         $distanceBetweenUserAndLocation = $this->
             haversineDistance($userLatitude, $userLongitude, $latitude, $longitude);
-
+        //Distance by meter
         if ($distanceBetweenUserAndLocation < 50) {
             $clock = ClockInOut::create([
                 'clock_in' => Carbon::now()->addRealHour(3),
@@ -80,7 +78,7 @@ class ClockController extends Controller
                 'user_id' => $user_id,
                 'location_id' => $location_id,
             ]);
-            return $this->returnData("clock", $clock, "clock Stored Successfully");
+            return $this->returnData("clock", $clock, "Clock In Done");
         } else {
             return $this->returnError('User is not located at the correct location');
 
@@ -90,21 +88,28 @@ class ClockController extends Controller
 
     public function clockOut(UpdateClockInOutRequest $request, ClockInOut $clock)
     {
+        // dd($clock->user_id);
+
+        // dd($clock->location_id);
         $this->validate($request, [
             'latitude' => 'required',
             'longitude' => 'required',
         ]);
-        $user_id = $request->user_id;
-        $location_id = $request->location_id;
+        $location_id = $clock->location_id;
+        $user_id = $clock->user_id;
         $latitude = $request->latitude;
         $longitude = $request->longitude;
 
-        $user = User::findorFail($user_id);
-        $user_locations = $user->user_locations()->wherePivot('location_id', $location_id)->first();
-        if (!$user_locations) {
+        $user = User::findorFail($clock->user_id);
+        $user_location = $user->user_locations()->wherePivot('location_id', $clock->location_id)->first();
+        if (!$user_location) {
             return $this->returnError('Not Found');
         }
-        if ($user_locations['latitude'] == $latitude && $user_locations['longitude'] == $longitude) {
+        $userLongitude = $user_location->longitude;
+        $userLatitude = $user_location->latitude;
+        $distanceBetweenUserAndLocation = $this->
+            haversineDistance($userLatitude, $userLongitude, $latitude, $longitude);
+        if ($distanceBetweenUserAndLocation < 50) {
 
             $clock_in = $clock->clock_in;
             $clock_out = Carbon::now()->addRealHour(3);
@@ -116,7 +121,7 @@ class ClockController extends Controller
                 'user_id' => $user_id,
                 'location_id' => $location_id,
             ]);
-            return $this->returnData("clock", $clock, "clock Updated Successfully");
+            return $this->returnData("clock", $clock, "Clock Out Done");
         } else {
             return $this->returnError('User is not located at the correct location');
 
