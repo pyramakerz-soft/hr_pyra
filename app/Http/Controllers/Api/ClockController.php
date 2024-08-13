@@ -29,10 +29,29 @@ class ClockController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
+    // private function calculateDistance($latitude_location, $longitude_location, $latitude_user, $longitude_user)
+    // {
+    //     $earthRadiusInKilometers = 6371; // Earth's radius in kilometers
+
+    //     $latitudeDifference = deg2rad($latitude_user - $latitude_location);
+    //     $longitudeDifference = deg2rad($longitude_user - $longitude_location);
+
+    //     $haversineFormula = sin($latitudeDifference / 2) * sin($latitudeDifference / 2) +
+    //     cos(deg2rad($latitude_location)) * cos(deg2rad($latitude_user)) *
+    //     sin($longitudeDifference / 2) * sin($longitudeDifference / 2);
+
+    //     $angularDistance = 2 * atan2(sqrt($haversineFormula), sqrt(1 - $haversineFormula));
+
+    //     return $earthRadiusInKilometers * $angularDistance; // Distance in kilometers
+    // }
+
     public function clockIn(StoreClockInOutRequest $request)
     {
-        // dd($request->toArray());
-
+        $this->validate($request, [
+            'latitude' => 'required',
+            'longitude' => 'required',
+        ]);
         $user_id = $request->user_id;
         $location_id = $request->location_id;
         $latitude = $request->latitude;
@@ -40,8 +59,7 @@ class ClockController extends Controller
 
         $user = User::findorFail($user_id);
         $user_locations = $user->user_locations()->wherePivot('location_id', $location_id)->first();
-        // dd($latitude);
-        // dd($user_locations['longitude']);
+
         if (!$user_locations) {
             return $this->returnError('Not found');
         }
@@ -61,17 +79,6 @@ class ClockController extends Controller
 
     }
 
-    /**
-     * Display the specified resource.
-     */
-    // public function show(ClockInOut $clock)
-    // {
-    //     return $this->returnData("clock", $clock, "Clock Data");
-    // }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function clockOut(UpdateClockInOutRequest $request, ClockInOut $clock)
     {
         $this->validate($request, [
@@ -85,10 +92,10 @@ class ClockController extends Controller
 
         $user = User::findorFail($user_id);
         $user_locations = $user->user_locations()->wherePivot('location_id', $location_id)->first();
-        // dd($->toArray());
         if (!$user_locations) {
-            return $this->returnError('User is not clocking out from the same location they clocked in.');
+            return $this->returnError('Not Found');
         }
+
         if ($user_locations['latitude'] == $latitude && $user_locations['longitude'] == $longitude) {
 
             $clock_in = $clock->clock_in;
