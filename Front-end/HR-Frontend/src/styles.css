@@ -2,4 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-@import '~@coreui/coreui/dist/css/coreui.min.css';
+/* @import '~@coreui/coreui/dist/css/coreui.min.css'; */
+
+.arial{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.Inter{
+    font-family: "Inter";
+}
+
+.poppins{
+    font-family: "Poppins", sans-serif;;
+}
