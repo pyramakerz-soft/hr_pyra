@@ -8,6 +8,7 @@ use App\Http\Requests\Api\UpdateUserDetailRequest;
 use App\Http\Resources\Api\UserDetailResource;
 use App\Models\UserDetail;
 use App\Traits\ResponseTrait;
+use Illuminate\Http\Response;
 
 class UserDetailController extends Controller
 {
@@ -33,8 +34,11 @@ class UserDetailController extends Controller
         $salary = $request->salary; //24000
         $working_hours_day = $request->working_hours_day; //8
         $hourly_rate = ($salary / 30) / $working_hours_day;
-        $start_time = $request->start_time; //7.00
-        $end_time = $start_time + $working_hours_day; //15.00
+        $start_time = $request->start_time;
+        $end_time = $request->end_time;
+        if ($end_time <= $start_time) {
+            return $this->returnError('End time must be later than start time', Response::HTTP_BAD_REQUEST);
+        }
         $userDetail = UserDetail::create([
             'salary' => $salary,
             'working_hours_day' => $working_hours_day,

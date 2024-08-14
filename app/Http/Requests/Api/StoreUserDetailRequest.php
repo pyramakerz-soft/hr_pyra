@@ -28,7 +28,9 @@ class StoreUserDetailRequest extends FormRequest
             'emp_type' => ['required', 'string'],
             'hiring_date' => ['required', 'date'],
             'user_id' => ['required', 'exists:users,id'],
-            'start_time' => ['required', 'numeric'],
+            'start_time' => ['required', 'date_format:H:i'],
+            'end_time' => ['required', 'date_format:H:i'],
+
         ];
     }
 }

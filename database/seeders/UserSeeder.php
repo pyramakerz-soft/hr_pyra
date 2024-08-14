@@ -24,22 +24,27 @@ class UserSeeder extends Seeder
         'user-create',
         'user-edit',
         'user-delete',
-        'user-details-list',
-        'user-details-create',
-        'user-details-edit',
-        'user-details-delete',
-        'user-vacations-list',
-        'user-vacations-create',
-        'user-vacations-edit',
-        'user-vacations-delete',
-        'department-list',
-        'department-create',
-        'department-edit',
-        'department-delete',
-        'user-holidays-list',
-        'user-holidays-create',
-        'user-holidays-edit',
-        'user-holidays-delete',
+        // 'user-details-list',
+        // 'user-details-create',
+        // 'user-details-edit',
+        // 'user-details-delete',
+        // 'user-vacations-list',
+        // 'user-vacations-create',
+        // 'user-vacations-edit',
+        // 'user-vacations-delete',
+        // 'department-list',
+        // 'department-create',
+        // 'department-edit',
+        // 'department-delete',
+        // 'user-holidays-list',
+        // 'user-holidays-create',
+        // 'user-holidays-edit',
+        // 'user-holidays-delete',
+        // 'location-list',
+        // 'location-create',
+        // 'location-edit',
+        // 'location-delete',
+
     ];
     /**
      * Run the database seeds.
@@ -83,10 +88,10 @@ class UserSeeder extends Seeder
         $role_hr->syncPermissions($permissions);
         $user_hr->assignRole([$role_hr->id]);
 
-        $role_mg = Role::create(['name' => 'Manager']);
-        $permissions = Permission::pluck('id', 'id')->all();
-        $role_mg->syncPermissions($permissions);
-        $user_manager->assignRole([$role_mg->id]);
+        // $role_mg = Role::create(['name' => 'Manager']);
+        // $permissions = Permission::pluck('id', 'id')->all();
+        // $role_mg->syncPermissions($permissions);
+        // $user_manager->assignRole([$role_mg->id]);
 
     }
 }
