@@ -45,6 +45,9 @@ class UserController extends Controller
      */
     public function store(RegisterRequest $request)
     {
+        if (!Auth::user()->hasRole('Hr')) {
+            return $this->returnError('Unauthorized', 403);
+        }
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -59,7 +62,7 @@ class UserController extends Controller
             return $this->returnError('Failed to Store User');
 
         }
-        $user->assignRole($request->input('roles'));
+        $user->syncRoles($request->input('roles', []));
         return $this->returnData("user", $user, "User Created");
     }
     public function login(LoginRequest $request)

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class RegisterRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class RegisterRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return Auth::user()->hasRole('Hr');
     }
 
     /**
@@ -30,7 +31,6 @@ class RegisterRequest extends FormRequest
             'gender' => ['required', 'in:m,M,F,f'],
             'department_id' => ['required', 'exists:departments,id'],
             'image' => ['nullable'],
-            'roles' => ['required'],
 
         ];
     }
