@@ -2,16 +2,16 @@
     <div class="py-5 mx-9">
       <div class="px-5 py-4 bg-[#2E3646] flex justify-between items-center">
         <img src="../../../../assets/images/Paragraphcontainer.png" class="w-[90%]" />
-        <i class="fa-solid fa-bell" style="color: #FF7519;"></i>
+        <i class="fa-solid fa-bell text-xl text-[#FF7519]"></i>
       </div>
     </div>
     
     <nav class="flex flex-col">
-      <p class="menu_style">Menu Items</p>
+      <p class="menu_style text-base md:text-lg">Menu Items</p>
   
       <div
         *ngFor="let item of menuItems; let i = index"
-        class="text_Style"
+        class="text_Style text-lg md:text-xl"
         [ngClass]="{ active: activeIndex === i }"
         (click)="setActiveIndex(i)"
       >
