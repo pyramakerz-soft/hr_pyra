@@ -5,8 +5,6 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Model\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -38,12 +36,8 @@ class DatabaseSeeder extends Seeder
             UserVacationSeeder::class,
             LocationSeeder::class,
             UserLocationSeeder::class,
-<<<<<<< HEAD
             WorkTypeSeeder::class,
-=======
-            PermissionSeeder::class
-
->>>>>>> 1447adec13c4eff540f9e6fe5db1abc7942f00b4
+            PermissionSeeder::class,
         ]);
 
     }
