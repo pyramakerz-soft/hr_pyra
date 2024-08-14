@@ -8,19 +8,18 @@ import { PermissionEditComponent } from './Pages/permission-edit/permission-edit
 import { SideBarComponent } from './Components/Core/side-bar/side-bar.component';
 import { ClockInComponent } from './Components/clock-in/clock-in.component';
 import { TableComponent } from './Components/Core/table/table.component';
+import { EmployeeDashboardComponent } from './Pages/employee-dashboard/employee-dashboard.component';
 
 export const routes: Routes = [
-    {path: "", component:DashboardComponent, title:"Dashboard", children:[
-        {path: "", redirectTo: "Users", pathMatch: "full"},
-        {path: "Users", component:UserComponent, title:"Users"},
-        {path: "Roles", component:RolesComponent , title:"Roles"},
-        {path: "Permissions", component:PermissionsComponent, title:"Permissions"},
-        {path: "Permissions/Edit/:id", component:PermissionEditComponent, title:"PermissionsEdit"},
-    ]},
-    { path: "SideBar", component:SideBarComponent, title:"SideBar" },
+    // {path: "", component:DashboardComponent, title:"Dashboard", children:[
+    //     {path: "", redirectTo: "Users", pathMatch: "full"},
+    //     {path: "Users", component:UserComponent, title:"Users"},
+    //     {path: "Roles", component:RolesComponent , title:"Roles"},
+    //     {path: "Permissions", component:PermissionsComponent, title:"Permissions"},
+    //     {path: "Permissions/Edit/:id", component:PermissionEditComponent, title:"PermissionsEdit"},
+    // ]},
     { path: "Login", component:LoginComponent, title:"Login" },
-    { path: "clockin", component:ClockInComponent, title:"pop" },
-    { path: "table", component:TableComponent, title:"table" },
+    { path: "empDashboard", component:EmployeeDashboardComponent, title:"Dashboard" },
     { path: "", component:DashboardComponent,title:"Dashboard" },
     { path: '**', redirectTo: '/' }
 ];

@@ -11,10 +11,10 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 })
 export class SideBarComponent {
   menuItems = [
-    { label: 'Dashboard', icon: 'fa-regular fa-table-list' ,  route: '/SideBar' },
-    { label: 'Profile', icon: 'fa-regular fa-user'  ,  route: '/SideBar' },
-    { label: 'Settings', icon: 'fa-regular fa-cog'  ,  route: '/SideBar' },
-    { label: 'Sign Out', icon: 'fa-regular fa-sign-out'  ,  route: '/SideBar' },
+    { label: 'Dashboard', icon: 'fa-regular fa-table-list' ,  route: '/side' },
+    { label: 'Profile', icon: 'fa-regular fa-user'  ,  route: '/empDashboard' },
+    { label: 'Settings', icon: 'fa-regular fa-cog'  ,  route: '/empDashboard' },
+    { label: 'Sign Out', icon: 'fa-regular fa-sign-out'  ,  route: '/empDashboard' },
   ];
 
   activeIndex: number | null = null;

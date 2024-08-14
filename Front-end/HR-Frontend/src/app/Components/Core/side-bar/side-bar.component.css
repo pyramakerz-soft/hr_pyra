@@ -1,25 +1,17 @@
 .sidebar {
-    height: 100vh;
-    width: 373.33px;
-     padding-top: 20px; 
+    height: 100%;
     border-right: 1.33px solid #2E3545;
     background-color: #17253E;
-
 }
 
 .logo{
-    width: 340.33px; 
-    height: auto; 
-    min-height: 77.33px; 
+    height: auto;  
     padding: 10.67px 21.33px 10.67px 21.33px; 
-    box-sizing: border-box; 
     display: flex;          
     align-items: center; 
     justify-content: space-between;   
     gap: 10px;   
     background-color:#2E3646 ;  
-    margin-left: 13px;
-
 }
 
 .imagee{
@@ -30,6 +22,7 @@
 .text_Style.active {
     background-color: #333b48;
     color: #fff;
+    border-left: 2px #F9F9F9 solid;
   }
 
   a {
@@ -45,7 +38,6 @@
     line-height: 29.33px; 
     letter-spacing: -0.13px; 
     color:  #A5ACBA;
-    width: 373.33px; 
     height: 61.33px; 
     padding: 0 37.33px;
     display: flex; 
@@ -60,7 +52,6 @@
     line-height:26.67px; 
     letter-spacing: 1%; 
     color:  #A5ACBA;
-    width: 373.33px; 
     height: 58.67px; 
     padding: 0 37.33px; 
     display: flex;
