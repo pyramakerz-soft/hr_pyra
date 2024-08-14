@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Traits\ResponseTrait;
-use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,7 +13,6 @@ class HrController extends Controller
     use ResponseTrait;
     public function getLocationAssignedToUser()
     {
-<<<<<<< HEAD
 
         $users = User::with('user_locations')->get();
 
@@ -25,22 +23,21 @@ class HrController extends Controller
                 $pivotData = $location->pivot->toArray();
                 $data[] = ['user_location' => $pivotData];
             }
-=======
-        $auth = Auth::user();
-        if (!$auth->hasRole('Hr')) {
-            return $this->returnError('User is unauthorized to assign location', 403);
-        }
-        $validated = $request->validate([
-            'location_id' => 'required|exists:locations,id',
-        ]);
-        if (!$user->user_locations()->where('location_id', $validated['location_id'])->exists()) {
-            $user->user_locations()->attach($validated['location_id']);
-        } else {
-            return $this->returnError('User has already been assigned to this location');
->>>>>>> 1447adec13c4eff540f9e6fe5db1abc7942f00b4
-        }
+            $auth = Auth::user();
+            if (!$auth->hasRole('Hr')) {
+                return $this->returnError('User is unauthorized to assign location', 403);
+            }
+            $validated = $request->validate([
+                'location_id' => 'required|exists:locations,id',
+            ]);
+            if (!$user->user_locations()->where('location_id', $validated['location_id'])->exists()) {
+                $user->user_locations()->attach($validated['location_id']);
+            } else {
+                return $this->returnError('User has already been assigned to this location');
+            }
 
-        return $this->returnData('user_locations', $data, 'User Location Data');
+            return $this->returnData('user_locations', $data, 'User Location Data');
+        }
     }
     public function getWorkTypeAssignedToUser()
     {
