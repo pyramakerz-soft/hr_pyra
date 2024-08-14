@@ -1,15 +1,14 @@
 <div class="sidebar">
     <div class="py-5 mx-9">
-      <div class="logo">
-        <img src="../../../../assets/images/Paragraphcontainer.png" class="imagee" />
+      <div class="px-5 py-4 bg-[#2E3646] flex justify-between items-center">
+        <img src="../../../../assets/images/Paragraphcontainer.png" class="w-2/3" />
         <i class="fa-solid fa-bell" style="color: #FF7519;"></i>
       </div>
     </div>
-  
+    
     <nav class="flex flex-col">
       <p class="menu_style">Menu Items</p>
   
-      <!-- Loop through menu items -->
       <div
         *ngFor="let item of menuItems; let i = index"
         class="text_Style"
@@ -20,9 +19,5 @@
         <a [routerLink]="item.route">{{ item.label }}</a>
     </div>
     </nav>
-  
-    <!-- <div class="flex-1 p-7">
-      <router-outlet></router-outlet>
-    </div> -->
 </div>
   
