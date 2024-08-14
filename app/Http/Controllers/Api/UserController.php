@@ -9,6 +9,7 @@ use App\Http\Requests\Api\UpdateUserRequest;
 use App\Http\Resources\Api\UserResource;
 // use App\Models\Request;
 use App\Models\User;
+use App\Models\UserDetail;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -45,6 +46,9 @@ class UserController extends Controller
      */
     public function store(RegisterRequest $request)
     {
+        if (!Auth::user()->hasRole('Hr')) {
+            return $this->returnError('Unauthorized', 403);
+        }
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -59,19 +63,24 @@ class UserController extends Controller
             return $this->returnError('Failed to Store User');
 
         }
-        $user->assignRole($request->input('roles'));
+        $user->syncRoles($request->input('roles', []));
         return $this->returnData("user", $user, "User Created");
     }
     public function login(LoginRequest $request)
     {
         $credentials = $request->only('email', 'password');
         $token = JWTAuth::attempt($credentials);
+        // dd(Auth::user()->user_detail->toArray());
+        $userDetail = UserDetail::findOrFail(Auth::user()->id);
+
+        // dd($userDetail);
         if (!$token) {
             return $this->returnError('You Are unauthenticated', Response::HTTP_UNAUTHORIZED);
         }
         return response()->json([
             "result" => "true",
             'user' => Auth::user(),
+            'user_detail' => $userDetail,
             'token' => $token,
         ], Response::HTTP_OK);
     }

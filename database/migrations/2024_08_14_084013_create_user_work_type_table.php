@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('over_time_in_outs', function (Blueprint $table) {
+        Schema::create('user_work_type', function (Blueprint $table) {
             $table->id();
-            $table->timestamp('clock_in')->nullable();
-            $table->timestamp('clock_out')->nullable();
-            $table->time('duration')->nullable();
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
-
+            $table->foreignId('work_type_id')->nullable()->constrained('work_types')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('over_time_in_outs');
+        Schema::dropIfExists('user_work_type');
     }
 };

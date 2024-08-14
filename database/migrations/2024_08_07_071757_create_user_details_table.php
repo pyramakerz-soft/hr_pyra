@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('user_details', function (Blueprint $table) {
             $table->id();
-            $table->decimal('salary', 8, 2);
-            $table->decimal('hourly_rate', 8, 2);
-            $table->decimal('working_hours_day', 8, 2);
-            $table->decimal('overtime_hours', 8, 2);
-            $table->time('start_time'); // Changed to time type
-            $table->time('end_time'); // Changed to time type
-            $table->string('emp_type');
-            $table->date('hiring_date');
+            $table->decimal('salary', 8, 2)->nullable();
+            $table->decimal('hourly_rate', 8, 2)->nullable();
+            $table->decimal('working_hours_day', 8, 2)->nullable();
+            $table->decimal('overtime_hours', 8, 2)->nullable();
+            $table->time('start_time')->nullable(); // Changed to time type
+            $table->time('end_time')->nullable(); // Changed to time type
+            $table->string('emp_type')->nullable();
+            $table->date('hiring_date')->nullable();
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
 
             $table->timestamps();

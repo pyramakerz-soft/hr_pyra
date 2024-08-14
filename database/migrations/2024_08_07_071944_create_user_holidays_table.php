@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('user_holidays', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->date('date_of_holiday');
+            $table->string('name')->nullable();
+            $table->date('date_of_holiday')->nullable();
             $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
 

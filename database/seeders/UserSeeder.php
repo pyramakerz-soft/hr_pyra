@@ -15,47 +15,14 @@ class UserSeeder extends Seeder
     /**
      * List of applications to add.
      */
-    public $permissions = [
-        'role-list',
-        'role-create',
-        'role-edit',
-        'role-delete',
-        'user-list',
-        'user-create',
-        'user-edit',
-        'user-delete',
-        // 'user-details-list',
-        // 'user-details-create',
-        // 'user-details-edit',
-        // 'user-details-delete',
-        // 'user-vacations-list',
-        // 'user-vacations-create',
-        // 'user-vacations-edit',
-        // 'user-vacations-delete',
-        // 'department-list',
-        // 'department-create',
-        // 'department-edit',
-        // 'department-delete',
-        // 'user-holidays-list',
-        // 'user-holidays-create',
-        // 'user-holidays-edit',
-        // 'user-holidays-delete',
-        // 'location-list',
-        // 'location-create',
-        // 'location-edit',
-        // 'location-delete',
 
-    ];
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        // User::factory()->count(10)->create();
 
-        foreach ($this->permissions as $permission) {
-            Permission::create(['name' => $permission]);
-        }
+
         $faker = Faker::create();
 
         $user_hr = User::create([
@@ -83,15 +50,6 @@ class UserSeeder extends Seeder
         $department = Department::findOrFail(2);
         $department->update(['manager_id' => 2]);
 
-        $role_hr = Role::create(['name' => 'Hr']);
-        $permissions = Permission::pluck('id', 'id')->all();
-        $role_hr->syncPermissions($permissions);
-        $user_hr->assignRole([$role_hr->id]);
-
-        // $role_mg = Role::create(['name' => 'Manager']);
-        // $permissions = Permission::pluck('id', 'id')->all();
-        // $role_mg->syncPermissions($permissions);
-        // $user_manager->assignRole([$role_mg->id]);
 
     }
 }
