@@ -23,18 +23,6 @@ class HrController extends Controller
                 $pivotData = $location->pivot->toArray();
                 $data[] = ['user_location' => $pivotData];
             }
-            $auth = Auth::user();
-            if (!$auth->hasRole('Hr')) {
-                return $this->returnError('User is unauthorized to assign location', 403);
-            }
-            $validated = $request->validate([
-                'location_id' => 'required|exists:locations,id',
-            ]);
-            if (!$user->user_locations()->where('location_id', $validated['location_id'])->exists()) {
-                $user->user_locations()->attach($validated['location_id']);
-            } else {
-                return $this->returnError('User has already been assigned to this location');
-            }
 
             return $this->returnData('user_locations', $data, 'User Location Data');
         }
@@ -54,6 +42,10 @@ class HrController extends Controller
 
     public function assignLocationToUser(Request $request, User $user)
     {
+        $auth = Auth::user();
+        if (!$auth->hasRole('Hr')) {
+            return $this->returnError('User is unauthorized to assign location', 403);
+        }
         $this->validate($request, [
             'location_id' => 'required|exists:locations,id',
 
