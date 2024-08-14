@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserDetailController;
 use App\Http\Controllers\Api\UserHolidayController;
 use App\Http\Controllers\Api\UserVacationController;
+use App\Http\Controllers\Api\WorkTypeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -46,6 +47,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
     Route::post('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
     Route::post('/locations/{location}', [LocationController::class, 'update'])->name('locations.update');
+    Route::post('/work_types/{workType}', [WorkTypeController::class, 'update'])->name('work_types.update');
+
     Route::post('/clock_in', [ClockController::class, 'clockIn'])->name('clocks.clockIn');
     Route::post('/clock_out/{clock}', [ClockController::class, 'clockOut'])->name('clocks.clockOut');
 
@@ -55,10 +58,17 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('permissions', PermissionController::class)->except('update');
     Route::apiResource('locations', LocationController::class)->except('update');
     Route::apiResource('clocks', ClockController::class)->except(['store', 'update']);
+    Route::apiResource('work_types', WorkTypeController::class)->except('update');
 
     Route::apiResource('departments', DepartmentController::class)->except('update');
     Route::apiResource('user_details', UserDetailController::class)->except('update');
     Route::apiResource('user_holidays', UserHolidayController::class)->except('update');
     Route::apiResource('user_vacations', UserVacationController::class)->except('update');
+    // Route::group('')
     Route::post('users/{user}/locations', [HrController::class, 'assignLocationToUser'])->name('users.assignLocation');
+    Route::get('users/locations', [HrController::class, 'getLocationAssignedToUser'])->name('users.userLocation');
+
+    Route::post('users/{user}/workTypes', [HrController::class, 'assignWorkTypeToUser'])->name('users.assignWorkType');
+    Route::get('users/workTypes', [HrController::class, 'getWorkTypeAssignedToUser'])->name('users.usersWorkTypes');
+
 });

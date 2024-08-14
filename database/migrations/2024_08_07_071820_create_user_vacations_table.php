@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('user_vacations', function (Blueprint $table) {
             $table->id();
-            $table->integer('sick_left');
-            $table->integer('paid_left');
-            $table->integer('deduction_left');
+            $table->integer('sick_left')->nullable();
+            $table->integer('paid_left')->nullable();
+            $table->integer('deduction_left')->nullable();
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });

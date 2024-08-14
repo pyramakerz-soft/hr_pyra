@@ -22,7 +22,7 @@ class UpdateDepartmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string'],
+            'name' => ['nullable', 'string'],
             'manager_id' => ['nullable', 'exists:users,id'],
         ];
     }

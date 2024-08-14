@@ -114,5 +114,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(OverTimeInOut::class);
     }
+    public function work_types()
+    {
+        return $this->belongsToMany(WorkType::class, 'user_work_type', 'user_id', 'work_type_id')->withTimestamps();
+    }
 
 }
