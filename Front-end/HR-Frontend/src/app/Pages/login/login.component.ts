@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 // import { CarouselComponent, CarouselControlComponent, CarouselIndicatorsComponent, CarouselInnerComponent, CarouselItemComponent, ThemeDirective } from '@coreui/angular';
 // import { RouterLink } from '@angular/router';
 // import { CarouselModule } from '@coreui/angular';
@@ -26,6 +27,10 @@ import { Component } from '@angular/core';
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
+  constructor(private router: Router){  }
+  SignIn(){
+    this.router.navigateByUrl("/empDashboard");
+  }
   // slides: any[] = new Array(3).fill({ id: -1, src: '', title: '', subtitle: '' });
 
   // ngOnInit(): void {

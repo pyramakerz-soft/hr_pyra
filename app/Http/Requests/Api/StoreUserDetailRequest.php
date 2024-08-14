@@ -26,6 +26,7 @@ class StoreUserDetailRequest extends FormRequest
             'working_hours_day' => ['required', 'numeric', 'min:4'],
             'overtime_hours' => ['required', 'numeric'],
             'emp_type' => ['required', 'string'],
+            'work_type' => ['required', 'string'],
             'hiring_date' => ['required', 'date'],
             'user_id' => ['required', 'exists:users,id'],
             'start_time' => ['required', 'date_format:H:i'],

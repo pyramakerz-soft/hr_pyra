@@ -47,6 +47,7 @@ class UserDetailController extends Controller
             'start_time' => $start_time,
             'end_time' => $end_time,
             'emp_type' => $request->emp_type,
+            'work_type' => $request->work_type,
             'hiring_date' => $request->hiring_date,
             'user_id' => $request->user_id,
         ]);
@@ -78,6 +79,8 @@ class UserDetailController extends Controller
                 'hourly_rate' => $hourly_rate,
                 'overtime_hours' => $request->overtime_hours,
                 'emp_type' => $request->emp_type,
+                'work_type' => $request->work_type,
+
                 'hiring_date' => $request->hiring_date,
                 'user_id' => $request->user_id,
             ]);
