@@ -20,6 +20,7 @@ return new class extends Migration
             $table->time('start_time'); // Changed to time type
             $table->time('end_time'); // Changed to time type
             $table->string('emp_type');
+            $table->enum('work_type', ['home', 'site'])->default('site');
             $table->date('hiring_date');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
 

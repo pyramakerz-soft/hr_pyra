@@ -26,6 +26,8 @@ class UpdateUserDetailRequest extends FormRequest
             'working_hours_day' => ['nullable', 'numeric', 'min:4'],
             'overtime_hours' => ['nullable', 'numeric'],
             'emp_type' => ['nullable', 'string'],
+            'work_type' => ['nullable', 'string'],
+
             'hiring_date' => ['nullable', 'date'],
             'user_id' => ['nullable', 'exists:users,id'],
         ];

@@ -9,6 +9,7 @@ use App\Http\Requests\Api\UpdateUserRequest;
 use App\Http\Resources\Api\UserResource;
 // use App\Models\Request;
 use App\Models\User;
+use App\Models\UserDetail;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -66,12 +67,17 @@ class UserController extends Controller
     {
         $credentials = $request->only('email', 'password');
         $token = JWTAuth::attempt($credentials);
+        // dd(Auth::user()->user_detail->toArray());
+        $userDetail = UserDetail::findOrFail(Auth::user()->id);
+
+        // dd($userDetail);
         if (!$token) {
             return $this->returnError('You Are unauthenticated', Response::HTTP_UNAUTHORIZED);
         }
         return response()->json([
             "result" => "true",
             'user' => Auth::user(),
+            'user_detail' => $userDetail,
             'token' => $token,
         ], Response::HTTP_OK);
     }
