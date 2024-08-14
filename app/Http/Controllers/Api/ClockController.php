@@ -44,7 +44,6 @@ class ClockController extends Controller
         $location_id = $request->location_id;
         $latitude = $request->latitude;
         $longitude = $request->longitude;
-        // dd($user_id);
         $user = User::findorFail($user_id);
         $existingClockIn = ClockInOut::where('user_id', $user_id)
             ->where('location_id', $location_id)
@@ -55,7 +54,6 @@ class ClockController extends Controller
             return $this->returnError('You have already clocked in at this location and have not clocked out yet.');
         }
         $user_location = $user->user_locations()->wherePivot('location_id', $location_id)->first();
-        // dd($user_location);
         if (!$user_location) {
             return $this->returnError('Not found');
         }
@@ -83,7 +81,6 @@ class ClockController extends Controller
 
     public function clockOut(UpdateClockInOutRequest $request, ClockInOut $clock)
     {
-
         $this->validate($request, [
             'latitude' => 'required',
             'longitude' => 'required',
