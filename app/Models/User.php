@@ -118,5 +118,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsToMany(WorkType::class, 'user_work_type', 'user_id', 'work_type_id')->withTimestamps();
     }
+    public function getRoleName()
+    {
+        return $this->getRoleNames()->first(); // Get the first role name
+    }
 
 }

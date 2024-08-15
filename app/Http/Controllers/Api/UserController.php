@@ -7,9 +7,9 @@ use App\Http\Requests\Api\LoginRequest;
 use App\Http\Requests\Api\RegisterRequest;
 use App\Http\Requests\Api\UpdateUserRequest;
 use App\Http\Resources\Api\UserResource;
+use App\Http\Resources\LoginResource;
 // use App\Models\Request;
 use App\Models\User;
-use App\Models\UserDetail;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -66,19 +66,45 @@ class UserController extends Controller
         $user->syncRoles($request->input('roles', []));
         return $this->returnData("user", $user, "User Created");
     }
+    // public function login(LoginRequest $request)
+    // {
+    //     $credentials = $request->only('email', 'password');
+    //     $token = JWTAuth::attempt($credentials);
+    //     $authUser = Auth::user()->load('user_detail');
+    //     // dd($authUser);
+    //     $userDetail = UserDetail::findOrFail($authUser->id)->toArray();
+
+    //     $authUserArray = $authUser->toArray();
+    //     $roleName = $authUser->getRoleName();
+    //     if (!$roleName) {
+    //         $authUserArray['role_name'] = null;
+    //     }
+    //     $authUserArray['role_name'] = $roleName;
+
+    //     $user = array_merge($authUserArray, $userDetail);
+    //     if (!$token) {
+    //         return $this->returnError('You Are unauthenticated', Response::HTTP_UNAUTHORIZED);
+    //     }
+    //     return response()->json([
+    //         "result" => "true",
+    //         'user' => new LoginResource($user),
+    //         'token' => $token,
+    //     ], Response::HTTP_OK);
+    // }
+
     public function login(LoginRequest $request)
     {
         $credentials = $request->only('email', 'password');
         $token = JWTAuth::attempt($credentials);
-        $userDetail = UserDetail::findOrFail(Auth::user()->id);
 
         if (!$token) {
             return $this->returnError('You Are unauthenticated', Response::HTTP_UNAUTHORIZED);
         }
+
+        $authUser = Auth::user()->load('user_detail');
         return response()->json([
             "result" => "true",
-            'user' => Auth::user(),
-            'user_detail' => $userDetail,
+            'user' => new LoginResource($authUser),
             'token' => $token,
         ], Response::HTTP_OK);
     }
