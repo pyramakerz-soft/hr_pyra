@@ -6,8 +6,6 @@ use App\Models\Department;
 use App\Models\User;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
@@ -22,11 +20,10 @@ class UserSeeder extends Seeder
     public function run(): void
     {
 
-
         $faker = Faker::create();
 
         $user_hr = User::create([
-            'name' => 'Hr',
+            'name' => 'belal',
             'email' => 'hr@test.com',
             'password' => bcrypt("123456"),
             'phone' => "01203376449",
@@ -36,7 +33,7 @@ class UserSeeder extends Seeder
             'department_id' => 1,
         ]);
         $user_manager = User::create([
-            'name' => 'manager',
+            'name' => 'mohamed',
             'email' => 'manager@test.com',
             'password' => bcrypt("123456"),
             'phone' => "01203376447",
@@ -49,7 +46,6 @@ class UserSeeder extends Seeder
 
         $department = Department::findOrFail(2);
         $department->update(['manager_id' => 2]);
-
 
     }
 }
