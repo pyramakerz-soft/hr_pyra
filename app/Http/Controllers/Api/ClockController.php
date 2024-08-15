@@ -114,7 +114,7 @@ class ClockController extends Controller
 
         }
     }
-    public function show(User $user)
+    public function showUserClocks(User $user)
     {
         $clocks = ClockInOut::where('user_id', $user->id)->get();
         if ($clocks->isEmpty()) {
