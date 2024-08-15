@@ -24,19 +24,28 @@ class UserResource extends JsonResource
         }
 
         return [
-            'id' => $this->id,
-            'department_id' => $this->department_id,
+            // 'id' => $this->id,
+            // 'department' => $this->department->name,
+            // 'name' => $this->name,
+            // 'code' => $this->code,
+            // 'email' => $this->email,
+            // 'phone' => $this->phone,
+            // 'contact_phone' => $this->contact_phone,
+            // 'image' => $this->image,
+            // 'gender' => $gender,
+
+            // 'userDetail' => new UserDetailResource($this->whenLoaded('user_detail')),
+            // 'userVacations' => UserVacationResource::collection($this->whenLoaded('user_vacations')),
+            // 'Department' => new DepartmentResource($this->whenLoaded('department')),
+            // 'Role' => RoleResource::collection($this->whenLoaded('roles')),
             'name' => $this->name,
+
+            'code' => $this->code,
+            'department' => $this->department->name,
+            "position" => $this->user_detail->emp_type,
             'email' => $this->email,
             'phone' => $this->phone,
-            'contact_phone' => $this->contact_phone,
-            'image' => $this->image,
-            'gender' => $gender,
-            'userDetail' => new UserDetailResource($this->whenLoaded('user_detail')),
-            'userVacations' => UserVacationResource::collection($this->whenLoaded('user_vacations')),
-            'Department' => new DepartmentResource($this->whenLoaded('department')),
-            'Role' => RoleResource::collection($this->whenLoaded('roles')),
-
+            'working_hours' => $this->user_detail->working_hours_day,
         ];
     }
 }

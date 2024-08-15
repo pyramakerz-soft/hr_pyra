@@ -8,7 +8,6 @@ use App\Http\Requests\Api\RegisterRequest;
 use App\Http\Requests\Api\UpdateUserRequest;
 use App\Http\Resources\Api\UserResource;
 use App\Http\Resources\LoginResource;
-// use App\Models\Request;
 use App\Models\User;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
@@ -26,9 +25,7 @@ class UserController extends Controller
     {
         $this->middleware('auth:api')->except(['store', 'login']);
     }
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         $users = User::with('user_detail', 'user_vacations', 'department.user_holidays', 'roles.permissions')->get();
@@ -36,25 +33,19 @@ class UserController extends Controller
             return $this->returnError('No Users Found');
         }
         $data['users'] = UserResource::collection($users);
-        // $data['users'] = $users;
 
         return $this->returnData("data", $data, "Users Data");
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(RegisterRequest $request)
     {
-        if (!Auth::user()->hasRole('Hr')) {
-            return $this->returnError('Unauthorized', 403);
-        }
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
             'phone' => $request->phone,
             'contact_phone' => $request->contact_phone,
+            'code' => $request->code,
             'gender' => $request->gender,
             'department_id' => (int) $request->department_id,
 
@@ -66,31 +57,6 @@ class UserController extends Controller
         $user->syncRoles($request->input('roles', []));
         return $this->returnData("user", $user, "User Created");
     }
-    // public function login(LoginRequest $request)
-    // {
-    //     $credentials = $request->only('email', 'password');
-    //     $token = JWTAuth::attempt($credentials);
-    //     $authUser = Auth::user()->load('user_detail');
-    //     // dd($authUser);
-    //     $userDetail = UserDetail::findOrFail($authUser->id)->toArray();
-
-    //     $authUserArray = $authUser->toArray();
-    //     $roleName = $authUser->getRoleName();
-    //     if (!$roleName) {
-    //         $authUserArray['role_name'] = null;
-    //     }
-    //     $authUserArray['role_name'] = $roleName;
-
-    //     $user = array_merge($authUserArray, $userDetail);
-    //     if (!$token) {
-    //         return $this->returnError('You Are unauthenticated', Response::HTTP_UNAUTHORIZED);
-    //     }
-    //     return response()->json([
-    //         "result" => "true",
-    //         'user' => new LoginResource($user),
-    //         'token' => $token,
-    //     ], Response::HTTP_OK);
-    // }
 
     public function login(LoginRequest $request)
     {
@@ -100,29 +66,17 @@ class UserController extends Controller
         if (!$token) {
             return $this->returnError('You Are unauthenticated', Response::HTTP_UNAUTHORIZED);
         }
-
-        $authUser = Auth::user()->load('user_detail');
-
-        $customClaims = [
-            'role_name' => $authUser->getRoleName(),
-            'emp_type' => $authUser->user_detail->emp_type,
-        ];
-
-        // Create a token with custom claims
-        $token = JWTAuth::claims($customClaims)->fromUser($authUser);
         return response()->json([
             "result" => "true",
-            'user' => new LoginResource($authUser),
             'token' => $token,
         ], Response::HTTP_OK);
     }
-    /**
-     * Display the specified resource.
-     */
-    public function show(User $user)
+
+    public function show()
     {
-        $user = $user->with('user_detail', 'user_vacations', 'department.user_holidays', 'roles.permissions')->where('id', $user->id)->get();
-        return $this->returnData("User", UserResource::collection($user), "User Data");
+        $authUser = Auth::user();
+        $user = $authUser::where('id', $authUser->id)->get();
+        return $this->returnData("User", LoginResource::collection($user), "User Data");
     }
 
     /**
