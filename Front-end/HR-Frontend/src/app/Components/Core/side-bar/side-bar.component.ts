@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
@@ -10,10 +10,12 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   styleUrl: './side-bar.component.css'
 })
 export class SideBarComponent {
-  menuItems = [
-    { label: 'Dashboard', icon: 'fa-regular fa-table-list' ,  route: '/Dashboard' },
-    { label: 'Sign Out', icon: 'fa-regular fa-sign-out'  ,  route: '/Login' },
-  ];
+  // menuItems = [
+  //   { label: 'Dashboard', icon: 'fa-regular fa-table-list' ,  route: '/Dashboard' },
+  //   { label: 'Sign Out', icon: 'fa-regular fa-sign-out'  ,  route: '/Login' },
+  // ];
+
+  @Input() menuItems: { label: string; icon: string; route: string; }[] = [];
 
   activeIndex: number | null = null;
 

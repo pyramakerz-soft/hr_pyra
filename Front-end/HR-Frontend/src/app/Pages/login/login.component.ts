@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AccountService } from '../../Services/account.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 // import { CarouselComponent, CarouselControlComponent, CarouselIndicatorsComponent, CarouselInnerComponent, CarouselItemComponent, ThemeDirective } from '@coreui/angular';
 // import { RouterLink } from '@angular/router';
 // import { CarouselModule } from '@coreui/angular';
@@ -19,7 +22,8 @@ import { Router } from '@angular/router';
     // CarouselItemComponent,
     // ThemeDirective,
     // RouterLink,
-    // CommonModule, 
+    CommonModule, 
+    FormsModule,
     // CarouselModule,
     // BrowserAnimationsModule
   ],
@@ -27,10 +31,38 @@ import { Router } from '@angular/router';
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
-  constructor(private router: Router){  }
+
+  email:string = ""
+  password:string = ""
+  constructor(private router: Router , public accountService:AccountService){  }
+
+
   SignIn(){
+    this.accountService.Login(this.email,this.password);
     this.router.navigateByUrl("/empDashboard");
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // slides: any[] = new Array(3).fill({ id: -1, src: '', title: '', subtitle: '' });
 
   // ngOnInit(): void {
