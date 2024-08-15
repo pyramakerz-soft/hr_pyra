@@ -10,6 +10,7 @@ import { ClockInComponent } from './Components/clock-in/clock-in.component';
 import { TableComponent } from './Components/Core/table/table.component';
 import { EmployeeDashboardComponent } from './Pages/employee-dashboard/employee-dashboard.component';
 import { EmployeeComponent } from './Pages/Employee/employee/employee.component';
+import { HrTableComponent } from './Components/Core/HR/hr-table/hr-table.component';
 
 export const routes: Routes = [
     // {path: "", component:DashboardComponent, title:"Dashboard", children:[
@@ -25,8 +26,10 @@ export const routes: Routes = [
         {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard"},
     ]},
 
-
+    
     { path: "Login", component:LoginComponent, title:"Login" },
+    { path: "HRtable", component:HrTableComponent, title:"HRtable" },
+    { path: "", component:LoginComponent, title:"Login" },
     { path: '**', redirectTo: '/' },
 
 

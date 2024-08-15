@@ -20,4 +20,8 @@ export class SideBarComponent {
   setActiveIndex(index: number): void {
     this.activeIndex = index;
   }
+
+  ngOnInit(): void {
+    this.setActiveIndex(0);
+  }
 }

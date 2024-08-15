@@ -70,10 +70,8 @@ class UserController extends Controller
     {
         $credentials = $request->only('email', 'password');
         $token = JWTAuth::attempt($credentials);
-        // dd(Auth::user()->user_detail->toArray());
         $userDetail = UserDetail::findOrFail(Auth::user()->id);
 
-        // dd($userDetail);
         if (!$token) {
             return $this->returnError('You Are unauthenticated', Response::HTTP_UNAUTHORIZED);
         }
