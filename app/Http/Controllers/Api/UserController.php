@@ -102,6 +102,14 @@ class UserController extends Controller
         }
 
         $authUser = Auth::user()->load('user_detail');
+
+        $customClaims = [
+            'role_name' => $authUser->getRoleName(),
+            'emp_type' => $authUser->user_detail->emp_type,
+        ];
+
+        // Create a token with custom claims
+        $token = JWTAuth::claims($customClaims)->fromUser($authUser);
         return response()->json([
             "result" => "true",
             'user' => new LoginResource($authUser),

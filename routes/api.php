@@ -51,7 +51,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::post('/clock_in', [ClockController::class, 'clockIn'])->name('clocks.clockIn');
     Route::post('/clock_out/{clock}', [ClockController::class, 'clockOut'])->name('clocks.clockOut');
-    Route::get('/clocks/{user}', [ClockController::class, 'showUserClocks'])->name('clocks.user');
+    Route::get('/clocks', [ClockController::class, 'showUserClocks'])->name('clocks.user');
 
     Route::apiResource('roles', RoleController::class)->except('update');
     Route::apiResource('permissions', PermissionController::class)->except('update');

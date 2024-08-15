@@ -67,5 +67,8 @@ class PermissionSeeder extends Seeder
         $user_hr = User::findOrFail(1);
         $user_hr->assignRole($roleHr);
         $roleAdmin->givePermissionTo(Permission::all());
+        $user_admin = User::findOrFail(2);
+        $user_admin->assignRole($roleAdmin);
+
     }
 }
