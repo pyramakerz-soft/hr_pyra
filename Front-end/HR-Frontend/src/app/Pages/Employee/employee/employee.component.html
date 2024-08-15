@@ -1,9 +1,9 @@
-<!-- <div class="flex min-h-[100vh]"> -->
-    <!-- <div class="w-1/5 hidden lg:block">
+<div class="flex min-h-[100vh]">
+    <div class="w-1/5 hidden lg:block">
         <app-side-bar></app-side-bar>
-    </div> -->
-    <!-- <div class="lg:w-4/5 w-full py-5 px-6"> -->
-        <div class="relative">
+    </div>
+    <div class="lg:w-4/5 w-full py-5 px-6">
+        <!-- <div class="relative">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-[#272D37] font-semibold text-2xl md:text-3xl mb-2">Dashboard</p>
@@ -19,13 +19,15 @@
             <div [ngClass]="{'absolute right-0 block h-[100vh] w-full md:w-[50%]': isMenuOpen, 'hidden': !isMenuOpen}">
                 <app-side-bar></app-side-bar>
             </div>
-        </div>
+        </div> -->
 
-        <div class="my-6">
+        <!-- <div class="my-6">
             <app-clock-in></app-clock-in>
         </div>
         
-        <app-table></app-table>
-    <!-- </div> -->
-<!-- </div> -->
+        <app-table></app-table> -->
+
+         <router-outlet></router-outlet>
+    </div>
+</div>
 

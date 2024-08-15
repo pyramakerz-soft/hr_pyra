@@ -9,6 +9,8 @@ import { SideBarComponent } from './Components/Core/side-bar/side-bar.component'
 import { ClockInComponent } from './Components/clock-in/clock-in.component';
 import { TableComponent } from './Components/Core/table/table.component';
 import { EmployeeDashboardComponent } from './Pages/employee-dashboard/employee-dashboard.component';
+import { EmployeeComponent } from './Pages/Employee/employee/employee.component';
+import { HrTableComponent } from './Components/Core/HR/hr-table/hr-table.component';
 
 export const routes: Routes = [
     // {path: "", component:DashboardComponent, title:"Dashboard", children:[
@@ -18,8 +20,18 @@ export const routes: Routes = [
     //     {path: "Permissions", component:PermissionsComponent, title:"Permissions"},
     //     {path: "Permissions/Edit/:id", component:PermissionEditComponent, title:"PermissionsEdit"},
     // ]},
+
+    {path: "employee", component:EmployeeComponent, title:"Dashboard", children:[
+        {path: "", redirectTo: "Dashboard", pathMatch: "full"},
+        {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard"},
+    ]},
+
+    
     { path: "Login", component:LoginComponent, title:"Login" },
-    { path: "empDashboard", component:EmployeeDashboardComponent, title:"Dashboard" },
-    { path: "", component:DashboardComponent,title:"Dashboard" },
-    { path: '**', redirectTo: '/' }
+    { path: "HRtable", component:HrTableComponent, title:"HRtable" },
+    { path: "", component:LoginComponent, title:"Login" },
+    { path: '**', redirectTo: '/' },
+
+
+
 ];

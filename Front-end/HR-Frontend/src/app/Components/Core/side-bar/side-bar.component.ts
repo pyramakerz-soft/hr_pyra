@@ -11,15 +11,17 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 })
 export class SideBarComponent {
   menuItems = [
-    { label: 'Dashboard', icon: 'fa-regular fa-table-list' ,  route: '/side' },
-    { label: 'Profile', icon: 'fa-regular fa-user'  ,  route: '/empDashboard' },
-    { label: 'Settings', icon: 'fa-regular fa-cog'  ,  route: '/empDashboard' },
-    { label: 'Sign Out', icon: 'fa-regular fa-sign-out'  ,  route: '/empDashboard' },
+    { label: 'Dashboard', icon: 'fa-regular fa-table-list' ,  route: '/Dashboard' },
+    { label: 'Sign Out', icon: 'fa-regular fa-sign-out'  ,  route: '/Login' },
   ];
 
   activeIndex: number | null = null;
 
   setActiveIndex(index: number): void {
     this.activeIndex = index;
+  }
+
+  ngOnInit(): void {
+    this.setActiveIndex(0);
   }
 }
