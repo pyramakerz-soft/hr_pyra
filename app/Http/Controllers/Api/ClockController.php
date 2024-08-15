@@ -114,5 +114,14 @@ class ClockController extends Controller
 
         }
     }
+    public function showUserClocks(User $user)
+    {
+        $clocks = ClockInOut::where('user_id', $user->id)->get();
+        if ($clocks->isEmpty()) {
+            return $this->returnError('No Clocks For this user found');
+        }
+        return $this->returnData("clocks", $clocks, "Clocks Data for {$user->name}");
+
+    }
 
 }
