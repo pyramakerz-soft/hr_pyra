@@ -82,23 +82,25 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateUserRequest $request, User $user)
+    public function update(UpdateUserRequest $request)
     {
-        $user->update($request->validated());
-        if (!$user) {
+        $authUser = Auth::user();
+        $authUser->update($request->validated());
+        if (!$authUser) {
             return $this->returnError('User Not Found');
         }
-        DB::table('model_has_roles')->where('model_id', $user->id)->delete();
-        $user->assignRole($request->input('roles'));
-        return $this->returnData("user", $user, "User Updated");
+        DB::table('model_has_roles')->where('model_id', $authUser->id)->delete();
+        $authUser->assignRole($request->input('roles'));
+        return $this->returnData("user", $authUser, "User Updated");
 
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy()
     {
+        $user = Auth::user();
         $user->delete();
         return $this->returnData("user", $user, "user deleted");
     }

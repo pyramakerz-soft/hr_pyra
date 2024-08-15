@@ -30,11 +30,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'auth'], function () {
     Route::get('/profile', [UserController::class, 'profile'])->name('users.profile');
-    Route::post('/users/{user}', [UserController::class, 'update'])->name('users.update');
-    Route::post('login', [UserController::class, 'login'])->name('users.login');
-    Route::post('logout', [UserController::class, 'logout'])->name('users.logout');
-    Route::post('assign_role/{user}', [UserController::class, 'AssignRole'])->name('users.role');
-    Route::get('/user_by_token', [UserController::class, 'show'])->name('users.user');
+    Route::post('/update_user', [UserController::class, 'update'])->name('user.update');
+    Route::delete('/delete_user', [UserController::class, 'destroy'])->name('user.delete');
+
+    Route::post('login', [UserController::class, 'login'])->name('user.login');
+    Route::post('logout', [UserController::class, 'logout'])->name('user.logout');
+    Route::post('assign_role/{user}', [UserController::class, 'AssignRole'])->name('user.roles');
+    Route::get('/user_by_token', [UserController::class, 'show'])->name('user.show');
     Route::apiResource('users', UserController::class)->except('update', 'show');
 
 });
@@ -52,6 +54,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/clock_in', [ClockController::class, 'clockIn'])->name('clocks.clockIn');
     Route::post('/clock_out/{clock}', [ClockController::class, 'clockOut'])->name('clocks.clockOut');
     Route::get('/clocks', [ClockController::class, 'showUserClocks'])->name('clocks.user');
+    Route::get('/userDetail_by_token', [UserDetailController::class, 'show'])->name('users.userDetail');
 
     Route::apiResource('roles', RoleController::class)->except('update');
     Route::apiResource('permissions', PermissionController::class)->except('update');

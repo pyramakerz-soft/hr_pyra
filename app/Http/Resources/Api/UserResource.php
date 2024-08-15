@@ -24,28 +24,15 @@ class UserResource extends JsonResource
         }
 
         return [
-            // 'id' => $this->id,
-            // 'department' => $this->department->name,
-            // 'name' => $this->name,
-            // 'code' => $this->code,
-            // 'email' => $this->email,
-            // 'phone' => $this->phone,
-            // 'contact_phone' => $this->contact_phone,
-            // 'image' => $this->image,
-            // 'gender' => $gender,
 
-            // 'userDetail' => new UserDetailResource($this->whenLoaded('user_detail')),
-            // 'userVacations' => UserVacationResource::collection($this->whenLoaded('user_vacations')),
-            // 'Department' => new DepartmentResource($this->whenLoaded('department')),
-            // 'Role' => RoleResource::collection($this->whenLoaded('roles')),
+            'id' => $this->id,
             'name' => $this->name,
-
-            'code' => $this->code,
+            'national_id' => $this->national_id,
             'department' => $this->department->name,
-            "position" => $this->user_detail->emp_type,
+            "position" => $this->user_detail->emp_type ?? null,
             'email' => $this->email,
             'phone' => $this->phone,
-            'working_hours' => $this->user_detail->working_hours_day,
+            'working_hours' => $this->user_detail->working_hours_day ?? null,
         ];
     }
 }

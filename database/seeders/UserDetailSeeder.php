@@ -26,6 +26,7 @@ class UserDetailSeeder extends Seeder
             'end_time' => $end_time,
             'overtime_hours' => 1.5,
             'emp_type' => "Backend developer",
+            'work_type' => 'site',
             'hiring_date' => "2024-7-8",
             'user_id' => 2,
         ]);
@@ -37,6 +38,7 @@ class UserDetailSeeder extends Seeder
             'end_time' => $end_time,
             'overtime_hours' => 1.5,
             'emp_type' => "Frontend developer",
+            'work_type' => 'home',
             'hiring_date' => "2024-8-8",
             'user_id' => 1,
         ]);
