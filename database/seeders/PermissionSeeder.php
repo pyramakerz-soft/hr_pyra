@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -61,9 +61,11 @@ class PermissionSeeder extends Seeder
             'user-edit',
             'user-delete',
             'user-list',
-            'assign-location'
+            'assign-location',
         ];
         $roleHr->givePermissionTo($HrPermsissions);
+        $user_hr = User::findOrFail(1);
+        $user_hr->assignRole($roleHr);
         $roleAdmin->givePermissionTo(Permission::all());
     }
 }
