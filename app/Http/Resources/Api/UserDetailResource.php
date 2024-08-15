@@ -14,7 +14,7 @@ class UserDetailResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        
+
         $salary = $this->salary;
         $working_hours_day = $this->working_hours_day;
 
@@ -35,7 +35,6 @@ class UserDetailResource extends JsonResource
             'start_time' => $start_time,
             'end_time' => $end_time,
             "emp_type" => $this->emp_type,
-            "work_type" => $this->work_type,
             "hiring_date" => $this->hiring_date,
 
         ];

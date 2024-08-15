@@ -17,7 +17,6 @@ class UserDetailSeeder extends Seeder
         $hourly_rate = ($salary / 30) / $working_hours;
         $start_time = "07:00";
         $end_time = "15:00";
-        // dd($start_time);
         UserDetail::create([
             'salary' => $salary,
             'working_hours_day' => $working_hours,
@@ -26,7 +25,6 @@ class UserDetailSeeder extends Seeder
             'end_time' => $end_time,
             'overtime_hours' => 1.5,
             'emp_type' => "Backend developer",
-            'work_type' => 'site',
             'hiring_date' => "2024-7-8",
             'user_id' => 2,
         ]);
@@ -38,7 +36,6 @@ class UserDetailSeeder extends Seeder
             'end_time' => $end_time,
             'overtime_hours' => 1.5,
             'emp_type' => "Frontend developer",
-            'work_type' => 'home',
             'hiring_date' => "2024-8-8",
             'user_id' => 1,
         ]);
