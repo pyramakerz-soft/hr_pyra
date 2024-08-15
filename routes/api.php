@@ -34,8 +34,8 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('login', [UserController::class, 'login'])->name('users.login');
     Route::post('logout', [UserController::class, 'logout'])->name('users.logout');
     Route::post('assign_role/{user}', [UserController::class, 'AssignRole'])->name('users.role');
-
-    Route::apiResource('users', UserController::class)->except('update');
+    Route::get('/user_by_token', [UserController::class, 'show'])->name('users.user');
+    Route::apiResource('users', UserController::class)->except('update', 'show');
 
 });
 Route::group(['middleware' => 'auth:api'], function () {
@@ -51,7 +51,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::post('/clock_in', [ClockController::class, 'clockIn'])->name('clocks.clockIn');
     Route::post('/clock_out/{clock}', [ClockController::class, 'clockOut'])->name('clocks.clockOut');
-    Route::get('/clocks/{user}', [ClockController::class, 'showUserClocks'])->name('clocks.user');
+    Route::get('/clocks', [ClockController::class, 'showUserClocks'])->name('clocks.user');
 
     Route::apiResource('roles', RoleController::class)->except('update');
     Route::apiResource('permissions', PermissionController::class)->except('update');

@@ -27,7 +27,10 @@ class UserSeeder extends Seeder
             'email' => 'hr@test.com',
             'password' => bcrypt("123456"),
             'phone' => "01203376449",
+
             'contact_phone' => "01211018851",
+            'national_id' => "30201010214378",
+
             'image' => $faker->imageUrl(),
             'gender' => 'M',
             'department_id' => 1,
@@ -38,7 +41,18 @@ class UserSeeder extends Seeder
             'password' => bcrypt("123456"),
             'phone' => "01203376447",
             'contact_phone' => "01211018850",
+            'national_id' => "30201010214377",
             'gender' => 'M',
+            'department_id' => 2,
+        ]);
+        $user_emp = User::create([
+            'name' => 'Rana',
+            'email' => 'emp@test.com',
+            'password' => bcrypt("123456"),
+            'phone' => "01203376440",
+            'contact_phone' => "01211018856",
+            'national_id' => "30201010214376",
+            'gender' => 'F',
             'department_id' => 2,
         ]);
         $department = Department::findOrFail(1);

@@ -12,7 +12,9 @@ class RegisterRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::user()->hasRole('Hr');
+
+        return true;
+
     }
 
     /**
@@ -28,6 +30,7 @@ class RegisterRequest extends FormRequest
             'password' => ['required', 'min:6'],
             'phone' => ['required', 'unique:users,phone', 'regex:/^01[0125][0-9]{8}$/'],
             'contact_phone' => ['required', 'unique:users,contact_phone', 'regex:/^01[0125][0-9]{8}$/'],
+            'national_id' => ['required', 'string', 'unique:users,national_id', 'regex:/^[0-9]{14}$/'],
             'gender' => ['required', 'in:m,M,F,f'],
             'department_id' => ['required', 'exists:departments,id'],
             'image' => ['nullable'],

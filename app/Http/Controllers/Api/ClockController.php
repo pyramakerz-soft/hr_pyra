@@ -35,13 +35,14 @@ class ClockController extends Controller
 
     public function clockIn(StoreClockInOutRequest $request)
     {
-
+        $authUser = Auth::user();
+        dd($authUser);
         $this->validate($request, [
             'latitude' => 'required',
             'longitude' => 'required',
         ]);
         $user_id = Auth::user()->id;
-        $location_id = $request->location_id;
+        $location_id = (int) $request->location_id;
         $latitude = $request->latitude;
         $longitude = $request->longitude;
         $user = User::findorFail($user_id);
@@ -55,7 +56,7 @@ class ClockController extends Controller
         }
         $user_location = $user->user_locations()->wherePivot('location_id', $location_id)->first();
         if (!$user_location) {
-            return $this->returnError('Not found');
+            return $this->returnError('User is not located at the correct location');
         }
         $userLongitude = $user_location->longitude;
         $userLatitude = $user_location->latitude;
@@ -114,9 +115,10 @@ class ClockController extends Controller
 
         }
     }
-    public function showUserClocks(User $user)
+    public function showUserClocks()
     {
-        $clocks = ClockInOut::where('user_id', $user->id)->get();
+        $clocks = ClockInOut::where('user_id', Auth::user()->id)->get();
+        dd($clocks->toArray());
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clocks For this user found');
         }

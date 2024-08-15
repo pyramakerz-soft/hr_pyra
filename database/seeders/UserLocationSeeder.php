@@ -19,6 +19,10 @@ class UserLocationSeeder extends Seeder
         // foreach ($locations as $location) {
         //     $location->users()->attach($users[rand(0, count($users) - 1)]);
         // }
-
+        $user_hr = User::findorFail(1);
+        $location = Location::findOrFail(1);
+        $user_hr->user_locations()->attach($location->id);
+        $user_admin = User::findorFail(2);
+        $user_admin->user_locations()->attach($location->id);
     }
 }

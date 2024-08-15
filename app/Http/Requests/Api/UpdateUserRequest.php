@@ -22,14 +22,16 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['nullable', 'string', 'min:3'],
-            'email' => ['nullable', 'email'],
-            'password' => ['nullable', 'min:6'],
-            'phone' => ['nullable', 'regex:/^01[0125][0-9]{8}$/'],
-            'contact_phone' => ['nullable', 'regex:/^01[0125][0-9]{8}$/'],
-            'gender' => ['nullable', 'in:m,M,F,f'],
-            'department_id' => ['nullable', 'exists:departments,id'],
-            'image' => ['nullable'],
+            'name' => ['required', 'string', 'min:3'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'min:6'],
+            'phone' => ['required', 'regex:/^01[0125][0-9]{8}$/'],
+            'contact_phone' => ['required', 'regex:/^01[0125][0-9]{8}$/'],
+            'code' => ['required', 'numeric', 'min:6'],
+            'national_id' => ['required', 'string', 'regex:/^[0-9]{14}$/'],
+            'gender' => ['required', 'in:m,M,F,f'],
+            'department_id' => ['required', 'exists:departments,id'],
+            'image' => ['required'],
             'roles' => ['required'],
 
         ];

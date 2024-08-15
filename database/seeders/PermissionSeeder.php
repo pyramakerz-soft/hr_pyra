@@ -51,7 +51,8 @@ class PermissionSeeder extends Seeder
         }
 
         $roleHr = Role::firstOrCreate(['name' => 'Hr']);
-        $roleAdmin = Role::firstOrCreate(['name' => 'Admin']);
+        $roleAdmin = Role::firstOrCreate(['name' => 'Manager']);
+        $roleEmp = Role::firstOrCreate(['name' => 'Employee']);
         $HrPermsissions = [
             'role-list',
             'role-create',
@@ -66,6 +67,13 @@ class PermissionSeeder extends Seeder
         $roleHr->givePermissionTo($HrPermsissions);
         $user_hr = User::findOrFail(1);
         $user_hr->assignRole($roleHr);
+
         $roleAdmin->givePermissionTo(Permission::all());
+        $user_admin = User::findOrFail(2);
+        $user_admin->assignRole($roleAdmin);
+
+        $user_employee = User::findOrFail(3);
+        $user_employee->assignRole($roleEmp);
+
     }
 }

@@ -35,9 +35,9 @@ class DatabaseSeeder extends Seeder
             UserHolidaySeeder::class,
             UserVacationSeeder::class,
             LocationSeeder::class,
-            UserLocationSeeder::class,
             WorkTypeSeeder::class,
             PermissionSeeder::class,
+            UserLocationSeeder::class,
         ]);
 
     }

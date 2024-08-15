@@ -36,7 +36,7 @@ class UserDetailSeeder extends Seeder
             'start_time' => $start_time,
             'end_time' => $end_time,
             'overtime_hours' => 1.5,
-            'emp_type' => "Front developer",
+            'emp_type' => "Frontend developer",
             'hiring_date' => "2024-8-8",
             'user_id' => 1,
         ]);
