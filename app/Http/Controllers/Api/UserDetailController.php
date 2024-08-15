@@ -60,9 +60,14 @@ class UserDetailController extends Controller
      */
     public function show()
     {
+
         $authUser = Auth::user();
         $userDetail = UserDetail::where('user_id', $authUser->id)->first();
-        return $this->returnData("User", new UserDetailResource($userDetail), "User Data");
+        if (!$userDetail) {
+            return $this->returnError('No User Detail Found for this User');
+
+        }
+        return $this->returnData("UserDetail", new UserDetailResource($userDetail), "User Data");
     }
 
     /**

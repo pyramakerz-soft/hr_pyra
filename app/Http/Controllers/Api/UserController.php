@@ -76,6 +76,10 @@ class UserController extends Controller
     {
         $authUser = Auth::user();
         $user = $authUser::where('id', $authUser->id)->get();
+        if (!$user) {
+            return $this->returnError('No User Found');
+
+        }
         return $this->returnData("User", LoginResource::collection($user), "User Data");
     }
 

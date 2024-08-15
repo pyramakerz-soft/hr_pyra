@@ -31,14 +31,13 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'auth'], function () {
     Route::get('/profile', [UserController::class, 'profile'])->name('users.profile');
     Route::post('/update_user', [UserController::class, 'update'])->name('user.update');
+    Route::get('/getAllUsers', [UserController::class, 'index'])->name('users.all');
     Route::delete('/delete_user', [UserController::class, 'destroy'])->name('user.delete');
-
+    Route::post('/create_user', [UserController::class, 'store'])->name('user.store');
     Route::post('login', [UserController::class, 'login'])->name('user.login');
     Route::post('logout', [UserController::class, 'logout'])->name('user.logout');
     Route::post('assign_role/{user}', [UserController::class, 'AssignRole'])->name('user.roles');
     Route::get('/user_by_token', [UserController::class, 'show'])->name('user.show');
-    Route::apiResource('users', UserController::class)->except('update', 'show');
-
 });
 Route::group(['middleware' => 'auth:api'], function () {
 
