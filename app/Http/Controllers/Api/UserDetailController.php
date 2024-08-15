@@ -9,6 +9,7 @@ use App\Http\Resources\Api\UserDetailResource;
 use App\Models\UserDetail;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class UserDetailController extends Controller
 {
@@ -57,9 +58,11 @@ class UserDetailController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(UserDetail $userDetail)
+    public function show()
     {
-        return $this->returnData("UserDetail", $userDetail, "User Details Data");
+        $authUser = Auth::user();
+        $userDetail = UserDetail::where('user_id', $authUser->id)->first();
+        return $this->returnData("User", new UserDetailResource($userDetail), "User Data");
     }
 
     /**

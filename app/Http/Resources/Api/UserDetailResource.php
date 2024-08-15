@@ -14,9 +14,15 @@ class UserDetailResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        
         $salary = $this->salary;
         $working_hours_day = $this->working_hours_day;
-        $hourly_rate = ($salary / 30) / $working_hours_day;
+
+        if ($working_hours_day === null || $working_hours_day == 0) {
+            $hourly_rate = 0;
+        } else {
+            $hourly_rate = ($salary / 30) / $working_hours_day;
+        }
         $start_time = $this->start_time; //07:00
         $end_time = $this->end_time; //15:00
         return [
