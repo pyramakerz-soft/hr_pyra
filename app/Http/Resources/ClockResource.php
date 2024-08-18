@@ -26,12 +26,12 @@ class ClockResource extends JsonResource
             'id' => $this->id,
             'Day' => Carbon::parse($this->clock_in)->format('l'), // Extracts the day (e.g., "Sunday")
             'Date' => Carbon::parse($this->clock_in)->format('Y-m-d'), // Extracts the date (e.g., "2024-08-18")
-            'Clock In' => Carbon::parse($this->clock_in)->format('H:iA'), // Extracts the time (e.g., "09:20:21")
-            'Clock Out' => $clock_out,
-            'Total Hours' => Carbon::parse($this->duration)->format('H:i') ?? null,
-            'Location In' => $this->location->address,
-            'Location Out' => $LocationOut,
-            'user_id' => $this->user->id,
+            'clockIn' => Carbon::parse($this->clock_in)->format('H:iA'), // Extracts the time (e.g., "09:20:21")
+            'clockOut' => $clock_out,
+            'totalHours' => Carbon::parse($this->duration)->format('H:i') ?? null,
+            'locationIn' => $this->location->address,
+            'locationOut' => $LocationOut,
+            'userId' => $this->user->id,
             'site' => $this->user->work_types->pluck('name'),
         ];
     }
