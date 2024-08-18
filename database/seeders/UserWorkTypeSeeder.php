@@ -14,9 +14,14 @@ class UserWorkTypeSeeder extends Seeder
     public function run(): void
     {
         $user_hr = User::findorFail(1);
-        $workType = WorkType::findOrFail(1);
-        $user_hr->work_types()->attach($workType->id);
+        $workTypeSite = WorkType::findOrFail(1);
+        $workTypeHome = WorkType::findOrFail(2);
+
+        $user_hr->work_types()->attach($workTypeSite->id);
+        $user_hr->work_types()->attach($workTypeHome->id);
+
         $user_admin = User::findorFail(2);
-        $user_admin->work_types()->attach($workType->id);
+        $user_admin->work_types()->attach($workTypeSite->id);
+
     }
 }
