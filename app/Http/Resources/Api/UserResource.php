@@ -30,6 +30,7 @@ class UserResource extends JsonResource
             'national_id' => $this->national_id,
             'department' => $this->department->name,
             "position" => $this->user_detail->emp_type ?? null,
+            'role' => $this->getRoleName(),
             'email' => $this->email,
             'phone' => $this->phone,
             'working_hours' => $this->user_detail->working_hours_day ?? null,

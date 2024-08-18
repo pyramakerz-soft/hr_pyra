@@ -28,7 +28,7 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = User::with('user_detail', 'user_vacations', 'department.user_holidays', 'roles.permissions')->get();
+        $users = User::get();
         if ($users->isEmpty()) {
             return $this->returnError('No Users Found');
         }

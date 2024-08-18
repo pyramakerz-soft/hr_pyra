@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClockInOutRequest;
 use App\Http\Requests\UpdateClockInOutRequest;
+use App\Http\Resources\ClockResource;
 use App\Models\ClockInOut;
 use App\Models\User;
 use App\Traits\HelperTrait;
@@ -21,11 +22,11 @@ class ClockController extends Controller
      */
     public function index()
     {
-        $clocks = ClockInOut::all();
+        $clocks = ClockInOut::paginate(10);
         if ($clocks->isEmpty()) {
             return $this->returnError('No clocks Found');
         }
-        $data['clocks'] = $clocks;
+        $data['clocks'] = ClockResource::collection($clocks);
         return $this->returnData("data", $data, "clocks Data");
     }
 
@@ -36,7 +37,6 @@ class ClockController extends Controller
     public function clockIn(StoreClockInOutRequest $request)
     {
         $authUser = Auth::user();
-        dd($authUser);
         $this->validate($request, [
             'latitude' => 'required',
             'longitude' => 'required',

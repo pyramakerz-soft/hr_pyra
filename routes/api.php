@@ -38,6 +38,7 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('logout', [UserController::class, 'logout'])->name('user.logout');
     Route::post('assign_role/{user}', [UserController::class, 'AssignRole'])->name('user.roles');
     Route::get('/user_by_token', [UserController::class, 'show'])->name('user.show');
+
 });
 Route::group(['middleware' => 'auth:api'], function () {
 
