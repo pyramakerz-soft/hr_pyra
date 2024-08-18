@@ -8,6 +8,7 @@ use App\Http\Requests\Api\UpdateUserHolidayRequest;
 use App\Http\Resources\Api\UserHolidayResource;
 use App\Models\UserHoliday;
 use App\Traits\ResponseTrait;
+use Illuminate\Support\Facades\Auth;
 
 class UserHolidayController extends Controller
 {
@@ -59,5 +60,15 @@ class UserHolidayController extends Controller
     {
         $userHoliday->delete();
         return $this->returnData('UserHoliday', $userHoliday, 'User Holiday deleted');
+    }
+    public function profile()
+    {
+        $authUser = Auth::user();
+        $userHolidays = UserHoliday::where('user_id', $authUser->id)->get();
+        if (!$userHolidays) {
+            return $this->returnError('No User Holidays Found for this User');
+
+        }
+        return $this->returnData("UserHolidays", ($userHolidays), "UserHolidays Data");
     }
 }

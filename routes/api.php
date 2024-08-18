@@ -29,15 +29,15 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::group(['prefix' => 'auth'], function () {
-    Route::get('/profile', [UserController::class, 'profile'])->name('users.profile');
-    Route::post('/update_user', [UserController::class, 'update'])->name('user.update');
+    Route::get('/user_by_token', [UserController::class, 'profile'])->name('user.profile');
+    Route::post('/update_user/{user}', [UserController::class, 'update'])->name('user.update');
     Route::get('/getAllUsers', [UserController::class, 'index'])->name('users.all');
-    Route::delete('/delete_user', [UserController::class, 'destroy'])->name('user.delete');
+    Route::delete('/delete_user/{user}', [UserController::class, 'destroy'])->name('user.delete');
     Route::post('/create_user', [UserController::class, 'store'])->name('user.store');
     Route::post('login', [UserController::class, 'login'])->name('user.login');
     Route::post('logout', [UserController::class, 'logout'])->name('user.logout');
     Route::post('assign_role/{user}', [UserController::class, 'AssignRole'])->name('user.roles');
-    Route::get('/user_by_token', [UserController::class, 'show'])->name('user.show');
+    Route::get('/user_by_id/{user}', [UserController::class, 'show'])->name('user.show');
 
 });
 Route::group(['middleware' => 'auth:api'], function () {
@@ -52,9 +52,11 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/work_types/{workType}', [WorkTypeController::class, 'update'])->name('work_types.update');
 
     Route::post('/clock_in', [ClockController::class, 'clockIn'])->name('clocks.clockIn');
-    Route::post('/clock_out/{clock}', [ClockController::class, 'clockOut'])->name('clocks.clockOut');
-    Route::get('/clocks', [ClockController::class, 'showUserClocks'])->name('clocks.user');
-    Route::get('/userDetail_by_token', [UserDetailController::class, 'show'])->name('users.userDetail');
+    Route::post('/clock_out', [ClockController::class, 'clockOut'])->name('clocks.clockOut');
+    Route::get('/user_clocks', [ClockController::class, 'showUserClocks'])->name('clocks.user');
+    Route::get('/user_detail_by_token', [UserDetailController::class, 'profile'])->name('userDetail.profile');
+    Route::get('/user_holidays_by_token', [UserHolidayController::class, 'profile'])->name('userHolidays.profile');
+    Route::get('/user_vacations_by_token', [UserVacationController::class, 'profile'])->name('UserVacations.profile');
 
     Route::apiResource('roles', RoleController::class)->except('update');
     Route::apiResource('permissions', PermissionController::class)->except('update');
@@ -66,7 +68,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('user_details', UserDetailController::class)->except('update');
     Route::apiResource('user_holidays', UserHolidayController::class)->except('update');
     Route::apiResource('user_vacations', UserVacationController::class)->except('update');
-    // Route::group('')
     Route::post('users/{user}/locations', [HrController::class, 'assignLocationToUser'])->name('users.assignLocation');
     Route::get('users/locations', [HrController::class, 'getLocationAssignedToUser'])->name('users.userLocation');
 

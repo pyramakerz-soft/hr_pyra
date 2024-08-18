@@ -58,15 +58,8 @@ class UserDetailController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show()
+    public function show(UserDetail $userDetail)
     {
-
-        $authUser = Auth::user();
-        $userDetail = UserDetail::where('user_id', $authUser->id)->first();
-        if (!$userDetail) {
-            return $this->returnError('No User Detail Found for this User');
-
-        }
         return $this->returnData("UserDetail", new UserDetailResource($userDetail), "User Data");
     }
 
@@ -75,11 +68,9 @@ class UserDetailController extends Controller
      */
     public function update(UpdateUserDetailRequest $request, UserDetail $userDetail)
     {
-        // dd($request->toArray());
         $salary = $request->salary; //24000
         $working_hours = $request->working_hours_day; //8
         $hourly_rate = ($salary / 30) / $working_hours;
-        // dd($request->toArray());
         if ($userDetail) {
             $userDetail->update([
                 'salary' => $salary,
@@ -106,5 +97,15 @@ class UserDetailController extends Controller
         $userDetail->delete();
         return $this->returnData('userDetail', $userDetail, 'User Details deleted');
 
+    }
+    public function profile()
+    {
+        $authUser = Auth::user();
+        $userDetail = UserDetail::where('user_id', $authUser->id)->first();
+        if (!$userDetail) {
+            return $this->returnError('No User Detail Found for this User');
+
+        }
+        return $this->returnData("UserDetail", new UserDetailResource($userDetail), "UserDetail Data");
     }
 }

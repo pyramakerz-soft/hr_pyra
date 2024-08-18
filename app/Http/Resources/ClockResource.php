@@ -17,8 +17,10 @@ class ClockResource extends JsonResource
     {
         if ($this->clock_out == null) {
             $clock_out = null;
+            $LocationOut = null;
         } else {
             $clock_out = Carbon::parse($this->clock_out)->format('H:iA');
+            $LocationOut = $this->location->address;
         }
         return [
             'id' => $this->id,
@@ -28,7 +30,8 @@ class ClockResource extends JsonResource
             'Clock Out' => $clock_out,
             'Total Hours' => Carbon::parse($this->duration)->format('H:i') ?? null,
             'Location In' => $this->location->address,
-            'Location Out' => $this->location->address,
+            'Location Out' => $LocationOut,
+            'user_id' => $this->user->id,
             'site' => $this->user->work_types->pluck('name'),
         ];
     }

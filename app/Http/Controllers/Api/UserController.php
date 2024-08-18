@@ -28,7 +28,7 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = User::get();
+        $users = User::paginate(5);
         if ($users->isEmpty()) {
             return $this->returnError('No Users Found');
         }
@@ -45,7 +45,7 @@ class UserController extends Controller
             'password' => bcrypt($request->password),
             'phone' => $request->phone,
             'contact_phone' => $request->contact_phone,
-            'code' => $request->code,
+            'national_id' => $request->national_id,
             'gender' => $request->gender,
             'department_id' => (int) $request->department_id,
 
@@ -72,39 +72,32 @@ class UserController extends Controller
         ], Response::HTTP_OK);
     }
 
-    public function show()
+    public function show(User $user)
     {
-        $authUser = Auth::user();
-        $user = $authUser::where('id', $authUser->id)->get();
-        if (!$user) {
-            return $this->returnError('No User Found');
-
-        }
-        return $this->returnData("User", LoginResource::collection($user), "User Data");
+        return $this->returnData("User", $user, "User Data");
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateUserRequest $request)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        $authUser = Auth::user();
-        $authUser->update($request->validated());
-        if (!$authUser) {
+        if (!$user) {
             return $this->returnError('User Not Found');
         }
-        DB::table('model_has_roles')->where('model_id', $authUser->id)->delete();
-        $authUser->assignRole($request->input('roles'));
-        return $this->returnData("user", $authUser, "User Updated");
+        $user->update($request->validated());
+
+        DB::table('model_has_roles')->where('model_id', $user->id)->delete();
+        $user->assignRole($request->input('roles'));
+        return $this->returnData("user", $user, "User Updated");
 
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy()
+    public function destroy(User $user)
     {
-        $user = Auth::user();
         $user->delete();
         return $this->returnData("user", $user, "user deleted");
     }
@@ -118,7 +111,12 @@ class UserController extends Controller
     public function profile()
     {
         $authUser = Auth::user();
-        return response()->json(["result" => 'true', 'message' => 'User Profile', 'user' => $authUser], Response::HTTP_OK);
+        $user = User::where('id', $authUser->id)->first();
+        if (!$user) {
+            return $this->returnError('No User Found');
+
+        }
+        return $this->returnData("User", new LoginResource($user), "User Data");
     }
     public function AssignRole(Request $request, User $user)
     {
