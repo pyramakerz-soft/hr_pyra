@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Department;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -22,17 +21,19 @@ class UserFactory extends Factory
      *
      * @return array<string, mixed>
      */
+
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => 'Rana', // Fixed name
+            'email' => $this->faker->unique()->safeEmail(), // Unique email
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'phone' => $this->faker->phoneNumber(),
-            'contact_phone' => $this->faker->phoneNumber(),
-            'image' => $this->faker->imageUrl(),
-            'department_id' => Department::factory(),
+            'password' => Hash::make('123456'), // Same password as the seeder
+            'phone' => $this->faker->unique()->phoneNumber(), // Unique phone number
+            'contact_phone' => $this->faker->unique()->numerify('012########'), // Generates a unique 11-digit phone number
+            'national_id' => $this->faker->unique()->numerify('302###########'), // Generates a unique 14-digit national ID
+            'gender' => $this->faker->randomElement(['F', 'M']), // Randomly selects 'F' or 'M'
+            'department_id' => 2, // Fixed department ID
             'remember_token' => Str::random(10),
         ];
     }
