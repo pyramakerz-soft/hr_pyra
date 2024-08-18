@@ -41,6 +41,7 @@ class DatabaseSeeder extends Seeder
 
             PermissionSeeder::class,
             UserLocationSeeder::class,
+            ClockSeeder::class,
         ]);
 
     }
