@@ -26,8 +26,8 @@ class ClockController extends Controller
         if ($clocks->isEmpty()) {
             return $this->returnError('No clocks Found');
         }
-        $data['clocks'] = ClockResource::collection($clocks);
-        return $this->returnData("data", $data, "clocks Data");
+        // $data['clocks'] = ;
+        return $this->returnData("clocks", ClockResource::collection($clocks), "clocks Data");
     }
 
     /**
