@@ -14,6 +14,8 @@ class LoginResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // $authUser = Auth::user();
+        // dd($authUser->toArray());
 
         return [
             'id' => $this->id,

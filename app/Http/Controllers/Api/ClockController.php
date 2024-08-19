@@ -137,11 +137,17 @@ class ClockController extends Controller
     {
         $authUser = Auth::user();
         $clocks = ClockInOut::where('user_id', $authUser->id)->orderBy('clock_in', 'desc')->paginate(7);
+        // dd();
+        // if($clocks->clock_out)
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clocks For this user found');
         }
+        // $clockedIn = false;
+        // if ($clocks['clock_out'] == null) {
+        //     $clockedIn = true;
+        // }
         return $this->returnData("clocks", ClockResource::collection($clocks), "Clocks Data for {$authUser->name}");
-
+        // return response()->json(['result' => 'true', "Clocked_in" => $clockedIn, 'message' => "User Clocks Data", "clocks" => ClockResource::collection($clocks)]);
     }
 
 }
