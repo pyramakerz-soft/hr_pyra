@@ -24,7 +24,7 @@ class StoreClockInOutRequest extends FormRequest
         return [
 
             // 'user_id' => ['required', 'exists:users,id'],
-            'location_id' => ['required', 'exists:locations,id'],
+            // 'location_id' => ['required', 'exists:locations,id'],
 
         ];
     }
