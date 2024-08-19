@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { EmployeeDashService } from '../../../Services/employee-dash.service';
 import { EmployeeDashboard } from '../../../Models/employee-dashboard';
+import { ClockEventService } from '../../../Services/clock-event.service';
 
 @Component({
   selector: 'app-table',
@@ -17,11 +18,18 @@ export class TableComponent {
   pageNumber=1;
 
 
-  constructor(public empDashserv:EmployeeDashService){
+  constructor(
+    public empDashserv:EmployeeDashService,
+    private clockEventService: ClockEventService // Inject the service
+
+  ){
   }
 
   ngOnInit(): void {
     this.GetClockss(1);
+    this.clockEventService.clockedIn$.subscribe(() => {
+      this.GetClockss(this.pageNumber);
+    });
   }
 
  
