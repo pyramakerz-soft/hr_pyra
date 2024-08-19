@@ -10,6 +10,7 @@ import { HrRoleAddComponent } from './Pages/HR/hr-role-add/hr-role-add.component
 import { HrBoundersComponent } from './Pages/HR/hr-bounders/hr-bounders.component';
 import { HrAttendanceComponent } from './Pages/HR/hr-attendance/hr-attendance.component';
 import { HrEmployeeAttendanceDetailsComponent } from './Pages/HR/hr-employee-attendance-details/hr-employee-attendance-details.component';
+import { HrEmployeeDetailsComponent } from './Pages/HR/hr-employee-details/hr-employee-details.component';
 
 export const routes: Routes = [
     {path: "employee", component:EmployeeComponent, title:"Dashboard", children:[
@@ -25,6 +26,7 @@ export const routes: Routes = [
         {path: "HRBounders", component:HrBoundersComponent, title:"HRBounders"},
         {path: "HRAttendance", component:HrAttendanceComponent, title:"HRAttendance"},
         {path: "HREmployeeAttendanceDetails", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails"},
+        {path: "HREmployeeDetails", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails"},
     ]},
 
     { path: "Login", component:LoginComponent, title:"Login" },
