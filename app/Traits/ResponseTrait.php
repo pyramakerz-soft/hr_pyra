@@ -26,7 +26,7 @@ trait ResponseTrait
     public function returnData($key, $value, $msg = "")
     {
         return response()->json([
-            'result' => true,
+            'result' => "true",
             'message' => $msg,
             $key => $value,
         ], Response::HTTP_OK);
