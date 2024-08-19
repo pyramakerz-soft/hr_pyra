@@ -23,8 +23,9 @@ class LoginResource extends JsonResource
             $is_clocked_out = true;
         }
         $user_clockIn = $authUser->user_clocks->last();
-
-        $clockIn = Carbon::parse($user_clockIn->clock_in)->format('H:i:s');
+        if ($user_clockIn) {
+            $clockIn = Carbon::parse($user_clockIn->clock_in)->format('H:i:s');
+        }
 
         return [
             'id' => $this->id,
