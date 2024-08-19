@@ -11,6 +11,9 @@ import { TableComponent } from './Components/Core/table/table.component';
 import { EmployeeDashboardComponent } from './Pages/employee-dashboard/employee-dashboard.component';
 import { EmployeeComponent } from './Pages/Employee/employee/employee.component';
 import { HrTableComponent } from './Components/Core/HR/hr-table/hr-table.component';
+import { HRDashboardComponent } from './Pages/HR/hrdashboard/hrdashboard.component';
+import { HREmployeeComponent } from './Pages/HR/hremployee/hremployee.component';
+import { HRComponent } from './Pages/HR/hr/hr.component';
 import { BoundersPopUpComponent } from './Components/bounders-pop-up/bounders-pop-up.component';
 
 export const routes: Routes = [
@@ -27,8 +30,14 @@ export const routes: Routes = [
         {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard"},
     ]},
 
+    {path: "HR", component:HRComponent, title:"HR", children:[
+        {path: "", redirectTo: "HREmployee", pathMatch: "full"},
+        {path: "HREmployee", component:HREmployeeComponent, title:"HREmployee"},
+    ]},
+
     
     { path: "Login", component:LoginComponent, title:"Login" },
+    { path: "HRtable", component:HREmployeeComponent, title:"HRtable" },
     { path: "HRtable", component:HrTableComponent, title:"HRtable" },
     { path: "bound", component:BoundersPopUpComponent, title:"HRtable" },
     { path: "", component:LoginComponent, title:"Login" },

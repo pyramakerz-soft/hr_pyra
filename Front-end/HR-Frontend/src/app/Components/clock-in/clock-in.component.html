@@ -6,12 +6,12 @@
     <div class="bg-white border border-[#F3F4F6] rounded-3xl w-full md:w-[45%] lg:w-[34%] p-6 lg:p-9 shadow-xl text-center">
         <div class="flex justify-between">
             <div>
-                <p class="text-base md:text-2xl text-[#111827] font-semibold mb-2">Aug 13, 2024</p>  <!-- font edited by tailwind not style.css -->
+                <p class="text-base md:text-2xl text-[#111827] font-semibold mb-2">{{currentDate}}</p>  <!-- font edited by tailwind not style.css -->
                 <p class="text-sm md:text-base text-[#6B7280] font-medium tracking-wide">Date</p>  
             </div>
             <div>
-                <p class="text-base md:text-2xl text-[#111827] font-semibold mb-2">Ahmed Mohamed</p>
-                <p class="text-sm md:text-base text-[#6B7280] font-medium tracking-wide">Employee</p>
+                <p class="text-base md:text-2xl text-[#111827] font-semibold mb-2">{{ userDetails.name }}</p>
+                <p class="text-sm md:text-base text-[#6B7280] font-medium tracking-wide">{{userDetails.job_title}}</p>
             </div>
         </div>
     
