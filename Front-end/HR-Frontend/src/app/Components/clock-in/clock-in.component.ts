@@ -32,7 +32,7 @@ export class ClockInComponent {
   stopwatchTime: number = 0; // Time in seconds
   interval: any;
   isRunning: boolean = false;
-
+  clockInTime: string = "15:23:32"; 
 
   constructor(public dialog: MatDialog, public accountService: AccountService, public clockService: ClockService, public clockEventService: ClockEventService) {
   }
@@ -54,8 +54,13 @@ export class ClockInComponent {
       try {
         const response = JSON.parse(d);
         this.userDetails = response.User;
+        this.clockInTime=this.userDetails.clockIn;
         if(!this.userDetails.is_clocked_out){
+
+
+            this.initializeStopwatchTime();
             this.startStopwatch();
+
         }
       } catch (error) {
         console.error('Error parsing JSON response:', error); 
@@ -135,6 +140,22 @@ export class ClockInComponent {
   }
 
 
+  initializeStopwatchTime(): void {
+    const clockInSeconds = this.convertTimeToSeconds(this.clockInTime);
+    const currentSeconds = this.getCurrentTimeInSeconds();
+    this.stopwatchTime = currentSeconds - clockInSeconds;
+  }
+
+  convertTimeToSeconds(time: string): number {
+    const [hours, minutes, seconds] = time.split(':').map(Number);
+    return hours * 3600 + minutes * 60 + seconds;
+  }
+
+  getCurrentTimeInSeconds(): number {
+    const now = new Date();
+    return now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  }
+
   startStopwatch(): void {
     if (!this.isRunning) {
       this.isRunning = true;
@@ -155,8 +176,6 @@ export class ClockInComponent {
     this.stopwatchTime = 0;
   }
 
-
-
   getFormattedTime(): string {
     const hours = Math.floor(this.stopwatchTime / 3600);
     const minutes = Math.floor((this.stopwatchTime % 3600) / 60);
@@ -167,6 +186,6 @@ export class ClockInComponent {
   pad(time: number): string {
     return time < 10 ? `0${time}` : `${time}`;
   }
-
 }
+
 
