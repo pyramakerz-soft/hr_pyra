@@ -34,17 +34,17 @@
           </thead>
           <tbody>
             <!-- No Data Row -->
-            <tr *ngIf="tableData.length === 0">
+            <tr *ngIf="Userclocks.length === 0">
               <td colspan="7" class="px-4 py-2 h-[72px] text-center  border-t border-gray-300">
                 No Data Found
               </td>
             </tr>
       
             <!-- Data Rows -->
-            <tr *ngFor="let row of tableData; let i = index"
+            <tr *ngFor="let row of Userclocks; let i = index"
                 [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300">
-              <td class="py-5">{{ row.day }}</td>
-              <td>{{ row.date }}</td>
+              <td class="py-5">{{ row.Day }}</td>
+              <td>{{ row.Date }}</td>
 
 
               <td>
@@ -102,26 +102,26 @@
       
       
     <div class="mt-5 md:flex justify-between items-center">
-        <button class="h-[44px] w-[119px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center hidden">
+        <button class="h-[44px] w-[119px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center hidden"   (click)="getPrevClocks()">
             <i class="fa-solid fa-arrow-left"></i>Previous
         </button>
         
         <div class="flex justify-center items-center space-x-5 md:block">
-          <button class="h-[50px] w-[50px] border border-[#D0D5DD] rounded-xl bg-[#FFFFFF] ">
+          <button class="h-[50px] w-[50px] border border-[#D0D5DD] rounded-xl bg-[#FFFFFF] " (click)="GetClockss(1)">
               1
           </button>
-          <button class="h-[50px] w-[50px] border border-[#D0D5DD] rounded-xl bg-[#FFFFFF] ">
+          <button class="h-[50px] w-[50px] border border-[#D0D5DD] rounded-xl bg-[#FFFFFF] " (click)="GetClockss(2)">
               2
           </button>
-          <button class="h-[50px] w-[50px] border border-[#D0D5DD] rounded-xl bg-[#FFFFFF] ">
+          <button class="h-[50px] w-[50px] border border-[#D0D5DD] rounded-xl bg-[#FFFFFF] " (click)="GetClockss(3)">
               3
           </button>
-          <button class="h-[50px] w-[50px] border border-[#D0D5DD] rounded-xl bg-[#FFFFFF] ">
+          <button class="h-[50px] w-[50px] border border-[#D0D5DD] rounded-xl bg-[#FFFFFF] " (click)="GetClockss(4)">
               4
           </button>
         </div>
 
-        <button class="h-[44px] w-[92px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center hidden ">
+        <button class="h-[44px] w-[92px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center hidden " (click)="getNextClocks()">
             Next<i class="fa-solid fa-arrow-right"></i>
         </button>
     </div>

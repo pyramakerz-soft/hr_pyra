@@ -14,4 +14,7 @@ export class ClockInPopUpComponent {
   closeDialog(): void {
     this.dialogRef.close();
   }
+
+  
+
 }
