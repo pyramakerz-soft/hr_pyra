@@ -15,7 +15,7 @@ export class AccountService {
 
   baseUrl = "http://127.0.0.1:8000/api/auth"
 
-  r: { name: string, job_title: string, id: string, image: string, role_name: string , code :string} = { name: "", job_title: "", id: "", image: "",role_name:"" , code :""};
+  r: { name: string, job_title: string, id: string, image: string, role_name: string , is_clocked_out :string ,national_id:string} = { name: "", job_title: "", id: "", image: "",role_name:"" , is_clocked_out :"",national_id:""};
 
   constructor(public http: HttpClient, private router: Router) {
     this.CheckToken();
@@ -25,18 +25,7 @@ export class AccountService {
     const token = localStorage.getItem("token");
     if (token) {
       this.isAuthenticated = true;
-      this.GetDataFromToken(token);
-    } else {
-      this.isAuthenticated = false;
-    }
-  }
-
-
-  GetDataFromToken(token: string) {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    
-    this.http.get(`${this.baseUrl}/user_by_token`, { headers, responseType: 'text' })
-      .subscribe((d: string) => {
+      this.GetDataFromToken().subscribe((d: string) => {
         try {
           const response = JSON.parse(d);
           const userDetails = response.User;
@@ -45,7 +34,20 @@ export class AccountService {
           console.error('Error parsing JSON response:', error);
         }
       });
+    } else {
+      this.isAuthenticated = false;
+    }
   }
+
+
+  GetDataFromToken() {
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+   return this.http.get(`${this.baseUrl}/user_by_token`, { headers, responseType: 'text' });
+  }
+
+
   
 
 
@@ -59,7 +61,7 @@ export class AccountService {
         if (token) {
           this.isAuthenticated = true;
           localStorage.setItem("token", token);
-          this.GetDataFromToken(token);
+          this.GetDataFromToken();
           this.router.navigateByUrl("employee");
 
         }
