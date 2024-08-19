@@ -113,20 +113,11 @@ class UserController extends Controller
     {
         $authUser = Auth::user();
         $user = User::where('id', $authUser->id)->first();
-        $user_clock = $user->user_clocks->whereNull('clock_out')->last();
-        $is_clockedOut = false;
-        if ($user_clock) {
-            return response()->json(['result' => 'true', "Is_Clocked_Out" => $is_clockedOut, 'message' => "User Clocks Data", "clocks" => new LoginResource($user)]);
-        }
-        $is_clockedOut = true;
         if (!$user) {
             return $this->returnError('No User Found');
-
         }
 
-        return response()->json(['result' => 'true', "Is_Clocked_Out" => $is_clockedOut, 'message' => " User Data", "clocks" => new LoginResource($user)]);
-
-        // return $this->returnData("User", new LoginResource($user), "User Data");
+        return $this->returnData("User", new LoginResource($user), "User Data");
     }
     public function AssignRole(Request $request, User $user)
     {
