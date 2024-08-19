@@ -14,9 +14,9 @@ export class HRComponent {
   menuItems = [
     { label: 'Dashboard', icon: 'fa-regular fa-table-list', route: '/HR//HREmployee' },
     { label: 'Employee', icon: 'fas fa-home', route: '/HR/HREmployee' },
-    { label: 'Roles', icon: 'fa-regular fa-sign-out', route: '/HR/HREmployee' },
-    { label: 'Atendence', icon: 'fas fa-chart-bar', route: '/HR/HREmployee' },
-    { label: 'Bounders', icon: 'fas fa-chart-bar', route: '/HR/HREmployee' },
+    { label: 'Roles', icon: 'fa-regular fa-sign-out', route: '/HR/HRRole' },
+    { label: 'Atendence', icon: 'fas fa-chart-bar', route: '/HR/HRAttendance' },
+    { label: 'Bounders', icon: 'fas fa-chart-bar', route: '/HR/HRBounders' },
     { label: 'Sign Out', icon: 'fa fa-sign-out', route: '/HR/HREmployee' },
 
   ];
