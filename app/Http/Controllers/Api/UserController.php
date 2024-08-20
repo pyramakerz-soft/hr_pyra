@@ -36,7 +36,7 @@ class UserController extends Controller
             return $this->returnError('You are not authorized to Update users', 403);
         }
 
-        $users = User::with('user_detail')->paginate(5);
+        $users = User::paginate(5);
         if ($users->isEmpty()) {
             return $this->returnError('No Users Found');
         }
