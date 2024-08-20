@@ -83,23 +83,22 @@
         <tr *ngFor="let row of tableData; let i = index"
             [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300 text-xs md:text-sm">
           
-            <td class="py-5 px-4"><button (click)="NavigateToEmployeeDetails()">{{ row.Name }}</button></td>
-            <td class="py-5 px-4">{{ row.Code }}</td>
+            <td class="py-5 px-4"><button (click)="NavigateToEmployeeDetails()">{{ row.name }}</button></td>
+            <td class="py-5 px-4">{{ row.national_id }}</td>
             <td class="py-5 px-4">
               <div 
                 class="text-center w-[80%] rounded-lg border border-[#D0D5DD] py-2 text-[#FFFFFF]"
                 [ngClass]="{
-                  'bg-[#1B5724]': row.Department === 'Software',
-                  'bg-[#63233C]': row.Department === 'Graphic',
-                  'bg-[#57571B]': row.Department === 'Academy'
+                  'bg-[#1B5724]': row.department === 'Software',
+                  'bg-[#63233C]': row.department === 'Academic',
                 }">
-                {{ row.Department }}
+                {{ row.department }}
               </div>
             </td>
             <td class="py-5 px-4">{{ row.position }}</td>
             <td class="py-5 px-4">{{ row.phone }}</td>
-            <td class="py-5 px-4">{{ row.Email }}</td>
-            <td class="py-5 px-4">{{ row.UserName }}</td>
+            <td class="py-5 px-4">{{ row.email }}</td>
+            <td class="py-5 px-4">{{ row.name }}</td>
             <td class="py-5 px-4">
               <div class="px-2">
                   <button (click)="NavigateToEditEmployee(1)">
@@ -113,8 +112,6 @@
     </table>
   </div>
         
-  <!-- <table class="lg:w-full md:table-fixed table-auto bg-[#FFFFFF] text-center text-[#475467]"> -->
-      
   <div class="mt-5 md:flex justify-between items-center">
       <button class="h-[44px] w-[119px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center hidden">
         <i class="fa-solid fa-arrow-left"></i>Previous
