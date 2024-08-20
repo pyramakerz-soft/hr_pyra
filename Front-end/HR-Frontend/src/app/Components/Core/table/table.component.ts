@@ -20,7 +20,7 @@ export class TableComponent {
 
   constructor(
     public empDashserv:EmployeeDashService,
-    private clockEventService: ClockEventService // Inject the service
+    private clockEventService: ClockEventService
 
   ){
   }

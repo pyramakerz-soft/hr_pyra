@@ -13,9 +13,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 export class EmployeeComponent {
   isMenuOpen: boolean = false;
 
-  
   menuItems = [
-    { label: 'Dashboard', icon: 'fa-regular fa-table-list', route: '/Dashboard' },
+    { label: 'Dashboard', icon: 'fa-regular fa-table-list', route: '/employee/Dashboard' },
     { label: 'Sign Out', icon: 'fa-regular fa-sign-out', route: '/Login' },
   ];
 
