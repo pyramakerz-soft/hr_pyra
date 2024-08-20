@@ -22,8 +22,12 @@ class ClockController extends Controller
      */
     public function index()
     {
+        // TODO make this for spacific user by where
+
         $clocks = ClockInOut::orderBy('clock_in', 'desc')->paginate(7);
         if ($clocks->isEmpty()) {
+            // TODO Edit the message like figma
+
             return $this->returnError('No clocks Found');
         }
         return $this->returnData("clocks", ClockResource::collection($clocks), "clocks Data");
@@ -45,6 +49,9 @@ class ClockController extends Controller
         $user_id = $authUser->id;
         $latitude = $request->latitude;
         $longitude = $request->longitude;
+
+
+        //TODO the user can have many locations
 
         // Access the first location_id associated with the authenticated user
         $userLocation = $authUser->user_locations()->first();
@@ -121,7 +128,6 @@ class ClockController extends Controller
             $clock_out = Carbon::now()->addRealHour(3);
 
             $duration = $clock_out->diffInHours($clock_in); // Consider using diff() for more precision
-
             $ClockauthUser->update([
                 'clock_out' => $clock_out,
                 'duration' => $duration,
