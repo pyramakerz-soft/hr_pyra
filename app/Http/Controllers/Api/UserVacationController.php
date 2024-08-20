@@ -58,14 +58,14 @@ class UserVacationController extends Controller
         $userVacation->delete();
         return $this->returnData('UserVacation', $userVacation, 'User Vacation deleted');
     }
-    public function profile()
-    {
-        $authUser = Auth::user();
-        $userVacations = UserVacation::where('user_id', $authUser->id)->get();
-        if (!$userVacations) {
-            return $this->returnError('No User Vacations Found for this User');
+    // public function profile()
+    // {
+    //     $authUser = Auth::user();
+    //     $userVacations = UserVacation::where('user_id', $authUser->id)->get();
+    //     if (!$userVacations) {
+    //         return $this->returnError('No User Vacations Found for this User');
 
-        }
-        return $this->returnData("UserVacations", ($userVacations), "UserVacations Data");
-    }
+    //     }
+    //     return $this->returnData("UserVacations", ($userVacations), "UserVacations Data");
+    // }
 }

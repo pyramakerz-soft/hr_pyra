@@ -25,6 +25,8 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'phone',
         'contact_phone',
+        'national_id',
+        'code',
         'gender',
         'department_id',
     ];

@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Department;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -24,6 +26,15 @@ class UserFactory extends Factory
 
     public function definition(): array
     {
+        $department = Department::find(1);
+
+        // Generate a unique code
+        do {
+            $departmentPrefix = substr(Str::slug($department->name), 0, 4); // Get the first 4 letters of the department name
+            $randomDigits = mt_rand(1000, 9999);
+            $code = strtoupper($departmentPrefix) . '-' . $randomDigits;
+        } while (User::where('code', $code)->exists());
+
         return [
             'name' => 'Rana', // Fixed name
             'email' => $this->faker->unique()->safeEmail(), // Unique email
@@ -34,7 +45,9 @@ class UserFactory extends Factory
             'national_id' => $this->faker->unique()->numerify('302###########'), // Generates a unique 14-digit national ID
             'gender' => $this->faker->randomElement(['F', 'M']), // Randomly selects 'F' or 'M'
             'department_id' => 2, // Fixed department ID
+            'code' => $code,
             'remember_token' => Str::random(10),
+
         ];
     }
 

@@ -27,13 +27,14 @@ class UserResource extends JsonResource
 
             'id' => $this->id,
             'name' => $this->name,
-            'national_id' => $this->national_id,
+            'code' => $this->code,
             'department' => $this->department->name,
             "position" => $this->user_detail->emp_type ?? null,
             'role' => $this->getRoleName(),
             'email' => $this->email,
             'phone' => $this->phone,
             'working_hours' => $this->user_detail->working_hours_day ?? null,
+            'userDetail' => new UserDetailResource($this->whenLoaded('user_detail')),
         ];
     }
 }

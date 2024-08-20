@@ -27,12 +27,19 @@ class UpdateUserRequest extends FormRequest
             'password' => ['nullable', 'min:6'],
             'phone' => ['nullable', 'regex:/^01[0125][0-9]{8}$/'],
             'contact_phone' => ['nullable', 'regex:/^01[0125][0-9]{8}$/'],
-            'code' => ['nullable', 'numeric', 'min:6'],
             'national_id' => ['nullable', 'string', 'regex:/^[0-9]{14}$/'],
+            'code' => ['nullable', 'string'],
             'gender' => ['nullable', 'in:m,M,F,f'],
             'department_id' => ['nullable', 'exists:departments,id'],
             'image' => ['nullable'],
-            'roles' => ['nullable'],
+            'salary' => ['nullable', 'numeric'],
+            'working_hours_day' => ['nullable', 'numeric', 'min:4'],
+            'overtime_hours' => ['nullable', 'numeric'],
+            'emp_type' => ['nullable', 'string'],
+            'hiring_date' => ['nullable', 'date'],
+            'user_id' => ['exists:users,id'],
+            'start_time' => ['nullable'],
+            'end_time' => ['nullable'],
 
         ];
     }

@@ -17,21 +17,20 @@ class ClockController extends Controller
 {
     use ResponseTrait;
     use HelperTrait;
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+    public function getUserClockById(User $user)
     {
-        $clocks = ClockInOut::orderBy('clock_in', 'desc')->paginate(7);
+        $authUser = Auth::user();
+        if (!$authUser->hasRole('Hr')) {
+            return $this->returnError('You are not unauthorized to see user Clocks', 403);
+        }
+        $clocks = ClockInOut::where('user_id', $user->id)->orderBy('clock_in', 'desc')->paginate(7);
+
         if ($clocks->isEmpty()) {
             return $this->returnError('No clocks Found');
         }
         return $this->returnData("clocks", ClockResource::collection($clocks), "clocks Data");
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
 
     public function clockIn(StoreClockInOutRequest $request)
     {
@@ -47,7 +46,6 @@ class ClockController extends Controller
         $longitude = $request->longitude;
 
         $userLocations = $authUser->user_locations()->get();
-
         $closestLocation = null;
         $shortestDistance = null;
 
@@ -73,21 +71,64 @@ class ClockController extends Controller
 
         $location_id = $closestLocation['location_id'];
         $distanceBetweenUserAndLocation = $closestLocation['distance'];
+        $now = Carbon::now()->addRealHour(3);
+        $UserEndTime = Carbon::createFromTimeString($authUser->user_detail->end_time);
+
+        if ($now->greaterThan($UserEndTime)) {
+            return $this->returnError('Your shift has already ended, you cannot clock in.');
+        }
 
         $existingClockIn = ClockInOut::where('user_id', $user_id)
             ->where('location_id', $location_id)
             ->whereNull('clock_out')
+            ->orderBy('clock_in', 'desc')
             ->first();
 
+        $LastClockedOut = ClockInOut::where('user_id', $user_id)
+            ->where('location_id', $location_id)
+            ->whereNotNull('clock_out')
+            ->whereDate('clock_out', Carbon::today())
+            ->orderBy('clock_out', 'desc')
+            ->first();
+
+        if ($LastClockedOut) {
+            $clock_in = Carbon::parse($LastClockedOut->clock_in);
+            $clock_out = Carbon::parse($LastClockedOut->clock_out);
+            $userWorkingHoursDay = $authUser->user_detail->working_hours_day;
+
+            // Calculate the duration between clock_in and clock_out as a CarbonInterval
+            $durationInterval = $clock_out->diffAsCarbonInterval($clock_in);
+
+            // Format the duration as H:i:s
+            $durationFormatted = $durationInterval->format('%H:%I:%S');
+
+            // Convert the duration to total hours for comparison with working hours
+            $durationInHours = $durationInterval->totalHours;
+            // dd($durationInHours);
+            // // $DurationClocked = $clock_out->diffInHours($clock_in);
+            // $durationInterval = $clock_out->diffAsCarbonInterval($clock_in);
+            // dd($durationInterval->toArray());
+            // $durationFormatted = $durationInterval->format('%H:%I:%S');
+
+            if ($durationInHours < $userWorkingHoursDay) {
+                $LastClockedOut->update([
+                    'clock_in' => $clock_in,
+                    'clock_out' => null,
+                    'duration' => $durationFormatted,
+                ]);
+                return $this->returnData("clock", $LastClockedOut, "Clock In Done");
+            }
+        }
+
         if ($existingClockIn) {
-            return $this->returnError('You have already clocked in at this location and have not clocked out yet.');
+            return $this->returnError('You have already clocked in.');
         }
 
         if ($distanceBetweenUserAndLocation < 50) {
             $clock = ClockInOut::create([
                 'clock_in' => Carbon::now()->addRealHour(3),
                 'clock_out' => null,
-                'duration' => null,
+                'duration' => null, // Set initial duration to 0
                 'user_id' => $user_id,
                 'location_id' => $location_id,
             ]);
@@ -109,17 +150,15 @@ class ClockController extends Controller
 
         $authUser = Auth::user();
 
-        // Get the last clock-in record where clock_out is null, ordered by clock_in descending
         $ClockauthUser = ClockInOut::where('user_id', $authUser->id)
             ->whereNull('clock_out')
-            ->orderBy('clock_in', 'desc') // Order by clock_in in descending order
+            ->orderBy('clock_in', 'desc')
             ->first();
 
         if (!$ClockauthUser) {
             return $this->returnError('You are not clocked in.');
         }
 
-        // Get the user's location associated with this clock-in
         $user_location = $authUser->user_locations()->wherePivot('location_id', $ClockauthUser->location_id)->first();
 
         if (!$user_location) {
@@ -132,14 +171,14 @@ class ClockController extends Controller
         $distanceBetweenUserAndLocation = $this->haversineDistance($userLatitude, $userLongitude, $latitude, $longitude);
 
         if ($distanceBetweenUserAndLocation < 50) {
-            $clock_in = $ClockauthUser->clock_in;
+            $clock_in = Carbon::parse($ClockauthUser->clock_in);
             $clock_out = Carbon::now()->addRealHour(3);
-
-            $duration = $clock_out->diffInHours($clock_in);
+            $durationInterval = $clock_out->diffAsCarbonInterval($clock_in);
+            $durationFormatted = $durationInterval->format('%H:%I:%S');
 
             $ClockauthUser->update([
                 'clock_out' => $clock_out,
-                'duration' => $duration,
+                'duration' => $durationFormatted,
             ]);
 
             return $this->returnData("clock", $ClockauthUser, "Clock Out Done");

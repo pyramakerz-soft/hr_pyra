@@ -19,19 +19,19 @@ class StoreUserDetailRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
-    {
-        return [
-            'salary' => ['required', 'numeric'],
-            'working_hours_day' => ['required', 'numeric', 'min:4'],
-            'overtime_hours' => ['required', 'numeric'],
-            'emp_type' => ['required', 'string'],
-            'work_type' => ['required'],
-            'hiring_date' => ['required', 'date'],
-            'user_id' => ['required', 'exists:users,id'],
-            'start_time' => ['required', 'date_format:H:i'],
-            'end_time' => ['required', 'date_format:H:i'],
+    // public function rules(): array
+    // {
+    //     // return [
+    //     //     'salary' => ['required', 'numeric'],
+    //     //     'working_hours_day' => ['required', 'numeric', 'min:4'],
+    //     //     'overtime_hours' => ['required', 'numeric'],
+    //     //     'emp_type' => ['required', 'string'],
+    //     //     'work_type' => ['required'],
+    //     //     'hiring_date' => ['required', 'date'],
+    //     //     'user_id' => ['required', 'exists:users,id'],
+    //     //     'start_time' => ['required', 'date_format:H:i'],
+    //     //     'end_time' => ['required', 'date_format:H:i'],
 
-        ];
-    }
+    //     // ];
+    // }
 }

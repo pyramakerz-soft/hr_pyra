@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Location;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class LocationSeeder extends Seeder
@@ -13,6 +12,13 @@ class LocationSeeder extends Seeder
      */
     public function run(): void
     {
-        Location::factory()->count(20)->create();
+        Location::create([
+            'name' => "Yehia Mosque",
+            'address' => "AboQeir Street Zizinya",
+            'latitude' => "100.0000000",
+            'longitude' => "200.0000000",
+
+        ]);
+        Location::factory()->count(19)->create();
     }
 }

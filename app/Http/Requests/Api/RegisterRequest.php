@@ -31,10 +31,18 @@ class RegisterRequest extends FormRequest
             'phone' => ['required', 'unique:users,phone', 'regex:/^01[0125][0-9]{8}$/'],
             'contact_phone' => ['required', 'unique:users,contact_phone', 'regex:/^01[0125][0-9]{8}$/'],
             'national_id' => ['required', 'string', 'unique:users,national_id', 'regex:/^[0-9]{14}$/'],
+            'code' => ['nullable', 'string'],
             'gender' => ['required', 'in:m,M,F,f'],
             'department_id' => ['required', 'exists:departments,id'],
             'image' => ['nullable'],
-
+            'salary' => ['required', 'numeric'],
+            'working_hours_day' => ['required', 'numeric', 'min:4'],
+            'overtime_hours' => ['required', 'numeric'],
+            'emp_type' => ['required', 'string'],
+            'hiring_date' => ['required', 'date'],
+            'user_id' => ['exists:users,id'],
+            'start_time' => ['required', 'date_format:H:i'],
+            'end_time' => ['required', 'date_format:H:i'],
         ];
     }
 

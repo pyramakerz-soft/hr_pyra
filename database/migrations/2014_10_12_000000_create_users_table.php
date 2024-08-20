@@ -18,10 +18,12 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->string('national_id')->nullable()->unique();
-            $table->string('phone')->unique();
-            $table->string('contact_phone')->unique();
+            $table->string('code')->nullable()->unique();
+
+            $table->string('phone')->nullable()->unique();
+            $table->string('contact_phone')->nullable()->unique();
             $table->string('image')->nullable();
-            $table->enum('gender', ['m', 'f']);
+            $table->enum('gender', ['m', 'f'])->nullable();
             $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('cascade');
             $table->rememberToken();
             $table->timestamps();

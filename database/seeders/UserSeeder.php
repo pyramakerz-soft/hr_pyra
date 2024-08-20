@@ -6,6 +6,7 @@ use App\Models\Department;
 use App\Models\User;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder
 {
@@ -21,6 +22,15 @@ class UserSeeder extends Seeder
     {
 
         $faker = Faker::create();
+        // Get the department name based on the department_id
+        $department = Department::find(1);
+
+        // Generate a unique code
+        do {
+            $departmentPrefix = substr(Str::slug($department->name), 0, 4); // Get the first 4 letters of the department name
+            $randomDigits = mt_rand(1000, 9999);
+            $code = strtoupper($departmentPrefix) . '-' . $randomDigits;
+        } while (User::where('code', $code)->exists());
 
         $user_hr = User::create([
             'name' => 'belal',
@@ -30,7 +40,7 @@ class UserSeeder extends Seeder
 
             'contact_phone' => "01211018851",
             'national_id' => "30201010214378",
-
+            'code' => $code,
             'image' => $faker->imageUrl(),
             'gender' => 'M',
             'department_id' => 1,

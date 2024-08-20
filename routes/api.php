@@ -50,23 +50,23 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/locations/{location}', [LocationController::class, 'update'])->name('locations.update');
     Route::post('/work_types/{workType}', [WorkTypeController::class, 'update'])->name('work_types.update');
 
+    Route::get('/user_clocks_by_id/{user}', [ClockController::class, 'getUserClockById'])->name('clocks.userById');
     Route::post('/clock_in', [ClockController::class, 'clockIn'])->name('clocks.clockIn');
     Route::post('/clock_out', [ClockController::class, 'clockOut'])->name('clocks.clockOut');
     Route::get('/user_clocks', [ClockController::class, 'showUserClocks'])->name('clocks.user');
-    Route::get('/user_detail_by_token', [UserDetailController::class, 'profile'])->name('userDetail.profile');
-    Route::get('/user_holidays_by_token', [UserHolidayController::class, 'profile'])->name('userHolidays.profile');
-    Route::get('/user_vacations_by_token', [UserVacationController::class, 'profile'])->name('UserVacations.profile');
+    // Route::get('/user_detail_by_token', [UserDetailController::class, 'profile'])->name('userDetail.profile');
+    // Route::get('/user_holidays_by_token', [UserHolidayController::class, 'profile'])->name('userHolidays.profile');
+    // Route::get('/user_vacations_by_token', [UserVacationController::class, 'profile'])->name('UserVacations.profile');
 
     Route::apiResource('roles', RoleController::class)->except('update');
     Route::apiResource('permissions', PermissionController::class)->except('update');
     Route::apiResource('locations', LocationController::class)->except('update');
-    Route::apiResource('clocks', ClockController::class)->only('index');
     Route::apiResource('work_types', WorkTypeController::class)->except('update');
-
     Route::apiResource('departments', DepartmentController::class)->except('update');
     Route::apiResource('user_details', UserDetailController::class)->except('update');
     Route::apiResource('user_holidays', UserHolidayController::class)->except('update');
     Route::apiResource('user_vacations', UserVacationController::class)->except('update');
+
     Route::post('users/{user}/locations', [HrController::class, 'assignLocationToUser'])->name('users.assignLocation');
     Route::get('users/locations', [HrController::class, 'getLocationAssignedToUser'])->name('users.userLocation');
 
