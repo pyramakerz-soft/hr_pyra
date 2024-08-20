@@ -14,15 +14,15 @@
         <div class="flex justify-between mb-5 md:mb-8">
             <div>
                 <p class="font-medium text-sm md:text-lg text-[#6B7280] border-t-[3px] py-2 border-[#FF7519] inline">Date</p>
-                <p class="font-semibold text-base md:text-2xl py-2">Aug 13, 2024</p>
+                <p class="font-semibold text-base md:text-2xl py-2">{{getCurrentDate()}}</p>
             </div>
             <div>
                 <p class="font-medium text-sm md:text-lg text-[#6B7280] border-t-[3px] py-2 border-[#FF7519] inline">Time</p>
-                <p class="font-semibold text-base md:text-2xl py-2">1:34 PM</p>
+                <p class="font-semibold text-base md:text-2xl py-2">{{ getCurrentFormattedTime() }}</p>
             </div>
         </div>
         <p class="font-medium text-sm md:text-lg text-[#6B7280] border-t-[3px] py-2 border-[#FF7519] inline">Location</p>
-        <p class="font-semibold text-base md:text-2xl py-2">42 Abd Al Aziz Agamea, Sidi Gaber, Alexandria Governorate 5433112,Egypt</p>
+        <p class="font-semibold text-base md:text-2xl py-2">{{locationName}}</p>
     
         <div class="mt-5 md:mt-8 flex justify-end">
             <button (click)="closeDialog()" class="font-bold text-base md:text-2xl text-[#707070] py-2 md:py-4 px-5 md:px-9 rounded-2xl border border-[#9F9999] mr-5">Cancel</button>

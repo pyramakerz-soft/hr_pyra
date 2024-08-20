@@ -103,7 +103,9 @@ export class ClockInComponent {
           this.IsClockedIn = false;
           this.clockEventService.notifyClockedIn(); // Notify other components
           this.userDetails.is_clocked_out = true;
+
           this.stopStopwatch();
+          this.resetStopwatch();
         },
         (error: HttpErrorResponse) => {
           const errorMessage = error.error?.message || 'An unknown error occurred';

@@ -3,6 +3,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { ClockService } from '../../Services/clock.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ClockEventService } from '../../Services/clock-event.service';
+import { ReverseGeocodingService } from '../../Services/reverse-geocoding.service';
 
 @Component({
   selector: 'app-clock-in-pop-up',
@@ -16,17 +17,26 @@ export class ClockInPopUpComponent {
   public lat: number =196.0000000;
   public lng: number =173.0000000;
   public IsClockedIn:boolean=false;
+  public reversedGeo: any;
+  public locationName :string="";
 
-  constructor(public dialogRef: MatDialogRef<ClockInPopUpComponent>,public clockService:ClockService , public clockEventService: ClockEventService) { }
+  constructor(public dialogRef: MatDialogRef<ClockInPopUpComponent>,public clockService:ClockService , public clockEventService: ClockEventService ,public revGeo:ReverseGeocodingService) { }
 
   closeDialog(): void {
     this.IsClockedIn=false;
     this.dialogRef.close(this.IsClockedIn);
   }
 
-  public ngOnInit(): void {
+  public async ngOnInit(): Promise<void> {
+    //await this.getLocation();  
 
+    const result = await this.revGeo.getAddress(this.lat, this.lng);
+    this.reversedGeo = result.formatted_address;
+    this.locationName=result.address_components[1].long_name +" , "+result.address_components[2].long_name +" , "+result.address_components[3].long_name
   }
+    
+
+
 
   async sendLocation(): Promise<void> {
     try {
@@ -69,4 +79,28 @@ export class ClockInPopUpComponent {
       }
     });
   }
+
+
+  getCurrentFormattedTime(): string {
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = now.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const minutesStr = minutes < 10 ? '0' + minutes : minutes.toString();
+    
+    return `${hours}:${minutesStr} ${ampm}`;
+  }
+
+  getCurrentDate(): string {
+    const date = new Date();
+    return date.toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  }
+
 }
