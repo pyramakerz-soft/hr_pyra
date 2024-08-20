@@ -10,13 +10,18 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class HrEmployeeAddEditDetailsComponent {
   EmployeeId:number | null = null
+  
   constructor(private route: ActivatedRoute){}
-
+  
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       if (params['EmpId']) {
         this.EmployeeId = +params['EmpId'];
       }
     });
+  }
+  
+  SaveEmployee() {
+    console.log("123")
   }
 }

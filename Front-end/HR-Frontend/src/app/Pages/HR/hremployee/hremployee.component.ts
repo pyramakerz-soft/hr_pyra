@@ -59,14 +59,14 @@ export class HREmployeeComponent {
   }
 
   NavigateToAddEmployee(){
-    this.router.navigateByUrl("")
+    this.router.navigateByUrl("HR/HREmployeeDetailsAdd")
   }
   
   NavigateToEmployeeDetails(){
     this.router.navigateByUrl("HR/HREmployeeDetails")
   }
  
-  NavigateToEditEmployee(){
-    this.router.navigateByUrl("")
+  NavigateToEditEmployee(empId:number){
+    this.router.navigateByUrl(`HR/HREmployeeDetailsEdit/${empId}`)
   }
 }

@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 export class HrEmployeeDetailsComponent {
   constructor(public router:Router){}
 
-  NavigateToEditEmployee(){
-    this.router.navigateByUrl("")
+  NavigateToEditEmployee(empId:number){
+    this.router.navigateByUrl(`HR/HREmployeeDetailsEdit/${empId}`)
   }
 }
