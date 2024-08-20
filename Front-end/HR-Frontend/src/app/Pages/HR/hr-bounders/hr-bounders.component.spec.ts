@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UserComponent } from './user.component';
+import { HrBoundersComponent } from './hr-bounders.component';
 
-describe('UserComponent', () => {
-  let component: UserComponent;
-  let fixture: ComponentFixture<UserComponent>;
+describe('HrBoundersComponent', () => {
+  let component: HrBoundersComponent;
+  let fixture: ComponentFixture<HrBoundersComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UserComponent]
+      imports: [HrBoundersComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(UserComponent);
+    fixture = TestBed.createComponent(HrBoundersComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

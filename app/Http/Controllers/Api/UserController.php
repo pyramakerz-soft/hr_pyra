@@ -50,6 +50,7 @@ class UserController extends Controller
             'department_id' => (int) $request->department_id,
 
         ]);
+
         if (!$user) {
             return $this->returnError('Failed to Store User');
 
@@ -114,8 +115,8 @@ class UserController extends Controller
         $user = User::where('id', $authUser->id)->first();
         if (!$user) {
             return $this->returnError('No User Found');
-
         }
+
         return $this->returnData("User", new LoginResource($user), "User Data");
     }
     public function AssignRole(Request $request, User $user)

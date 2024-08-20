@@ -50,19 +50,33 @@ class ClockController extends Controller
         $latitude = $request->latitude;
         $longitude = $request->longitude;
 
+        $userLocations = $authUser->user_locations()->get();
 
-        //TODO the user can have many locations
+        $closestLocation = null;
+        $shortestDistance = null;
 
-        // Access the first location_id associated with the authenticated user
-        $userLocation = $authUser->user_locations()->first();
+        foreach ($userLocations as $userLocation) {
+            $location_id = $userLocation->pivot['location_id'];
+            $userLongitude = $userLocation->longitude;
+            $userLatitude = $userLocation->latitude;
 
-        if (!$userLocation) {
-            return $this->returnError('User does not have any associated locations.');
+            $distance = $this->haversineDistance($userLatitude, $userLongitude, $latitude, $longitude);
+
+            if (is_null($shortestDistance) || $distance < $shortestDistance) {
+                $shortestDistance = $distance;
+                $closestLocation = [
+                    'location_id' => $location_id,
+                    'distance' => $distance,
+                ];
+            }
         }
 
-        $location_id = $userLocation->pivot['location_id'];
-        $userLongitude = $userLocation->longitude;
-        $userLatitude = $userLocation->latitude;
+        if (is_null($closestLocation)) {
+            return $this->returnError('User is not located at any registered locations.');
+        }
+
+        $location_id = $closestLocation['location_id'];
+        $distanceBetweenUserAndLocation = $closestLocation['distance'];
 
         $existingClockIn = ClockInOut::where('user_id', $user_id)
             ->where('location_id', $location_id)
@@ -72,8 +86,6 @@ class ClockController extends Controller
         if ($existingClockIn) {
             return $this->returnError('You have already clocked in at this location and have not clocked out yet.');
         }
-
-        $distanceBetweenUserAndLocation = $this->haversineDistance($userLatitude, $userLongitude, $latitude, $longitude);
 
         if ($distanceBetweenUserAndLocation < 50) {
             $clock = ClockInOut::create([
@@ -85,7 +97,7 @@ class ClockController extends Controller
             ]);
             return $this->returnData("clock", $clock, "Clock In Done");
         } else {
-            return $this->returnError('User is not located at the correct location');
+            return $this->returnError('User is not located at the correct location.');
         }
     }
 
@@ -127,7 +139,8 @@ class ClockController extends Controller
             $clock_in = $ClockauthUser->clock_in;
             $clock_out = Carbon::now()->addRealHour(3);
 
-            $duration = $clock_out->diffInHours($clock_in); // Consider using diff() for more precision
+            $duration = $clock_out->diffInHours($clock_in);
+
             $ClockauthUser->update([
                 'clock_out' => $clock_out,
                 'duration' => $duration,
@@ -143,11 +156,12 @@ class ClockController extends Controller
     {
         $authUser = Auth::user();
         $clocks = ClockInOut::where('user_id', $authUser->id)->orderBy('clock_in', 'desc')->paginate(7);
+
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clocks For this user found');
         }
-        return $this->returnData("clocks", ClockResource::collection($clocks), "Clocks Data for {$authUser->name}");
 
+        return $this->returnData("clocks", ClockResource::collection($clocks), "Clocks Data for {$authUser->name}");
     }
 
 }
