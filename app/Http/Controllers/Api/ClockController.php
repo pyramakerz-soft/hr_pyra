@@ -20,9 +20,13 @@ class ClockController extends Controller
 
     public function getUserClockById(User $user)
     {
+        $authUser = Auth::user();
+        if (!$authUser) {
+            return $this->returnError('You are not authorized to Update users', 403);
+
+        }
         $clocks = ClockInOut::orderBy('clock_in', 'desc')->paginate(7);
         if ($clocks->isEmpty()) {
-            // TODO Edit the message like figma
 
             return $this->returnError('No clocks Found');
         }
