@@ -22,8 +22,12 @@ class ClockController extends Controller
      */
     public function index()
     {
+        // TODO make this for spacific user by where
+
         $clocks = ClockInOut::orderBy('clock_in', 'desc')->paginate(7);
         if ($clocks->isEmpty()) {
+            // TODO Edit the message like figma
+
             return $this->returnError('No clocks Found');
         }
         return $this->returnData("clocks", ClockResource::collection($clocks), "clocks Data");
