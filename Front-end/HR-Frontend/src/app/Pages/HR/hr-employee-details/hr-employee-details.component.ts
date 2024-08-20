@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-hr-employee-details',
@@ -8,5 +9,9 @@ import { Component } from '@angular/core';
   styleUrl: './hr-employee-details.component.css'
 })
 export class HrEmployeeDetailsComponent {
+  constructor(public router:Router){}
 
+  NavigateToEditEmployee(){
+    this.router.navigateByUrl("")
+  }
 }

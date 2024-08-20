@@ -11,6 +11,7 @@ import { HrBoundersComponent } from './Pages/HR/hr-bounders/hr-bounders.componen
 import { HrAttendanceComponent } from './Pages/HR/hr-attendance/hr-attendance.component';
 import { HrEmployeeAttendanceDetailsComponent } from './Pages/HR/hr-employee-attendance-details/hr-employee-attendance-details.component';
 import { HrEmployeeDetailsComponent } from './Pages/HR/hr-employee-details/hr-employee-details.component';
+import { HrEmployeeAddEditDetailsComponent } from './Pages/HR/hr-employee-add-edit-details/hr-employee-add-edit-details.component';
 
 export const routes: Routes = [
     {path: "employee", component:EmployeeComponent, title:"Dashboard", children:[
@@ -27,6 +28,8 @@ export const routes: Routes = [
         {path: "HRAttendance", component:HrAttendanceComponent, title:"HRAttendance"},
         {path: "HREmployeeAttendanceDetails", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails"},
         {path: "HREmployeeDetails", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails"},
+        {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd"},
+        {path: "HREmployeeDetailsEdit/:EmpId", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit"},
     ]},
 
     { path: "Login", component:LoginComponent, title:"Login" },
