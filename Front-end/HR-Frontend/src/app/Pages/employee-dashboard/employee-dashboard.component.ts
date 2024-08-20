@@ -12,9 +12,4 @@ import { CommonModule } from '@angular/common';
   styleUrl: './employee-dashboard.component.css'
 })
 export class EmployeeDashboardComponent {
-  isMenuOpen: boolean = false;
-
-  OpenMenu() {
-    this.isMenuOpen = !this.isMenuOpen;
-  }
 }

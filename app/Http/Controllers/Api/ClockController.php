@@ -20,13 +20,10 @@ class ClockController extends Controller
 
     public function getUserClockById(User $user)
     {
-        $authUser = Auth::user();
-        if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not unauthorized to see user Clocks', 403);
-        }
-        $clocks = ClockInOut::where('user_id', $user->id)->orderBy('clock_in', 'desc')->paginate(7);
-
+        $clocks = ClockInOut::orderBy('clock_in', 'desc')->paginate(7);
         if ($clocks->isEmpty()) {
+            // TODO Edit the message like figma
+
             return $this->returnError('No clocks Found');
         }
         return $this->returnData("clocks", ClockResource::collection($clocks), "clocks Data");

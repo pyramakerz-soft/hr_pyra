@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { RoleModel } from '../../../Models/role-model';
+import { RolesService } from '../../../Services/roles.service';
 
 interface data{
   role:string,
@@ -16,16 +18,30 @@ interface data{
 })
 
 export class HrRoleComponent {
-  constructor(private router: Router) {}
+  constructor(private router: Router , public roleService:RolesService) {}
   
-  tableData:data[]= [
-    { role: "Employee", desc: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. '},
-    { role: "Employee", desc: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. '},
-    { role: "Employee", desc: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. '},
-    // Add more data as needed
-  ];
+  tableData:RoleModel[]= [];
 
+  ngOnInit():void{
+    this.GetAllRoles();
+  }
+
+  GetAllRoles():void{
+    this.roleService.getall().subscribe(
+      (d: any) => {
+        this.tableData = d.roles; 
+        console.log(this.tableData)
+      },
+      (error) => {
+        console.error('Error retrieving user clocks:', error);
+      }
+    );
+  }
+
+  
   NavigateToAddRole(){
     this.router.navigateByUrl("/HR/HRRoleAdd");
   }
+
+
 }

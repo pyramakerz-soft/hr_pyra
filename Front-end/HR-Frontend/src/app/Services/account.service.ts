@@ -15,7 +15,7 @@ export class AccountService {
 
   baseUrl = "http://127.0.0.1:8000/api/auth"
 
-  r: { name: string, job_title: string, id: string, image: string, role_name: string , is_clocked_out :string ,national_id:string} = { name: "", job_title: "", id: "", image: "",role_name:"" , is_clocked_out :"",national_id:""};
+  r: { name: string, job_title: string, id: string, image: string, role_name: string , is_clocked_out :string ,national_id:string, clockIn:string} = { name: "", job_title: "", id: "", image: "",role_name:"" , is_clocked_out :"",national_id:"" ,clockIn:""};
 
   constructor(public http: HttpClient, private router: Router) {
     this.CheckToken();
@@ -30,6 +30,7 @@ export class AccountService {
           const response = JSON.parse(d);
           const userDetails = response.User;
           this.r = userDetails;
+          console.log(this.r)
         } catch (error) {
           console.error('Error parsing JSON response:', error);
         }

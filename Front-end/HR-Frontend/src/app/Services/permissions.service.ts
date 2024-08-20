@@ -17,10 +17,8 @@ export class PermissionsService {
   constructor(public http: HttpClient) {}
 
   GetAll() {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${this.token}`, // Use backticks for template literals
-    });
-
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.get<PermissionModel[]>(`${this.baseurl}`, { headers }); // Ensure URL path is correct
   }
 
