@@ -30,7 +30,6 @@ export class AccountService {
           const response = JSON.parse(d);
           const userDetails = response.User;
           this.r = userDetails;
-          console.log(this.r)
         } catch (error) {
           console.error('Error parsing JSON response:', error);
         }
@@ -80,6 +79,12 @@ export class AccountService {
           }
         }
       );
+  }
+
+
+  logout(){
+    this.isAuthenticated=false;
+    localStorage.removeItem("token");
   }
 
 

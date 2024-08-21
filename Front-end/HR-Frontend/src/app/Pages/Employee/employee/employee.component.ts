@@ -14,7 +14,7 @@ export class EmployeeComponent {
   isMenuOpen: boolean = false;
 
   menuItems = [
-    { label: 'Dashboard', icon: 'fa-regular fa-table-list', route: '/employee/Dashboard' },
+    { label: 'Dashboard', icon: 'fi fi-rr-table-rows', route: '/employee/Dashboard' },
     { label: 'Sign Out', icon: 'fa-regular fa-sign-out', route: '/Login' },
   ];
 

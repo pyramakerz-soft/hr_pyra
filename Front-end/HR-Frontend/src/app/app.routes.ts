@@ -26,10 +26,10 @@ export const routes: Routes = [
         {path: "HRRoleAdd", component:HrRoleAddComponent, title:"HRRoleAdd"},
         {path: "HRBounders", component:HrBoundersComponent, title:"HRBounders"},
         {path: "HRAttendance", component:HrAttendanceComponent, title:"HRAttendance"},
-        {path: "HREmployeeAttendanceDetails", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails"},
+        {path: "HREmployeeAttendanceDetails/:Id", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails"},
         {path: "HREmployeeDetails", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails"},
         {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd"},
-        {path: "HREmployeeDetailsEdit/:EmpId", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit"},
+        {path: "HREmployeeDetailsEdit/:Id", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit"},
     ]},
 
     { path: "Login", component:LoginComponent, title:"Login" },

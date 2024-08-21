@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { UserModel } from '../../../Models/user-model';
+import { UserServiceService } from '../../../Services/user-service.service';
 
 interface data{
   Employees:string,
@@ -16,16 +18,27 @@ interface data{
   styleUrl: './hr-attendance.component.css'
 })
 export class HrAttendanceComponent {
-  constructor(public router:Router){}
+  constructor(public router:Router , public userServ:UserServiceService){}
 
-  tableData:data[]= [
-    { Employees: "Aya Atiea", Department: "Software", Position: "Senior UI/UX Designer" },
-    { Employees: "Aya Atiea", Department: "Software", Position: "Senior UI/UX Designer" },
-    { Employees: "Aya Atiea", Department: "Software", Position: "Senior UI/UX Designer" },
-    // Add more data as needed
-  ];
+  tableData:UserModel[]= [];
 
-  NavigateToEmployeeAttendanceDetails(){
-    this.router.navigateByUrl("HR/HREmployeeAttendanceDetails")
+  ngOnInit(){
+    this.getAllEmployees();
   }
+
+  NavigateToEmployeeAttendanceDetails(EmpId:number){
+    this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/"+EmpId)
+  }
+
+  getAllEmployees() {
+    this.userServ.getall().subscribe(
+      (d: any) => {
+        this.tableData = d.data.users;
+      },
+      (error) => {
+        console.log(error)
+      }
+    );
+  }
+
 }

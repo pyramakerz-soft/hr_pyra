@@ -19,12 +19,4 @@ export class UserServiceService {
     return this.http.get<UserModel[]>(this.baseURL+"/auth/getAllUsers?page=1", { headers });
   }
 
-
-  // DeleteUser(id: number){
-  //   const headers = new HttpHeaders({
-  //     'Authorization': `Bearer ${this.token}`
-  //   });
-    
-  //   return this.http.delete(this.baseURL+"/auth/users/"+id, {headers})
-  // }
 }
