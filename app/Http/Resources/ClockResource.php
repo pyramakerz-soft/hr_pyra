@@ -38,6 +38,7 @@ class ClockResource extends JsonResource
             'userId' => $this->user->id,
             'otherClocks' => $otherClocksForDay,
             'site' => $this->user->work_types->pluck('name'),
+
         ];
     }
 }

@@ -28,7 +28,7 @@ class ClockController extends Controller
         }
         $clocks = ClockInOut::where('user_id', $user->id)
             ->orderBy('clock_in', 'desc')
-            ->get();
+            ->paginate(7);
 
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clocks For this user found');
@@ -53,7 +53,16 @@ class ClockController extends Controller
             $data[] = (new ClockResource($firstClockForDay))->toArray(request()) + ['otherClocks' => $otherClocksForDay->values()->toArray()];
         }
 
-        return $this->returnData("data", ['clocks' => $data], "Clocks Data for {$user->name}");
+        return $this->returnData("data", [
+            'clocks' => $data,
+            'pagination' => [
+                'current_page' => $clocks->currentPage(),
+                'next_page_url' => $clocks->nextPageUrl(),
+                'previous_page_url' => $clocks->previousPageUrl(),
+                'last_page' => $clocks->lastPage(),
+                'total' => $clocks->total(),
+            ],
+        ], "Clocks Data for {$user->name}");
     }
 
     public function clockIn(StoreClockInOutRequest $request)
@@ -181,7 +190,7 @@ class ClockController extends Controller
         // Fetch all clocks for the user, ordered by clock_in ascending
         $clocks = ClockInOut::where('user_id', $authUser->id)
             ->orderBy('clock_in', 'desc')
-            ->get();
+            ->paginate(7);
 
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clocks For this user found');
@@ -210,11 +219,21 @@ class ClockController extends Controller
             // Add the first clock with otherClocks to the data array
             $data[] = (new ClockResource($firstClockForDay))->toArray(request()) + ['otherClocks' => $otherClocksForDay->values()->toArray()];
         }
-
-        return $this->returnData("data", ['clocks' => $data], "Clocks Data for {$authUser->name}");
+        return $this->returnData("data", [
+            'clocks' => $data,
+            'pagination' => [
+                'current_page' => $clocks->currentPage(),
+                'next_page_url' => $clocks->nextPageUrl(),
+                'previous_page_url' => $clocks->previousPageUrl(),
+                'last_page' => $clocks->lastPage(),
+                'total' => $clocks->total(),
+            ],
+        ], "Clocks Data for {$authUser->name}");
     }
+
     // public function updateUserClock(Request $request, User $user, ClockInOut $clock)
     // {
+    //     // TODO: Implement the update function
     //     $authUser = Auth::user();
     //     if (!$authUser->hasRole('Hr')) {
     //         return $this->returnError('You are not authorized to Update users', 403);

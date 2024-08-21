@@ -44,7 +44,7 @@ class UserDetailResource extends JsonResource
             'start_time' => $start_time,
             'code' => $this->user->code,
             'end_time' => $end_time,
-            "position" => $this->emp_type,
+            "emp_type" => $this->emp_type,
             "hiring_date" => $this->hiring_date,
 
         ];
