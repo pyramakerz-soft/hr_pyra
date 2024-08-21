@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
@@ -8,33 +7,36 @@ use Illuminate\Support\Carbon;
 
 class ClockResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
-        if ($this->clock_out == null) {
-            $clock_out = null;
-            $LocationOut = null;
-            $totalHours = null;
-        } else {
-            $clock_out = Carbon::parse($this->clock_out)->format('H:iA');
-            $LocationOut = $this->location->address;
-            $totalHours = Carbon::parse($this->duration)->format('H:i');
-        }
+        $clockOut = $this->clock_out ? Carbon::parse($this->clock_out)->format('h:iA') : null;
+        $locationOut = $this->clock_out ? $this->location->address : null;
+        $totalHours = $this->clock_out ? Carbon::parse($this->duration)->format('H:i') : null;
+
+        // Get the collection of all clocks passed to the resource
+        $allClocks = $this->resource->first()->get(); // Adjusted to ensure we get the full collection
+
+        // Find other clocks for the same day excluding the current one
+        $otherClocksForDay = $allClocks->filter(function ($clock) {
+            return Carbon::parse($clock->clock_in)->toDateString() === Carbon::parse($this->clock_in)->toDateString() && $clock->id !== $this->id;
+        })->map(function ($clock) {
+            return [
+                'clockIn' => Carbon::parse($clock->clock_in)->format('h:iA'),
+                'clockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('h:iA') : null,
+            ];
+        })->values()->toArray();
+
         return [
             'id' => $this->id,
-            'Day' => Carbon::parse($this->clock_in)->format('l'), // Extracts the day (e.g., "Sunday")
-            'Date' => Carbon::parse($this->clock_in)->format('Y-m-d'), // Extracts the date (e.g., "2024-08-18")
-            'clockIn' => Carbon::parse($this->clock_in)->format('H:iA'), // Extracts the time (e.g., "09:20:21")
-            'clockOut' => $clock_out,
+            'Day' => Carbon::parse($this->clock_in)->format('l'),
+            'Date' => Carbon::parse($this->clock_in)->format('Y-m-d'),
+            'clockIn' => Carbon::parse($this->clock_in)->format('h:iA'),
+            'clockOut' => $clockOut,
             'totalHours' => $totalHours,
-
             'locationIn' => $this->location->address,
-            'locationOut' => $LocationOut,
+            'locationOut' => $locationOut,
             'userId' => $this->user->id,
+            'otherClocks' => $otherClocksForDay,
             'site' => $this->user->work_types->pluck('name'),
         ];
     }

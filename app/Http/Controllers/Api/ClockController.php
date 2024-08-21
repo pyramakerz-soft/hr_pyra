@@ -7,9 +7,11 @@ use App\Http\Requests\StoreClockInOutRequest;
 use App\Http\Requests\UpdateClockInOutRequest;
 use App\Http\Resources\ClockResource;
 use App\Models\ClockInOut;
+// use App\Models\Request;
 use App\Models\User;
 use App\Traits\HelperTrait;
 use App\Traits\ResponseTrait;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,19 +20,40 @@ class ClockController extends Controller
     use ResponseTrait;
     use HelperTrait;
 
-    public function getUserClockById(User $user)
+    public function getUserClocksById(User $user)
     {
         $authUser = Auth::user();
-        if (!$authUser) {
-            return $this->returnError('You are not authorized to Update users', 403);
-
+        if (!$authUser->hasRole('Hr')) {
+            return $this->returnError('You are not authorized to view users', 403);
         }
-        $clocks = ClockInOut::orderBy('clock_in', 'desc')->paginate(7);
+        $clocks = ClockInOut::where('user_id', $user->id)
+            ->orderBy('clock_in', 'desc')
+            ->get();
+
         if ($clocks->isEmpty()) {
-
-            return $this->returnError('No clocks Found');
+            return $this->returnError('No Clocks For this user found');
         }
-        return $this->returnData("clocks", ClockResource::collection($clocks), "clocks Data");
+
+        $groupedClocks = $clocks->groupBy(function ($clock) {
+            return Carbon::parse($clock->clock_in)->toDateString();
+        });
+
+        $data = [];
+
+        foreach ($groupedClocks as $date => $clocksForDay) {
+            $firstClockForDay = $clocksForDay->last();
+
+            $otherClocksForDay = $clocksForDay->slice(1)->map(function ($clock) {
+                return [
+                    'clockIn' => Carbon::parse($clock->clock_in)->format('h:iA'),
+                    'clockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('h:iA') : null,
+                ];
+            });
+
+            $data[] = (new ClockResource($firstClockForDay))->toArray(request()) + ['otherClocks' => $otherClocksForDay->values()->toArray()];
+        }
+
+        return $this->returnData("data", ['clocks' => $data], "Clocks Data for {$user->name}");
     }
 
     public function clockIn(StoreClockInOutRequest $request)
@@ -78,49 +101,12 @@ class ClockController extends Controller
         if ($now->greaterThan($UserEndTime)) {
             return $this->returnError('Your shift has already ended, you cannot clock in.');
         }
-
         $existingClockIn = ClockInOut::where('user_id', $user_id)
             ->where('location_id', $location_id)
+            ->whereDate('clock_in', Carbon::today())
             ->whereNull('clock_out')
             ->orderBy('clock_in', 'desc')
-            ->first();
-
-        $LastClockedOut = ClockInOut::where('user_id', $user_id)
-            ->where('location_id', $location_id)
-            ->whereNotNull('clock_out')
-            ->whereDate('clock_out', Carbon::today())
-            ->orderBy('clock_out', 'desc')
-            ->first();
-
-        if ($LastClockedOut) {
-            $clock_in = Carbon::parse($LastClockedOut->clock_in);
-            $clock_out = Carbon::parse($LastClockedOut->clock_out);
-            $userWorkingHoursDay = $authUser->user_detail->working_hours_day;
-
-            // Calculate the duration between clock_in and clock_out as a CarbonInterval
-            $durationInterval = $clock_out->diffAsCarbonInterval($clock_in);
-
-            // Format the duration as H:i:s
-            $durationFormatted = $durationInterval->format('%H:%I:%S');
-
-            // Convert the duration to total hours for comparison with working hours
-            $durationInHours = $durationInterval->totalHours;
-            // dd($durationInHours);
-            // // $DurationClocked = $clock_out->diffInHours($clock_in);
-            // $durationInterval = $clock_out->diffAsCarbonInterval($clock_in);
-            // dd($durationInterval->toArray());
-            // $durationFormatted = $durationInterval->format('%H:%I:%S');
-
-            if ($durationInHours < $userWorkingHoursDay) {
-                $LastClockedOut->update([
-                    'clock_in' => $clock_in,
-                    'clock_out' => null,
-                    'duration' => $durationFormatted,
-                ]);
-                return $this->returnData("clock", $LastClockedOut, "Clock In Done");
-            }
-        }
-
+            ->exists();
         if ($existingClockIn) {
             return $this->returnError('You have already clocked in.');
         }
@@ -129,7 +115,7 @@ class ClockController extends Controller
             $clock = ClockInOut::create([
                 'clock_in' => Carbon::now()->addRealHour(3),
                 'clock_out' => null,
-                'duration' => null, // Set initial duration to 0
+                'duration' => null,
                 'user_id' => $user_id,
                 'location_id' => $location_id,
             ]);
@@ -191,13 +177,59 @@ class ClockController extends Controller
     public function showUserClocks()
     {
         $authUser = Auth::user();
-        $clocks = ClockInOut::where('user_id', $authUser->id)->orderBy('clock_in', 'desc')->paginate(7);
+
+        // Fetch all clocks for the user, ordered by clock_in ascending
+        $clocks = ClockInOut::where('user_id', $authUser->id)
+            ->orderBy('clock_in', 'desc')
+            ->get();
 
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clocks For this user found');
         }
 
-        return $this->returnData("clocks", ClockResource::collection($clocks), "Clocks Data for {$authUser->name}");
-    }
+        // Group clocks by date
+        $groupedClocks = $clocks->groupBy(function ($clock) {
+            return Carbon::parse($clock->clock_in)->toDateString();
+        });
 
+        // Prepare the final data array
+        $data = [];
+
+        foreach ($groupedClocks as $date => $clocksForDay) {
+            // Get the first clock for the day
+            $firstClockForDay = $clocksForDay->last();
+
+            // Get other clocks for the day excluding the first one
+            $otherClocksForDay = $clocksForDay->slice(1)->map(function ($clock) {
+                return [
+                    'clockIn' => Carbon::parse($clock->clock_in)->format('h:iA'),
+                    'clockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('h:iA') : null,
+                ];
+            });
+
+            // Add the first clock with otherClocks to the data array
+            $data[] = (new ClockResource($firstClockForDay))->toArray(request()) + ['otherClocks' => $otherClocksForDay->values()->toArray()];
+        }
+
+        return $this->returnData("data", ['clocks' => $data], "Clocks Data for {$authUser->name}");
+    }
+    // public function updateUserClock(Request $request, User $user, ClockInOut $clock)
+    // {
+    //     $authUser = Auth::user();
+    //     if (!$authUser->hasRole('Hr')) {
+    //         return $this->returnError('You are not authorized to Update users', 403);
+    //     }
+    //     $this->validate($request, [
+    //         'clock_in' => ['required', 'date_format:H:i'],
+    //         'clock_out' => ['required', 'date_format:H:i'],
+
+    //     ]);
+    //     $clock = ClockInOut::where('user_id', $user->id)->where('id', $clock->id)->first();
+    //     $clock->update([
+    //         'clock_in' => $request->clock_in,
+    //         'clock_out' => $request->clock_out,
+    //     ]);
+    //     return $this->returnData("clock", new ClockResource($clock), "Clocks Data for {$user->name}");
+
+    // }
 }
