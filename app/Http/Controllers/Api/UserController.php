@@ -32,12 +32,14 @@ class UserController extends Controller
     {
         $authUser = Auth::user();
 
-
         if (!$authUser->hasRole('Hr')) {
             return $this->returnError('You are not authorized to Update users', 403);
         }
         if (request()->has('search')) {
-            $users = UserResource::collection(User::paginate(5)->where('name', 'like', '%' . request()->get('search', '') . '%'));
+            $users = UserResource::collection(
+                User::where('name', 'like', '%' . request()->get('search', '') . '%')
+                    ->orWhere('code', 'like', '%' . request()->get('search', '') . '%')->paginate()
+            );
         } else {
             $users = User::paginate(5);
         }
