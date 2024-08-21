@@ -61,6 +61,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('roles', RoleController::class)->except('update');
     Route::apiResource('permissions', PermissionController::class)->except('update');
     Route::apiResource('locations', LocationController::class)->except('update');
+    Route::get('location_names', [LocationController::class, 'indexNames']);
     Route::apiResource('work_types', WorkTypeController::class)->except('update');
     Route::apiResource('departments', DepartmentController::class)->except('update');
     Route::apiResource('user_details', UserDetailController::class)->except('update');

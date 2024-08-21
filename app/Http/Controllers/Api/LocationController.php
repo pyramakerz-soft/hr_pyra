@@ -16,13 +16,22 @@ class LocationController extends Controller
      */
     public function index()
     {
-        $locations = Location::all();
+
+        if (request()->has('search')) {
+            $locations = Location::where('name', 'like', '%' . request()->get('search', '') . '%')->paginate(5);
+        } else {
+            $locations = Location::paginate(5);
+        }
         if ($locations->isEmpty()) {
             return $this->returnError('No locations Found');
         }
         return $this->returnData('locations', $locations, 'Locations Data');
     }
-
+    public function indexNames()
+    {
+        $locationNames = Location::pluck('name');
+        return $this->returnData('location names', $locationNames, '');
+    }
     /**
      * Store a newly created resource in storage.
      */
