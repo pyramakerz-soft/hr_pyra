@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\LoginRequest;
 use App\Http\Requests\Api\RegisterRequest;
 use App\Http\Requests\Api\UpdateUserRequest;
+use App\Http\Resources\Api\UserDetailResource;
 use App\Http\Resources\Api\UserResource;
 use App\Http\Resources\LoginResource;
 use App\Models\Department;
@@ -53,28 +54,25 @@ class UserController extends Controller
 
     public function store(RegisterRequest $request)
     {
+
         $finalData = [];
         $authUser = Auth::user();
 
-        // Check if the authenticated user has the 'Hr' role
         if (!$authUser->hasRole('Hr')) {
             return $this->returnError('You are not authorized to create users', 403);
         }
 
-        // Get the department name based on the department_id
         $department = Department::find((int) $request->department_id);
         if (!$department) {
             return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
         }
 
-        // Generate a unique code
         do {
-            $departmentPrefix = substr(Str::slug($department->name), 0, 4); // Get the first 4 letters of the department name
+            $departmentPrefix = substr(Str::slug($department->name), 0, 4);
             $randomDigits = mt_rand(1000, 9999);
             $code = strtoupper($departmentPrefix) . '-' . $randomDigits;
         } while (User::where('code', $code)->exists());
 
-        // Create the user with the generated unique code
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -82,7 +80,7 @@ class UserController extends Controller
             'phone' => $request->phone,
             'contact_phone' => $request->contact_phone,
             'national_id' => $request->national_id,
-            'code' => $code, // Assign the generated code here
+            'code' => $code,
             'gender' => $request->gender,
             'department_id' => (int) $request->department_id,
         ]);
@@ -143,8 +141,9 @@ class UserController extends Controller
         if (!$authUser->hasRole('Hr')) {
             return $this->returnError('You are not authorized to Update users', 403);
         }
-
-        return $this->returnData("User", $user, "User Data");
+        $userDetail = UserDetail::where('user_id', $user->id)->first();
+        // dd($userDetail);
+        return $this->returnData("User", new UserDetailResource($userDetail), "User Data");
     }
 
     public function update(UpdateUserRequest $request, User $user)

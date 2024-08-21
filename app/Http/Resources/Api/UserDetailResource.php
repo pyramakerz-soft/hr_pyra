@@ -15,7 +15,7 @@ class UserDetailResource extends JsonResource
     public function toArray(Request $request): array
     {
 
-        $salary = $this->salary;
+        $salary = $this->salary ?? null;
         $working_hours_day = $this->working_hours_day;
 
         if ($working_hours_day === null || $working_hours_day == 0) {
@@ -26,15 +26,25 @@ class UserDetailResource extends JsonResource
         $start_time = $this->start_time; //07:00
         $end_time = $this->end_time; //15:00
         return [
-            "id" => $this->id,
-            "user_id" => $this->user_id,
+            "id" => $this->user->id,
+            'name' => $this->user->name,
+            'email' => $this->user->email,
+            "password" => $this->user->password,
+            "phone" => $this->user->phone,
+            "contact_phone" => $this->user->contact_phone,
+            "gender" => $this->user->gender,
+            "department_id" => $this->user->department_id,
+            "deparment_name" => $this->user->department->name,
+            "role" => $this->user->roles->pluck('name'),
+            "national_id" => $this->user->national_id,
             "salary" => $salary,
             "working_hours_day" => $working_hours_day,
             "hourly_rate" => $hourly_rate,
             "overtime_hours" => $this->overtime_hours,
             'start_time' => $start_time,
+            'code' => $this->user->code,
             'end_time' => $end_time,
-            "emp_type" => $this->emp_type,
+            "position" => $this->emp_type,
             "hiring_date" => $this->hiring_date,
 
         ];
