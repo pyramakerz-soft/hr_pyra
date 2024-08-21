@@ -18,7 +18,7 @@ class RoleController extends Controller
     public function index()
     {
 
-        $roles = Role::with('permissions')->get();
+        $roles = Role::with('permissions')->paginate();
         if ($roles->isEmpty()) {
             return $this->returnError('No Roles Found');
         }

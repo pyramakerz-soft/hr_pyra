@@ -32,11 +32,15 @@ class UserController extends Controller
     {
         $authUser = Auth::user();
 
+
         if (!$authUser->hasRole('Hr')) {
             return $this->returnError('You are not authorized to Update users', 403);
         }
-
-        $users = User::paginate(5);
+        if (request()->has('search')) {
+            $users = UserResource::collection(User::paginate(5)->where('name', 'like', '%' . request()->get('search', '') . '%'));
+        } else {
+            $users = User::paginate(5);
+        }
         if ($users->isEmpty()) {
             return $this->returnError('No Users Found');
         }
@@ -83,19 +87,16 @@ class UserController extends Controller
 
         $finalData['user'] = $user;
 
-        // Calculate the hourly rate
-        $salary = $request->salary; // Example: 24000
-        $working_hours_day = $request->working_hours_day; // Example: 8
+        $salary = $request->salary;
+        $working_hours_day = $request->working_hours_day;
         $hourly_rate = ($salary / 30) / $working_hours_day;
 
-        // Validate start and end time
         $start_time = $request->start_time;
         $end_time = $request->end_time;
         if ($end_time <= $start_time) {
             return $this->returnError('End time must be later than start time', Response::HTTP_BAD_REQUEST);
         }
 
-        // Create the user detail record
         $userDetail = UserDetail::create([
             'salary' => $salary,
             'working_hours_day' => $working_hours_day,
@@ -114,7 +115,6 @@ class UserController extends Controller
             return $this->returnError('Failed to Store User');
         }
 
-        // Assign roles to the user
         $user->syncRoles($request->input('roles', []));
 
         return $this->returnData("data", $finalData, "User Created");
