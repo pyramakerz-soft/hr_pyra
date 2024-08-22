@@ -61,6 +61,7 @@ export class HREmployeeComponent {
   getAllEmployees() {
     this.userServ.getall().subscribe(
       (d: any) => {
+        console.log("yhj")
         this.tableData = d.data.users;
       },
       (error) => {

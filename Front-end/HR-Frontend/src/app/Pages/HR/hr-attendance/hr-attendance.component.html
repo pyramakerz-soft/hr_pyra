@@ -38,9 +38,9 @@
             <tr *ngFor="let row of tableData; let i = index"
                 [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300 text-xs md:text-sm">
               
-                <td class="py-5 px-4"><button (click)="NavigateToEmployeeAttendanceDetails()">{{ row.Employees }}</button></td>
-                <td class="py-5 px-4">{{ row.Department }}</td>
-                <td class="py-5 px-4">{{ row.Position }}</td>
+                <td class="py-5 px-4"><button (click)="NavigateToEmployeeAttendanceDetails(row.id)">{{ row.name }}</button></td>
+                <td class="py-5 px-4">{{ row.department }}</td>
+                <td class="py-5 px-4">{{ row.position }}</td>
             </tr>
           </tbody>
         </table>

@@ -8,6 +8,7 @@ import { ClockService } from '../../Services/clock.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TableComponent } from '../Core/table/table.component';
 import { ClockEventService } from '../../Services/clock-event.service';
+import { UserDetails } from '../../Models/user-details';
 
 @Component({
   selector: 'app-clock-in',
@@ -22,7 +23,17 @@ import { ClockEventService } from '../../Services/clock-event.service';
   styleUrl: './clock-in.component.css'
 })
 export class ClockInComponent {
-  userDetails: any;
+
+  userDetails: UserDetails = {
+    name: "string",
+    job_title: "string",
+    id: "string",
+    role_name: "string",
+    is_clocked_out: true,
+    national_id: "string",
+    clockIn: "string",
+    image: "string"
+  };  
   currentDate: string | undefined;
   token: string = "";
   public IsClockedIn: boolean = false;
@@ -96,7 +107,7 @@ export class ClockInComponent {
 
   async sendLocation(): Promise<void> {
     try {
-      // await this.getLocation();  
+       await this.getLocation();  
       this.clockService.CreateClockOut(this.lat, this.lng).subscribe(
         (response: any) => {
           localStorage.setItem("IsClockedIn", "false");

@@ -7,8 +7,24 @@ import { map, Observable } from 'rxjs';
 })
 export class ReverseGeocodingService {
 
-  constructor(private http: HttpClient) { }
+  private loadPromise!: Promise<void>;
+  constructor(private http: HttpClient) {
+    this.loadPromise = new Promise((resolve) => {
+      if (typeof google === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyA3LxsmNEJv-yxSF8khxA4LgZwF_k0xePU&libraries=places';
+        script.onload = () => resolve();
+        document.head.appendChild(script);
+      } else {
+        resolve();
+      }
+    });
+  }
 
+  load(): Promise<void> {
+    return this.loadPromise;
+  }
+  
   getAddress(lat: number, lng: number): Promise<any> {
     return new Promise((resolve, reject) => {
       this.http

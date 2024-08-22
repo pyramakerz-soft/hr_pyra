@@ -14,9 +14,12 @@
         class="text_Style text-lg md:text-xl font-semibold px-9 py-3 md:py-5 flex items-center space-x-4"
         [ngClass]="{ active: activeIndex === i }"
         (click)="setActiveIndex(i)"
+        [routerLink]="item.route"
+        (click)="item.label === 'Sign Out' ? signOut() : null"
+
       >
         <i [ngClass]="item.icon"></i>
-        <a class="no-underline ml-3" [routerLink]="item.route">{{ item.label }}</a>
+        <a class="no-underline ml-3" >{{ item.label }}</a>
       </div>
     </nav>
 </div>

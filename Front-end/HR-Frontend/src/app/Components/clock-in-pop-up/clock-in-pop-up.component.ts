@@ -28,7 +28,7 @@ export class ClockInPopUpComponent {
   }
 
   public async ngOnInit(): Promise<void> {
-    //await this.getLocation();  
+    await this.getLocation();  
 
     const result = await this.revGeo.getAddress(this.lat, this.lng);
     this.reversedGeo = result.formatted_address;
@@ -40,7 +40,7 @@ export class ClockInPopUpComponent {
 
   async sendLocation(): Promise<void> {
     try {
-    // await this.getLocation();  
+    await this.getLocation();  
       this.clockService.CreateClockIn(this.lat, this.lng).subscribe(
         (response: any) => {
           this.IsClockedIn = true;
