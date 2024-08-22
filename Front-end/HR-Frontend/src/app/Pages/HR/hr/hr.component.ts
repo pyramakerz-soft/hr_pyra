@@ -12,7 +12,7 @@ import { SideBarComponent } from '../../../Components/Core/side-bar/side-bar.com
 })
 export class HRComponent {
   menuItems = [
-    { label: 'Dashboard', icon: 'fa-regular fa-table-list', route: '/HR//HREmployee' },
+    { label: 'Dashboard', icon: 'fi fi-rr-table-rows', route: '/HR//HREmployee' },
     { label: 'Employee', icon: 'fas fa-home', route: '/HR/HREmployee' },
     { label: 'Roles', icon: 'fa-regular fa-sign-out', route: '/HR/HRRole' },
     { label: 'Atendence', icon: 'fas fa-chart-bar', route: '/HR/HRAttendance' },

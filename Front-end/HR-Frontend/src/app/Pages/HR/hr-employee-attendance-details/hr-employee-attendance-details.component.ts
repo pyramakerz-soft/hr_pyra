@@ -1,16 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { EmployeeDashboard } from '../../../Models/employee-dashboard';
+import { EmployeeDashService } from '../../../Services/employee-dash.service';
+import { ClockService } from '../../../Services/clock.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
-interface data{
-  Day:string,
-  Date:string,
-  Clock_in:string,
-  Clock_out:string,
-  Total_hours:string,
-  Location_In:string,
-  Location_out:string,
-  Site:string,
-}
+
 
 @Component({
   selector: 'app-hr-employee-attendance-details',
@@ -20,10 +15,42 @@ interface data{
   styleUrl: './hr-employee-attendance-details.component.css'
 })
 export class HrEmployeeAttendanceDetailsComponent {
-  tableData:data[]= [
-    { Day: "Saturday", Date: 'Apr 28th 2024', Clock_in: "10:25 Am", Clock_out: "10:25 Am", Total_hours: "8:00 H", Location_In: "42 Abd Al Aziz Agamea, Sidi Gaber, Alexandria Governorate 5433112,Egypt", Location_out: "42 Abd Al Aziz Agamea, Sidi Gaber, Alexandria Governorate 5433112,Egypt", Site: "Home"},
-    { Day: "Saturday", Date: 'Apr 28th 2024', Clock_in: "10:25 Am", Clock_out: "10:25 Am", Total_hours: "8:00 H", Location_In: "42 Abd Al Aziz Agamea, Sidi Gaber, Alexandria Governorate 5433112,Egypt", Location_out: "42 Abd Al Aziz Agamea, Sidi Gaber, Alexandria Governorate 5433112,Egypt", Site: "Home"},
-    { Day: "Saturday", Date: 'Apr 28th 2024', Clock_in: "10:25 Am", Clock_out: "10:25 Am", Total_hours: "8:00 H", Location_In: "42 Abd Al Aziz Agamea, Sidi Gaber, Alexandria Governorate 5433112,Egypt", Location_out: "42 Abd Al Aziz Agamea, Sidi Gaber, Alexandria Governorate 5433112,Egypt", Site: "Home"},
-    // Add more data as needed
-  ];
+  tableData:EmployeeDashboard[]= [];
+  pageNumber:number=0;
+  token:string="";
+  constructor(public empDashserv:EmployeeDashService , public UserClocksService : ClockService ,public activatedRoute: ActivatedRoute,
+    public route: Router){}
+
+
+    ngOnInit() {
+      this.activatedRoute.params.subscribe({
+        next: (params) => {
+          const id = params['Id']; 
+          if (id) {
+            this.getAllClocks(id);
+          } else {
+            console.error('No ID found in route parameters');
+          }
+        },
+        error: (err) => {
+          console.error('Error in route parameters:', err);
+        }
+      });
+    }
+    
+
+  getAllClocks(id:number) {
+    this.UserClocksService.GetUserClocksById(id).subscribe(
+      (d: any) => {
+        console.log(d)
+        this.tableData = d.data.clocks;
+        console.log(this.tableData)
+
+      },
+      (error) => {
+        console.log(error)
+      }
+    );
+  }
+
 }

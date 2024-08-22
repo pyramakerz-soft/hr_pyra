@@ -33,7 +33,6 @@ export class HrRoleAddComponent {
 this.PerService.GetAll().subscribe(
   (d: any) => {
     this.permissions = d.permissions; 
-    console.log(this.permissions)
   },
   (error) => {
     console.error('Error retrieving user clocks:', error);

@@ -20,31 +20,17 @@ export class EmployeeDashService {
   }
 
   GetClocks(token: string,pageNumber:number): Observable<EmployeeDashboard[]> {
+    
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.get<EmployeeDashboard[]>(`${this.baseUrl}/user_clocks?page=${pageNumber}`, { headers });
   }
   
 
-
-
-
-  // GetClocks(token: string) {
-  //   const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    
-  //   this.http.get(`${this.baseUrl}/clocks?page=1`, { headers, responseType: 'text' })
-  //     .subscribe((d: string) => {
-  //       try {
-  //         const response = JSON.parse(d);
-  //         const userDetails = response.clocks;
-  //         console.log(userDetails)
-         
-  //       } catch (error) {
-  //         console.error('Error parsing JSON response:', error);
-  //       }
-  //     });
-  // }
   
- 
+
+
+
+
 
   
 }

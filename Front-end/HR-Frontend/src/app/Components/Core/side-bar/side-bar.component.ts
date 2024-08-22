@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AccountService } from '../../../Services/account.service';
 
 @Component({
   selector: 'app-side-bar',
@@ -12,6 +13,9 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 export class SideBarComponent {
 
   @Input() menuItems: { label: string; icon: string; route: string; }[] = [];
+  constructor(public AccountServ:AccountService ,private router: Router){
+
+  }
 
   activeIndex: number | null = null;
 
@@ -21,5 +25,12 @@ export class SideBarComponent {
 
   ngOnInit(): void {
     this.setActiveIndex(0);
+  }
+
+  signOut(){
+
+  this.AccountServ.logout();
+  this.router.navigateByUrl("Login");
+
   }
 }
