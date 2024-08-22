@@ -15,14 +15,14 @@
             placeholder="Enter Role" [(ngModel)]="RoleName">
             <div class="mt-4 text-xs md:text-sm">
                 <label class="font-semibold block mb-2 md:mb-3">Permissions</label>
-                <div class="relative">
+                <div class="">
                     <!-- Dropdown toggle -->
                     <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl cursor-pointer" (click)="toggleDropdown()">
                         <span *ngIf="!isDropdownOpen">Choose Permissions</span>
                     </div>
             
                     <!-- Dropdown content -->
-                    <div *ngIf="isDropdownOpen" class="absolute w-full border border-[#E5E5EA] rounded-xl bg-white mt-1 z-10 max-h-60 overflow-y-auto">
+                    <div *ngIf="isDropdownOpen" class=" w-full border border-[#E5E5EA] rounded-xl bg-white mt-1 max-h-60 overflow-y-auto">
                         <div *ngFor="let permission of permissions" class="p-2 hover:bg-gray-100">
                             <input type="checkbox" id="permission{{permission.name}}" [(ngModel)]="permission.selected" class="mr-2">
                             <label for="permission{{permission.name}}" class="text-xs md:text-sm">{{ permission.name }}</label>

@@ -20,12 +20,12 @@ export class HrEmployeeAddEditDetailsComponent {
   EmployeeId:number = 0
   roles: RoleModel[] = [];
   departments: Department[] = [];
-
-  date = new Date();
   
   employee: AddEmployee = new AddEmployee(
-    '', '', 0, '', '', '', '', '', '', new Date(), 0, 0, '', this.date, this.date, '', []
+    '', '', null, '', '', '', '', '', '', null, null, null, '', null, null, '', []
   );
+
+  validationErrors: { [key in keyof AddEmployee]?: boolean | number | string | null | Date } = {};
   
   constructor(private route: ActivatedRoute,  
               public roleService: RolesService, 
@@ -34,11 +34,9 @@ export class HrEmployeeAddEditDetailsComponent {
             ){}
   
   ngOnInit(): void {
-    this.date.setHours(0, 0, 0, 0);
-
     this.route.params.subscribe(params => {
-      if (params['EmpId']) {
-        this.EmployeeId = +params['EmpId'];
+      if (params['Id']) {
+        this.EmployeeId = +params['Id'];
         this.getEmployeeByID(this.EmployeeId)
       }
     });
@@ -52,7 +50,6 @@ export class HrEmployeeAddEditDetailsComponent {
       (d: any) => {
         this.employee = d.User;
         this.employee.role = this.employee.role || []
-        console.log(this.employee)
       },
       (error) => {
         console.log(error)
@@ -97,30 +94,66 @@ export class HrEmployeeAddEditDetailsComponent {
     }
   }
 
-  SaveEmployee() {
-    this.employee.department_id = Number(this.employee.department_id);
+  isFormValid(): boolean {
+    let isValid = true;
 
-    console.log(this.employee)
-    console.log(this.EmployeeId)
-
-    if(this.EmployeeId === 0){
-      this.userService.createUser(this.employee).subscribe(
-        (result: any) => {
-          console.log(result)
-        },
-        error => {
-          console.error('Error:', error);
+    for (const key in this.employee) {
+      if (this.employee.hasOwnProperty(key)) {
+        const field = key as keyof AddEmployee;
+        if (!this.employee[field]) {
+          this.validationErrors[field] = true;
+          isValid = false;
+        } else {
+          this.validationErrors[field] = false;
         }
-      );
-    } else{
-      this.userService.updateUser(this.employee, this.EmployeeId).subscribe(
-        (result: any) => {
-          console.log(result)
-        },
-        error => {
-          console.error('Error:', error);
-        }
-      );
+      }
     }
+
+    if(this.employee.role.length == 0){
+      this.validationErrors["role"] = true;
+      isValid = false;
+    } else {
+      this.validationErrors["role"] = false;
+    }
+
+    return isValid;
+  }
+
+  onInputValueChange(event: { field: keyof AddEmployee, value: any }) {
+    const { field, value } = event;
+    if (field in this.employee) {
+      (this.employee as any)[field] = value;
+      if (value) {
+        this.validationErrors[field] = false;
+      }
+    }
+  }
+  
+  SaveEmployee() {
+    if (this.isFormValid()) {
+      this.employee.department_id = Number(this.employee.department_id);
+
+      console.log(this.employee)
+
+      if(this.EmployeeId === 0){
+        this.userService.createUser(this.employee).subscribe(
+          (result: any) => {
+            console.log(result)
+          },
+          error => {
+            console.error('Error:', error.error.errors);
+          }
+        );
+      } else{
+        this.userService.updateUser(this.employee, this.EmployeeId).subscribe(
+          (result: any) => {
+            console.log(result)
+          },
+          error => {
+            console.error('Error:', error);
+          }
+        );
+      }
+      }
   }
 }

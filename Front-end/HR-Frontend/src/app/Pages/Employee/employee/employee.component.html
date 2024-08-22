@@ -1,10 +1,10 @@
-<div class="relative lg:hidden">
-    <div class="lg:hidden block cursor-pointer absolute top-10 right-10"  (click)="OpenMenu()">
+<div class="lg:hidden flex justify-end relative z-50">
+    <div class="lg:hidden block cursor-pointer pt-5 pr-7"  (click)="OpenMenu()">
         <div class="h-1 w-7 md:h-[6px] md:w-10 mb-1 bg-[#454950] rounded"></div>
         <div class="h-1 w-7 md:h-[6px] md:w-10 mb-1 bg-[#454950] rounded"></div>
         <div class="h-1 w-7 md:h-[6px] md:w-10 bg-[#454950] rounded"></div>
     </div>
-    <div [ngClass]="{'absolute top-20 right-0 block h-[100vh] w-full md:w-[50%]': isMenuOpen, 'hidden': !isMenuOpen}">
+    <div [ngClass]="{'absolute top-12 right-0 block h-[100vh] w-full md:w-[50%]': isMenuOpen, 'hidden': !isMenuOpen}">
         <app-side-bar [menuItems]="menuItems"></app-side-bar>
     </div>
 </div>

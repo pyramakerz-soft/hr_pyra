@@ -15,7 +15,7 @@ export class EmployeeComponent {
 
   menuItems = [
     { label: 'Dashboard', icon: 'fi fi-rr-table-rows', route: '/employee/Dashboard' },
-    { label: 'Sign Out', icon: 'fa-regular fa-sign-out', route: '/Login' },
+    { label: 'Sign Out', icon: 'fi fi-bs-sign-out-alt transform rotate-180', route: '/Login' },
   ];
 
   OpenMenu() {

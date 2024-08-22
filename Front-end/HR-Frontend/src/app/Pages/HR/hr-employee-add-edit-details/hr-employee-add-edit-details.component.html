@@ -28,41 +28,80 @@
             <div class="text-[#3A3A3C] mt-4 flex flex-col md:flex-row md:space-x-8 space-y-3 md:space-y-0">
                 <div class="flex-1">
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Name</label>
-                        <input [(ngModel)]="employee.name" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the name">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Name
+                            <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">*Name is required.</span>
+                        </label>
+                        <input [(ngModel)]="employee.name" 
+                            (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"
+                            type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the name">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Department</label>
-                        <select [(ngModel)]="employee.department_id" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
-                            <option value="" disabled selected hidden>Choose</option>
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Department
+                            <span *ngIf="validationErrors['department_id']" class="text-red-500 ml-3 font-normal">*Department is required.</span>
+                        </label>
+                        <select [(ngModel)]="employee.department_id" 
+                        (ngModelChange)="onInputValueChange({ field: 'department_id', value: $event })"
+                        class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl overflow-y-auto">
                             @for(department of departments; track $index){
                                 <option value="{{department.id}}">{{department.name}}</option>
                             }
                         </select>
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Phone</label>
-                        <input [(ngModel)]="employee.phone" type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the phone">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Phone
+                            <span *ngIf="validationErrors['phone']" class="text-red-500 ml-3 font-normal">*Phone is required.</span>
+                        </label>
+                        <input [(ngModel)]="employee.phone" 
+                        (ngModelChange)="onInputValueChange({ field: 'phone', value: $event })"
+                        type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the phone">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Email</label>
-                        <input [(ngModel)]="employee.email" type="email" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the email">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Email
+                            <span *ngIf="validationErrors['email']" class="text-red-500 ml-3 font-normal">*Email is required.</span>
+                        </label>
+                        <input [(ngModel)]="employee.email" 
+                        (ngModelChange)="onInputValueChange({ field: 'email', value: $event })"
+                        type="email" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the email">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">National ID</label>
-                        <input [(ngModel)]="employee.national_id" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the national ID">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            National ID
+                            <span *ngIf="validationErrors['national_id']" class="text-red-500 ml-3 font-normal">*National ID is required.</span>
+                        </label>
+                        <input [(ngModel)]="employee.national_id" 
+                        (ngModelChange)="onInputValueChange({ field: 'national_id', value: $event })"
+                        type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the national ID">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Salary</label>
-                        <input [(ngModel)]="employee.salary" type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the salary number">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Salary
+                            <span *ngIf="validationErrors['salary']" class="text-red-500 ml-3 font-normal">*Salary ID is required.</span>
+                        </label>
+                        <input [(ngModel)]="employee.salary" 
+                        (ngModelChange)="onInputValueChange({ field: 'salary', value: $event })"
+                        type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the salary number">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Working Hours Day</label>
-                        <input [(ngModel)]="employee.working_hours_day" type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the working hours day">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Working Hours Day
+                            <span *ngIf="validationErrors['working_hours_day']" class="text-red-500 ml-3 font-normal">*Working Hours is required.</span>
+                        </label>
+                        <input [(ngModel)]="employee.working_hours_day"
+                        (ngModelChange)="onInputValueChange({ field: 'working_hours_day', value: $event })"
+                        type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the working hours day">
                     </div>
                     <div class="text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Gender</label>
-                        <select [(ngModel)]="employee.gender" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Gender
+                            <span *ngIf="validationErrors['gender']" class="text-red-500 ml-3 font-normal">*Gender ID is required.</span>
+                        </label>
+                        <select [(ngModel)]="employee.gender" 
+                        (ngModelChange)="onInputValueChange({ field: 'gender', value: $event })"
+                        class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
                             <option value="" disabled selected hidden>Choose</option>
                             <option value="m">Male</option>
                             <option value="f">Female</option>
@@ -72,35 +111,73 @@
 
                 <div class="flex-1">
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Position</label>
-                        <input [(ngModel)]="employee.emp_type" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the position">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Position
+                            <span *ngIf="validationErrors['emp_type']" class="text-red-500 ml-3 font-normal">*Position is required.</span>
+                        </label>
+                        <input [(ngModel)]="employee.emp_type" 
+                        (ngModelChange)="onInputValueChange({ field: 'emp_type', value: $event })"
+                        type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the position">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Contact Phone</label>
-                        <input [(ngModel)]="employee.contact_phone" type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the Contact Phone">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Contact Phone
+                            <span *ngIf="validationErrors['contact_phone']" class="text-red-500 ml-3 font-normal">*Contact Phone is required.</span>
+                        </label>
+                        <input [(ngModel)]="employee.contact_phone" 
+                        (ngModelChange)="onInputValueChange({ field: 'contact_phone', value: $event })"
+                        type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the Contact Phone">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Password</label>
-                        <input [(ngModel)]="employee.password" type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the password">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Password
+                            <span *ngIf="validationErrors['password']" class="text-red-500 ml-3 font-normal">*Password is required.</span>
+                        </label>
+                        <input [(ngModel)]="employee.password" 
+                        (ngModelChange)="onInputValueChange({ field: 'password', value: $event })"
+                        type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the password">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Hiring Date</label>
-                        <input [(ngModel)]="employee.hiring_date" type="date" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Choose">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Hiring Date
+                            <span *ngIf="validationErrors['hiring_date']" class="text-red-500 ml-3 font-normal">*Hiring Date is required.</span>
+                        </label>
+                        <input [(ngModel)]="employee.hiring_date"
+                        (ngModelChange)="onInputValueChange({ field: 'hiring_date', value: $event })"
+                         type="date" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Choose">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Over time Hours</label>
-                        <input [(ngModel)]="employee.overtime_hours" type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the over time hours">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Over time Hours
+                            <span *ngIf="validationErrors['overtime_hours']" class="text-red-500 ml-3 font-normal">*Over time is required.</span>
+                        </label>
+                        <input [(ngModel)]="employee.overtime_hours" 
+                        (ngModelChange)="onInputValueChange({ field: 'overtime_hours', value: $event })"
+                        type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the over time hours">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Start Time</label>
-                        <input [(ngModel)]="employee.start_time" type="time" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter start time" min="0" max="24">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Start Time
+                            <span *ngIf="validationErrors['start_time']" class="text-red-500 ml-3 font-normal">*Start Time is required.</span>
+                        </label>
+                        <input [(ngModel)]="employee.start_time" 
+                        (ngModelChange)="onInputValueChange({ field: 'start_time', value: $event })"
+                        type="time" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter start time" min="0" max="24">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">End Time</label>
-                        <input [(ngModel)]="employee.end_time" type="time" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter end time" min="0" max="24">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            End Time
+                            <span *ngIf="validationErrors['end_time']" class="text-red-500 ml-3 font-normal">*End Time is required.</span>
+                        </label>
+                        <input [(ngModel)]="employee.end_time" 
+                        (ngModelChange)="onInputValueChange({ field: 'end_time', value: $event })"
+                        type="time" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter end time" min="0" max="24">
                     </div>
                     <div class="text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Role</label>
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Role
+                            <span *ngIf="validationErrors['role']" class="text-red-500 ml-3 font-normal">*Role is required.</span>
+                        </label>
                         <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
                             <div *ngFor="let role of roles; let i = index" class="flex items-center mb-2">
                                 <input 
@@ -109,7 +186,8 @@
                                     [value]="role.name" 
                                     class="mr-2"
                                     (change)="onRoleChange(role.name, $event)"
-                                    [checked]="employee.role.includes(role.name)">
+                                    [checked]="employee.role.includes(role.name)"
+                                    >
                                 <label for="role_{{role.id}}" class="text-sm">{{role.name}}</label>
                             </div>
                         </div>
