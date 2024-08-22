@@ -1,0 +1,121 @@
+<div>
+    <div class="flex justify-between mb-5 items-center">
+        <div>
+            <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Employee</p>
+            <p class="text-[#5F6D7E] text-xs md:text-base">Created: 22 May, 2020</p>
+        </div>
+        <button (click)="SaveEmployee()" 
+            class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
+            Save
+        </button>
+    </div>
+
+    <div class="border border-[#ECECEC] rounded-lg p-4 md:p-8 shadow-md shadow-[#0000001F]">
+        <p class="font-semibold text-sm md:text-lg mb-3">Information's</p>
+        <p class="font-normal text-xs md:text-sm">Final property prices</p>
+   
+        <div class="mt-5">
+            <div class="flex justify-center md:justify-start">
+                <label for="file-upload" class="cursor-pointer flex flex-col items-center bg-[#F6F6F6] rounded-xl px-6 py-3 lg:py-5">
+                    <img src="../../../../assets/images/AddPhoto.png" class="w-12">
+                    <span class="bg-[#FF7519] text-white px-4 md:px-8 py-2 lg:py-4 lg:font-semibold text-xs md:text-sm rounded-lg my-2 md:my-4 text-center">Select Image</span>
+                    <p class="font-normal text-xs md:text-sm">or drag photo here</p>
+                    <p class="font-normal text-xs md:text-sm text-[#8E8E93]">(JPEG, PNG with max size of 15 MB)</p>
+                </label>
+                <input id="file-upload" type="file" class="hidden" accept="image/jpeg, image/png, image/bmp, image/webp, image/svg+xml" />
+            </div>
+
+            <div class="text-[#3A3A3C] mt-4 flex flex-col md:flex-row md:space-x-8 space-y-3 md:space-y-0">
+                <div class="flex-1">
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">Name</label>
+                        <input [(ngModel)]="employee.name" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the name">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">Department</label>
+                        <select [(ngModel)]="employee.department_id" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+                            <option value="" disabled selected hidden>Choose</option>
+                            @for(department of departments; track $index){
+                                <option value="{{department.id}}">{{department.name}}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">Phone</label>
+                        <input [(ngModel)]="employee.phone" type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the phone">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">Email</label>
+                        <input [(ngModel)]="employee.email" type="email" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the email">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">National ID</label>
+                        <input [(ngModel)]="employee.national_id" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the national ID">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">Salary</label>
+                        <input [(ngModel)]="employee.salary" type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the salary number">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">Working Hours Day</label>
+                        <input [(ngModel)]="employee.working_hours_day" type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the working hours day">
+                    </div>
+                    <div class="text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">Gender</label>
+                        <select [(ngModel)]="employee.gender" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+                            <option value="" disabled selected hidden>Choose</option>
+                            <option value="m">Male</option>
+                            <option value="f">Female</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex-1">
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">Position</label>
+                        <input [(ngModel)]="employee.emp_type" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the position">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">Contact Phone</label>
+                        <input [(ngModel)]="employee.contact_phone" type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the Contact Phone">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">Password</label>
+                        <input [(ngModel)]="employee.password" type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the password">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">Hiring Date</label>
+                        <input [(ngModel)]="employee.hiring_date" type="date" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Choose">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">Over time Hours</label>
+                        <input [(ngModel)]="employee.overtime_hours" type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the over time hours">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">Start Time</label>
+                        <input [(ngModel)]="employee.start_time" type="time" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter start time" min="0" max="24">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">End Time</label>
+                        <input [(ngModel)]="employee.end_time" type="time" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter end time" min="0" max="24">
+                    </div>
+                    <div class="text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">Role</label>
+                        <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+                            <div *ngFor="let role of roles; let i = index" class="flex items-center mb-2">
+                                <input 
+                                    type="checkbox" 
+                                    id="role_{{role.id}}" 
+                                    [value]="role.name" 
+                                    class="mr-2"
+                                    (change)="onRoleChange(role.name, $event)"
+                                    [checked]="employee.role.includes(role.name)">
+                                <label for="role_{{role.id}}" class="text-sm">{{role.name}}</label>
+                            </div>
+                        </div>
+                    </div>                    
+                </div>
+            </div>
+        </div>
+    </div> 
+</div>

@@ -20,108 +20,141 @@
     <div class="flex justify-between mb-2 items-center">
         <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">May 2024</p>
         <div class="flex space-x-2 md:space-x-4">
-            <button class="h-9 md:h-11 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-4 py-3 flex items-center">
+            <button class="h-9 md:h-11 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-4 py-3 flex items-center" 
+            [ngClass]="{'hidden': CurrentPageNumber === 1, 'opacity-50 cursor-not-allowed': CurrentPageNumber === 1}"
+            [disabled]="CurrentPageNumber === 1"
+            (click)="getPrevPage()"
+            >
                 <i class="fa-solid fa-arrow-left"></i>Previous
             </button>
-            <button class="h-9 md:h-11 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-4 py-3 flex items-center">
+            <button class="h-9 md:h-11 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-4 py-3 flex items-center" 
+            [ngClass]="{'hidden': CurrentPageNumber === PagesNumber, 'opacity-50 cursor-not-allowed': CurrentPageNumber === PagesNumber}"
+            [disabled]="CurrentPageNumber === PagesNumber"
+            (click)="getNextPage()"
+            >
                 Next<i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>
     </div>
 
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">
-        <table class="w-full table-auto bg-[#FFFFFF] text-left text-[#475467]">
-          <thead class="bg-[#F9FAFB] text-sm md:text-base">
-            <tr>
-                <th class="py-3 px-4 whitespace-nowrap">
-                    Day <i class="fa-solid fa-arrow-down mx-2"></i>
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-                    Date <i class="fa-solid fa-arrow-down mx-2"></i>
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-                    Clock In <i class="fa-solid fa-arrow-down mx-2"></i>
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-                    Clock Out <i class="fa-solid fa-arrow-down mx-2"></i>
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-                    Total Hours <i class="fa-solid fa-arrow-down mx-2"></i>
-                </th>
-                <th class="py-3 px-4 min-w-[120px] max-w-[150px] whitespace-nowrap text-ellipsis">
-                    Location In <i class="fa-solid fa-arrow-down mx-2"></i>
-                </th>
-                <th class="py-3 px-4 min-w-[120px] max-w-[150px] whitespace-nowrap text-ellipsis">
-                    Location Out <i class="fa-solid fa-arrow-down mx-2"></i>
-                </th>
-                <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-                    Site<i class="fa-solid fa-arrow-down mx-2"></i>
-                </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <!-- No Data Row -->
-            <tr *ngIf="tableData.length === 0">
-              <td colspan="8" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-                No Data Found
-              </td>
-            </tr>
-      
-            <!-- Data Rows -->
-            <tr *ngFor="let row of tableData; let i = index"
-                [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300 text-xs md:text-sm">
-              
-                <td class="py-5 px-4">{{ row.Day }}</td>
-                <td class="py-5 px-4">{{ row.Date }}</td>
-
-                <td>
-                    <div class="flex justify-center">
-                      <div class="text-center w-[97px] rounded-xl border border-[#D0D5DD] bg-[#FFFFFF] py-2">
-                        {{ row.clockIn }}
-                      </div>
-                    </div>
-                  </td>
-    
-                  
-                <td>
-                    <div class="flex justify-center">
-                        <div *ngIf="row.clockOut; else emptyState"
-                            class="text-center w-[97px] rounded-xl border border-[#D0D5DD] bg-[#FFFFFF] py-2">
-                            {{ row.clockOut }}
+        <table class="lg:w-full md:table-fixed table-auto bg-[#FFFFFF] text-center text-[#475467]">
+            <thead class="bg-[#F9FAFB]">
+                <tr>
+                    <th class="py-3 w-1/12 min-w-[120px] whitespace-nowrap">
+                        Day <i class="fa-solid fa-arrow-down mr-2"></i>
+                    </th>
+                    <th class="py-3 min-w-[120px] whitespace-nowrap">
+                        Date <i class="fa-solid fa-arrow-down mr-2"></i>
+                    </th>
+                    <th class="py-3 min-w-[120px] whitespace-nowrap">
+                        Clock In <i class="fa-solid fa-arrow-down mr-2"></i>
+                    </th>
+                    <th class="py-3 min-w-[120px] whitespace-nowrap">
+                        Clock Out <i class="fa-solid fa-arrow-down mr-2"></i>
+                    </th>
+                    <th class="py-3 min-w-[120px] whitespace-nowrap">
+                        Total Hours <i class="fa-solid fa-arrow-down mr-2"></i>
+                    </th>
+                    <th
+                        class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
+                        Location In <i class="fa-solid fa-arrow-down mr-2"></i>
+                    </th>
+                    <th
+                        class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
+                        Location Out <i class="fa-solid fa-arrow-down mr-2"></i>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- No Data Row -->
+                <tr *ngIf="tableData.length === 0">
+                    <td colspan="7" class="px-4 py-2 h-[72px] text-center border-t border-gray-300">
+                        No Data Found
+                    </td>
+                </tr>
+  
+                <!-- Data Rows -->
+                <tr *ngFor="let row of tableData; let i = index"
+                    [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}"
+                    class="border-t border-gray-300">
+                    <td class="py-5">
+                        <i *ngIf="row.otherClocks.length > 0" class="fa-solid fa-chevron-down ml-1"
+                            (click)="toggleOtherClocks(i)"></i>
+                        {{ row.Day }}
+                    </td>
+                    <td>{{ row.Date }}</td>
+  
+  
+  
+  
+                    <td>
+                        <div>
+                            <div
+                                class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] m-auto">
+                                {{ row.clockIn }}
+                            </div>
                         </div>
-                        <ng-template #emptyState>
-                            <div class="w-[97px] h-9 rounded-xl border border-[#D0D5DD] bg-[#FFFFFF] px-4 py-2 flex items-center justify-center">
-                            <div class="w-[50px] h-[1px] bg-[#475467]"></div>
+  
+                        <div *ngIf="showOtherClocks" class="flex flex-col mt-1 space-y-1 items-center">
+                          <div *ngFor="let cl of row.otherClocks; let j = index"  class=" text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
+                              {{ cl.clockIn}}
+                          </div>
+                      </div>
+                    </td>
+  
+  
+  
+  
+                    <td>
+                        <div class="flex justify-center">
+                            <div *ngIf="row.clockOut; else emptyState"
+                            class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] m-auto">
+                                {{ row.clockOut }}
+  
+                            </div>
+                            <ng-template #emptyState>
+                                <div
+                                    class="w-[97px] h-[36px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[8px] flex items-center justify-center">
+                                    <div class="w-[50px] h-[1px] bg-[#475467]"></div>
+                                </div>
+                            </ng-template>
+                        </div>
+  
+                        <div *ngIf="showOtherClocks" class="flex flex-col mt-1 space-y-1 items-center">
+                          <div *ngFor="let cl of row.otherClocks; let j = index"  class=" text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] ">
+                              {{ cl.clockOut }}
+                          </div>
+                      </div>
+                    </td>
+  
+                    <td>{{ row.totalHours }}</td>
+  
+                    <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
+                        <div class="truncate" title="{{ row.locationIn }}">
+                            {{ row.locationIn }}
+                        </div>
+                    </td>
+  
+                    <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
+                        <div *ngIf="row.locationOut; else emptyLocation">
+                            <div class="truncate" title="{{ row.locationOut }}">
+                                {{ row.locationOut }}
+                            </div>
+                        </div>
+  
+                        <ng-template #emptyLocation>
+                            <div class="flex justify-center">
+                                <div class="w-[90%] h-[1px] bg-[#475467]"></div>
                             </div>
                         </ng-template>
-                    </div>
-                </td>
-
-                <td class="py-5 px-4">{{ row.totalHours }}</td>
-                
-                <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
-                    <div class="truncate" title="{{ row.locationOut }}">
-                      {{ row.locationOut }}
-                    </div>
-                </td>
-
-                <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
-                    <div *ngIf="row.locationOut; else emptyLocation">
-                        <div class="truncate" title="{{ row.locationOut }}">
-                            {{ row.locationOut }}
-                        </div>
-                    </div>
-    
-                    <ng-template #emptyLocation>
-                        <div class="flex justify-center">
-                            <div class="w-[90%] h-[1px] bg-[#475467] "></div>
-                        </div>
-                    </ng-template>
-                </td>
-                <td class="py-5 px-4">{{ row.locationOut }}</td>
-            </tr>
-          </tbody>
+  
+                    </td>
+                </tr>
+            </tbody>
         </table>
     </div>
-</div>
+  
+ 
+  </div>
+  

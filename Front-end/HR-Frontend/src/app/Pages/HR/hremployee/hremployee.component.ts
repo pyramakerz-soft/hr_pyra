@@ -30,9 +30,13 @@ export class HREmployeeComponent {
 
   tableData: UserModel[] = [];
   isMenuOpen: boolean = false;
+  PagesNumber: number = 1;
+  CurrentPageNumber: number = 1;
+  pages: number[] = [];
+
 
   ngOnInit() {
-    this.getAllEmployees();
+    this.getAllEmployees(this.CurrentPageNumber);
   }
 
 
@@ -58,14 +62,35 @@ export class HREmployeeComponent {
     this.router.navigateByUrl(`HR/HREmployeeDetailsEdit/${empId}`)
   }
 
-  getAllEmployees() {
-    this.userServ.getall().subscribe(
+  getAllEmployees(PgNumber:number) {
+    this.CurrentPageNumber=PgNumber;
+    this.userServ.getall(PgNumber).subscribe(
       (d: any) => {
-        this.tableData = d.data.users;
+        this.tableData = d.data[0].users;
+        this.PagesNumber=d.data[0].pagination.last_page;
+        this.generatePages();
       },
       (error) => {
         console.log(error)
       }
     );
   }
+
+  generatePages() {
+    this.pages = [];
+    for (let i = 1; i <= this.PagesNumber; i++) {
+      this.pages.push(i);
+    }
+  }
+
+  getNextPage() {
+    this.CurrentPageNumber++;
+    this.getAllEmployees(this.CurrentPageNumber);
+  }
+
+  getPrevPage() {
+    this.CurrentPageNumber--;
+    this.getAllEmployees(this.CurrentPageNumber);
+  }
+
 }

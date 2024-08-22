@@ -17,6 +17,9 @@ export class TableComponent {
   Userclocks:EmployeeDashboard[]=[];
   pageNumber=1;
   showOtherClocks: boolean= false; 
+  PagesNumber: number = 1;
+  CurrentPageNumber: number = 1;
+  pages: number[] = [];
 
 
   constructor(
@@ -39,7 +42,7 @@ export class TableComponent {
     this.token = localStorage.getItem("token");
     this.empDashserv.GetClocks(this.token,pgNumb).subscribe(
      (d: any) => {
-          console.log(d.data.clocks)
+       console.log(d.data.pagination.last_page)
        this.Userclocks = d.data.clocks; 
      },
      (error) => {
@@ -48,14 +51,21 @@ export class TableComponent {
    );
   }
 
-  getNextClocks(): void {
-    this.pageNumber++;
-    this.GetClockss(this.pageNumber);
+  generatePages() {
+    this.pages = [];
+    for (let i = 1; i <= this.PagesNumber; i++) {
+      this.pages.push(i);
+    }
   }
 
-  getPrevClocks(): void {
-    this.pageNumber--;
-    this.GetClockss(this.pageNumber);
+  getNextPage() {
+    this.CurrentPageNumber++;
+    this.GetClockss(this.CurrentPageNumber);
+  }
+
+  getPrevPage() {
+    this.CurrentPageNumber--;
+    this.GetClockss(this.CurrentPageNumber);
   }
 
   toggleOtherClocks(index: number): void {
