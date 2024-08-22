@@ -20,49 +20,105 @@ class ClockController extends Controller
     use ResponseTrait;
     use HelperTrait;
 
-    public function getUserClocksById(User $user)
+    protected function prepareClockData($clocks)
     {
-        $authUser = Auth::user();
-        if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to view users', 403);
-        }
-        $clocks = ClockInOut::where('user_id', $user->id)
-            ->orderBy('clock_in', 'desc')
-            ->paginate(7);
+        // Check if the clocks are paginated
+        $isPaginated = $clocks instanceof \Illuminate\Pagination\LengthAwarePaginator;
 
-        if ($clocks->isEmpty()) {
-            return $this->returnError('No Clocks For this user found');
-        }
-
+        // Group clocks by date
         $groupedClocks = $clocks->groupBy(function ($clock) {
             return Carbon::parse($clock->clock_in)->toDateString();
         });
 
         $data = [];
 
+        // Iterate over each day's clocks
         foreach ($groupedClocks as $date => $clocksForDay) {
-            $firstClockForDay = $clocksForDay->last();
+            // Sort clocks within the same date by clock_in in ascending order
+            $clocksForDay = $clocksForDay->sortBy(function ($clock) {
+                return Carbon::parse($clock->clock_in);
+            });
 
-            $otherClocksForDay = $clocksForDay->slice(1)->map(function ($clock) {
+            // Get the first clock of the day
+            $firstClockAtTheDay = $clocksForDay->shift();
+
+            // Initialize total duration
+            $totalDuration = Carbon::createFromTime(0, 0, 0);
+
+            // Calculate total duration including all clocks
+            foreach ($clocksForDay->prepend($firstClockAtTheDay) as $clock) {
+                if ($clock->clock_out && $clock->clock_in) {
+                    $clockIn = Carbon::parse($clock->clock_in);
+                    $clockOut = Carbon::parse($clock->clock_out);
+                    $duration = $clockOut->diff($clockIn);
+
+                    $totalDuration->addHours($duration->h)
+                        ->addMinutes($duration->i)
+                        ->addSeconds($duration->s);
+                }
+            }
+
+            // Format the total duration
+            $totalDurationFormatted = $totalDuration->format('H:i:s');
+
+            // Assign total duration to the first clock
+            $firstClockAtTheDay->totalHours = $totalDurationFormatted;
+
+            // Prepare other clocks for the day
+            $otherClocksForDay = $clocksForDay->map(function ($clock) {
                 return [
+                    'id' => $clock->id,
                     'clockIn' => Carbon::parse($clock->clock_in)->format('h:iA'),
                     'clockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('h:iA') : null,
                 ];
             });
 
-            $data[] = (new ClockResource($firstClockForDay))->toArray(request()) + ['otherClocks' => $otherClocksForDay->values()->toArray()];
+            // Prepare the final data structure
+            $data[] = (new ClockResource($firstClockAtTheDay))->toArray(request()) + [
+                'otherClocks' => $otherClocksForDay->values()->toArray(),
+                'totalHours' => $totalDurationFormatted,
+            ];
         }
 
-        return $this->returnData("data", [
+        return [
             'clocks' => $data,
-            'pagination' => [
+            'pagination' => $isPaginated ? [
                 'current_page' => $clocks->currentPage(),
                 'next_page_url' => $clocks->nextPageUrl(),
                 'previous_page_url' => $clocks->previousPageUrl(),
                 'last_page' => $clocks->lastPage(),
                 'total' => $clocks->total(),
-            ],
-        ], "Clocks Data for {$user->name}");
+            ] : null,
+        ];
+    }
+
+    public function getUserClocksById(Request $request, User $user)
+    {
+        $authUser = Auth::user();
+        if (!$authUser->hasRole('Hr')) {
+            return $this->returnError('You are not authorized to view users', 403);
+        }
+
+        // Initialize the query for ClockInOut
+        $query = ClockInOut::where('user_id', $user->id);
+
+        // Apply date filter if 'date' is provided
+        if ($request->has('date')) {
+            $date = Carbon::parse($request->get('date'))->toDateString();
+            $query->whereDate('clock_in', $date);
+        }
+
+        // Paginate the results
+        $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+
+        if ($clocks->isEmpty()) {
+            return $this->returnError('No Clocks Found For This User');
+        }
+
+        // Prepare data with total duration calculation
+        $data = $this->prepareClockData($clocks);
+
+        return $this->returnData("data", $data, "Clocks Data for {$user->name}");
     }
 
     public function clockIn(StoreClockInOutRequest $request)
@@ -183,75 +239,30 @@ class ClockController extends Controller
         }
     }
 
-    public function showUserClocks()
+    public function showUserClocks(Request $request)
     {
         $authUser = Auth::user();
 
-        // Fetch all clocks for today
-        $clocksToday = ClockInOut::where('user_id', $authUser->id)
-            ->whereDate('clock_in', Carbon::today())
-            ->orderBy('clock_in', 'asc')
-            ->paginate(7);
+        // Initialize the query for ClockInOut
+        $query = ClockInOut::where('user_id', $authUser->id);
 
-        // Fetch all clocks for the user, regardless of the date
-        $allClocksForUser = ClockInOut::where('user_id', $authUser->id)
-            ->orderBy('clock_in', 'asc')
-            ->get();
-
-        // if ($clocksToday->isEmpty()) {
-        //     return $this->returnError('No Clocks For this user Today');
-        // }
-        if ($allClocksForUser->isEmpty()) {
-            return $this->returnError('No Clocks For this user ');
-        }
-        $groupedClocks = $clocksToday->groupBy(function ($clock) {
-            return Carbon::parse($clock->clock_in)->toDateString();
-        });
-
-        $data = [];
-
-        foreach ($groupedClocks as $date => $clocksForDay) {
-            $firstClockForDay = $clocksForDay->first();
-
-            $totalDuration = Carbon::createFromTime(0, 0, 0);
-
-            foreach ($clocksForDay as $clock) {
-                if ($clock->duration) {
-                    $duration = Carbon::parse($clock->duration);
-                    $totalDuration->addHours($duration->hour)
-                        ->addMinutes($duration->minute)
-                        ->addSeconds($duration->second);
-                }
-            }
-
-            $totalDurationFormatted = $totalDuration->format('H:i:s');
-            $firstClockForDay->duration = $totalDurationFormatted;
-
-            $otherClocksForDay = $clocksForDay->slice(1)->map(function ($clock) {
-                return [
-                    'id' => $clock->id,
-                    'clockIn' => Carbon::parse($clock->clock_in)->format('h:iA'),
-                    'clockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('h:iA') : null,
-                ];
-            });
-
-            $data[] = (new ClockResource($firstClockForDay))->toArray(request()) + [
-                'otherClocks' => $otherClocksForDay->values()->toArray(),
-                'totalHours' => $totalDurationFormatted, // Include the total duration in the response
-            ];
+        // Apply date filter if 'date' is provided
+        if ($request->has('date')) {
+            $date = Carbon::parse($request->get('date'))->toDateString();
+            $query->whereDate('clock_in', $date);
         }
 
-        return $this->returnData("data", [
-            'clocksToday' => $data,
-            'allClocksForUser' => ClockResource::collection($allClocksForUser), // Include all clocks for the user
-            'pagination' => [
-                'current_page' => $clocksToday->currentPage(),
-                'next_page_url' => $clocksToday->nextPageUrl(),
-                'previous_page_url' => $clocksToday->previousPageUrl(),
-                'last_page' => $clocksToday->lastPage(),
-                'total' => $clocksToday->total(),
-            ],
-        ], "Clocks Data for {$authUser->name}");
+        // Paginate the results
+        $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+
+        if ($clocks->isEmpty()) {
+            return $this->returnError('No Clocks Found For This User');
+        }
+
+        // Prepare data with total duration calculation
+        $data = $this->prepareClockData($clocks);
+
+        return $this->returnData("data", $data, "Clocks Data for {$authUser->name}");
     }
 
     public function updateUserClock(Request $request, User $user, ClockInOut $clock)
