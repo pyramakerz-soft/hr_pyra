@@ -13,16 +13,16 @@ class ClockResource extends JsonResource
         $locationOut = $this->clock_out ? $this->location->address : null;
         $totalHours = $this->clock_out ? Carbon::parse($this->duration)->format('H:i') : null;
 
-        // Get the collection of all clocks passed to the resource
-        $allClocks = $this->resource->first()->get(); // Adjusted to ensure we get the full collection
+        $allClocks = $this->resource->first()->get();
 
-        // Find other clocks for the same day excluding the current one
         $otherClocksForDay = $allClocks->filter(function ($clock) {
             return Carbon::parse($clock->clock_in)->toDateString() === Carbon::parse($this->clock_in)->toDateString() && $clock->id !== $this->id;
         })->map(function ($clock) {
             return [
+                'id' => $clock->id,
                 'clockIn' => Carbon::parse($clock->clock_in)->format('h:iA'),
                 'clockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('h:iA') : null,
+
             ];
         })->values()->toArray();
 

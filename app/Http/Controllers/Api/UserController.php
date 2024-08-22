@@ -39,7 +39,7 @@ class UserController extends Controller
         if (request()->has('search')) {
             $users = UserResource::collection(
                 User::where('name', 'like', '%' . request()->get('search', '') . '%')
-                    ->orWhere('code', 'like', '%' . request()->get('search', '') . '%')->paginate()
+                    ->orWhere('code', 'like', '%' . request()->get('search', '') . '%')->paginate(5)
             );
         } else {
             $users = User::paginate(5);
@@ -47,8 +47,16 @@ class UserController extends Controller
         if ($users->isEmpty()) {
             return $this->returnError('No Users Found');
         }
-        $data['users'] = UserResource::collection($users);
-
+        $data[] = [
+            'users' => UserResource::collection($users),
+            'pagination' => [
+                'current_page' => $users->currentPage(),
+                'next_page_url' => $users->nextPageUrl(),
+                'previous_page_url' => $users->previousPageUrl(),
+                'last_page' => $users->lastPage(),
+                'total' => $users->total(),
+            ],
+        ];
         return $this->returnData("data", $data, "Users Data");
     }
 
