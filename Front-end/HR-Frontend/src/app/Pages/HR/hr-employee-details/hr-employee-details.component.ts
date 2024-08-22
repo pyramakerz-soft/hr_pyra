@@ -14,7 +14,7 @@ import { CommonModule } from '@angular/common';
 export class HrEmployeeDetailsComponent {
   empId:number|null = null
   employee: AddEmployee = new AddEmployee(
-    '', '', null, '', '', '', '', '', '', null, null, null, '', null, null, '', []
+    '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', []
   );
 
   constructor(public router:Router, public activeRoute:ActivatedRoute, public userService:UserServiceService){}
