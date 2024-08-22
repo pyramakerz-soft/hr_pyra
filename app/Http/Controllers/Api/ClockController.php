@@ -187,17 +187,24 @@ class ClockController extends Controller
     {
         $authUser = Auth::user();
 
-        $clocks = ClockInOut::where('user_id', $authUser->id)
-            ->orderBy('clock_in', 'asc')
-
+        // Fetch all clocks for today
+        $clocksToday = ClockInOut::where('user_id', $authUser->id)
             ->whereDate('clock_in', Carbon::today())
+            ->orderBy('clock_in', 'asc')
             ->paginate(7);
 
-        if ($clocks->isEmpty()) {
-            return $this->returnError('No Clocks For this user found');
-        }
+        // Fetch all clocks for the user, regardless of the date
+        $allClocksForUser = ClockInOut::where('user_id', $authUser->id)
+            ->orderBy('clock_in', 'asc')
+            ->get();
 
-        $groupedClocks = $clocks->groupBy(function ($clock) {
+        // if ($clocksToday->isEmpty()) {
+        //     return $this->returnError('No Clocks For this user Today');
+        // }
+        if ($allClocksForUser->isEmpty()) {
+            return $this->returnError('No Clocks For this user ');
+        }
+        $groupedClocks = $clocksToday->groupBy(function ($clock) {
             return Carbon::parse($clock->clock_in)->toDateString();
         });
 
@@ -206,7 +213,6 @@ class ClockController extends Controller
         foreach ($groupedClocks as $date => $clocksForDay) {
             $firstClockForDay = $clocksForDay->first();
 
-            // Calculate the total duration for the day
             $totalDuration = Carbon::createFromTime(0, 0, 0);
 
             foreach ($clocksForDay as $clock) {
@@ -219,8 +225,8 @@ class ClockController extends Controller
             }
 
             $totalDurationFormatted = $totalDuration->format('H:i:s');
-            // Update the first clock's duration with the total duration
             $firstClockForDay->duration = $totalDurationFormatted;
+
             $otherClocksForDay = $clocksForDay->slice(1)->map(function ($clock) {
                 return [
                     'id' => $clock->id,
@@ -236,13 +242,14 @@ class ClockController extends Controller
         }
 
         return $this->returnData("data", [
-            'clocks' => $data,
+            'clocksToday' => $data,
+            'allClocksForUser' => ClockResource::collection($allClocksForUser), // Include all clocks for the user
             'pagination' => [
-                'current_page' => $clocks->currentPage(),
-                'next_page_url' => $clocks->nextPageUrl(),
-                'previous_page_url' => $clocks->previousPageUrl(),
-                'last_page' => $clocks->lastPage(),
-                'total' => $clocks->total(),
+                'current_page' => $clocksToday->currentPage(),
+                'next_page_url' => $clocksToday->nextPageUrl(),
+                'previous_page_url' => $clocksToday->previousPageUrl(),
+                'last_page' => $clocksToday->lastPage(),
+                'total' => $clocksToday->total(),
             ],
         ], "Clocks Data for {$authUser->name}");
     }

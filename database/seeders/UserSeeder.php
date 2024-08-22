@@ -23,11 +23,11 @@ class UserSeeder extends Seeder
 
         $faker = Faker::create();
         // Get the department name based on the department_id
-        $department = Department::find(1);
+        $department_1 = Department::find(1);
 
         // Generate a unique code
         do {
-            $departmentPrefix = substr(Str::slug($department->name), 0, 4); // Get the first 4 letters of the department name
+            $departmentPrefix = substr(Str::slug($department_1->name), 0, 4); // Get the first 4 letters of the department name
             $randomDigits = mt_rand(1000, 9999);
             $code = strtoupper($departmentPrefix) . '-' . $randomDigits;
         } while (User::where('code', $code)->exists());
@@ -45,6 +45,16 @@ class UserSeeder extends Seeder
             'gender' => 'M',
             'department_id' => 1,
         ]);
+        // Get the department name based on the department_id
+        $department_2 = Department::find(2);
+
+        // Generate a unique code
+        do {
+            $departmentPrefix = substr(Str::slug($department_2->name), 0, 4); // Get the first 4 letters of the department name
+            $randomDigits = mt_rand(1000, 9999);
+            $code = strtoupper($departmentPrefix) . '-' . $randomDigits;
+        } while (User::where('code', $code)->exists());
+
         $user_manager = User::create([
             'name' => 'mohamed',
             'email' => 'manager@test.com',
@@ -52,6 +62,8 @@ class UserSeeder extends Seeder
             'phone' => "01203376447",
             'contact_phone' => "01211018850",
             'national_id' => "30201010214377",
+            'code' => $code,
+
             'gender' => 'M',
             'department_id' => 2,
         ]);
