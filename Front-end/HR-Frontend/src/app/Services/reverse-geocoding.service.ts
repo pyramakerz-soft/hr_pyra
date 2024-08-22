@@ -20,7 +20,11 @@ export class ReverseGeocodingService {
       }
     });
   }
-
+  reverseGeocode(lat: number, lng: number) {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_API_KEY`;
+    return this.http.get(url);
+  }
+  
   load(): Promise<void> {
     return this.loadPromise;
   }

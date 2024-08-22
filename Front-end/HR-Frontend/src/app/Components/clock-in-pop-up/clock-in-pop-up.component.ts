@@ -65,12 +65,19 @@ export class ClockInPopUpComponent {
           (position: GeolocationPosition) => {
             this.lat = position.coords.latitude;
             this.lng = position.coords.longitude;
+  
+            console.log("User location:", this.lat, this.lng);
             resolve();  
           },
           (error: GeolocationPositionError) => {
             console.error(error);
             alert("Error retrieving location: " + error.message);
             reject(error);  
+          },
+          {
+            enableHighAccuracy: true,
+            maximumAge: 0, // Disable caching for the most up-to-date reading
+            timeout: 10000 // Allow up to 10 seconds to retrieve location
           }
         );
       } else {
@@ -79,6 +86,8 @@ export class ClockInPopUpComponent {
       }
     });
   }
+  
+  
 
 
   getCurrentFormattedTime(): string {
