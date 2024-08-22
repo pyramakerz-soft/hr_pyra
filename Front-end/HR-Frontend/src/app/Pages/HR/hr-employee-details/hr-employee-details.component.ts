@@ -30,7 +30,6 @@ export class HrEmployeeDetailsComponent {
     this.userService.getUserById(id).subscribe(
       (d: any) => {
         this.employee = d.User;
-        console.log(this.employee)
       },
       (error) => {
         console.log(error)
