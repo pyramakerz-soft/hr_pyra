@@ -50,8 +50,8 @@ export class HREmployeeComponent {
     this.router.navigateByUrl("HR/HREmployeeDetailsAdd")
   }
 
-  NavigateToEmployeeDetails() {
-    this.router.navigateByUrl("HR/HREmployeeDetails")
+  NavigateToEmployeeDetails(id:number) {
+    this.router.navigateByUrl(`HR/HREmployeeDetails/${id}`)
   }
  
   NavigateToEditEmployee(empId:number){

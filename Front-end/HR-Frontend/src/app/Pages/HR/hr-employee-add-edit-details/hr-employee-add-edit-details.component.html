@@ -29,97 +29,91 @@
                 <div class="flex-1">
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">Name</label>
-                        <input type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the name">
+                        <input [(ngModel)]="employee.name" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the name">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">Department</label>
-                        <select class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+                        <select [(ngModel)]="employee.department_id" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
                             <option value="" disabled selected hidden>Choose</option>
-                            <option value="option1">Option 1</option>
-                            <option value="option2">Option 2</option>
-                            <option value="option3">Option 3</option>
+                            @for(department of departments; track $index){
+                                <option value="{{department.id}}">{{department.name}}</option>
+                            }
                         </select>
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">Phone</label>
-                        <input type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the phone">
+                        <input [(ngModel)]="employee.phone" type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the phone">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Phone</label>
-                        <input type="email" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the email">
+                        <label class="font-semibold block mb-2 md:mb-3">Email</label>
+                        <input [(ngModel)]="employee.email" type="email" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the email">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">National ID</label>
-                        <input type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the national ID">
+                        <input [(ngModel)]="employee.national_id" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the national ID">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">Salary</label>
-                        <input type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the salary number">
+                        <input [(ngModel)]="employee.salary" type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the salary number">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Hourly Rate</label>
-                        <input type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the hourly rate">
-                    </div>
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Start Time</label>
-                        <input type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter start time" min="0" max="24">
+                        <label class="font-semibold block mb-2 md:mb-3">Working Hours Day</label>
+                        <input [(ngModel)]="employee.working_hours_day" type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the working hours day">
                     </div>
                     <div class="text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">Gender</label>
-                        <select class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+                        <select [(ngModel)]="employee.gender" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
                             <option value="" disabled selected hidden>Choose</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
+                            <option value="m">Male</option>
+                            <option value="f">Female</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="flex-1">
                     <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Code</label>
-                        <input type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the code">
-                    </div>
-                    <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">Position</label>
-                        <select class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
-                            <option value="" disabled selected hidden>Choose</option>
-                            <option value="option1">Option 1</option>
-                            <option value="option2">Option 2</option>
-                            <option value="option3">Option 3</option>
-                        </select>
+                        <input [(ngModel)]="employee.emp_type" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the position">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">Contact Phone</label>
-                        <input type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the Contact Phone">
+                        <input [(ngModel)]="employee.contact_phone" type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the Contact Phone">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">Password</label>
-                        <input type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the password">
+                        <input [(ngModel)]="employee.password" type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the password">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">Hiring Date</label>
-                        <input type="date" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Choose">
+                        <input [(ngModel)]="employee.hiring_date" type="date" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Choose">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">Over time Hours</label>
-                        <input type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the over time hours">
-                    </div>
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">Working Hours Day</label>
-                        <input type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the working hours day">
+                        <input [(ngModel)]="employee.overtime_hours" type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the over time hours">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">Start Time</label>
-                        <input type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter start time" min="0" max="24">
+                        <input [(ngModel)]="employee.start_time" type="time" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter start time" min="0" max="24">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">End Time</label>
+                        <input [(ngModel)]="employee.end_time" type="time" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter end time" min="0" max="24">
                     </div>
                     <div class="text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">Role</label>
-                        <select class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
-                            <option value="" disabled selected hidden>Choose</option>
-                            <option value="option1">Option 1</option>
-                            <option value="option2">Option 2</option>
-                        </select>
-                    </div>
+                        <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+                            <div *ngFor="let role of roles; let i = index" class="flex items-center mb-2">
+                                <input 
+                                    type="checkbox" 
+                                    id="role_{{role.id}}" 
+                                    [value]="role.name" 
+                                    class="mr-2"
+                                    (change)="onRoleChange(role.name, $event)"
+                                    [checked]="employee.role.includes(role.name)">
+                                <label for="role_{{role.id}}" class="text-sm">{{role.name}}</label>
+                            </div>
+                        </div>
+                    </div>                    
                 </div>
             </div>
         </div>

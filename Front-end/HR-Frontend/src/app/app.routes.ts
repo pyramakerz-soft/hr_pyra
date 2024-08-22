@@ -27,7 +27,7 @@ export const routes: Routes = [
         {path: "HRBounders", component:HrBoundersComponent, title:"HRBounders"},
         {path: "HRAttendance", component:HrAttendanceComponent, title:"HRAttendance"},
         {path: "HREmployeeAttendanceDetails", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails"},
-        {path: "HREmployeeDetails", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails"},
+        {path: "HREmployeeDetails/:EmpId", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails"},
         {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd"},
         {path: "HREmployeeDetailsEdit/:EmpId", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit"},
     ]},

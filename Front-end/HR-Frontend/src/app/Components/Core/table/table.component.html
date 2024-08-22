@@ -5,102 +5,104 @@
         <input type="text" placeholder="Enter Keyword..."
             class="flex-1 outline-none border-none  placeholder-[#667085] bg-transparent" />
     </div>
+
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">
-        <table class="lg:w-full md:table-fixed table-auto bg-[#FFFFFF] text-center text-[#475467]">
-          <thead class="bg-[#F9FAFB]">
-            <tr>
-              <th class="py-3 w-1/12 min-w-[120px] whitespace-nowrap">
-                Day <i class="fa-solid fa-arrow-down mr-2"></i>
-              </th>
-              <th class="py-3 min-w-[120px] whitespace-nowrap">
-                Date <i class="fa-solid fa-arrow-down mr-2"></i>
-              </th>
-              <th class="py-3 min-w-[120px] whitespace-nowrap">
-                Clock In <i class="fa-solid fa-arrow-down mr-2"></i>
-              </th>
-              <th class="py-3 min-w-[120px] whitespace-nowrap">
-                Clock Out <i class="fa-solid fa-arrow-down mr-2"></i>
-              </th>
-              <th class="py-3 min-w-[120px] whitespace-nowrap">
-                Total Hours <i class="fa-solid fa-arrow-down mr-2"></i>
-              </th>
-              <th class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
-                Location In <i class="fa-solid fa-arrow-down mr-2"></i>
-              </th>
-              <th class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
-                Location Out <i class="fa-solid fa-arrow-down mr-2"></i>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- No Data Row -->
-            <tr *ngIf="Userclocks.length === 0">
-              <td colspan="7" class="px-4 py-2 h-[72px] text-center  border-t border-gray-300">
-                No Data Found
-              </td>
-            </tr>
-      
-            <!-- Data Rows -->
-            <tr *ngFor="let row of Userclocks; let i = index"
-                [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300">
-              <td class="py-5">{{ row.Day }}</td>
-              <td>{{ row.Date }}</td>
-
-
-              <td>
-                <div class="flex justify-center">
-                  <div class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
-                    {{ row.clockIn }}
-                  </div>
+      <table class="bg-[#FFFFFF] text-left text-[#475467]">
+        <thead class="bg-[#F9FAFB] text-sm md:text-base">
+          <tr>
+            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+              Day <i class="fa-solid fa-arrow-down mr-2"></i>
+            </th>
+            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+              Date <i class="fa-solid fa-arrow-down mr-2"></i>
+            </th>
+            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+              Clock In <i class="fa-solid fa-arrow-down mr-2"></i>
+            </th>
+            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+              Clock Out <i class="fa-solid fa-arrow-down mr-2"></i>
+            </th>
+            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+              Total Hours <i class="fa-solid fa-arrow-down mr-2"></i>
+            </th>
+            <th class="py-3 px-4 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
+              Location In <i class="fa-solid fa-arrow-down mr-2"></i>
+            </th>
+            <th class="py-3 px-4 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
+              Location Out <i class="fa-solid fa-arrow-down mr-2"></i>
+            </th>
+            <th class="py-3 px-4 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
+              Site <i class="fa-solid fa-arrow-down mr-2"></i>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="Userclocks.length === 0">
+            <td colspan="8" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+              No Data Found
+            </td>
+          </tr>
+  
+          <!-- Data Rows -->
+          <tr *ngFor="let row of Userclocks; let i = index"
+            [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}"
+            class="border-t border-gray-300 text-xs md:text-sm">
+  
+            <td class="py-5 px-4">{{ row.Day }}</td>
+            <td class="py-5 px-4">{{ row.Date }}</td>
+            
+            <td class="py-5 px-4">
+              <div class="flex justify-center">
+                <div class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
+                  {{ row.clockIn }}
                 </div>
-              </td>
+              </div>
+            </td>
 
-              
-              <td>
-                <div class="flex justify-center">
-                  <div *ngIf="row.clockOut; else emptyState"
-                      class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
-                    {{ row.clockOut }}
+            <td class="py-5 px-4">
+              <div class="flex justify-center">
+                <div *ngIf="row.clockOut; else emptyState"
+                    class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
+                  {{ row.clockOut }}
+                </div>
+                <ng-template #emptyState>
+                  <div class="w-[97px] h-[36px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[8px] flex items-center justify-center">
+                    <div class="w-[50px] h-[1px] bg-[#475467]"></div>
                   </div>
-                  <ng-template #emptyState>
-                    <div class="w-[97px] h-[36px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[8px] flex items-center justify-center">
-                      <div class="w-[50px] h-[1px] bg-[#475467]"></div>
+                </ng-template>
+              </div>
+            </td>
+
+            <td class="py-5 px-4">{{ row.totalHours }}</td>
+
+
+            <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden py-5 px-4">
+              <div class="truncate" title="{{ row.locationIn }}">
+                {{ row.locationIn }}
+              </div>
+            </td>
+        
+            <td class="min-w-[120px] lg:max-w-[170px] overflow-hidden py-5 px-4">
+              <div *ngIf="row.locationOut; else emptyLocation"
+                  >
+                   <div class="truncate" title="{{ row.locationOut }}">
+                      {{ row.locationOut }}
                     </div>
-                  </ng-template>
-                </div>
-              </td>
-
-
-              <td>{{ row.totalHours }}</td>
-
-
-              <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
-                <div class="truncate" title="{{ row.locationIn }}">
-                  {{ row.locationIn }}
-                </div>
-              </td>
-
-              <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
-                <div *ngIf="row.locationOut; else emptyLocation"
-                    >
-                     <div class="truncate" title="{{ row.locationOut }}">
-                        {{ row.locationOut }}
-                      </div>
-                 </div>
-
-                <ng-template #emptyLocation>
-                  <div class="flex justify-center">
+               </div>
+        
+              <ng-template #emptyLocation>
+                <div class="flex justify-center">
                   <div class="w-[90%] h-[1px] bg-[#475467] "></div>
                 </div>
-                </ng-template>
+              </ng-template>
+            </td>
 
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      
-      
+            <td>{{ row.site }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
     <div class="mt-5 md:flex justify-between items-center">
         <button class="h-[44px] w-[119px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center hidden"   (click)="getPrevClocks()">
             <i class="fa-solid fa-arrow-left"></i>Previous
