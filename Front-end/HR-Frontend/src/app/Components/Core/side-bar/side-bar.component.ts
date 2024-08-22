@@ -13,24 +13,27 @@ import { AccountService } from '../../../Services/account.service';
 export class SideBarComponent {
 
   @Input() menuItems: { label: string; icon: string; route: string; }[] = [];
-  constructor(public AccountServ:AccountService ,private router: Router){
-
-  }
+  constructor(public AccountServ:AccountService ,private router: Router){}
 
   activeIndex: number | null = null;
-
+  
+  ngOnInit(): void {
+    this.setActiveIndexByRoute(this.router.url);
+  }
+  
   setActiveIndex(index: number): void {
     this.activeIndex = index;
   }
 
-  ngOnInit(): void {
-    this.setActiveIndex(0);
+  setActiveIndexByRoute(currentRoute: string): void {
+    const foundIndex = this.menuItems.findIndex(item => item.route === currentRoute);
+    if (foundIndex !== -1) {
+      this.setActiveIndex(foundIndex);
+    }
   }
 
   signOut(){
-
-  this.AccountServ.logout();
-  this.router.navigateByUrl("Login");
-
+    this.AccountServ.logout();
+    this.router.navigateByUrl("Login");
   }
 }

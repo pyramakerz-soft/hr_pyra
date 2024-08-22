@@ -11,14 +11,19 @@ import { SideBarComponent } from '../../../Components/Core/side-bar/side-bar.com
   styleUrl: './hr.component.css'
 })
 export class HRComponent {
+  isMenuOpen: boolean = false;
+
   menuItems = [
     { label: 'Dashboard', icon: 'fi fi-rr-table-rows', route: '/HR//HREmployee' },
     { label: 'Employee', icon: 'fas fa-home', route: '/HR/HREmployee' },
-    { label: 'Roles', icon: 'fa-regular fa-sign-out', route: '/HR/HRRole' },
-    { label: 'Atendence', icon: 'fas fa-chart-bar', route: '/HR/HRAttendance' },
-    { label: 'Bounders', icon: 'fas fa-chart-bar', route: '/HR/HRBounders' },
-    { label: 'Sign Out', icon: 'fa fa-sign-out', route: '/HR/HREmployee' },
-
+    { label: 'Roles', icon: 'fi fi-rs-chart-pie', route: '/HR/HRRole' },
+    { label: 'Atendence', icon: 'fi fi-rr-chart-simple', route: '/HR/HRAttendance' },
+    { label: 'Bounders', icon: 'fi fi-rr-chart-simple', route: '/HR/HRBounders' },
+    { label: 'Sign Out', icon: 'fi fi-bs-sign-out-alt transform rotate-180', route: '/HR/HREmployee' },
   ];
+
+  OpenMenu() {
+    this.isMenuOpen = !this.isMenuOpen;
+  }
 
 }

@@ -42,10 +42,7 @@ export class HrEmployeeAttendanceDetailsComponent {
   getAllClocks(id:number) {
     this.UserClocksService.GetUserClocksById(id).subscribe(
       (d: any) => {
-        console.log(d)
         this.tableData = d.data.clocks;
-        console.log(this.tableData)
-
       },
       (error) => {
         console.log(error)
