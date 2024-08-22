@@ -23,6 +23,13 @@ trait ResponseTrait
             'data' => (object) [],
         ], $status);
     }
+    // public function returnErrorMessage($msg)
+    // {
+    //     return response()->json([
+    //         'message' => $msg,
+    //     ], Response::HTTP_NOT_FOUND);
+
+    // }
     public function returnData($key, $value, $msg = "")
     {
         return response()->json([

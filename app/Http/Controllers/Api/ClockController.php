@@ -128,9 +128,10 @@ class ClockController extends Controller
                 'user_id' => $user_id,
                 'location_id' => $location_id,
             ]);
+
             return $this->returnData("clock", $clock, "Clock In Done");
         } else {
-            return $this->returnError('User is not located at the correct location.');
+            return $this->returnError('User is not located at the correct location. lat : ' . $latitude . " / long : " . $longitude);
         }
     }
 
@@ -171,7 +172,6 @@ class ClockController extends Controller
             $clock_out = Carbon::now()->addRealHour(3);
             $durationInterval = $clock_out->diffAsCarbonInterval($clock_in);
             $durationFormatted = $durationInterval->format('%H:%I:%S');
-
             $ClockauthUser->update([
                 'clock_out' => $clock_out,
                 'duration' => $durationFormatted,
@@ -179,7 +179,7 @@ class ClockController extends Controller
 
             return $this->returnData("clock", $ClockauthUser, "Clock Out Done");
         } else {
-            return $this->returnError('User is not located at the correct location.');
+            return $this->returnError('User is not located at the correct location. lat : ' . $latitude . " / long : " . $longitude);
         }
     }
 
@@ -187,38 +187,54 @@ class ClockController extends Controller
     {
         $authUser = Auth::user();
 
-        // Fetch all clocks for the user, ordered by clock_in ascending
         $clocks = ClockInOut::where('user_id', $authUser->id)
-            ->orderBy('clock_in', 'desc')
+            ->orderBy('clock_in', 'asc')
+
+            ->whereDate('clock_in', Carbon::today())
             ->paginate(7);
 
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clocks For this user found');
         }
 
-        // Group clocks by date
         $groupedClocks = $clocks->groupBy(function ($clock) {
             return Carbon::parse($clock->clock_in)->toDateString();
         });
 
-        // Prepare the final data array
         $data = [];
 
         foreach ($groupedClocks as $date => $clocksForDay) {
-            // Get the first clock for the day
-            $firstClockForDay = $clocksForDay->last();
+            $firstClockForDay = $clocksForDay->first();
 
-            // Get other clocks for the day excluding the first one
+            // Calculate the total duration for the day
+            $totalDuration = Carbon::createFromTime(0, 0, 0);
+
+            foreach ($clocksForDay as $clock) {
+                if ($clock->duration) {
+                    $duration = Carbon::parse($clock->duration);
+                    $totalDuration->addHours($duration->hour)
+                        ->addMinutes($duration->minute)
+                        ->addSeconds($duration->second);
+                }
+            }
+
+            $totalDurationFormatted = $totalDuration->format('H:i:s');
+            // Update the first clock's duration with the total duration
+            $firstClockForDay->duration = $totalDurationFormatted;
             $otherClocksForDay = $clocksForDay->slice(1)->map(function ($clock) {
                 return [
+                    'id' => $clock->id,
                     'clockIn' => Carbon::parse($clock->clock_in)->format('h:iA'),
                     'clockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('h:iA') : null,
                 ];
             });
 
-            // Add the first clock with otherClocks to the data array
-            $data[] = (new ClockResource($firstClockForDay))->toArray(request()) + ['otherClocks' => $otherClocksForDay->values()->toArray()];
+            $data[] = (new ClockResource($firstClockForDay))->toArray(request()) + [
+                'otherClocks' => $otherClocksForDay->values()->toArray(),
+                'totalHours' => $totalDurationFormatted, // Include the total duration in the response
+            ];
         }
+
         return $this->returnData("data", [
             'clocks' => $data,
             'pagination' => [
@@ -231,24 +247,41 @@ class ClockController extends Controller
         ], "Clocks Data for {$authUser->name}");
     }
 
-    // public function updateUserClock(Request $request, User $user, ClockInOut $clock)
-    // {
-    //     // TODO: Implement the update function
-    //     $authUser = Auth::user();
-    //     if (!$authUser->hasRole('Hr')) {
-    //         return $this->returnError('You are not authorized to Update users', 403);
-    //     }
-    //     $this->validate($request, [
-    //         'clock_in' => ['required', 'date_format:H:i'],
-    //         'clock_out' => ['required', 'date_format:H:i'],
+    public function updateUserClock(Request $request, User $user, ClockInOut $clock)
+    {
+        $authUser = Auth::user();
+        if (!$authUser->hasRole('Hr')) {
+            return $this->returnError('You are not authorized to update users', 403);
+        }
 
-    //     ]);
-    //     $clock = ClockInOut::where('user_id', $user->id)->where('id', $clock->id)->first();
-    //     $clock->update([
-    //         'clock_in' => $request->clock_in,
-    //         'clock_out' => $request->clock_out,
-    //     ]);
-    //     return $this->returnData("clock", new ClockResource($clock), "Clocks Data for {$user->name}");
+        $this->validate($request, [
+            'clock_in' => ['nullable', 'date_format:H:i'],
+            'clock_out' => ['nullable', 'date_format:H:i'],
+        ]);
 
-    // }
+        $clock = ClockInOut::where('user_id', $user->id)->where('id', $clock->id)->first();
+        if (!$clock) {
+            return $this->returnError("No clocks found for this user", 404);
+        }
+
+        // $currentDate = Carbon::now()->format('Y-m-d');
+        $existingDate = Carbon::parse($clock->clock_in)->format('Y-m-d');
+
+        $clockIn = $request->clock_in ? Carbon::createFromFormat('Y-m-d H:i:s', "{$existingDate} {$request->clock_in}:00") : Carbon::parse($clock->clock_in);
+        $clockOut = $request->clock_out ? Carbon::createFromFormat('Y-m-d H:i:s', "{$existingDate} {$request->clock_out}:00") : Carbon::parse($clock->clock_out);
+        if ($clockOut->isSameDay($clockIn) === false) {
+            return $this->returnError("clock_in and clock_out must be on the same day", 400);
+        }
+
+        $durationFormatted = $clockIn->diff($clockOut)->format('%H:%I:%S');
+
+        $clock->update([
+            'clock_in' => $clockIn->format('Y-m-d H:i:s'),
+            'clock_out' => $clockOut->format('Y-m-d H:i:s'),
+            'duration' => $durationFormatted,
+        ]);
+
+        return $this->returnData("clock", new ClockResource($clock), "Clock data for {$user->name}");
+    }
+
 }
