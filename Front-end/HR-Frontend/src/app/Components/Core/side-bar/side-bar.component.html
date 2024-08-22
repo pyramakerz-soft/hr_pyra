@@ -1,17 +1,17 @@
 <div class="bg-[#17253E] h-full border-r-[1.33px] border-[#2E3545]">
     <div class="py-5 mx-9">
-      <div class="px-5 py-4 bg-[#2E3646] flex justify-between items-center">
-        <img src="../../../../assets/images/Paragraphcontainer.png" class="w-[90%]" />
-        <i class="fa-solid fa-bell text-xl text-[#FF7519]"></i>
+      <div class="px-3 md:px-5 py-3 md:py-4 bg-[#2E3646] flex justify-between items-center">
+        <img src="../../../../assets/images/Paragraphcontainer.png" class="w-2/3 md:w-[90%]" />
+        <i class="fa-solid fa-bell text-lg md:text-xl text-[#FF7519]"></i>
       </div>
     </div>
     
     <nav class="flex flex-col text-[#A5ACBA]">
-      <p class="text-base md:text-lg font-semibold px-9 my-4 uppercase">Main Menu</p>
+      <p class="text-base md:text-lg font-semibold px-9 mb-4 uppercase">Main Menu</p>
   
       <div
         *ngFor="let item of menuItems; let i = index"
-        class="text_Style text-lg md:text-xl font-semibold px-9 py-5 flex items-center space-x-4"
+        class="text_Style text-lg md:text-xl font-semibold px-9 py-3 md:py-5 flex items-center space-x-4"
         [ngClass]="{ active: activeIndex === i }"
         (click)="setActiveIndex(i)"
         [routerLink]="item.route"

@@ -83,7 +83,7 @@
         <tr *ngFor="let row of tableData; let i = index"
             [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300 text-xs md:text-sm">
           
-            <td class="py-5 px-4"><button (click)="NavigateToEmployeeDetails()">{{ row.name }}</button></td>
+            <td class="py-5 px-4"><button (click)="NavigateToEmployeeDetails(row.id)">{{ row.name }}</button></td>
             <td class="py-5 px-4">{{ row.national_id }}</td>
             <td class="py-5 px-4">
               <div 
@@ -101,7 +101,7 @@
             <td class="py-5 px-4">{{ row.name }}</td>
             <td class="py-5 px-4">
               <div class="px-2">
-                  <button (click)="NavigateToEditEmployee(1)">
+                  <button (click)="NavigateToEditEmployee(row.id)">
                       <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
                   </button>
                   <i class="fa fa-trash text-[#CC161D] ml-2 w-3 md:w-4"></i>
