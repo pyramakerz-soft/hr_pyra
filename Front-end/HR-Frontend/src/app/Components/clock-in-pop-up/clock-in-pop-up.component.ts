@@ -65,6 +65,8 @@ export class ClockInPopUpComponent {
           (position: GeolocationPosition) => {
             this.lat = position.coords.latitude;
             this.lng = position.coords.longitude;
+
+            console.log( "user location",this.lat,this.lng)
             resolve();  
           },
           (error: GeolocationPositionError) => {

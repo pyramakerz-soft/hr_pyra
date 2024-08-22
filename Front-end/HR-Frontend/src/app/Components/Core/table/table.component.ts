@@ -16,6 +16,7 @@ export class TableComponent {
   token:any="";
   Userclocks:EmployeeDashboard[]=[];
   pageNumber=1;
+  showOtherClocks: boolean= false; 
 
 
   constructor(
@@ -38,7 +39,8 @@ export class TableComponent {
     this.token = localStorage.getItem("token");
     this.empDashserv.GetClocks(this.token,pgNumb).subscribe(
      (d: any) => {
-       this.Userclocks = d.clocks; 
+          console.log(d.data.clocks)
+       this.Userclocks = d.data.clocks; 
      },
      (error) => {
        console.error('Error retrieving user clocks:', error);
@@ -54,6 +56,10 @@ export class TableComponent {
   getPrevClocks(): void {
     this.pageNumber--;
     this.GetClockss(this.pageNumber);
+  }
+
+  toggleOtherClocks(index: number): void {
+    this.showOtherClocks = !this.showOtherClocks;
   }
 
 }
