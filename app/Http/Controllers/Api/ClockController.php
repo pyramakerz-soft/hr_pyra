@@ -22,19 +22,15 @@ class ClockController extends Controller
 
     protected function prepareClockData($clocks)
     {
-        // Check if the clocks are paginated
         $isPaginated = $clocks instanceof \Illuminate\Pagination\LengthAwarePaginator;
 
-        // Group clocks by date
         $groupedClocks = $clocks->groupBy(function ($clock) {
             return Carbon::parse($clock->clock_in)->toDateString();
         });
 
         $data = [];
 
-        // Iterate over each day's clocks
         foreach ($groupedClocks as $date => $clocksForDay) {
-            // Sort clocks within the same date by clock_in in ascending order
             $clocksForDay = $clocksForDay->sortBy(function ($clock) {
                 return Carbon::parse($clock->clock_in);
             });
@@ -99,23 +95,19 @@ class ClockController extends Controller
             return $this->returnError('You are not authorized to view users', 403);
         }
 
-        // Initialize the query for ClockInOut
         $query = ClockInOut::where('user_id', $user->id);
 
-        // Apply date filter if 'date' is provided
         if ($request->has('date')) {
             $date = Carbon::parse($request->get('date'))->toDateString();
             $query->whereDate('clock_in', $date);
         }
 
-        // Paginate the results
         $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
 
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clocks Found For This User');
         }
 
-        // Prepare data with total duration calculation
         $data = $this->prepareClockData($clocks);
 
         return $this->returnData("data", $data, "Clocks Data for {$user->name}");
@@ -161,11 +153,10 @@ class ClockController extends Controller
         $location_id = $closestLocation['location_id'];
         $distanceBetweenUserAndLocation = $closestLocation['distance'];
         $now = Carbon::now()->addRealHour(3);
-        $UserEndTime = Carbon::createFromTimeString($authUser->user_detail->end_time);
-
-        // if ($now->greaterThan($UserEndTime)) {
-        //     return $this->returnError('Your shift has already ended, you cannot clock in.');
-        // }
+        $UserEndTime = Carbon::parse($authUser->user_detail->end_time);
+        if ($now >= $UserEndTime) {
+            return $this->returnError("Your Shift Is Ended");
+        }
         $existingClockIn = ClockInOut::where('user_id', $user_id)
             ->where('location_id', $location_id)
             ->whereDate('clock_in', Carbon::today())
@@ -243,23 +234,19 @@ class ClockController extends Controller
     {
         $authUser = Auth::user();
 
-        // Initialize the query for ClockInOut
         $query = ClockInOut::where('user_id', $authUser->id);
 
-        // Apply date filter if 'date' is provided
         if ($request->has('date')) {
             $date = Carbon::parse($request->get('date'))->toDateString();
             $query->whereDate('clock_in', $date);
         }
 
-        // Paginate the results
         $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
 
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clocks Found For This User');
         }
 
-        // Prepare data with total duration calculation
         $data = $this->prepareClockData($clocks);
 
         return $this->returnData("data", $data, "Clocks Data for {$authUser->name}");

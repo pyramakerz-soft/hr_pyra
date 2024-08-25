@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
         } while (User::where('code', $code)->exists());
 
         $user_hr = User::create([
-            'name' => 'belal',
+            'name' => 'Mohamed Ali',
             'email' => 'hr@test.com',
             'password' => bcrypt("123456"),
             'phone' => "01203376449",
@@ -56,7 +56,7 @@ class UserSeeder extends Seeder
         } while (User::where('code', $code)->exists());
 
         $user_manager = User::create([
-            'name' => 'mohamed',
+            'name' => 'Eng.Ashraf',
             'email' => 'manager@test.com',
             'password' => bcrypt("123456"),
             'phone' => "01203376447",
@@ -67,17 +67,28 @@ class UserSeeder extends Seeder
             'gender' => 'M',
             'department_id' => 2,
         ]);
-        // $user_emp = User::create([
-        //     'name' => 'Rana',
-        //     'email' => 'emp@test.com',
-        //     'password' => bcrypt("123456"),
-        //     'phone' => "01203376440",
-        //     'contact_phone' => "01211018856",
-        //     'national_id' => "30201010214376",
-        //     'gender' => 'F',
-        //     'department_id' => 2,
-        // ]);
-        User::factory()->count(30)->create();
+        // Get the department name based on the department_id
+        $department_3 = Department::find(3);
+
+        // Generate a unique code
+        do {
+            $departmentPrefix = substr(Str::slug($department_3->name), 0, 5); // Get the first 4 letters of the department name
+            $randomDigits = mt_rand(1000, 9999);
+            $code = strtoupper($departmentPrefix) . '-' . $randomDigits;
+        } while (User::where('code', $code)->exists());
+        $user_emp = User::create([
+            'name' => 'belal',
+            'email' => 'emp@test.com',
+            'password' => bcrypt("123456"),
+            'phone' => "01203376440",
+            'contact_phone' => "01211018856",
+            'national_id' => "30201010214376",
+            'code' => $code,
+
+            'gender' => 'F',
+            'department_id' => 2,
+        ]);
+        // User::factory()->count(30)->create();
 
         $department = Department::findOrFail(1);
         $department->update(['manager_id' => 1]);

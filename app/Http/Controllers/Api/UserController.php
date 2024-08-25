@@ -39,24 +39,30 @@ class UserController extends Controller
         if (request()->has('search')) {
             $users = UserResource::collection(
                 User::where('name', 'like', '%' . request()->get('search', '') . '%')
-                    ->orWhere('code', 'like', '%' . request()->get('search', '') . '%')->paginate(5)
+                    ->orWhere('code', 'like', '%' . request()->get('search', '') . '%')->get()
             );
+            if ($users->isEmpty()) {
+                return $this->returnError('No Users Found');
+            }
+            $data[] = [
+                'users' => UserResource::collection($users),
+
+            ];
         } else {
             $users = User::paginate(5);
+            $data[] = [
+                'users' => UserResource::collection($users),
+                'pagination' => [
+                    'current_page' => $users->currentPage(),
+                    'next_page_url' => $users->nextPageUrl(),
+                    'previous_page_url' => $users->previousPageUrl(),
+                    'last_page' => $users->lastPage(),
+                    'total' => $users->total(),
+                ],
+
+            ];
         }
-        if ($users->isEmpty()) {
-            return $this->returnError('No Users Found');
-        }
-        $data[] = [
-            'users' => UserResource::collection($users),
-            'pagination' => [
-                'current_page' => $users->currentPage(),
-                'next_page_url' => $users->nextPageUrl(),
-                'previous_page_url' => $users->previousPageUrl(),
-                'last_page' => $users->lastPage(),
-                'total' => $users->total(),
-            ],
-        ];
+
         return $this->returnData("data", $data, "Users Data");
     }
 
@@ -122,8 +128,22 @@ class UserController extends Controller
         if (!$user || !$userDetail) {
             return $this->returnError('Failed to Store User');
         }
-
+        //assign role to user
         $user->syncRoles($request->input('roles', []));
+
+        //assign Location to user
+        $LocationAssignedToUser = $user->user_locations()->wherePivot('location_id', $request->location_id)->exists();
+        if ($LocationAssignedToUser) {
+            return $this->returnError('User has already been assigned to this location');
+        }
+        $user->user_locations()->attach($request->location_id);
+
+        //assign workType to User
+        $workTypeAssignedToUser = $user->work_types()->where('work_type_id', $request->work_type_id)->exists();
+        if ($workTypeAssignedToUser) {
+            return $this->returnError('User has already been assigned to this workType');
+        }
+        $user->work_types()->attach($request->work_type_id);
 
         return $this->returnData("data", $finalData, "User Created");
     }
@@ -256,13 +276,10 @@ class UserController extends Controller
 
         return $this->returnData("User", new LoginResource($user), "User Data");
     }
-    // public function AssignRole(Request $request, User $user)
-    // {
-    //     $this->validate($request, [
-    //         'role' => ['required', 'string', 'exists:roles,name'],
-    //     ]);
-    //     $role = Role::findByName($request->role);
-    //     $user->assignRole($role);
-    //     return $this->returnData('user', $user, 'Role assigned to user successfully.');
-    // }
+    public function getAllUsersNames()
+    {
+        $usersByName = User::pluck('name');
+        return $this->returnData("usersNames", $usersByName, "UsersName");
+    }
+
 }

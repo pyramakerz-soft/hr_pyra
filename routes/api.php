@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'auth'], function () {
     Route::get('/user_by_token', [UserController::class, 'profile'])->name('user.profile');
+    Route::get('/users_by_name', [UserController::class, 'getAllUsersNames'])->name('user.names');
     Route::post('/update_user/{user}', [UserController::class, 'update'])->name('user.update');
     Route::get('/getAllUsers', [UserController::class, 'index'])->name('users.all');
     Route::delete('/delete_user/{user}', [UserController::class, 'destroy'])->name('user.delete');

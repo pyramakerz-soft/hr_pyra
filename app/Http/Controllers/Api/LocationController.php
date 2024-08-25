@@ -18,7 +18,7 @@ class LocationController extends Controller
     {
 
         if (request()->has('search')) {
-            $locations = Location::where('name', 'like', '%' . request()->get('search', '') . '%')->paginate(5);
+            $locations = Location::where('name', 'like', '%' . request()->get('search', '') . '%')->get();
         } else {
             $locations = Location::paginate(5);
         }

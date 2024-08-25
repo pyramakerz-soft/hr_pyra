@@ -33,10 +33,15 @@ export class HREmployeeComponent {
   PagesNumber: number = 1;
   CurrentPageNumber: number = 1;
   pages: number[] = [];
+  selectedName: string = "";
+  DisplayPagginationOrNot:boolean=true;
+  UsersNames:string[]=[];
+  filteredUsers: string[] = [];
 
 
   ngOnInit() {
     this.getAllEmployees(this.CurrentPageNumber);
+    this.getUsersName()
   }
 
 
@@ -93,4 +98,80 @@ export class HREmployeeComponent {
     this.getAllEmployees(this.CurrentPageNumber);
   }
 
-}
+  
+  Search(){
+    if(this.selectedName){
+    this.userServ.SearchByName(this.selectedName).subscribe(
+      (d: any) => {
+        this.tableData = d.data[0].users;
+        this.PagesNumber=1;
+        this.DisplayPagginationOrNot=false;
+      },
+      (error) => {
+        console.log(error)
+      }
+    );
+  }
+  else{
+    this.DisplayPagginationOrNot=true;
+  }
+  }
+
+
+  getUsersName(){
+    this.userServ.getAllUsersName().subscribe(
+      (d: any) => {
+        console.log(d.usersNames);
+        this.UsersNames=d.usersNames;
+      },
+      (error) => {
+        console.log(error)
+      }
+    );
+  }
+
+
+  filterByName() {
+    // this.getLocationsName();
+    const query = this.selectedName.toLowerCase();
+    if (query.trim() === '') {
+      // If the input is empty, call getAllLocations with the current page number
+      this.getAllEmployees(this.CurrentPageNumber);
+      this.DisplayPagginationOrNot=true;
+      this.filteredUsers = []; // Clear the dropdown list
+    } else {
+    this.filteredUsers = this.UsersNames;
+    this.filteredUsers = this.UsersNames.filter(name => 
+      name.toLowerCase().includes(query)
+    );
+  }
+  }
+
+  selectUser(location: string) {
+    this.selectedName = location;
+    this.userServ.SearchByName(this.selectedName).subscribe(
+      (d: any) => {
+        this.tableData=d.data[0].users;
+        this.DisplayPagginationOrNot=false;
+      },
+      (error) => {
+        console.log(error);
+
+      }
+    );
+
+  }
+
+  resetfilteredUsers(){
+    this.filteredUsers = [];
+
+  }
+
+
+
+
+
+
+  }
+
+

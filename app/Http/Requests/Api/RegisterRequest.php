@@ -43,6 +43,8 @@ class RegisterRequest extends FormRequest
             'user_id' => ['exists:users,id'],
             'start_time' => ['required', 'date_format:H:i'],
             'end_time' => ['required', 'date_format:H:i'],
+            'location_id' => ['required', 'exists:locations,id'],
+            'work_type_id' => ['required', 'exists:work_types,id'],
         ];
     }
 
