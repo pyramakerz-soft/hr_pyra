@@ -20,8 +20,9 @@ class ClockResource extends JsonResource
         })->map(function ($clock) {
             return [
                 'id' => $clock->id,
-                'clockIn' => Carbon::parse($clock->clock_in)->format('h:iA'),
+                'clockIn' => $clock->clock_in ? Carbon::parse($clock->clock_in)->format('h:iA') : null,
                 'clockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('h:iA') : null,
+                'totalHours' => $clock->duration ? Carbon::parse($clock->duration)->format('h:i') : null,
 
             ];
         })->values()->toArray();
