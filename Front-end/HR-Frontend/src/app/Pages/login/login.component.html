@@ -4,11 +4,23 @@
         <p class="h5 text-[#111111] py-3">Hello, please sign into your account</p>
 
         <div class="w-full text-start">
-            <label htmlFor="email" class="h-4 font-medium text-[#344054] block mb-1" >Email</label>
-            <input id="email" type="email" placeholder="Enter your email" class="h5 w-full bg-white border rounded border-[#D0D5DD] shadow-sm shadow-[#1018280D] h-[22%] mb-4 py-[7.5px] px-[10.5px]  "   [(ngModel)]="email">
+            <label htmlFor="email" class="h-4 font-medium text-[#344054] block mb-1" >
+                Email
+            </label>
+            <input id="email" type="email" placeholder="Enter your email" 
+            [(ngModel)]="email"
+            (input)="onEmailChange()"
+            class="h5 w-full bg-white border rounded border-[#D0D5DD] shadow-sm shadow-[#1018280D] h-[22%]  py-[7.5px] px-[10.5px]"   [(ngModel)]="email">
+            <span *ngIf="emailError" class="text-red-500 text-sm ml-2 font-normal">{{ emailError }}</span>
             
-            <label htmlFor="pass" class="h-4 font-medium text-[#344054] block mb-1"  >Password</label>
-            <input id="pass" type="password" class="h5 w-full bg-white border rounded border-[#D0D5DD] shadow-sm shadow-[#1018280D] h-[22%] py-[7.5px] px-[10.5px]" [(ngModel)]="password">
+            <label htmlFor="pass" class="h-4 font-medium text-[#344054] block mb-1 mt-4"  >
+                Password
+            </label>
+            <input id="pass" type="password"
+            [(ngModel)]="password"
+            (input)="onPasswordChange()"
+            class="h5 w-full bg-white border rounded border-[#D0D5DD] shadow-sm shadow-[#1018280D] h-[22%] py-[7.5px] px-[10.5px]" [(ngModel)]="password">
+            <span *ngIf="passwordError" class="text-red-500 text-sm ml-2 font-normal">{{ passwordError }}</span>
             
             <div class="h6 flex items-center mt-4 justify-between">
                 <div class="flex items-center">
