@@ -158,11 +158,11 @@ class ClockController extends Controller
         $distanceBetweenUserAndLocation = $closestLocation['distance'];
         $now = Carbon::now()->addRealHour(3);
         $UserEndTime = Carbon::parse($authUser->user_detail->end_time)->format("H:i:sa");
-        dd($now->toString(), $UserEndTime);
-        if ($now > $UserEndTime) {
-            dd("Your Shift Is Ended");
-        }
-        dd("You Are able to clockIn");
+        // dd($now->toString(),$UserEndTime)
+        // if ($now > $UserEndTime) {
+        //     dd("Your Shift Is Ended");
+        // }
+        // dd("You Are able to clockIn");
         $existingClockIn = ClockInOut::where('user_id', $user_id)
             ->where('location_id', $location_id)
             ->whereDate('clock_in', Carbon::today())
