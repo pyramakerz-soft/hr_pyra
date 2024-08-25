@@ -279,7 +279,7 @@ class UserController extends Controller
     public function getAllUsersNames()
     {
         $usersByName = User::pluck('name');
-        return $this->returnData("usersNames", $usersByName, "UsersNames");
+        return $this->returnData("users names", $usersByName, "UsersName");
     }
 
 }

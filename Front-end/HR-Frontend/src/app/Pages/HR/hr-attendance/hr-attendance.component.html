@@ -6,8 +6,9 @@
 
     <div
         class="mt-5 w-full rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 space-x-2 flex items-center">
-        <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]"></i>
+        <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]" (click)="Search()"></i>
         <input type="text" placeholder="Enter Keyword..."
+             [(ngModel)]="selectedName"
             class="outline-none border-none  placeholder-[#667085] bg-transparent text-sm md:text-base" />
     </div>
 

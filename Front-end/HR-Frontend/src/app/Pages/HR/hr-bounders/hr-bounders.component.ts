@@ -21,6 +21,9 @@ export class HrBoundersComponent {
   locationsNames: string[] = [];
   filteredLocations: string[] = [];
   selectedName: string = "";
+  DisplayPagginationOrNot:boolean=true;
+
+
 
   constructor(public dialog: MatDialog, public locationServ: LocationsService) {}
 
@@ -129,4 +132,6 @@ export class HrBoundersComponent {
     this.filteredLocations = [];
 
   }
+
+
 }
