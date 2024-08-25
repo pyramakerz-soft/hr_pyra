@@ -26,4 +26,7 @@ export class HRComponent {
     this.isMenuOpen = !this.isMenuOpen;
   }
 
+  closeMenu() {
+    this.isMenuOpen = false;
+  }
 }

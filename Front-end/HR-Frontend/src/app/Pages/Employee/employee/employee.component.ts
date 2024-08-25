@@ -21,4 +21,8 @@ export class EmployeeComponent {
   OpenMenu() {
     this.isMenuOpen = !this.isMenuOpen;
   }
+
+  closeMenu() {
+    this.isMenuOpen = false;
+  }
 }

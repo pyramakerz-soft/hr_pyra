@@ -29,7 +29,7 @@ export class UserServiceService {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     
-    return this.http.post<any>(this.baseURL + "/auth/create_user", emp, { headers });
+    return this.http.post<any>(this.baseURL + "/auth/create_user/", emp, { headers });
   }
 
   updateUser(emp:AddEmployee, empId:number) {

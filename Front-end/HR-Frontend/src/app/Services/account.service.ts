@@ -47,10 +47,6 @@ export class AccountService {
    return this.http.get(`${this.baseUrl}/user_by_token`, { headers, responseType: 'text' });
   }
 
-
-  
-
-
   Login(email: string, password: string) {
     if (email.trim() === "" || password.trim() === "") {
        if (email.trim() === "" && password.trim() === "") {
@@ -60,7 +56,7 @@ export class AccountService {
        } else if (password.trim() === "" && email.trim() !== "") {
           alert('Password cannot be empty');
        }
-       return;  // Stop further execution if any field is empty
+       return;
     }
  
     const body = { email, password };
@@ -90,7 +86,5 @@ export class AccountService {
     this.isAuthenticated=false;
     localStorage.removeItem("token");
   }
-
-
 
 }

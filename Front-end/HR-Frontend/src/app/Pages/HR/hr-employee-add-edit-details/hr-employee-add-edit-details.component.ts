@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { RolesService } from '../../../Services/roles.service';
 import { RoleModel } from '../../../Models/role-model';
 import { DepartmentService } from '../../../Services/department.service';
@@ -8,6 +8,7 @@ import { AddEmployee } from '../../../Models/add-employee';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { UserServiceService } from '../../../Services/user-service.service';
+import Swal from 'sweetalert2'
 
 @Component({
   selector: 'app-hr-employee-add-edit-details',
@@ -29,12 +30,14 @@ export class HrEmployeeAddEditDetailsComponent {
   regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   regexNationalID = /^\d{14}$/;
 
-  validationErrors: { [key in keyof AddEmployee]?: boolean | string } = {};
+  // validationErrors: { [key in keyof AddEmployee]?: boolean | string } = {};
+  validationErrors: { [key in keyof AddEmployee]?: string } = {};
   
   constructor(private route: ActivatedRoute,  
               public roleService: RolesService, 
               public departmentService: DepartmentService,
-              public userService: UserServiceService
+              public userService: UserServiceService, 
+              public router: Router
             ){}
   
   ngOnInit(): void {
@@ -54,9 +57,6 @@ export class HrEmployeeAddEditDetailsComponent {
       (d: any) => {
         this.employee = d.User;
         this.employee.role = this.employee.role || []
-      },
-      (error) => {
-        console.log(error)
       }
     );
   }
@@ -65,9 +65,6 @@ export class HrEmployeeAddEditDetailsComponent {
     this.departmentService.getall().subscribe(
       (departments: any) => {
         this.departments = departments.data.departments
-      },
-      error => {
-        console.error('Error fetching departments:', error);
       }
     );
   }
@@ -76,9 +73,6 @@ export class HrEmployeeAddEditDetailsComponent {
     this.roleService.getall().subscribe(
       (roles: any) => {
         this.roles = roles.roles
-      },
-      error => {
-        console.error('Error fetching roles:', error);
       }
     );
   }
@@ -96,6 +90,19 @@ export class HrEmployeeAddEditDetailsComponent {
         this.employee.role.splice(index, 1);
       }
     }
+
+    if (this.employee.role.length > 0) {
+      this.validationErrors['role'] = '';
+    } else {
+      this.validationErrors['role'] = '*Role is required.';
+    }
+  }
+
+  capitalizeField(field: keyof AddEmployee): string {
+    if(field == "emp_type"){
+      return "Position";
+    }
+    return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
   isFormValid(): boolean {
@@ -104,47 +111,54 @@ export class HrEmployeeAddEditDetailsComponent {
     for (const key in this.employee) {
       if (this.employee.hasOwnProperty(key)) {
         const field = key as keyof AddEmployee;
-        if (!this.employee[field]) {
-          this.validationErrors[field] = true;
+        if (!this.employee[field] && field != "code") {
+          this.validationErrors[field] = `*${this.capitalizeField(field)} is required.`;
           isValid = false;
         } else {
-          this.validationErrors[field] = false;
+          this.validationErrors[field] = '';
 
           switch (field){
             case "name":
               if(this.employee.name.length < 3){
-                console.log("Name Must be more than 2 chars")
+                this.validationErrors[field] = 'Name must be more than 2 characters.';
+                isValid = false;
               }
               break;
             case "phone":
               if(!this.regexPhone.test(this.employee.phone)){
-                console.log("Invalid phone number")
+                this.validationErrors[field] = 'Invalid phone number.';
+                isValid = false;
               }
               break;
             case "contact_phone":
               if(!this.regexPhone.test(this.employee.contact_phone)){
-                console.log("Invalid contact phone number")
+                this.validationErrors[field] = 'Invalid contact phone number.';
+                isValid = false;
               }
               break;
             case "password":
               if(this.employee.password.length < 5){
-                console.log("Password Must be more than 5 chars")
+                this.validationErrors[field] = 'Password must be more than 5 characters.';
+                isValid = false;
               }
               break;
             case "email":
               if(!this.regexEmail.test(this.employee.email)){
-                console.log("Invalid Email")
+                this.validationErrors[field] = 'Invalid email.';
+                isValid = false;
               }
               break;
             case "national_id":
               if(!this.regexNationalID.test(this.employee.national_id)){
-                console.log("Invalid National ID")
+                this.validationErrors[field] = 'Invalid National ID.';
+                isValid = false;
               }
               break;
             case "working_hours_day":
               if(this.employee.working_hours_day){
                 if(this.employee.working_hours_day > 23){
-                  console.log("Invalid working_hours_day")
+                  this.validationErrors[field] = 'Invalid working hours day.';
+                  isValid = false;
                 }
               }
               break;
@@ -154,10 +168,10 @@ export class HrEmployeeAddEditDetailsComponent {
     }
 
     if(this.employee.role.length == 0){
-      this.validationErrors["role"] = true;
+      this.validationErrors['role'] = '*Role is required.';
       isValid = false;
     } else {
-      this.validationErrors["role"] = false;
+      this.validationErrors['role'] = '';
     }
 
     if(this.employee.start_time != null && this.employee.end_time != null){
@@ -174,8 +188,21 @@ export class HrEmployeeAddEditDetailsComponent {
 
       const diffHours = diffMilliseconds / (1000 * 60 * 60);
 
-      if (diffHours !== this.employee.working_hours_day || diffHours < 0 ) {
-        console.log("Invalid Start and end time")
+      const workingHoursDay = this.employee.working_hours_day != null ? this.employee.working_hours_day : 0; 
+
+      if (diffHours - parseFloat(workingHoursDay.toString()) > 0.01 || diffHours < 0 ) {
+        this.validationErrors['start_time'] = 'Invalid Start Time.';
+        this.validationErrors["end_time"] = 'Invalid End Time.';
+        this.validationErrors['working_hours_day'] = 'Invalid Working hours day.';
+        isValid = false;
+        Swal.fire({
+          icon: "error",
+          title: "Invalid Input",
+          text: "Starting Time and Ending Time not Compatible with Working hours day",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#FF7519",
+          
+        });
       }
     }
 
@@ -187,36 +214,48 @@ export class HrEmployeeAddEditDetailsComponent {
     if (field in this.employee) {
       (this.employee as any)[field] = value;
       if (value) {
-        this.validationErrors[field] = false;
+        this.validationErrors[field] = '';
       }
     }
   }
   
   SaveEmployee() {
+
     if (this.isFormValid()) {
       this.employee.department_id = Number(this.employee.department_id);
-
-      console.log(this.employee)
 
       if(this.EmployeeId === 0){
         this.userService.createUser(this.employee).subscribe(
           (result: any) => {
-            console.log(result)
+            this.router.navigateByUrl("HR/HREmployee")
           },
           error => {
-            console.error('Error:', error.error.errors);
+            if (error.error && error.error.errors) {
+              this.handleServerErrors(error.error.errors as Record<keyof AddEmployee, string[]>);
+            }
           }
         );
       } else{
         this.userService.updateUser(this.employee, this.EmployeeId).subscribe(
           (result: any) => {
-            console.log(result)
+            this.router.navigateByUrl("HR/HREmployee")
           },
           error => {
-            console.error('Error:', error);
+            if (error.error && error.error.errors) {
+              this.handleServerErrors(error.error.errors as Record<keyof AddEmployee, string[]>);
+            }
           }
         );
       }
+    }
+  }
+
+  private handleServerErrors(errors: Record<keyof AddEmployee, string[]>) {
+    for (const key in errors) {
+      if (errors.hasOwnProperty(key)) {
+        const field = key as keyof AddEmployee; 
+        this.validationErrors[field] = errors[field].join(' ');
       }
+    }
   }
 }

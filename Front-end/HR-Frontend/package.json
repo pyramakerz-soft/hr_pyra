@@ -26,6 +26,7 @@
     "@fortawesome/angular-fontawesome": "^0.15.0",
     "ngx-owl-carousel-o": "^18.0.0",
     "rxjs": "~7.8.0",
+    "sweetalert2": "^11.12.4",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.3"
   },

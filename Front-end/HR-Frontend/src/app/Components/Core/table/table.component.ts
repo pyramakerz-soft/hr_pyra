@@ -42,7 +42,6 @@ export class TableComponent {
     this.token = localStorage.getItem("token");
     this.empDashserv.GetClocks(this.token,pgNumb).subscribe(
      (d: any) => {
-       console.log(d.data.pagination.last_page)
        this.Userclocks = d.data.clocks; 
      },
      (error) => {
