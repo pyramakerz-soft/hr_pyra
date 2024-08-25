@@ -100,9 +100,12 @@ class ClockController extends Controller
         if ($request->has('date')) {
             $date = Carbon::parse($request->get('date'))->toDateString();
             $query->whereDate('clock_in', $date);
-        }
+            $clocks = $query->orderBy('clock_in', 'desc')->get();
 
-        $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+        } else {
+            $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+
+        }
 
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clocks Found For This User');
@@ -240,7 +243,6 @@ class ClockController extends Controller
             $date = Carbon::parse($request->get('date'))->toDateString();
             $query->whereDate('clock_in', $date);
         }
-
         $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
 
         if ($clocks->isEmpty()) {
