@@ -13,10 +13,10 @@ export class UserServiceService {
 
   constructor(public http:HttpClient) { }
 
-  getall(): Observable<UserModel[]> {
+  getall(pageNumber:number): Observable<UserModel[]> {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<UserModel[]>(this.baseURL + "/auth/getAllUsers?page=1", { headers });
+    return this.http.get<UserModel[]>(this.baseURL + `/auth/getAllUsers?page=${pageNumber}`, { headers });
   }
 
   getUserById(id:number): Observable<AddEmployee> {

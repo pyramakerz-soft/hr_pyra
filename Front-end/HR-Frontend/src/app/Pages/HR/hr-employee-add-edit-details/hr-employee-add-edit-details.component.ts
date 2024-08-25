@@ -22,10 +22,14 @@ export class HrEmployeeAddEditDetailsComponent {
   departments: Department[] = [];
   
   employee: AddEmployee = new AddEmployee(
-    '', '', null, '', '', '', '', '', '', null, null, null, '', null, null, '', []
+    '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', []
   );
 
-  validationErrors: { [key in keyof AddEmployee]?: boolean | number | string | null | Date } = {};
+  regexPhone = /^(010|011|012|015)\d{8}$/;
+  regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  regexNationalID = /^\d{14}$/;
+
+  validationErrors: { [key in keyof AddEmployee]?: boolean | string } = {};
   
   constructor(private route: ActivatedRoute,  
               public roleService: RolesService, 
@@ -105,6 +109,46 @@ export class HrEmployeeAddEditDetailsComponent {
           isValid = false;
         } else {
           this.validationErrors[field] = false;
+
+          switch (field){
+            case "name":
+              if(this.employee.name.length < 3){
+                console.log("Name Must be more than 2 chars")
+              }
+              break;
+            case "phone":
+              if(!this.regexPhone.test(this.employee.phone)){
+                console.log("Invalid phone number")
+              }
+              break;
+            case "contact_phone":
+              if(!this.regexPhone.test(this.employee.contact_phone)){
+                console.log("Invalid contact phone number")
+              }
+              break;
+            case "password":
+              if(this.employee.password.length < 5){
+                console.log("Password Must be more than 5 chars")
+              }
+              break;
+            case "email":
+              if(!this.regexEmail.test(this.employee.email)){
+                console.log("Invalid Email")
+              }
+              break;
+            case "national_id":
+              if(!this.regexNationalID.test(this.employee.national_id)){
+                console.log("Invalid National ID")
+              }
+              break;
+            case "working_hours_day":
+              if(this.employee.working_hours_day){
+                if(this.employee.working_hours_day > 23){
+                  console.log("Invalid working_hours_day")
+                }
+              }
+              break;
+          }
         }
       }
     }
@@ -114,6 +158,25 @@ export class HrEmployeeAddEditDetailsComponent {
       isValid = false;
     } else {
       this.validationErrors["role"] = false;
+    }
+
+    if(this.employee.start_time != null && this.employee.end_time != null){
+      let [xHours, xMinutes] = this.employee.start_time.split(':').map(Number);
+      let [yHours, yMinutes] = this.employee.end_time.split(':').map(Number);
+
+      const start_timeDate = new Date();
+      const end_timeDate = new Date();
+
+      start_timeDate.setHours(xHours, xMinutes, 0, 0);
+      end_timeDate.setHours(yHours, yMinutes, 0, 0);
+
+      const diffMilliseconds = end_timeDate.getTime() - start_timeDate.getTime();
+
+      const diffHours = diffMilliseconds / (1000 * 60 * 60);
+
+      if (diffHours !== this.employee.working_hours_day || diffHours < 0 ) {
+        console.log("Invalid Start and end time")
+      }
     }
 
     return isValid;

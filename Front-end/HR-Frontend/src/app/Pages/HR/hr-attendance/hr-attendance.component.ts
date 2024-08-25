@@ -18,22 +18,32 @@ interface data{
   styleUrl: './hr-attendance.component.css'
 })
 export class HrAttendanceComponent {
+  PagesNumber: number = 1;
+  CurrentPageNumber: number = 1;
+  pages: number[] = [];
+
   constructor(public router:Router , public userServ:UserServiceService){}
 
   tableData:UserModel[]= [];
 
   ngOnInit(){
-    this.getAllEmployees();
+    this.getAllEmployees(1);
+
   }
 
   NavigateToEmployeeAttendanceDetails(EmpId:number){
     this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/"+EmpId)
   }
 
-  getAllEmployees() {
-    this.userServ.getall().subscribe(
+
+  getAllEmployees(pgNumber:number) {
+    this.CurrentPageNumber = pgNumber;
+    this.userServ.getall(pgNumber).subscribe(
       (d: any) => {
-        this.tableData = d.data.users;
+        console.log(d.data[0])
+        this.tableData = d.data[0].users;
+        this.PagesNumber=d.data[0].pagination.last_page;
+        this.generatePages();
       },
       (error) => {
         console.log(error)
@@ -41,4 +51,21 @@ export class HrAttendanceComponent {
     );
   }
 
+
+  generatePages() {
+    this.pages = [];
+    for (let i = 1; i <= this.PagesNumber; i++) {
+      this.pages.push(i);
+    }
+  }
+
+  getNextPage() {
+    this.CurrentPageNumber++;
+    this.getAllEmployees(this.CurrentPageNumber);
+  }
+
+  getPrevPage() {
+    this.CurrentPageNumber--;
+    this.getAllEmployees(this.CurrentPageNumber);
+  }
 }

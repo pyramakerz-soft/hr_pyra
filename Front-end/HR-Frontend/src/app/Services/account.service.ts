@@ -52,34 +52,38 @@ export class AccountService {
 
 
   Login(email: string, password: string) {
+    if (email.trim() === "" || password.trim() === "") {
+       if (email.trim() === "" && password.trim() === "") {
+          alert('Please enter the data');
+       } else if (email.trim() === "" && password.trim() !== "") {
+          alert('Email cannot be empty');
+       } else if (password.trim() === "" && email.trim() !== "") {
+          alert('Password cannot be empty');
+       }
+       return;  // Stop further execution if any field is empty
+    }
+ 
     const body = { email, password };
     this.http.post(`${this.baseUrl}/login`, body, { responseType: 'text' })
-      .subscribe((d: string) => {
-        const response = JSON.parse(d);
-        const token = response.token;
-
-        if (token) {
-          this.isAuthenticated = true;
-          localStorage.setItem("token", token);
-          this.GetDataFromToken();
-          this.router.navigateByUrl("employee");
-
-        }
-      },
-        (error: HttpErrorResponse) => {
-          if (error.status === 401) {
-            // Show an alert for invalid email or password
-            alert('Invalid email or password');
-          } else if (email === "" && password !== "") {
-            alert('Email cannot be empty');
-          } else if (password === "" && email !== "") {
-            alert('Password cannot be empty');
-          } else {
-            alert('Please enter the data');
+       .subscribe((d: string) => {
+          const response = JSON.parse(d);
+          const token = response.token;
+ 
+          if (token) {
+             this.isAuthenticated = true;
+             localStorage.setItem("token", token);
+             this.GetDataFromToken();
+             this.router.navigateByUrl("employee");
           }
-        }
-      );
-  }
+       },
+       (error: HttpErrorResponse) => {
+          if (error.status === 401) {
+             alert('Invalid email or password');
+          } else {
+             alert('An unexpected error occurred');
+          }
+       });
+ }
 
 
   logout(){

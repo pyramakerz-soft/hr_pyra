@@ -13,7 +13,7 @@ export class AddEmployee {
         public hiring_date: Date | null,
         public salary: number | null,
         public overtime_hours: number | null,
-        public working_hours_day: string,
+        public working_hours_day: number | null,
         public start_time: string | null,
         public end_time: string | null,
         public gender: string,

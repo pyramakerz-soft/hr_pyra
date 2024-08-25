@@ -163,9 +163,9 @@ class ClockController extends Controller
         $now = Carbon::now()->addRealHour(3);
         $UserEndTime = Carbon::createFromTimeString($authUser->user_detail->end_time);
 
-        if ($now->greaterThan($UserEndTime)) {
-            return $this->returnError('Your shift has already ended, you cannot clock in.');
-        }
+        // if ($now->greaterThan($UserEndTime)) {
+        //     return $this->returnError('Your shift has already ended, you cannot clock in.');
+        // }
         $existingClockIn = ClockInOut::where('user_id', $user_id)
             ->where('location_id', $location_id)
             ->whereDate('clock_in', Carbon::today())

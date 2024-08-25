@@ -16,8 +16,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class HrEmployeeAttendanceDetailsComponent {
   tableData:EmployeeDashboard[]= [];
-  pageNumber:number=0;
   token:string="";
+  showOtherClocks: boolean= false; 
+  PagesNumber: number = 1;
+  CurrentPageNumber: number = 1;
+  pages: number[] = [];
   constructor(public empDashserv:EmployeeDashService , public UserClocksService : ClockService ,public activatedRoute: ActivatedRoute,
     public route: Router){}
 
@@ -42,6 +45,7 @@ export class HrEmployeeAttendanceDetailsComponent {
   getAllClocks(id:number) {
     this.UserClocksService.GetUserClocksById(id).subscribe(
       (d: any) => {
+        console.log(d)
         this.tableData = d.data.clocks;
       },
       (error) => {
@@ -50,4 +54,24 @@ export class HrEmployeeAttendanceDetailsComponent {
     );
   }
 
+  generatePages() {
+    this.pages = [];
+    for (let i = 1; i <= this.PagesNumber; i++) {
+      this.pages.push(i);
+    }
+  }
+
+  getNextPage() {
+    this.CurrentPageNumber++;
+    this.getAllClocks(this.CurrentPageNumber);
+  }
+
+  getPrevPage() {
+    this.CurrentPageNumber--;
+    this.getAllClocks(this.CurrentPageNumber);
+  }
+
+  toggleOtherClocks(index: number): void {
+    this.showOtherClocks = !this.showOtherClocks;
+  }
 }

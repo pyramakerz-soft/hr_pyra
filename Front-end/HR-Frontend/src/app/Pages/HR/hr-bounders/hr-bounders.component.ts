@@ -29,6 +29,7 @@ export class HrBoundersComponent {
     this.getLocationsName();
   }
 
+  
   getAllLocations(page: number) {
     this.CurrentPageNumber = page;
     this.locationServ.getall(page).subscribe(
