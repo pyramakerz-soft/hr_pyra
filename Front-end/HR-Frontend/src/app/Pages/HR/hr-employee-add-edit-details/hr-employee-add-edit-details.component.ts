@@ -30,7 +30,6 @@ export class HrEmployeeAddEditDetailsComponent {
   regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   regexNationalID = /^\d{14}$/;
 
-  // validationErrors: { [key in keyof AddEmployee]?: boolean | string } = {};
   validationErrors: { [key in keyof AddEmployee]?: string } = {};
   
   constructor(private route: ActivatedRoute,  
