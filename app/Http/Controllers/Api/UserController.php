@@ -265,7 +265,7 @@ class UserController extends Controller
     public function getAllUsersNames()
     {
         $usersByName = User::pluck('name');
-        return $this->returnData("users names", $usersByName, "Users Name");
+        return $this->returnData("users names", $usersByName, "UsersName");
     }
     // public function AssignRole(Request $request, User $user)
     // {
