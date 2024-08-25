@@ -39,24 +39,30 @@ class UserController extends Controller
         if (request()->has('search')) {
             $users = UserResource::collection(
                 User::where('name', 'like', '%' . request()->get('search', '') . '%')
-                    ->orWhere('code', 'like', '%' . request()->get('search', '') . '%')->paginate(5)
+                    ->orWhere('code', 'like', '%' . request()->get('search', '') . '%')->get()
             );
+            if ($users->isEmpty()) {
+                return $this->returnError('No Users Found');
+            }
+            $data[] = [
+                'users' => UserResource::collection($users),
+
+            ];
         } else {
             $users = User::paginate(5);
+            $data[] = [
+                'users' => UserResource::collection($users),
+                'pagination' => [
+                    'current_page' => $users->currentPage(),
+                    'next_page_url' => $users->nextPageUrl(),
+                    'previous_page_url' => $users->previousPageUrl(),
+                    'last_page' => $users->lastPage(),
+                    'total' => $users->total(),
+                ],
+
+            ];
         }
-        if ($users->isEmpty()) {
-            return $this->returnError('No Users Found');
-        }
-        $data[] = [
-            'users' => UserResource::collection($users),
-            'pagination' => [
-                'current_page' => $users->currentPage(),
-                'next_page_url' => $users->nextPageUrl(),
-                'previous_page_url' => $users->previousPageUrl(),
-                'last_page' => $users->lastPage(),
-                'total' => $users->total(),
-            ],
-        ];
+
         return $this->returnData("data", $data, "Users Data");
     }
 
@@ -255,6 +261,11 @@ class UserController extends Controller
         }
 
         return $this->returnData("User", new LoginResource($user), "User Data");
+    }
+    public function getAllUsersNames()
+    {
+        $usersByName = User::pluck('name');
+        return $this->returnData("users names", $usersByName, "Users Name");
     }
     // public function AssignRole(Request $request, User $user)
     // {
