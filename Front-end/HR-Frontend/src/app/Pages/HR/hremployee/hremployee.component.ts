@@ -35,7 +35,7 @@ export class HREmployeeComponent {
   pages: number[] = [];
   selectedName: string = "";
   DisplayPagginationOrNot:boolean=true;
-  UsersName:string[]=[];
+  UsersNames:string[]=[];
   filteredUsers: string[] = [];
 
 
@@ -98,6 +98,7 @@ export class HREmployeeComponent {
     this.getAllEmployees(this.CurrentPageNumber);
   }
 
+  
   Search(){
     if(this.selectedName){
     this.userServ.SearchByName(this.selectedName).subscribe(
@@ -116,10 +117,12 @@ export class HREmployeeComponent {
   }
   }
 
+
   getUsersName(){
     this.userServ.getAllUsersName().subscribe(
       (d: any) => {
-        console.log(d)
+        console.log(d.usersNames);
+        this.UsersNames=d.usersNames;
       },
       (error) => {
         console.log(error)
@@ -134,10 +137,11 @@ export class HREmployeeComponent {
     if (query.trim() === '') {
       // If the input is empty, call getAllLocations with the current page number
       this.getAllEmployees(this.CurrentPageNumber);
+      this.DisplayPagginationOrNot=true;
       this.filteredUsers = []; // Clear the dropdown list
     } else {
-    this.filteredUsers = this.UsersName;
-    this.filteredUsers = this.UsersName.filter(name => 
+    this.filteredUsers = this.UsersNames;
+    this.filteredUsers = this.UsersNames.filter(name => 
       name.toLowerCase().includes(query)
     );
   }
@@ -147,11 +151,12 @@ export class HREmployeeComponent {
     this.selectedName = location;
     this.userServ.SearchByName(this.selectedName).subscribe(
       (d: any) => {
-        console.log(d.usersnames)
-        this.tableData = d.locations.data;
+        this.tableData=d.data[0].users;
+        this.DisplayPagginationOrNot=false;
       },
       (error) => {
         console.log(error);
+
       }
     );
 
@@ -161,6 +166,7 @@ export class HREmployeeComponent {
     this.filteredUsers = [];
 
   }
+
 
 
 

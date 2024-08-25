@@ -106,6 +106,7 @@ export class HrBoundersComponent {
     if (query.trim() === '') {
       // If the input is empty, call getAllLocations with the current page number
       this.getAllLocations(this.CurrentPageNumber);
+      this.DisplayPagginationOrNot=true
       this.filteredLocations = []; // Clear the dropdown list
     } else {
     this.filteredLocations = this.locationsNames;
@@ -119,7 +120,9 @@ export class HrBoundersComponent {
     this.selectedName = location;
     this.locationServ.SearchByNames(this.selectedName).subscribe(
       (d: any) => {
-        this.tableData = d.locations.data;
+        console.log(d)
+        this.tableData = d.locations;
+        this.DisplayPagginationOrNot=false;
       },
       (error) => {
         console.log(error);
@@ -133,5 +136,24 @@ export class HrBoundersComponent {
 
   }
 
+
+
+  Search(){
+    if(this.selectedName){
+    this.locationServ.SearchByNames(this.selectedName).subscribe(
+      (d: any) => {
+        this.tableData =  d.locations;
+        this.PagesNumber=1;
+        this.DisplayPagginationOrNot=false;
+      },
+      (error) => {
+        console.log(error)
+      }
+    );
+  }
+  else{
+    this.DisplayPagginationOrNot=true;
+  }
+  }
 
 }
