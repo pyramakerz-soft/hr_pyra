@@ -16,7 +16,6 @@ use App\Traits\ResponseTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -240,10 +239,17 @@ class UserController extends Controller
             return $this->returnError('Failed to Update User');
         }
 
-        // Assign roles to the user
-        DB::table('model_has_roles')->where('model_id', $user->id)->delete();
-
-        $user->syncRoles($request->input('roles', []));
+        //Update Assigning Roles to User
+        $currentRoles = $user->roles->pluck('name')->toArray();
+        $newRoles = $request->input('roles', []);
+        $allRoles = array_unique(array_merge($currentRoles, $newRoles));
+        $user->syncRoles($allRoles);
+        //Update Assigning Locations to User
+        // $currentLocations = $user->user_locations()->pluck('name')->toArray();
+        // $newLocations = $request->input('locations', []);
+        // $allLocations = array_unique(array_merge($currentLocations, $newLocations));
+        // $user->Attach($allLocations);
+        //Update Assigning WorkTypes to User
 
         return $this->returnData("data", $finalData, "User Updated");
     }
