@@ -14,7 +14,7 @@ class ClockSeeder extends Seeder
     public function run(): void
     {
         $user_id = 1;
-        for ($i = 1; $i <= 30; $i++) {
+        for ($i = 1; $i <= 3; $i++) {
             $clockIn = Carbon::now()->subDays($i); // Set clock_in to different days
             $clockOut = $clockIn->copy()->addHours(rand(1, 8)); // Randomly add 1 to 8 hours
 

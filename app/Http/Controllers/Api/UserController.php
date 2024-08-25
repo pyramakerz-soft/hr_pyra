@@ -128,8 +128,22 @@ class UserController extends Controller
         if (!$user || !$userDetail) {
             return $this->returnError('Failed to Store User');
         }
-
+        //assign role to user
         $user->syncRoles($request->input('roles', []));
+
+        //assign Location to user
+        $LocationAssignedToUser = $user->user_locations()->wherePivot('location_id', $request->location_id)->exists();
+        if ($LocationAssignedToUser) {
+            return $this->returnError('User has already been assigned to this location');
+        }
+        $user->user_locations()->attach($request->location_id);
+
+        //assign workType to User
+        $workTypeAssignedToUser = $user->work_types()->where('work_type_id', $request->work_type_id)->exists();
+        if ($workTypeAssignedToUser) {
+            return $this->returnError('User has already been assigned to this workType');
+        }
+        $user->work_types()->attach($request->work_type_id);
 
         return $this->returnData("data", $finalData, "User Created");
     }
@@ -265,15 +279,7 @@ class UserController extends Controller
     public function getAllUsersNames()
     {
         $usersByName = User::pluck('name');
-        return $this->returnData("users names", $usersByName, "UsersName");
+        return $this->returnData("usersNames", $usersByName, "UsersNames");
     }
-    // public function AssignRole(Request $request, User $user)
-    // {
-    //     $this->validate($request, [
-    //         'role' => ['required', 'string', 'exists:roles,name'],
-    //     ]);
-    //     $role = Role::findByName($request->role);
-    //     $user->assignRole($role);
-    //     return $this->returnData('user', $user, 'Role assigned to user successfully.');
-    // }
+
 }
