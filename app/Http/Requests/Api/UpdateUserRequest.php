@@ -40,6 +40,8 @@ class UpdateUserRequest extends FormRequest
             'user_id' => ['exists:users,id'],
             'start_time' => ['nullable'],
             'end_time' => ['nullable'],
+            'location_id' => ['nullable', 'exists:locations,id'],
+            'work_type_id' => ['nullable', 'exists:work_types,id'],
 
         ];
     }

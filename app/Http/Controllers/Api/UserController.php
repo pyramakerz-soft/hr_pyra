@@ -130,19 +130,22 @@ class UserController extends Controller
         //assign role to user
         $user->syncRoles($request->input('roles', []));
 
-        //assign Location to user
-        $LocationAssignedToUser = $user->user_locations()->wherePivot('location_id', $request->location_id)->exists();
-        if ($LocationAssignedToUser) {
-            return $this->returnError('User has already been assigned to this location');
+        // Assign Location to user
+        $newLocations = $request->input('location_id', []);
+        foreach ($newLocations as $locationId) {
+            $LocationAssignedToUser = $user->user_locations()->wherePivot('location_id', $locationId)->exists();
+            if (!$LocationAssignedToUser) {
+                $user->user_locations()->attach($locationId);
+            }
         }
-        $user->user_locations()->attach($request->location_id);
-
-        //assign workType to User
-        $workTypeAssignedToUser = $user->work_types()->where('work_type_id', $request->work_type_id)->exists();
-        if ($workTypeAssignedToUser) {
-            return $this->returnError('User has already been assigned to this workType');
+        // Assign workType to User
+        $newWorkTypes = $request->input('work_type_id', []);
+        foreach ($newWorkTypes as $workTypeId) {
+            $workTypeAssignedToUser = $user->work_types()->wherePivot('work_type_id', $workTypeId)->exists();
+            if (!$workTypeAssignedToUser) {
+                $user->work_types()->attach($workTypeId);
+            }
         }
-        $user->work_types()->attach($request->work_type_id);
 
         return $this->returnData("data", $finalData, "User Created");
     }
@@ -241,15 +244,21 @@ class UserController extends Controller
 
         //Update Assigning Roles to User
         $currentRoles = $user->roles->pluck('name')->toArray();
+        // dd($currentRoles);
         $newRoles = $request->input('roles', []);
         $allRoles = array_unique(array_merge($currentRoles, $newRoles));
         $user->syncRoles($allRoles);
-        //Update Assigning Locations to User
-        // $currentLocations = $user->user_locations()->pluck('name')->toArray();
-        // $newLocations = $request->input('locations', []);
-        // $allLocations = array_unique(array_merge($currentLocations, $newLocations));
-        // $user->Attach($allLocations);
-        //Update Assigning WorkTypes to User
+        // Update Assigning Locations to User
+        $currentLocations = $user->user_locations()->pluck('locations.id')->toArray();
+        $newLocations = $request->input('location_id', []);
+        $uniqueNewLocations = array_diff($newLocations, $currentLocations);
+        $user->user_locations()->sync($uniqueNewLocations);
+
+        // Update Assigning WorkTypes to User
+        $currentWorkTypes = $user->work_types()->pluck('work_types.id')->toArray();
+        $newWorkTypes = $request->input('work_type_id', []);
+        $uniqueNewWorkTypes = array_diff($newWorkTypes, $currentWorkTypes);
+        $user->work_types()->sync($uniqueNewWorkTypes);
 
         return $this->returnData("data", $finalData, "User Updated");
     }
@@ -259,7 +268,7 @@ class UserController extends Controller
         $authUser = Auth::user();
 
         if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to Update users', 403);
+            return $this->returnError('You are not authorized to delete users', 403);
         }
 
         $user->delete();
