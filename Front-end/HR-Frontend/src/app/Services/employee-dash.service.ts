@@ -20,17 +20,8 @@ export class EmployeeDashService {
   }
 
   GetClocks(token: string,pageNumber:number): Observable<EmployeeDashboard[]> {
-    console.log("ghdft")
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.get<EmployeeDashboard[]>(`${this.baseUrl}/user_clocks?page=${pageNumber}`, { headers });
   }
-  
-
-  
-
-
-
-
-
   
 }

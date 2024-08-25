@@ -13,6 +13,8 @@ import { AccountService } from '../../../Services/account.service';
 export class SideBarComponent {
 
   @Input() menuItems: { label: string; icon: string; route: string; }[] = [];
+  @Input() closeMenu!: () => void;
+
   constructor(public AccountServ:AccountService ,private router: Router){}
 
   activeIndex: number | null = null;
@@ -23,6 +25,9 @@ export class SideBarComponent {
   
   setActiveIndex(index: number): void {
     this.activeIndex = index;
+    if (window.innerWidth < 1024) {
+      this.closeMenu();
+    }
   }
 
   setActiveIndexByRoute(currentRoute: string): void {
@@ -35,5 +40,8 @@ export class SideBarComponent {
   signOut(){
     this.AccountServ.logout();
     this.router.navigateByUrl("Login");
+    if (window.innerWidth < 1024) { 
+      this.closeMenu();
+    }
   }
 }

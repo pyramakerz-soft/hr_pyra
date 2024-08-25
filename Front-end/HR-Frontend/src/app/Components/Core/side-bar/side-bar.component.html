@@ -13,9 +13,8 @@
         *ngFor="let item of menuItems; let i = index"
         class="text_Style text-lg md:text-xl font-semibold px-9 py-3 md:py-5 flex items-center space-x-4 cursor-pointer"
         [ngClass]="{ active: activeIndex === i }"
-        (click)="setActiveIndex(i)"
+        (click)="setActiveIndex(i); item.label === 'Sign Out' ? signOut() : null"
         [routerLink]="item.route"
-        (click)="item.label === 'Sign Out' ? signOut() : null"
       >
         <i [ngClass]="item.icon"></i>
         <a class="no-underline ml-3" >{{ item.label }}</a>
