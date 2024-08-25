@@ -243,11 +243,9 @@ class UserController extends Controller
         }
 
         //Update Assigning Roles to User
-        $currentRoles = $user->roles->pluck('name')->toArray();
-        // dd($currentRoles);
         $newRoles = $request->input('roles', []);
-        $allRoles = array_unique(array_merge($currentRoles, $newRoles));
-        $user->syncRoles($allRoles);
+        $user->syncRoles($newRoles);
+
         // Update Assigning Locations to User
         $currentLocations = $user->user_locations()->pluck('locations.id')->toArray();
         $newLocations = $request->input('location_id', []);

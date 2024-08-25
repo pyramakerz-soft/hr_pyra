@@ -3,13 +3,14 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { ReverseGeocodingService } from '../../Services/reverse-geocoding.service';
 import { LocationsService } from '../../Services/locations.service';
+import { CommonModule } from '@angular/common';
 
 declare const google: any;
 
 @Component({
   selector: 'app-bounders-pop-up',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './bounders-pop-up.component.html',
   styleUrls: ['./bounders-pop-up.component.css']
 })
@@ -19,10 +20,13 @@ export class BoundersPopUpComponent implements AfterViewInit {
   id: number = 1;
   lat: number = 0;
   long: number = 0;
-  name: string | undefined;
-  address: string | undefined;
+  Boundname: string = '';
+  address: string = '';
   map: any;
   marker: any;
+
+  nameError: string = "";
+  addressError: string = ""; 
 
   constructor(public dialogRef: MatDialogRef<BoundersPopUpComponent>, 
               public googleMapsService: ReverseGeocodingService,
@@ -30,7 +34,7 @@ export class BoundersPopUpComponent implements AfterViewInit {
               @Inject(MAT_DIALOG_DATA) public data: any) {
     this.mode = data.mode;
     if (this.mode === 'edit') {
-      this.name = data.locationName;
+      this.Boundname = data.locationName;
       this.id = data.id;
       this.address = data.LocationAddress;
     }
@@ -112,29 +116,53 @@ export class BoundersPopUpComponent implements AfterViewInit {
   }
   
 
+  isFormValid(){
+    let isValid = true
+    this.nameError = ""; 
+    this.addressError = "";  
+    if (this.Boundname.trim() === "" && this.address.trim() === "") {
+      isValid = false;
+      this.nameError = '*Name Can not be empty';
+      this.addressError = '*Address Can not be empty';
+    } else if (this.Boundname.trim() === "") {
+      isValid = false;
+      this.nameError = '*Name Can not be empty';
+    } else if (this.address.trim() === "") {
+      isValid = false;
+      this.addressError = '*Address Can not be empty';
+    } 
+    return isValid
+  }
+
+  onNameChange() {
+    this.nameError = "" 
+  }
+  
+  onAddressChange() {
+    this.addressError = "" 
+  }
+
   EditAndAddLocation() {
-    if (this.mode === 'edit') {
-      const name = this.name || '';
-      const address = this.address || '';
-      this.LocationServ.EditByID(name, address, this.lat, this.long, this.id).subscribe(
-        (d: any) => {
-          this.dialogRef.close();
-        },
-        (error) => {
-          console.log(error);
-        }
-      );
-    } else if (this.mode === 'add') {
-      const name = this.name || '';
-      const address = this.address || '';
-      this.LocationServ.CreateAddress(name, address, this.lat, this.long).subscribe(
-        (d: any) => {
-          this.dialogRef.close();
-        },
-        (error) => {
-          console.log(error);
-        }
-      );
+    if(this.isFormValid()){
+      if (this.mode === 'edit') {
+        this.LocationServ.EditByID(this.Boundname, this.address, this.lat, this.long, this.id).subscribe(
+          (d: any) => {
+            this.dialogRef.close();
+          },
+          (error) => {
+            console.log(error);
+          }
+        );
+      } else if (this.mode === 'add') {
+        this.LocationServ.CreateAddress(this.Boundname, this.address, this.lat, this.long).subscribe(
+          (d: any) => {
+            this.dialogRef.close();
+          },
+          (error) => {
+            console.log(error);
+          }
+        );
+      }
     }
   }
 }

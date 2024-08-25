@@ -24,6 +24,7 @@ class ClockController extends Controller
     {
         $isPaginated = $clocks instanceof \Illuminate\Pagination\LengthAwarePaginator;
 
+        // Group clocks by date
         $groupedClocks = $clocks->groupBy(function ($clock) {
             return Carbon::parse($clock->clock_in)->toDateString();
         });
@@ -31,45 +32,49 @@ class ClockController extends Controller
         $data = [];
 
         foreach ($groupedClocks as $date => $clocksForDay) {
+            // Sort clocks by clock_in time to get the earliest one first
             $clocksForDay = $clocksForDay->sortBy(function ($clock) {
                 return Carbon::parse($clock->clock_in);
             });
+            // Get the earliest clock (the first clock of the day)
+            $firstClockAtTheDay = $clocksForDay->first();
+            // dd($firstClockAtTheDay->toArray());
 
-            // Get the first clock of the day
-            $firstClockAtTheDay = $clocksForDay->shift();
+            // Initialize total duration in seconds
+            $totalDurationInSeconds = 0;
 
-            // Initialize total duration
-            $totalDuration = Carbon::createFromTime(0, 0, 0);
-
-            // Calculate total duration including all clocks
-            foreach ($clocksForDay->prepend($firstClockAtTheDay) as $clock) {
+            // Calculate total duration including all clocks for the day
+            foreach ($clocksForDay as $clock) {
                 if ($clock->clock_out && $clock->clock_in) {
                     $clockIn = Carbon::parse($clock->clock_in);
                     $clockOut = Carbon::parse($clock->clock_out);
-                    $duration = $clockOut->diff($clockIn);
+                    $durationInSeconds = $clockOut->diffInSeconds($clockIn);
 
-                    $totalDuration->addHours($duration->h)
-                        ->addMinutes($duration->i)
-                        ->addSeconds($duration->s);
+                    $totalDurationInSeconds += $durationInSeconds;
+
                 }
             }
+            // Convert total duration from seconds to H:i:s format
+            $hours = floor($totalDurationInSeconds / 3600);
+            $minutes = floor(($totalDurationInSeconds % 3600) / 60);
 
-            // Format the total duration
-            $totalDurationFormatted = $totalDuration->format('H:i:s');
+            $seconds = $totalDurationInSeconds % 60;
 
-            // Assign total duration to the first clock
-            $firstClockAtTheDay->totalHours = $totalDurationFormatted;
+            $totalDurationFormatted = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+            // Update the total duration for the first clock entry
+            $firstClockAtTheDay->duration = $totalDurationFormatted;
 
-            // Prepare other clocks for the day
-            $otherClocksForDay = $clocksForDay->map(function ($clock) {
+            // Prepare other clocks for the day, excluding the first one
+            $otherClocksForDay = $clocksForDay->skip(1)->map(function ($clock) {
                 return [
                     'id' => $clock->id,
-                    'clockIn' => Carbon::parse($clock->clock_in)->format('h:iA'),
+                    'clockIn' => $clock->clock_in ? Carbon::parse($clock->clock_in)->format('h:iA') : null,
                     'clockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('h:iA') : null,
+                    'totalHours' => $clock->duration ? Carbon::parse($clock->duration)->format('h:i') : null,
                 ];
             });
 
-            // Prepare the final data structure
+            // Prepare the final data structure for this date
             $data[] = (new ClockResource($firstClockAtTheDay))->toArray(request()) + [
                 'otherClocks' => $otherClocksForDay->values()->toArray(),
                 'totalHours' => $totalDurationFormatted,
@@ -157,9 +162,9 @@ class ClockController extends Controller
         $distanceBetweenUserAndLocation = $closestLocation['distance'];
         $now = Carbon::now()->addRealHour(3);
         $UserEndTime = Carbon::parse($authUser->user_detail->end_time);
-        if ($now >= $UserEndTime) {
-            return $this->returnError("Your Shift Is Ended");
-        }
+        // if ($now >= $UserEndTime) {
+        //     return $this->returnError("Your Shift Is Ended");
+        // }
         $existingClockIn = ClockInOut::where('user_id', $user_id)
             ->where('location_id', $location_id)
             ->whereDate('clock_in', Carbon::today())
@@ -201,11 +206,14 @@ class ClockController extends Controller
             ->whereNull('clock_out')
             ->orderBy('clock_in', 'desc')
             ->first();
-
+        // dd($ClockauthUser->clock_in);
         if (!$ClockauthUser) {
             return $this->returnError('You are not clocked in.');
         }
-
+        // dd(Carbon::parse($ClockauthUser->clock_in), Carbon::now()->addRealHour(3));
+        if (Carbon::parse($ClockauthUser->clock_in)->greaterThan(Carbon::now()->addRealHour(3))) {
+            return $this->returnError("You Can't clocked out now");
+        }
         $user_location = $authUser->user_locations()->wherePivot('location_id', $ClockauthUser->location_id)->first();
 
         if (!$user_location) {
