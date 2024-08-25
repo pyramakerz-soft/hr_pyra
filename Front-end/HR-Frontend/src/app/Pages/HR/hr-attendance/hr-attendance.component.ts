@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserModel } from '../../../Models/user-model';
 import { UserServiceService } from '../../../Services/user-service.service';
+import { FormsModule } from '@angular/forms';
 
 interface data{
   Employees:string,
@@ -13,7 +14,7 @@ interface data{
 @Component({
   selector: 'app-hr-attendance',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule , FormsModule],
   templateUrl: './hr-attendance.component.html',
   styleUrl: './hr-attendance.component.css'
 })
@@ -21,6 +22,8 @@ export class HrAttendanceComponent {
   PagesNumber: number = 1;
   CurrentPageNumber: number = 1;
   pages: number[] = [];
+  selectedName: string = "";
+
 
   constructor(public router:Router , public userServ:UserServiceService){}
 
@@ -67,5 +70,23 @@ export class HrAttendanceComponent {
   getPrevPage() {
     this.CurrentPageNumber--;
     this.getAllEmployees(this.CurrentPageNumber);
+  }
+
+  Search(){
+    if(this.selectedName){
+    this.userServ.SearchByName(this.selectedName).subscribe(
+      (d: any) => {
+        this.tableData = d.data[0].users;
+        this.PagesNumber=d.data[0].pagination.last_page;
+        this.generatePages();
+      },
+      (error) => {
+        console.log(error)
+      }
+    );
+  }
+  else{
+    this.getAllEmployees(1);
+  }
   }
 }

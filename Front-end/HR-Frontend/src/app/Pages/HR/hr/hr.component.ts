@@ -18,7 +18,7 @@ export class HRComponent {
     { label: 'Employee', icon: 'fas fa-home', route: '/HR/HREmployee' },
     { label: 'Roles', icon: 'fi fi-rs-chart-pie', route: '/HR/HRRole' },
     { label: 'Atendence', icon: 'fi fi-rr-chart-simple', route: '/HR/HRAttendance' },
-    { label: 'Bounders', icon: 'fi fi-rr-chart-simple', route: '/HR/HRBounders' },
+    { label: 'Boundaries', icon: 'fi fi-rr-chart-simple', route: '/HR/HRBounders' },
     { label: 'Sign Out', icon: 'fi fi-bs-sign-out-alt transform rotate-180', route: '/HR/HREmployee' },
   ];
 

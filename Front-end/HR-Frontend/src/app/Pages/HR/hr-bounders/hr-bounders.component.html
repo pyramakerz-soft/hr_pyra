@@ -11,7 +11,7 @@
     </div>
 
     <div class="mt-5 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 space-x-2 flex items-center relative">
-      <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]"></i>
+      <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]" ></i>
       <input type="text" [(ngModel)]="selectedName" (input)="filterByName()" placeholder="Enter Keyword..."
           class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
       
@@ -65,7 +65,7 @@
         </table>
     </div>
       
-    <div class="mt-5 md:flex justify-between items-center">
+    <div class="mt-5 md:flex justify-between items-center"  *ngIf="DisplayPagginationOrNot">
       <!-- Previous Button -->
       <button 
         class="h-[44px] w-[119px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center"

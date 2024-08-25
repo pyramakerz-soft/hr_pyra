@@ -39,11 +39,16 @@ export class UserServiceService {
     return this.http.post<any>(this.baseURL + "/auth/update_user/" + empId, emp, { headers });
   }
   
-  // DeleteUser(id: number){
-  //   const headers = new HttpHeaders({
-  //     'Authorization': `Bearer ${this.token}`
-  //   });
-    
-  //   return this.http.delete(this.baseURL+"/auth/users/"+id, {headers})
-  // }
+
+  SearchByName(Name:string){
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<UserModel[]>(this.baseURL + `/auth/getAllUsers?search=${Name}`, { headers });
+  }
+
+  getAllUsersName(){
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<UserModel[]>(this.baseURL + `/auth/users_by_name`, { headers });
+  }
 }
