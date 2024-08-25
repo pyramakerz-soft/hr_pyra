@@ -9,31 +9,31 @@
         class="border border-[#FF7519] text-[#FF7519] font-medium text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
         Import Employee
       </button>
-      <button  (click)="NavigateToAddEmployee()"
+      <button (click)="NavigateToAddEmployee()"
         class="bg-[#17253E] text-white font-medium text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
         Add
       </button>
     </div>
   </div>
-  
-  <div class="mt-5 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 space-x-2 flex items-center relative">
-    <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]" 
-    (click)="Search()"
-    ></i>
-    <input type="text" [(ngModel)]="selectedName" (input)="filterByName()" placeholder="Enter Keyword..."
-        class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
-  
-    <div *ngIf="filteredUsers.length > 0" class="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
-        <ul>
-            <li *ngFor="let user of filteredUsers" 
-                (click)="selectUser(user)" 
-                class="px-4 py-2 cursor-pointer hover:bg-gray-200">
-                {{ user }}
-            </li>
-        </ul>
+
+  <div
+    class="mt-5 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 space-x-2 flex items-center relative">
+    <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]" (click)="Search()"></i>
+    <input type="text" [(ngModel)]="selectedName" (input)="filterByName()" (keydown.enter)="Search()"
+      placeholder="Enter Employee Name..."
+      class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
+
+    <div *ngIf="filteredUsers.length > 0"
+      class="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
+      <ul>
+        <li *ngFor="let user of filteredUsers" (click)="selectUser(user)"
+          class="px-4 py-2 cursor-pointer hover:bg-gray-200">
+          {{ user }}
+        </li>
+      </ul>
     </div>
   </div>
-  
+
 
   <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">
     <table class="w-full table-auto bg-[#FFFFFF] text-left text-[#475467]">
@@ -72,74 +72,62 @@
             No Data Found
           </td>
         </tr>
-  
+
         <!-- Data Rows -->
         <tr *ngFor="let row of tableData; let i = index"
-            [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300 text-xs md:text-sm">
-          
-            <td class="py-5 px-4"><button (click)="NavigateToEmployeeDetails(row.id)">{{ row.name }}</button></td>
-            <td class="py-5 px-4">{{ row.national_id }}</td>
-            <td class="py-5 px-4">
-              <div 
-                class="text-center w-[80%] rounded-lg border border-[#D0D5DD] py-2 text-[#FFFFFF]"
-                [ngClass]="{
+          [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}"
+          class="border-t border-gray-300 text-xs md:text-sm">
+
+          <td class="py-5 px-4"><button (click)="NavigateToEmployeeDetails(row.id)">{{ row.name }}</button></td>
+          <td class="py-5 px-4">{{ row.national_id }}</td>
+          <td class="py-5 px-4">
+            <div class="text-center w-[80%] rounded-lg border border-[#D0D5DD] py-2 text-[#FFFFFF]" [ngClass]="{
                   'bg-[#1B5724]': row.department === 'Software',
                   'bg-[#63233C]': row.department === 'Academic',
                 }">
-                {{ row.department }}
-              </div>
-            </td>
-            <td class="py-5 px-4">{{ row.position }}</td>
-            <td class="py-5 px-4">{{ row.phone }}</td>
-            <td class="py-5 px-4">{{ row.email }}</td>
-            <td class="py-5 px-4">{{ row.name }}</td>
-            <td class="py-5 px-4">
-              <div class="px-2">
-                  <button (click)="NavigateToEditEmployee(row.id)">
-                      <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
-                  </button>
-                  <i class="fa fa-trash text-[#CC161D] ml-2 w-3 md:w-4"></i>
-              </div>
+              {{ row.department }}
+            </div>
+          </td>
+          <td class="py-5 px-4">{{ row.position }}</td>
+          <td class="py-5 px-4">{{ row.phone }}</td>
+          <td class="py-5 px-4">{{ row.email }}</td>
+          <td class="py-5 px-4">{{ row.name }}</td>
+          <td class="py-5 px-4">
+            <div class="px-2">
+              <button (click)="NavigateToEditEmployee(row.id)">
+                <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
+              </button>
+              <i class="fa fa-trash text-[#CC161D] ml-2 w-3 md:w-4"></i>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
-        
+
   <div class="mt-5 md:flex justify-between items-center" *ngIf="DisplayPagginationOrNot ">
     <!-- Previous Button -->
-    <button 
+    <button
       class="h-[44px] w-[119px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center"
       [ngClass]="{'hidden': CurrentPageNumber === 1, 'opacity-50 cursor-not-allowed': CurrentPageNumber === 1}"
-      [disabled]="CurrentPageNumber === 1"
-      (click)="getPrevPage()">
+      [disabled]="CurrentPageNumber === 1" (click)="getPrevPage()">
       <i class="fa-solid fa-arrow-left"></i> Previous
     </button>
-  
+
     <!-- Pagination Buttons -->
     <div class="flex justify-center items-center space-x-5 md:block">
-      <button
-        *ngFor="let page of pages"
-        class="h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
-        [ngClass]="{'border border-[#D0D5DD]': page === CurrentPageNumber}"
-        (click)="getAllEmployees(page)">
+      <button *ngFor="let page of pages" class="h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
+        [ngClass]="{'border border-[#D0D5DD]': page === CurrentPageNumber}" (click)="getAllEmployees(page)">
         {{ page }}
       </button>
     </div>
-  
+
     <!-- Next Button -->
-    <button 
+    <button
       class="h-[44px] w-[92px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center"
       [ngClass]="{'hidden': CurrentPageNumber === PagesNumber, 'opacity-50 cursor-not-allowed': CurrentPageNumber === PagesNumber}"
-      [disabled]="CurrentPageNumber === PagesNumber"
-      (click)="getNextPage()">
+      [disabled]="CurrentPageNumber === PagesNumber" (click)="getNextPage()">
       Next <i class="fa-solid fa-arrow-right"></i>
     </button>
   </div>
 </div>
-
-
-
-
-
-

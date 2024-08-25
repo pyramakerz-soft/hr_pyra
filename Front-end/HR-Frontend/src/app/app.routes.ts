@@ -12,25 +12,29 @@ import { HrAttendanceComponent } from './Pages/HR/hr-attendance/hr-attendance.co
 import { HrEmployeeAttendanceDetailsComponent } from './Pages/HR/hr-employee-attendance-details/hr-employee-attendance-details.component';
 import { HrEmployeeDetailsComponent } from './Pages/HR/hr-employee-details/hr-employee-details.component';
 import { HrEmployeeAddEditDetailsComponent } from './Pages/HR/hr-employee-add-edit-details/hr-employee-add-edit-details.component';
+import { authGuard } from './Guard/auth.guard';
+import { AttendenceEditComponent } from './Pages/HR/attendence-edit/attendence-edit.component';
 
 export const routes: Routes = [
     {path: "employee", component:EmployeeComponent, title:"Dashboard", children:[
-        {path: "", redirectTo: "Dashboard", pathMatch: "full"},
-        {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard"},
+        {path: "", redirectTo: "Dashboard", pathMatch: "full" },
+        {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard" ,canActivate: [authGuard]},
     ]},
 
     {path: "HR", component:HRComponent, title:"HR", children:[
         {path: "", redirectTo: "HREmployee", pathMatch: "full"},
-        {path: "HREmployee", component:HREmployeeComponent, title:"HREmployee"},
-        {path: "HRRole", component:HrRoleComponent, title:"HRRole"},
-        {path: "HRRoleAdd", component:HrRoleAddComponent, title:"HRRoleAdd"},
-        {path: "HRBounders", component:HrBoundersComponent, title:"HRBounders"},
-        {path: "HRAttendance", component:HrAttendanceComponent, title:"HRAttendance"},
-        {path: "HREmployeeAttendanceDetails/:Id", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails"},
-        {path: "HREmployeeAttendanceDetails", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails"},
-        {path: "HREmployeeDetails/:EmpId", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails"},
-        {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd"},
-        {path: "HREmployeeDetailsEdit/:Id", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit"},
+        {path: "HREmployee", component:HREmployeeComponent, title:"HREmployee" ,canActivate: [authGuard]},
+        {path: "HRRole", component:HrRoleComponent, title:"HRRole" ,canActivate: [authGuard]},
+        {path: "HRRoleAdd", component:HrRoleAddComponent, title:"HRRoleAdd" ,canActivate: [authGuard]},
+        {path: "HRBounders", component:HrBoundersComponent, title:"HRBounders" ,canActivate: [authGuard]},
+        {path: "HRAttendance", component:HrAttendanceComponent, title:"HRAttendance" ,canActivate: [authGuard]},
+        {path: "HREmployeeAttendanceDetails/:Id", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails" ,canActivate: [authGuard]},
+        // {path: "HREmployeeAttendanceDetails", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails"},
+        {path: "HREmployeeDetails/:EmpId", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails" ,canActivate: [authGuard]},
+        {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd" ,canActivate: [authGuard]},
+        {path: "HREmployeeDetailsEdit/:Id", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit" ,canActivate: [authGuard]},
+        {path: "HREmployeeAttendanceEdit/:Id", component:AttendenceEditComponent, title:"HREmployeeAttendanceEdit" },
+
     ]},
 
     { path: "Login", component:LoginComponent, title:"Login" },

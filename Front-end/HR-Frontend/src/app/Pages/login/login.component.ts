@@ -94,7 +94,6 @@ export class LoginComponent {
   
               const userResponse = JSON.parse(userData as string);
               this.accountService.r = userResponse.User;
-              console.log(this.accountService.r, token);
 
               // Navigate based on role
               if (this.accountService.r.role_name === "Employee") {
