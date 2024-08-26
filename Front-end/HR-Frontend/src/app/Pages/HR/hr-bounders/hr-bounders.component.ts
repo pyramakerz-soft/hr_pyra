@@ -92,7 +92,8 @@ export class HrBoundersComponent {
   getLocationsName() {
     this.locationServ.GetAllNames().subscribe(
       (d: any) => {
-        this.locationsNames = d['location names'];
+        this.locationsNames = d.locationNames.map((item: { name: any; }) => item.name);
+
       },
       (error) => {
         console.log(error);
@@ -120,6 +121,7 @@ export class HrBoundersComponent {
     this.selectedName = location;
     this.locationServ.SearchByNames(this.selectedName).subscribe(
       (d: any) => {
+        console.log(d)
         this.tableData = d.locations;
         this.DisplayPagginationOrNot=false;
       },

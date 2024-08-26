@@ -103,5 +103,9 @@ export class HrEmployeeAttendanceDetailsComponent {
     }
   }
 
+  EditUserClock(Clock:EmployeeDashboard) {
+    this.route.navigate(['HR/HREmployeeAttendanceEdit'], { state: { data: Clock } }); // Pass data via router state
+  }
+
 
 }
