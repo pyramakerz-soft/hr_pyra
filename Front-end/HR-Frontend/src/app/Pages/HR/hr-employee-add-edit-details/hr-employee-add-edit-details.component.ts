@@ -9,6 +9,10 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { UserServiceService } from '../../../Services/user-service.service';
 import Swal from 'sweetalert2'
+import { WorkTypeService } from '../../../Services/work-type.service';
+import { WorkType } from '../../../Models/work-type';
+import { AssignLocationToUser } from '../../../Models/assign-location-to-user';
+import { LocationsService } from '../../../Services/locations.service';
 
 @Component({
   selector: 'app-hr-employee-add-edit-details',
@@ -21,14 +25,19 @@ export class HrEmployeeAddEditDetailsComponent {
   EmployeeId:number = 0
   roles: RoleModel[] = [];
   departments: Department[] = [];
+  workTypes: WorkType[] = [];
+  Locations: AssignLocationToUser[] = [];
+  isDropdownOpen = false;
   
   employee: AddEmployee = new AddEmployee(
-    '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', []
+    '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], []
   );
 
   regexPhone = /^(010|011|012|015)\d{8}$/;
   regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   regexNationalID = /^\d{14}$/;
+
+  maxFileSize = 15 * 1024 * 1024;
 
   validationErrors: { [key in keyof AddEmployee]?: string } = {};
   
@@ -36,6 +45,8 @@ export class HrEmployeeAddEditDetailsComponent {
               public roleService: RolesService, 
               public departmentService: DepartmentService,
               public userService: UserServiceService, 
+              public workTypeService: WorkTypeService,
+              public locationService: LocationsService,
               public router: Router
             ){}
   
@@ -49,13 +60,19 @@ export class HrEmployeeAddEditDetailsComponent {
 
     this.getDepartments()
     this.getRoles()
+    this.getWorkType()
+    this.getLocations()
+  }
+
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
   }
   
   getEmployeeByID(id:number){
     this.userService.getUserById(id).subscribe(
       (d: any) => {
         this.employee = d.User;
-        this.employee.role = this.employee.role || []
+        this.employee.roles = this.employee.roles || []
       }
     );
   }
@@ -75,25 +92,99 @@ export class HrEmployeeAddEditDetailsComponent {
       }
     );
   }
+  
+  getWorkType(){
+    this.workTypeService.getall().subscribe(
+      (workTypes: any) => {
+        this.workTypes = workTypes.workTypes
+      }
+    );
+  }
+  
+  getLocations(){
+    this.locationService.GetAllNames().subscribe(
+      (locations: any) => {
+        this.Locations = locations.locationNames
+      } 
+    );
+  }
 
+  onLocationChange(Location: number, event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+
+    if (isChecked) {
+      if (!this.employee.location_id.includes(Location)) {
+        this.employee.location_id.push(Location);
+      }
+    } else {
+      const index = this.employee.location_id.indexOf(Location);
+      if (index > -1) {
+        this.employee.location_id.splice(index, 1);
+      }
+    }
+
+    if (this.employee.location_id.length > 0) {
+      this.validationErrors['location_id'] = '';
+    } else {
+      this.validationErrors['location_id'] = '*Location is required.';
+    }
+  }
+
+  onWorkTypeChange(WorkType: number, event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+
+    if (isChecked) {
+      if (!this.employee.work_type_id.includes(WorkType)) {
+        this.employee.work_type_id.push(WorkType);
+      }
+    } else {
+      const index = this.employee.work_type_id.indexOf(WorkType);
+      if (index > -1) {
+        this.employee.work_type_id.splice(index, 1);
+      }
+    }
+
+    if (this.employee.work_type_id.length > 0) {
+      this.validationErrors['work_type_id'] = '';
+    } else {
+      this.validationErrors['work_type_id'] = '*Work Type is required.';
+    }
+  }
+  
   onRoleChange(roleName: string, event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
 
     if (isChecked) {
-      if (!this.employee.role.includes(roleName)) {
-        this.employee.role.push(roleName);
+      if (!this.employee.roles.includes(roleName)) {
+        this.employee.roles.push(roleName);
       }
     } else {
-      const index = this.employee.role.indexOf(roleName);
+      const index = this.employee.roles.indexOf(roleName);
       if (index > -1) {
-        this.employee.role.splice(index, 1);
+        this.employee.roles.splice(index, 1);
       }
     }
 
-    if (this.employee.role.length > 0) {
-      this.validationErrors['role'] = '';
+    if (this.employee.roles.length > 0) {
+      this.validationErrors['roles'] = '';
     } else {
-      this.validationErrors['role'] = '*Role is required.';
+      this.validationErrors['roles'] = '*Role is required.';
+    }
+  }
+
+  onImageFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    
+    if (file) {
+      if (file.size > this.maxFileSize) {
+        Swal.fire({   
+          text: "File size exceeds the maximum limit of 15 MB.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#FF7519",
+          
+        });
+        return;
+      }
     }
   }
 
@@ -166,11 +257,25 @@ export class HrEmployeeAddEditDetailsComponent {
       }
     }
 
-    if(this.employee.role.length == 0){
-      this.validationErrors['role'] = '*Role is required.';
+    if(this.employee.roles.length == 0){
+      this.validationErrors['roles'] = '*Role is required.';
       isValid = false;
     } else {
-      this.validationErrors['role'] = '';
+      this.validationErrors['roles'] = '';
+    }
+    
+    if(this.employee.work_type_id.length == 0){
+      this.validationErrors['work_type_id'] = '*Work Type is required.';
+      isValid = false;
+    } else {
+      this.validationErrors['work_type_id'] = '';
+    }
+    
+    if(this.employee.location_id.length == 0){
+      this.validationErrors['location_id'] = '*Location is required.';
+      isValid = false;
+    } else {
+      this.validationErrors['location_id'] = '';
     }
 
     if(this.employee.start_time != null && this.employee.end_time != null){
@@ -221,6 +326,7 @@ export class HrEmployeeAddEditDetailsComponent {
   SaveEmployee() {
 
     if (this.isFormValid()) {
+      console.log(this.employee)
       this.employee.department_id = Number(this.employee.department_id);
 
       if(this.EmployeeId === 0){

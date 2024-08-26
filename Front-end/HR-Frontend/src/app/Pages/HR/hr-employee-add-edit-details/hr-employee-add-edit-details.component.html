@@ -23,7 +23,7 @@
                     <p class="font-normal text-xs md:text-sm">or drag photo here</p>
                     <p class="font-normal text-xs md:text-sm text-[#8E8E93]">(JPEG, PNG with max size of 15 MB)</p>
                 </label>
-                <input id="file-upload" type="file" class="hidden" accept="image/jpeg, image/png, image/bmp, image/webp, image/svg+xml" />
+                <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)" accept="image/jpeg, image/png, image/bmp, image/webp, image/svg+xml" />
             </div>
 
             <div class="text-[#3A3A3C] mt-4 flex flex-col md:flex-row md:space-x-8 space-y-3 md:space-y-0">
@@ -99,7 +99,7 @@
                         (ngModelChange)="onInputValueChange({ field: 'working_hours_day', value: $event })"
                         type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the working hours day">
                     </div>
-                    <div class="text-xs md:text-sm">
+                    <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">
                             Gender
                             <span *ngIf="validationErrors['gender']" class="text-red-500 ml-3 font-normal">{{ validationErrors['gender'] }}</span>
@@ -112,9 +112,61 @@
                             <option value="f">Female</option>
                         </select>
                     </div>
+                    <div class="text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Work Type
+                            <span *ngIf="validationErrors['work_type_id']" class="text-red-500 ml-3 font-normal">{{ validationErrors['work_type_id'] }}</span>
+                        </label>
+                        <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+                            @if(workTypes.length !==0 ) {
+                                <div *ngFor="let work of workTypes; let i = index" class="flex items-center mb-2">
+                                    <input 
+                                        type="checkbox" 
+                                        id="workType_{{work.id}}" 
+                                        [value]="work.id" 
+                                        class="mr-2"
+                                        (change)="onWorkTypeChange(work.id, $event)"
+                                        [checked]="employee.work_type_id.includes(work.id)"
+                                        >
+                                    <label for="workType_{{work.id}}" class="text-sm">{{work.name}}</label>
+                                </div>
+                            } @else {
+                                <div>No Data Found</div>
+                            }
+                        </div>
+                    </div>  
                 </div>
 
                 <div class="flex-1">
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Location
+                            <span *ngIf="validationErrors['location_id']" class="text-red-500 text-sm ml-2 font-normal">{{ validationErrors['location_id'] }}</span>
+                        </label>
+                        <div class="">
+                            <!-- Dropdown toggle -->
+                            <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl cursor-pointer" (click)="toggleDropdown()">
+                                <span *ngIf="!isDropdownOpen">Choose Location</span>
+                            </div>
+                    
+                            <!-- Dropdown content -->
+                            <div *ngIf="isDropdownOpen" class=" w-full border border-[#E5E5EA] rounded-xl bg-white mt-1 max-h-60 overflow-y-auto">
+                                @if(Locations.length !==0 ) {
+                                    <div *ngFor="let location of Locations" class="p-2 hover:bg-gray-100">
+                                        <input type="checkbox" 
+                                        id="location{{location.name}}" 
+                                        class="mr-2" 
+                                        [value]="location.id" 
+                                        (change)="onLocationChange(location.id, $event)"
+                                        [checked]="employee.location_id.includes(location.id)">
+                                        <label for="location{{location.name}}" class="text-xs md:text-sm">{{ location.name }}</label>
+                                    </div>
+                                }@else {
+                                    <div class="p-2">No Data Found</div>
+                                }
+                            </div>
+                        </div>
+                    </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">
                             Position
@@ -181,7 +233,7 @@
                     <div class="text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">
                             Role
-                            <span *ngIf="validationErrors['role']" class="text-red-500 ml-3 font-normal">{{ validationErrors['role'] }}</span>
+                            <span *ngIf="validationErrors['roles']" class="text-red-500 ml-3 font-normal">{{ validationErrors['roles'] }}</span>
                         </label>
                         <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
                             @if(roles.length !==0 ) {
@@ -192,7 +244,7 @@
                                         [value]="role.name" 
                                         class="mr-2"
                                         (change)="onRoleChange(role.name, $event)"
-                                        [checked]="employee.role.includes(role.name)"
+                                        [checked]="employee.roles.includes(role.name)"
                                         >
                                     <label for="role_{{role.id}}" class="text-sm">{{role.name}}</label>
                                 </div>
