@@ -87,9 +87,11 @@ class UserController extends Controller
             $code = strtoupper($departmentPrefix) . '-' . $randomDigits;
         } while (User::where('code', $code)->exists());
 
-        $newImageName = uniqid() . "-" . "employee" . "." . $request->image->extension();
-        // dd($newImageName);
-        $request->image->move(public_path("assets/images/Users"), $newImageName);
+        $imageUrl = $this->uploadImage($request);
+        if (!$imageUrl) {
+            return $this->returnError('Image upload failed', Response::HTTP_BAD_REQUEST);
+        }
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -100,7 +102,7 @@ class UserController extends Controller
             'code' => $code,
             'gender' => $request->gender,
             'department_id' => (int) $request->department_id,
-            'image' => $newImageName,
+            'image' => $imageUrl,
         ]);
 
         $finalData['user'] = $user;
@@ -200,6 +202,16 @@ class UserController extends Controller
             $randomDigits = mt_rand(1000, 9999);
             $code = strtoupper($departmentPrefix) . '-' . $randomDigits;
         } while (User::where('code', $code)->exists());
+
+        if ($request->hasFile('image')) {
+            $imageUrl = $this->uploadImage($request);
+            if (!$imageUrl) {
+                return $this->returnError('Image upload failed', Response::HTTP_BAD_REQUEST);
+            }
+        } else {
+            $imageUrl = $user->image;
+        }
+
         $user->update([
             'name' => $request->name ?? $user->name,
             'email' => $request->email ?? $user->email,
@@ -210,6 +222,8 @@ class UserController extends Controller
             'code' => $code,
             'gender' => $request->gender ?? $user->gender,
             'department_id' => (int) $department->id,
+            'image' => $imageUrl,
+
         ]);
 
         $finalData['user'] = $user;

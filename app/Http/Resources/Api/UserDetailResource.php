@@ -28,6 +28,7 @@ class UserDetailResource extends JsonResource
         return [
             "id" => $this->user->id,
             'name' => $this->user->name,
+            'image' => $this->user->image,
             'email' => $this->user->email,
             "password" => $this->user->password,
             "phone" => $this->user->phone,

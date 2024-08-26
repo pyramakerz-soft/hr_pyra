@@ -24,11 +24,12 @@ trait HelperTrait
         $distance = $R * $c; // Distance in metres
         return $distance;
     }
-    public function uploadImage($request)
+    public function uploadImage($request, $inputName = 'image', $directory = 'assets/images/Users')
     {
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('public');
-            return $imagePath;
+        if ($request->hasFile($inputName)) {
+            $newImageName = uniqid() . "-employee." . $request->file($inputName)->extension();
+            $request->file($inputName)->move(public_path($directory), $newImageName);
+            return asset($directory . '/' . $newImageName);
         }
         return false;
     }

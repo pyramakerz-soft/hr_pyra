@@ -42,7 +42,7 @@ class UpdateUserRequest extends FormRequest
             'end_time' => ['nullable'],
             'location_id' => ['nullable', 'exists:locations,id'],
             'work_type_id' => ['nullable', 'exists:work_types,id'],
-
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:15360'],
         ];
     }
 }
