@@ -270,8 +270,8 @@ class ClockController extends Controller
         }
 
         $this->validate($request, [
-            'clock_in' => ['nullable', 'date_format:H:i'],
-            'clock_out' => ['nullable', 'date_format:H:i'],
+            'clock_in' => ['nullable', 'date_format:Y-m-d H:i'],
+            'clock_out' => ['nullable', 'date_format:Y-m-d H:i'],
         ]);
 
         $clock = ClockInOut::where('user_id', $user->id)->where('id', $clock->id)->first();
@@ -279,17 +279,36 @@ class ClockController extends Controller
             return $this->returnError("No clocks found for this user", 404);
         }
 
-        // $currentDate = Carbon::now()->format('Y-m-d');
         $existingDate = Carbon::parse($clock->clock_in)->format('Y-m-d');
 
-        $clockIn = $request->clock_in ? Carbon::createFromFormat('Y-m-d H:i:s', "{$existingDate} {$request->clock_in}:00") : Carbon::parse($clock->clock_in);
-        $clockOut = $request->clock_out ? Carbon::createFromFormat('Y-m-d H:i:s', "{$existingDate} {$request->clock_out}:00") : Carbon::parse($clock->clock_out);
-        if ($clockOut->isSameDay($clockIn) === false) {
+        // Adjust clock_in time if provided
+        if ($request->clock_in) {
+            $clockIn = Carbon::createFromFormat('Y-m-d H:i', $request->clock_in);
+        } else {
+            $clockIn = Carbon::parse($clock->clock_in);
+        }
+
+        // Adjust clock_out time if provided
+        if ($request->clock_out) {
+            $clockOut = Carbon::createFromFormat('Y-m-d H:i', $request->clock_out);
+        } else {
+            $clockOut = Carbon::parse($clock->clock_out);
+        }
+
+        // Check if clock_in and clock_out are on the same day
+        if (!$clockOut->isSameDay($clockIn)) {
             return $this->returnError("clock_in and clock_out must be on the same day", 400);
         }
 
+        // Ensure clock_in is before clock_out
+        if ($clockOut->lessThanOrEqualTo($clockIn)) {
+            return $this->returnError("clock_out must be after clock_in", 400);
+        }
+
+        // Calculate duration
         $durationFormatted = $clockIn->diff($clockOut)->format('%H:%I:%S');
 
+        // Update clock record
         $clock->update([
             'clock_in' => $clockIn->format('Y-m-d H:i:s'),
             'clock_out' => $clockOut->format('Y-m-d H:i:s'),
