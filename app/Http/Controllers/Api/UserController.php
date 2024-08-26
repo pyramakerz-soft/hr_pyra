@@ -177,7 +177,7 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, User $user)
     {
-        // dd();
+        // dd($user->user_locations()->pluck('locations.id')->toArray());
         $finalData = [];
         $authUser = Auth::user();
 
@@ -241,21 +241,17 @@ class UserController extends Controller
             return $this->returnError('Failed to Update User');
         }
 
-        //Update Assigning Roles to User
-        $newRoles = $request->input('roles', []) ?? $user->getRoleNames()->toArray();
+        // Update Assigning Roles to User
+        $newRoles = $request->input('roles') ?? $user->getRoleNames()->toArray();
         $user->syncRoles($newRoles);
 
         // Update Assigning Locations to User
-        $currentLocations = $user->user_locations()->pluck('locations.id')->toArray();
-        $newLocations = $request->input('location_id', []);
-        $uniqueNewLocations = array_diff($newLocations, $currentLocations);
-        $user->user_locations()->sync($uniqueNewLocations);
+        $newLocations = $request->input('location_id') ?? $user->user_locations()->pluck('locations.id')->toArray();
+        $user->user_locations()->sync($newLocations);
 
         // Update Assigning WorkTypes to User
-        $currentWorkTypes = $user->work_types()->pluck('work_types.id')->toArray();
-        $newWorkTypes = $request->input('work_type_id', []);
-        $uniqueNewWorkTypes = array_diff($newWorkTypes, $currentWorkTypes);
-        $user->work_types()->sync($uniqueNewWorkTypes);
+        $newWorkTypes = $request->input('work_type_id') ?? $user->work_types()->pluck('work_types.id')->toArray();
+        $user->work_types()->sync($newWorkTypes);
 
         return $this->returnData("data", $finalData, "User Updated");
     }
