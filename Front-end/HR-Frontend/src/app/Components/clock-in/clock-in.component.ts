@@ -9,6 +9,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TableComponent } from '../Core/table/table.component';
 import { ClockEventService } from '../../Services/clock-event.service';
 import { UserDetails } from '../../Models/user-details';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-clock-in',
@@ -120,12 +121,16 @@ export class ClockInComponent {
         },
         (error: HttpErrorResponse) => {
           const errorMessage = error.error?.message || 'An unknown error occurred';
-          alert(errorMessage);
+          console.log(errorMessage);
         }
       );
     } catch (error) {
-      console.error('Error getting location:', error);
-      alert('Failed to retrieve location. Please try again.');
+      Swal.fire({   
+        text: "Failed to retrieve location. Please try again.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#FF7519",
+        
+      });
     }
   }
 
@@ -140,8 +145,12 @@ export class ClockInComponent {
             resolve();
           },
           (error: GeolocationPositionError) => {
-            console.error(error);
-            alert("Error retrieving location: " + error.message);
+            Swal.fire({   
+              text: "Error retrieving location.",
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+              
+            });
             reject(error);
           }
         );

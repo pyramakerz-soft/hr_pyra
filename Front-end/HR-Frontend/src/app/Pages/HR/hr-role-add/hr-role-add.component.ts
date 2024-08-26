@@ -6,6 +6,7 @@ import { PermissionsService } from '../../../Services/permissions.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { PermissionAddModel } from '../../../Models/permission-add-model';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-hr-role-add',
@@ -88,7 +89,12 @@ export class HrRoleAddComponent {
         this.router.navigateByUrl("/HR/HRRole");
       },
       (error) => {
-        alert('Faild to create');
+        Swal.fire({   
+          text: "Faild to create, Please Try again later",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#FF7519",
+          
+        });
       }
     );
   }

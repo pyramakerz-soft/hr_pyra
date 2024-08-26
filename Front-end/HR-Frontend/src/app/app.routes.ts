@@ -15,10 +15,11 @@ import { HrEmployeeAddEditDetailsComponent } from './Pages/HR/hr-employee-add-ed
 import { authGuard } from './Guard/auth.guard';
 import { AttendenceEditComponent } from './Pages/HR/attendence-edit/attendence-edit.component';
 
+
 export const routes: Routes = [
     {path: "employee", component:EmployeeComponent, title:"Dashboard", children:[
         {path: "", redirectTo: "Dashboard", pathMatch: "full" },
-        {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard" ,canActivate: [authGuard]},
+        {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard" ,canActivate: [authGuard ]},
     ]},
 
     {path: "HR", component:HRComponent, title:"HR", children:[
@@ -31,9 +32,9 @@ export const routes: Routes = [
         {path: "HREmployeeAttendanceDetails/:Id", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails" ,canActivate: [authGuard]},
         // {path: "HREmployeeAttendanceDetails", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails"},
         {path: "HREmployeeDetails/:EmpId", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails" ,canActivate: [authGuard]},
-        {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd" ,canActivate: [authGuard]},
+        {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd" ,canActivate: [authGuard ]},
         {path: "HREmployeeDetailsEdit/:Id", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit" ,canActivate: [authGuard]},
-        {path: "HREmployeeAttendanceEdit/:Id", component:AttendenceEditComponent, title:"HREmployeeAttendanceEdit" },
+        {path: "HREmployeeAttendanceEdit", component:AttendenceEditComponent, title:"HREmployeeAttendanceEdit" ,canActivate: [authGuard]},
 
     ]},
 

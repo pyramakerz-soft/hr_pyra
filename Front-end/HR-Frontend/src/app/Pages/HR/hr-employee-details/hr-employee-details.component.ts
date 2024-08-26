@@ -14,7 +14,7 @@ import { CommonModule } from '@angular/common';
 export class HrEmployeeDetailsComponent {
   empId:number|null = null
   employee: AddEmployee = new AddEmployee(
-    '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', []
+    '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [1], [], [], []
   );
 
   constructor(public router:Router, public activeRoute:ActivatedRoute, public userService:UserServiceService){}
@@ -29,6 +29,7 @@ export class HrEmployeeDetailsComponent {
   getEmployeeByID(id:number){
     this.userService.getUserById(id).subscribe(
       (d: any) => {
+        console.log(d.User)
         this.employee = d.User;
       },
       (error) => {

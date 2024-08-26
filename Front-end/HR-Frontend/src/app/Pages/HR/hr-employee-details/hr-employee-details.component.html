@@ -132,8 +132,26 @@
             
             <div class="w-full md:w-1/2">
                 <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Role</p>
-                <div *ngFor="let role of employee.role; let i = index" class="flex space-x-4 font-medium text-sm md:text-base text-[#282727]">
-                    <p class="bg-slate-200 p-3 rounded-md">{{role}}</p>
+                <div *ngFor="let role of employee.roles; let i = index" class="flex space-x-4 font-medium text-sm md:text-base text-[#282727]">
+                    <p [ngClass]="{'mb-1': i !== employee.roles.length - 1}" class="bg-slate-200 p-3 rounded-md">{{role}}</p>
+                </div>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Work Type</p>
+                <div *ngFor="let work of employee.work_type_name; let i = index" class="flex space-x-4 font-medium text-sm md:text-base text-[#282727]">
+                    <p [ngClass]="{'mb-1': i !== employee.work_type_name.length - 1}" class="bg-slate-200 p-3 rounded-md">{{work}}</p>
+                </div>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA]">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Location</p>
+                <div *ngFor="let location of employee.location; let i = index" class="flex space-x-4 font-medium text-sm md:text-base text-[#282727]">
+                    <p [ngClass]="{'mb-1': i !==employee.location.length - 1}" class="bg-slate-200 p-3 rounded-md">{{location}}</p>
                 </div>
             </div>
         </div>

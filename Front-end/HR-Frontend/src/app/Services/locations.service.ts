@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Location } from '../Models/location';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { AssignLocationToUser } from '../Models/assign-location-to-user';
 
 @Injectable({
   providedIn: 'root'

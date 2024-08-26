@@ -45,11 +45,11 @@ export class ClockService {
 
   }
 
-  UpdateUserClock(Userid: number, clockId: number, clock: EmployeeDashboard) {
-    const body = clock; 
+  UpdateUserClock(Userid: number, clockId: number, clock_in: String , clock_out :string) {
+    const body = {clock_in , clock_out}; 
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.put<EmployeeDashboard>(`${this.baseUrl}/update_clock/user/${Userid}/clock/${clockId}`,body,{ headers, responseType: 'json' });
+    return this.http.post<EmployeeDashboard>(`${this.baseUrl}/update_clock/user/${Userid}/clock/${clockId}`,body,{ headers, responseType: 'json' });
   }
 
 
