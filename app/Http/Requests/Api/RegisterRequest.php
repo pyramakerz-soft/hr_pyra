@@ -45,6 +45,7 @@ class RegisterRequest extends FormRequest
             'end_time' => ['required', 'date_format:H:i'],
             'location_id' => ['required', 'exists:locations,id'],
             'work_type_id' => ['required', 'exists:work_types,id'],
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:15360'],
         ];
     }
 

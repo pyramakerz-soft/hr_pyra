@@ -12,8 +12,10 @@ use App\Http\Resources\LoginResource;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\UserDetail;
+use App\Traits\HelperTrait;
 use App\Traits\ResponseTrait;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -21,8 +23,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
-    use ResponseTrait;
-
+    use ResponseTrait, HelperTrait;
     public function __construct()
     {
         $this->middleware('auth:api')->except(['store', 'login']);
@@ -86,6 +87,9 @@ class UserController extends Controller
             $code = strtoupper($departmentPrefix) . '-' . $randomDigits;
         } while (User::where('code', $code)->exists());
 
+        $newImageName = uniqid() . "-" . "employee" . "." . $request->image->extension();
+        // dd($newImageName);
+        $request->image->move(public_path("assets/images/Users"), $newImageName);
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -96,6 +100,7 @@ class UserController extends Controller
             'code' => $code,
             'gender' => $request->gender,
             'department_id' => (int) $request->department_id,
+            'image' => $newImageName,
         ]);
 
         $finalData['user'] = $user;
@@ -289,5 +294,17 @@ class UserController extends Controller
         $usersByName = User::pluck('name');
         return $this->returnData("usersNames", $usersByName, "UsersName");
     }
+    // public function uploadImage(Request $request)
+    // {
+    //     $request->validate([
+    //         'image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+    //     ]);
+    //     if ($request->hasFile('image')) {
+    //         $imagePath = $request->file('image')->store('images/users', 'public');
+    //         $imageUrl = asset('storage/' . $imagePath);
+    //         return $this->returnData("imageUrl", $imageUrl, "Image successfully uploaded");
 
+    //     }
+    //     return $this->returnError('Image upload failed');
+    // }
 }

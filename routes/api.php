@@ -42,6 +42,8 @@ Route::group(['prefix' => 'auth'], function () {
 });
 Route::group(['middleware' => 'auth:api'], function () {
 
+    Route::post('/upload_image', [UserController::class, 'uploadImage'])->name('users.image');
+
     Route::post('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
     Route::post('/user_details/{user_detail}', [UserDetailController::class, 'update'])->name('user_details.update');
     Route::post('/user_holidays/{user_holiday}', [UserHolidayController::class, 'update'])->name('user_holidays.update');

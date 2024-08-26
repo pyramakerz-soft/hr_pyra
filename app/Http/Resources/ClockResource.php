@@ -37,7 +37,6 @@ class ClockResource extends JsonResource
             'locationIn' => $this->location->address,
             'locationOut' => $locationOut,
             'userId' => $this->user->id,
-
             'formattedClockIn' => Carbon::parse($this->clock_in)->format('Y-m-d H:i'),
             'formattedClockOut' => Carbon::parse($this->clock_out)->format('Y-m-d H:i'),
             'otherClocks' => $otherClocksForDay,

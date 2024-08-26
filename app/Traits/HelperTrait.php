@@ -2,9 +2,6 @@
 
 namespace App\Traits;
 
-use Illuminate\Http\Response;
-
-
 trait HelperTrait
 {
 
@@ -19,13 +16,21 @@ trait HelperTrait
         $deltaLongitude = ($locationLongitude - $userLongitude) * M_PI / 180; // Difference in longitude in radians
 
         $a = sin($deltaLatitude / 2) * sin($deltaLatitude / 2) +
-            cos($userLatitudeRad) * cos($locationLatitudeRad) *
-            sin($deltaLongitude / 2) * sin($deltaLongitude / 2);
+        cos($userLatitudeRad) * cos($locationLatitudeRad) *
+        sin($deltaLongitude / 2) * sin($deltaLongitude / 2);
 
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
         $distance = $R * $c; // Distance in metres
         return $distance;
+    }
+    public function uploadImage($request)
+    {
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('public');
+            return $imagePath;
+        }
+        return false;
     }
 
 }
