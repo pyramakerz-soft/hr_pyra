@@ -46,6 +46,10 @@ class UserDetailResource extends JsonResource
             'end_time' => $end_time,
             "emp_type" => $this->emp_type,
             "hiring_date" => $this->hiring_date,
+            'location_id' => $this->user->user_locations->pluck('id'),
+            'location' => $this->user->user_locations->pluck('name'),
+            'work_type_id' => $this->user->work_types->pluck('id'),
+            'work_type_name' => $this->user->work_types->pluck('name'),
 
         ];
     }

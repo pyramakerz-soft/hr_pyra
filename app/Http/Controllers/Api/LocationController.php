@@ -29,8 +29,10 @@ class LocationController extends Controller
     }
     public function indexNames()
     {
-        $locationNames = Location::pluck('name', 'id');
-        return $this->returnData('location names', $locationNames, '');
+        $locationNames = Location::get()->map(function ($location) {
+            return ['id' => $location->id, 'name' => $location->name];
+        })->toArray();
+        return $this->returnData('locationNames', $locationNames, 'Location Names');
     }
     /**
      * Store a newly created resource in storage.

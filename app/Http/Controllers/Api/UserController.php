@@ -172,7 +172,6 @@ class UserController extends Controller
             return $this->returnError('You are not authorized to Update users', 403);
         }
         $userDetail = UserDetail::where('user_id', $user->id)->first();
-        // dd($userDetail);
         return $this->returnData("User", new UserDetailResource($userDetail), "User Data");
     }
 
