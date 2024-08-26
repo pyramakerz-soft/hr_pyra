@@ -35,7 +35,7 @@ class UserDetailResource extends JsonResource
             "gender" => $this->user->gender,
             "department_id" => $this->user->department_id,
             "deparment_name" => $this->user->department->name,
-            "role" => $this->user->roles->pluck('name'),
+            "roles" => $this->user->roles->pluck('name'),
             "national_id" => $this->user->national_id,
             "salary" => $salary,
             "working_hours_day" => $working_hours_day,

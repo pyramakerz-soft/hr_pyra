@@ -34,7 +34,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'working_hours' => $this->user_detail->working_hours_day ?? null,
-            'userDetail' => new UserDetailResource($this->whenLoaded('user_detail')),
+            // 'userDetail' => new UserDetailResource($this->whenLoaded('user_detail')),
         ];
     }
 }
