@@ -12,9 +12,10 @@ class UserDetailSeeder extends Seeder
      */
     public function run(): void
     {
-        $salary = 24000; //24000
+        $salary = 10000;
         $working_hours = 8.00; //8
-        $hourly_rate = ($salary / 30) / $working_hours;
+        $hourly_rate = ($salary / 22) / $working_hours;
+        $overtime_hourly_rate = (($salary / 30) / $working_hours) * 1.5;
         $start_time = "07:00";
         $end_time = "15:00";
 
@@ -22,6 +23,7 @@ class UserDetailSeeder extends Seeder
             'salary' => $salary,
             'working_hours_day' => $working_hours,
             'hourly_rate' => $hourly_rate,
+            'overtime_hourly_rate' => $overtime_hourly_rate,
             'start_time' => $start_time,
             'end_time' => $end_time,
             'overtime_hours' => 1.5,
@@ -33,6 +35,8 @@ class UserDetailSeeder extends Seeder
             'salary' => $salary,
             'working_hours_day' => $working_hours,
             'hourly_rate' => $hourly_rate,
+            'overtime_hourly_rate' => $overtime_hourly_rate,
+
             'start_time' => $start_time,
             'end_time' => $end_time,
             'overtime_hours' => 1.5,
@@ -44,6 +48,8 @@ class UserDetailSeeder extends Seeder
             'salary' => $salary,
             'working_hours_day' => $working_hours,
             'hourly_rate' => $hourly_rate,
+            'overtime_hourly_rate' => $overtime_hourly_rate,
+
             'start_time' => $start_time,
             'end_time' => $end_time,
             'overtime_hours' => 1.5,

@@ -109,8 +109,9 @@ class UserController extends Controller
 
         $salary = $request->salary;
         $working_hours_day = $request->working_hours_day;
-        $hourly_rate = ($salary / 30) / $working_hours_day;
-
+        $overtime_hours = $request->overtime_hours;
+        $hourly_rate = ($salary / 22) / $working_hours_day;
+        $overtime_hourly_rate = (($salary / 30) / $working_hours_day) * $overtime_hours;
         $start_time = $request->start_time;
         $end_time = $request->end_time;
         if ($end_time <= $start_time) {
@@ -121,7 +122,8 @@ class UserController extends Controller
             'salary' => $salary,
             'working_hours_day' => $working_hours_day,
             'hourly_rate' => $hourly_rate,
-            'overtime_hours' => $request->overtime_hours,
+            'overtime_hourly_rate' => $overtime_hourly_rate,
+            'overtime_hours' => $overtime_hours,
             'start_time' => $start_time,
             'end_time' => $end_time,
             'emp_type' => $request->emp_type,

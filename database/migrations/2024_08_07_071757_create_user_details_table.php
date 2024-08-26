@@ -15,10 +15,12 @@ return new class extends Migration
             $table->id();
             $table->decimal('salary', 8, 2)->nullable();
             $table->decimal('hourly_rate', 8, 2)->nullable();
+            $table->decimal('overtime_hourly_rate', 8, 2)->nullable();
+
             $table->decimal('working_hours_day', 8, 2)->nullable();
             $table->decimal('overtime_hours', 8, 2)->nullable();
-            $table->time('start_time')->nullable(); // Changed to time type
-            $table->time('end_time')->nullable(); // Changed to time type
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
             $table->string('emp_type')->nullable();
             $table->date('hiring_date')->nullable();
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
