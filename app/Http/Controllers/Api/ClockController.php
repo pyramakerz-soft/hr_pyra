@@ -314,7 +314,6 @@ class ClockController extends Controller
             'clock_out' => $clockOut->format('Y-m-d H:i:s'),
             'duration' => $durationFormatted,
         ]);
-
         return $this->returnData("clock", new ClockResource($clock), "Clock data for {$user->name}");
     }
 

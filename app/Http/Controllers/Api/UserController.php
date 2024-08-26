@@ -177,7 +177,7 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, User $user)
     {
-
+        // dd();
         $finalData = [];
         $authUser = Auth::user();
 
@@ -242,7 +242,7 @@ class UserController extends Controller
         }
 
         //Update Assigning Roles to User
-        $newRoles = $request->input('roles', []);
+        $newRoles = $request->input('roles', []) ?? $user->getRoleNames()->toArray();
         $user->syncRoles($newRoles);
 
         // Update Assigning Locations to User
