@@ -17,6 +17,10 @@ export class AddEmployee {
         public start_time: string | null,
         public end_time: string | null,
         public gender: string,
-        public role: string[]
+        public roles: string[],
+        public location_id: number[],
+        public location: string[],
+        public work_type_id: number[],
+        public work_type_name: string[]
     ) {}
 }
