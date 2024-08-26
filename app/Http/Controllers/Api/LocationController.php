@@ -29,7 +29,7 @@ class LocationController extends Controller
     }
     public function indexNames()
     {
-        $locationNames = Location::pluck('name');
+        $locationNames = Location::pluck('name', 'id');
         return $this->returnData('location names', $locationNames, '');
     }
     /**
