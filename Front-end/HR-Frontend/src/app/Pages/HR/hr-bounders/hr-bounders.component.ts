@@ -120,7 +120,6 @@ export class HrBoundersComponent {
     this.selectedName = location;
     this.locationServ.SearchByNames(this.selectedName).subscribe(
       (d: any) => {
-        console.log(d)
         this.tableData = d.locations;
         this.DisplayPagginationOrNot=false;
       },
@@ -145,6 +144,7 @@ export class HrBoundersComponent {
         this.tableData =  d.locations;
         this.PagesNumber=1;
         this.DisplayPagginationOrNot=false;
+        this.filteredLocations=[];
       },
       (error) => {
         console.log(error)

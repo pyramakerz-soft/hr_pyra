@@ -106,6 +106,7 @@ export class HREmployeeComponent {
         this.tableData = d.data[0].users;
         this.PagesNumber=1;
         this.DisplayPagginationOrNot=false;
+        this.filteredUsers=[];
       },
       (error) => {
         console.log(error)
@@ -121,7 +122,6 @@ export class HREmployeeComponent {
   getUsersName(){
     this.userServ.getAllUsersName().subscribe(
       (d: any) => {
-        console.log(d.usersNames);
         this.UsersNames=d.usersNames;
       },
       (error) => {

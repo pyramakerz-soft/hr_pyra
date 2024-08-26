@@ -9,7 +9,8 @@
       <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]" 
       (click)="Search()"
       ></i>
-      <input type="text" [(ngModel)]="selectedName" (input)="filterByName()" placeholder="Enter Keyword..."
+      <input type="text" [(ngModel)]="selectedName" (input)="filterByName()" placeholder="Enter Employee Name..."
+         (keydown.enter)="Search()"  
           class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
     
       <div *ngIf="filteredUsers.length > 0" class="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
