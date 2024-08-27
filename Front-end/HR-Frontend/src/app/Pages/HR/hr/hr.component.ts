@@ -14,7 +14,7 @@ export class HRComponent {
   isMenuOpen: boolean = false;
 
   menuItems = [
-    { label: 'Dashboard', icon: 'fi fi-rr-table-rows', route: '/HR//HREmployee' },
+    { label: 'Dashboard', icon: 'fi fi-rr-table-rows', route: '/HR//HRDashBoard' },
     { label: 'Employee', icon: 'fas fa-home', route: '/HR/HREmployee' },
     { label: 'Roles', icon: 'fi fi-rs-chart-pie', route: '/HR/HRRole' },
     { label: 'Atendence', icon: 'fi fi-rr-chart-simple', route: '/HR/HRAttendance' },

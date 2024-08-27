@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { CanActivateFn } from '@angular/router';
 
-import { doNotNavigateToLoginIfTokenGuard } from './do-not-navigate-to-login-if-token.guard';
+import { navigateIfHrGuard } from './navigate-if-hr.guard';
 
-describe('doNotNavigateToLoginIfTokenGuard', () => {
+describe('navigateIfHrGuard', () => {
   const executeGuard: CanActivateFn = (...guardParameters) => 
-      TestBed.runInInjectionContext(() => doNotNavigateToLoginIfTokenGuard(...guardParameters));
+      TestBed.runInInjectionContext(() => navigateIfHrGuard(...guardParameters));
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
