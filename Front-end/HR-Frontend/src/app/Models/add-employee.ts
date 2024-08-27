@@ -1,6 +1,6 @@
 export class AddEmployee {
     constructor(
-        // public photo: File|null
+        public image: File|null|string,
         public name: string,
         public code: string,
         public department_id: number | null,
