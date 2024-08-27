@@ -28,9 +28,10 @@ export class HrEmployeeAddEditDetailsComponent {
   workTypes: WorkType[] = [];
   Locations: AssignLocationToUser[] = [];
   isDropdownOpen = false;
+  imagePreview: string | ArrayBuffer | null = null;
   
   employee: AddEmployee = new AddEmployee(
-    '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], []
+    null, '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], []
   );
 
   regexPhone = /^(010|011|012|015)\d{8}$/;
@@ -73,6 +74,9 @@ export class HrEmployeeAddEditDetailsComponent {
       (d: any) => {
         this.employee = d.User;
         this.employee.roles = this.employee.roles || []
+        if(typeof this.employee.image == "string"){
+          this.imagePreview = this.employee.image
+        }
       }
     );
   }
@@ -177,14 +181,28 @@ export class HrEmployeeAddEditDetailsComponent {
     
     if (file) {
       if (file.size > this.maxFileSize) {
-        Swal.fire({   
-          text: "File size exceeds the maximum limit of 15 MB.",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#FF7519",
-          
-        });
-        return;
+        this.validationErrors['image'] = 'The file size exceeds the maximum limit of 15 MB.';
+        this.imagePreview = null;
+        this.employee.image = null;
+        return; 
       }
+      if (file.type === 'image/jpeg' || file.type === 'image/png') {
+        this.employee.image = file; 
+        this.validationErrors['image'] = ''; 
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.imagePreview = reader.result;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        this.validationErrors['image'] = 'Invalid file type. Only JPEG, JPG and PNG are allowed.';
+        this.imagePreview = null;
+        this.employee.image = null;
+        return; 
+      }
+    }else{
+      this.validationErrors['image'] = '*Image is required.';
     }
   }
 
@@ -202,6 +220,9 @@ export class HrEmployeeAddEditDetailsComponent {
       if (this.employee.hasOwnProperty(key)) {
         const field = key as keyof AddEmployee;
         if (!this.employee[field] && field != "code") {
+          if(this.EmployeeId !== 0){
+            continue
+          }
           this.validationErrors[field] = `*${this.capitalizeField(field)} is required.`;
           isValid = false;
         } else {
@@ -227,7 +248,7 @@ export class HrEmployeeAddEditDetailsComponent {
               }
               break;
             case "password":
-              if(this.employee.password.length < 5){
+              if(this.employee.password.length < 5 && this.EmployeeId === 0){
                 this.validationErrors[field] = 'Password must be more than 5 characters.';
                 isValid = false;
               }
