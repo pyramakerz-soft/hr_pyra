@@ -4,55 +4,63 @@ import { EmployeeDashboard } from '../../../Models/employee-dashboard';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClockService } from '../../../Services/clock.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-attendence-edit',
   standalone: true,
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './attendence-edit.component.html',
   styleUrl: './attendence-edit.component.css'
 })
 export class AttendenceEditComponent {
-  data: any = new EmployeeDashboard("", "", "", "", "", "", "", "", []); 
-  
+  data: any = new EmployeeDashboard("", "", "", "", "", "", "", "", []);
+  ClockInAfterClockOut: boolean = false;
+  DataIsNotTheSame: boolean = false;
 
-  constructor(private router: Router , public ClockServ:ClockService) {
+
+
+  constructor(private router: Router, public ClockServ: ClockService) {
 
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras.state) {
-      this.data = navigation.extras.state['data'] as EmployeeDashboard; 
+      this.data = navigation.extras.state['data'] as EmployeeDashboard;
       console.log(this.data)
     }
   }
 
+  CheckValidate() {
+    this.data.formattedClockIn = this.data.formattedClockIn.replace("T", ' ')
+    this.data.formattedClockOut = this.data.formattedClockOut.replace("T", ' ')
+    if (this.data.formattedClockIn > this.data.formattedClockOut) {
+      Swal.fire({
+        icon: "error",
+        title: "Clock Out must be after Clock In",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#17253E",
+      });
+    }
+    else if (this.data.formattedClockIn.split(' ')[0] !== this.data.formattedClockOut.split(' ')[0]) {
+      Swal.fire({
+        icon: "error",
+        title: "Clock Out and Clock In must be in the same date",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#17253E",
+      });
 
-  transformDateTime(dateTime: string): string {
-    // Create a Date object from the input string
-    const dateObj = new Date(dateTime);
-  
-    // Extract the date part and format it
-    const datePart = dateObj.toISOString().split('T')[0]; // "2024-08-23"
-  
-    // Extract the time part, and remove leading zero from hours
-    const timePart = dateObj.toTimeString().split(' ')[0]; // "07:51:00"
-    const [hours, minutes] = timePart.split(':');
-    const formattedTime = `${parseInt(hours, 10)}:${minutes}`; // "7:51"
-  
-    // Combine date and time parts
-    return `${datePart} ${formattedTime}`;
+    }
+    else{
+      this.SaveData();
+    }
   }
 
 
+  SaveData() {
 
-  SaveData(){
 
-
-    this.data.formattedClockIn = this.data.formattedClockIn.replace("T", ' ')
-    this.data.formattedClockOut = this.data.formattedClockOut.replace("T", ' ')
-
-    this.ClockServ.UpdateUserClock(this.data.userId,this.data.id , this.data.formattedClockIn ,this.data.formattedClockOut).subscribe(
+    this.ClockServ.UpdateUserClock(this.data.userId, this.data.id, this.data.formattedClockIn, this.data.formattedClockOut).subscribe(
       (d: any) => {
-        this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/"+this.data.userId)
+        this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/" + this.data.userId)
       },
       (error) => {
         console.error('Error:', error);
@@ -61,8 +69,8 @@ export class AttendenceEditComponent {
     );
 
   }
-  Cancel(){
-    this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/"+this.data.userId)
+  Cancel() {
+    this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/" + this.data.userId)
 
   }
 }
