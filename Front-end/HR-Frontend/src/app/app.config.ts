@@ -9,6 +9,10 @@ import { TokenExpireInterceptor } from './token-expire.interceptor';
 
 export const appConfig: ApplicationConfig = {
   // providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes) , provideRouter(routes),provideHttpClient(), provideAnimationsAsync(), provideAnimationsAsync()]
-  providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes) , provideRouter(routes),provideHttpClient() ,provideClientHydration(),    { provide: HTTP_INTERCEPTORS, useFactory: TokenExpireInterceptor, multi: true }
+
+  providers: [provideZoneChangeDetection({ eventCoalescing: true }), 
+    provideRouter(routes), provideRouter(routes),provideHttpClient(),
+    provideClientHydration(),
+    { provide: HTTP_INTERCEPTORS, useFactory: TokenExpireInterceptor, multi: true }
   ]
 };
