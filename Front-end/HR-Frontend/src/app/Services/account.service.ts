@@ -18,7 +18,7 @@ export class AccountService {
     this.CheckToken();
   }
 
-  private CheckToken(): void {
+  public CheckToken(): void {
     const token = localStorage.getItem("token");
     if (token) {
       this.isAuthenticated = true;
