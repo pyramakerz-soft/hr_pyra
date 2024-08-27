@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './Pages/login/login.component';
 import { EmployeeDashboardComponent } from './Pages/employee-dashboard/employee-dashboard.component';
 import { EmployeeComponent } from './Pages/Employee/employee/employee.component';
-import { HrTableComponent } from './Components/Core/HR/hr-table/hr-table.component';
 import { HREmployeeComponent } from './Pages/HR/hremployee/hremployee.component';
 import { HRComponent } from './Pages/HR/hr/hr.component';
 import { HrRoleComponent } from './Pages/HR/hr-role/hr-role.component';
@@ -12,35 +11,33 @@ import { HrAttendanceComponent } from './Pages/HR/hr-attendance/hr-attendance.co
 import { HrEmployeeAttendanceDetailsComponent } from './Pages/HR/hr-employee-attendance-details/hr-employee-attendance-details.component';
 import { HrEmployeeDetailsComponent } from './Pages/HR/hr-employee-details/hr-employee-details.component';
 import { HrEmployeeAddEditDetailsComponent } from './Pages/HR/hr-employee-add-edit-details/hr-employee-add-edit-details.component';
-import { authGuard } from './Guard/auth.guard';
 import { AttendenceEditComponent } from './Pages/HR/attendence-edit/attendence-edit.component';
+import { doNotNavigateWithoutLoginGuard } from './Guards/do-not-navigate-without-login.guard';
+import { doNotNavigateToLoginIfTokenGuard } from './Guards/do-not-navigate-to-login-if-token.guard';
 
 
 export const routes: Routes = [
     {path: "employee", component:EmployeeComponent, title:"Dashboard", children:[
         {path: "", redirectTo: "Dashboard", pathMatch: "full" },
-        {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard" ,canActivate: [authGuard ]},
-    ]},
+        {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard", canActivate:[doNotNavigateWithoutLoginGuard] },
+    ], canActivate:[doNotNavigateWithoutLoginGuard]},
 
     {path: "HR", component:HRComponent, title:"HR", children:[
         {path: "", redirectTo: "HREmployee", pathMatch: "full"},
-        {path: "HREmployee", component:HREmployeeComponent, title:"HREmployee" ,canActivate: [authGuard]},
-        {path: "HRRole", component:HrRoleComponent, title:"HRRole" ,canActivate: [authGuard]},
-        {path: "HRRoleAdd", component:HrRoleAddComponent, title:"HRRoleAdd" ,canActivate: [authGuard]},
-        {path: "HRBounders", component:HrBoundersComponent, title:"HRBounders" ,canActivate: [authGuard]},
-        {path: "HRAttendance", component:HrAttendanceComponent, title:"HRAttendance" ,canActivate: [authGuard]},
-        {path: "HREmployeeAttendanceDetails/:Id", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails" ,canActivate: [authGuard]},
-        // {path: "HREmployeeAttendanceDetails", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails"},
-        {path: "HREmployeeDetails/:EmpId", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails" ,canActivate: [authGuard]},
-        {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd" ,canActivate: [authGuard ]},
-        {path: "HREmployeeDetailsEdit/:Id", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit" ,canActivate: [authGuard]},
-        {path: "HREmployeeAttendanceEdit", component:AttendenceEditComponent, title:"HREmployeeAttendanceEdit" ,canActivate: [authGuard]},
+        {path: "HREmployee", component:HREmployeeComponent, title:"HREmployee", canActivate:[doNotNavigateWithoutLoginGuard]},
+        {path: "HRRole", component:HrRoleComponent, title:"HRRole", canActivate:[doNotNavigateWithoutLoginGuard]},
+        {path: "HRRoleAdd", component:HrRoleAddComponent, title:"HRRoleAdd", canActivate:[doNotNavigateWithoutLoginGuard]},
+        {path: "HRBounders", component:HrBoundersComponent, title:"HRBounders", canActivate:[doNotNavigateWithoutLoginGuard]},
+        {path: "HRAttendance", component:HrAttendanceComponent, title:"HRAttendance", canActivate:[doNotNavigateWithoutLoginGuard]},
+        {path: "HREmployeeAttendanceDetails/:Id", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails", canActivate:[doNotNavigateWithoutLoginGuard]},
+        {path: "HREmployeeDetails/:EmpId", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails", canActivate:[doNotNavigateWithoutLoginGuard]},
+        {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd", canActivate:[doNotNavigateWithoutLoginGuard] },
+        {path: "HREmployeeDetailsEdit/:Id", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit", canActivate:[doNotNavigateWithoutLoginGuard]},
+        {path: "HREmployeeAttendanceEdit", component:AttendenceEditComponent, title:"HREmployeeAttendanceEdit", canActivate:[doNotNavigateWithoutLoginGuard]},
 
-    ]},
+    ], canActivate:[doNotNavigateWithoutLoginGuard]},
 
-    { path: "Login", component:LoginComponent, title:"Login" },
-    { path: "HRtable", component:HREmployeeComponent, title:"HRtable" },
-    { path: "HRtable", component:HrTableComponent, title:"HRtable" },
-    { path: "", component:LoginComponent, title:"Login" },
+    { path: "Login", component:LoginComponent, title:"Login", canActivate:[doNotNavigateToLoginIfTokenGuard] },
+    { path: "", component:LoginComponent, title:"Login", canActivate:[doNotNavigateToLoginIfTokenGuard] },
     { path: '**', redirectTo: '/' },
 ];

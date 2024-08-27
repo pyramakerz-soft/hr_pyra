@@ -63,7 +63,6 @@ export class ClockInComponent {
 
   getDataFromToken():void{
     this.accountService.GetDataFromToken().subscribe((d: string) => {
-      try {
         const response = JSON.parse(d);
         this.userDetails = response.User;
         this.clockInTime=this.userDetails.clockIn;
@@ -74,9 +73,6 @@ export class ClockInComponent {
             this.startStopwatch();
 
         }
-      } catch (error) {
-        console.error('Error parsing JSON response:', error); 
-      }
     });
   }
 
@@ -90,8 +86,9 @@ export class ClockInComponent {
   }
 
   openDialog(): void {
-    const dialogRef = this.dialog.open(ClockInPopUpComponent);
-
+    const dialogRef = this.dialog.open(ClockInPopUpComponent, {
+      data: { Name: this.userDetails.name , job_title: this.userDetails.job_title ,  } // Your data here
+    });
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
         this.IsClockedIn = result;

@@ -18,28 +18,37 @@ export class AccountService {
     this.CheckToken();
   }
 
-  private CheckToken(): void {
+  public CheckToken(): void {
     const token = localStorage.getItem("token");
     if (token) {
-      this.isAuthenticated = true;
-      this.GetDataFromToken().subscribe(
-        (d: string) => {
-          try {
-            const response = JSON.parse(d);
-            const userDetails = response.User;
-            this.r = userDetails;
-          } catch (error) {
-            console.error('Error parsing JSON response:', error);
-          }
-        },
-        (error: HttpErrorResponse) => {
-          console.error('Error fetching data from token:', error);
+      try {
+        const decodedToken: any = jwt_decode(token);
+        const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+  
+        if (decodedToken.exp < currentTime) {
+          // Token has expired
+          this.logout();
+        } else {
+          this.isAuthenticated = true;
+          this.GetDataFromToken().subscribe(
+            (d: string) => {
+              const response = JSON.parse(d);
+              const userDetails = response.User;
+              this.r = userDetails;
+            },
+            (error: HttpErrorResponse) => {
+              this.logout();
+            }
+          );
         }
-      );
+      } catch (e) {
+        this.logout();
+      }
     } else {
       this.isAuthenticated = false;
     }
   }
+
   
   GetDataFromToken() {
     const token = localStorage.getItem("token");
@@ -59,3 +68,8 @@ export class AccountService {
     this.router.navigateByUrl("/login");
   }
 }  
+
+function jwt_decode(token: string): any {
+  throw new Error('Function not implemented.');
+}
+
