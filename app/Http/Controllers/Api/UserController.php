@@ -103,6 +103,7 @@ class UserController extends Controller
             'gender' => $request->gender,
             'department_id' => (int) $request->department_id,
             'image' => $imageUrl,
+            'serial_number' => null,
         ]);
 
         $finalData['user'] = $user;
@@ -161,12 +162,30 @@ class UserController extends Controller
 
     public function login(LoginRequest $request)
     {
+
         $credentials = $request->only('email', 'password');
         $token = JWTAuth::attempt($credentials);
 
         if (!$token) {
             return $this->returnError('You Are unauthenticated', Response::HTTP_UNAUTHORIZED);
         }
+
+        $user = auth()->user();
+        // Check if serial number is present in the request
+        $serialNumber = $request->serial_number;
+
+        if ($user && $serialNumber) {
+            if (is_null($user->serial_number)) {
+                $user->serial_number = $serialNumber;
+                $user->save();
+            } else {
+                if ($user->serial_number !== $serialNumber) {
+                    return $this->returnError('Serial number does not match', 406);
+                }
+            }
+            // dd($user->toArray());
+        }
+
         return response()->json([
             "result" => "true",
             'token' => $token,
@@ -186,7 +205,6 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, User $user)
     {
-        // dd($user->user_locations()->pluck('locations.id')->toArray());
         $finalData = [];
         $authUser = Auth::user();
 
@@ -217,7 +235,7 @@ class UserController extends Controller
         $user->update([
             'name' => $request->name ?? $user->name,
             'email' => $request->email ?? $user->email,
-            'password' => bcrypt($request->password) ?? $user->password,
+            // 'password' => bcrypt($request->password) ?? $user->password,
             'phone' => $request->phone ?? $user->phone,
             'contact_phone' => $request->contact_phone ?? $user->contact_phone,
             'national_id' => $request->national_id ?? $user->national_id,
@@ -310,17 +328,16 @@ class UserController extends Controller
         $usersByName = User::pluck('name');
         return $this->returnData("usersNames", $usersByName, "UsersName");
     }
-    // public function uploadImage(Request $request)
-    // {
-    //     $request->validate([
-    //         'image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
-    //     ]);
-    //     if ($request->hasFile('image')) {
-    //         $imagePath = $request->file('image')->store('images/users', 'public');
-    //         $imageUrl = asset('storage/' . $imagePath);
-    //         return $this->returnData("imageUrl", $imageUrl, "Image successfully uploaded");
+    public function updatePassword(Request $request, User $user)
+    {
 
-    //     }
-    //     return $this->returnError('Image upload failed');
-    // }
+        $request->validate([
+            'password' => ['required', 'min:6'],
+        ]);
+        $user->update([
+            'password' => bcrypt($request->password) ?? $user->password,
+        ]);
+        return $this->returnSuccessMessage("Password Updated Successfully");
+    }
+
 }

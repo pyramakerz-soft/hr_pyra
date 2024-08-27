@@ -39,6 +39,8 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('logout', [UserController::class, 'logout'])->name('user.logout');
     Route::post('assign_role/{user}', [UserController::class, 'AssignRole'])->name('user.roles');
     Route::get('/get_user_by_id/{user}', [UserController::class, 'show'])->name('user.show');
+    Route::post('update_password/{user}', [UserController::class, 'updatePassword'])->name('user.updatePassword');
+
 });
 Route::group(['middleware' => 'auth:api'], function () {
 

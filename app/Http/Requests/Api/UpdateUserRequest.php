@@ -24,7 +24,7 @@ class UpdateUserRequest extends FormRequest
         return [
             'name' => ['nullable', 'string', 'min:3'],
             'email' => ['nullable', 'email'],
-            'password' => ['nullable', 'min:6'],
+            // 'password' => ['nullable', 'min:6'],
             'phone' => ['nullable', 'regex:/^01[0125][0-9]{8}$/'],
             'contact_phone' => ['nullable', 'regex:/^01[0125][0-9]{8}$/'],
             'national_id' => ['nullable', 'string', 'regex:/^[0-9]{14}$/'],
