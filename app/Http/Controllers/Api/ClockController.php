@@ -124,13 +124,39 @@ class ClockController extends Controller
     public function clockIn(StoreClockInOutRequest $request)
     {
         $authUser = Auth::user();
+        $user_id = $authUser->id;
+
+        $this->validate($request, [
+            'location_type' => 'required|string|exists:work_types,name',
+            'clock_in' => ['required', 'date_format:Y-m-d H:i:s'],
+        ]);
+
+        if ($request->location_type == "home") {
+            $existingHomeClockIn = ClockInOut::where('user_id', $user_id)
+                ->whereDate('clock_in', Carbon::today())
+                ->where('location_type', "home")
+                ->whereNull('clock_out')
+                ->orderBy('clock_in', 'desc')
+                ->exists();
+            if ($existingHomeClockIn) {
+                return $this->returnError('You have already clocked in.');
+            }
+            // $clockIn = Carbon::parse($request->clock_in);
+            $clock = ClockInOut::create([
+                'clock_in' => Carbon::parse($request->clock_in),
+                'clock_out' => null,
+                'duration' => null,
+                'user_id' => $user_id,
+                'location_id' => null,
+                'location_type' => $request->location_type,
+            ]);
+            return $this->returnData("clock", $clock, "Clock In Done");
+        }
 
         $this->validate($request, [
             'latitude' => 'required',
             'longitude' => 'required',
         ]);
-
-        $user_id = $authUser->id;
         $latitude = $request->latitude;
         $longitude = $request->longitude;
 
@@ -162,26 +188,26 @@ class ClockController extends Controller
         $distanceBetweenUserAndLocation = $closestLocation['distance'];
         $now = Carbon::now()->addRealHour(3);
         $UserEndTime = Carbon::parse($authUser->user_detail->end_time);
-        // if ($now >= $UserEndTime) {
-        //     return $this->returnError("Your Shift Is Ended");
-        // }
-        $existingClockIn = ClockInOut::where('user_id', $user_id)
+
+        $existingSiteClockIn = ClockInOut::where('user_id', $user_id)
             ->where('location_id', $location_id)
             ->whereDate('clock_in', Carbon::today())
             ->whereNull('clock_out')
             ->orderBy('clock_in', 'desc')
             ->exists();
-        if ($existingClockIn) {
+        if ($existingSiteClockIn) {
             return $this->returnError('You have already clocked in.');
         }
 
         if ($distanceBetweenUserAndLocation < 50) {
             $clock = ClockInOut::create([
-                'clock_in' => Carbon::now()->addRealHour(3),
+                'clock_in' => Carbon::parse($request->clock_in),
                 'clock_out' => null,
                 'duration' => null,
                 'user_id' => $user_id,
                 'location_id' => $location_id,
+                'location_type' => $request->location_type,
+
             ]);
 
             return $this->returnData("clock", $clock, "Clock In Done");
@@ -192,33 +218,49 @@ class ClockController extends Controller
 
     public function clockOut(UpdateClockInOutRequest $request)
     {
-        $this->validate($request, [
-            'latitude' => 'required',
-            'longitude' => 'required',
-        ]);
-
-        $latitude = $request->latitude;
-        $longitude = $request->longitude;
-
         $authUser = Auth::user();
 
         $ClockauthUser = ClockInOut::where('user_id', $authUser->id)
             ->whereNull('clock_out')
             ->orderBy('clock_in', 'desc')
             ->first();
-        // dd($ClockauthUser->clock_in);
+        $request->validate([
+            'clock_out' => ['required', "date_format:Y-m-d H:i:s"],
+        ]);
         if (!$ClockauthUser) {
             return $this->returnError('You are not clocked in.');
         }
-        // dd(Carbon::parse($ClockauthUser->clock_in), Carbon::now()->addRealHour(3));
-        if (Carbon::parse($ClockauthUser->clock_in)->greaterThan(Carbon::now()->addRealHour(3))) {
+
+        // if (Carbon::parse($ClockauthUser->clock_in)->greaterThan(Carbon::now()->addRealHour(3))) {
+        //     return $this->returnError("You Can't clocked out now");
+        // }
+        $clockOut = Carbon::parse($request->clock_out);
+        if ($clockOut < Carbon::parse($ClockauthUser->clock_in)) {
             return $this->returnError("You Can't clocked out now");
         }
-        $user_location = $authUser->user_locations()->wherePivot('location_id', $ClockauthUser->location_id)->first();
+        if ($ClockauthUser->location_type == "home") {
+            $clock_in = Carbon::parse($ClockauthUser->clock_in);
+            $clock_out = $clockOut;
+            $durationInterval = $clock_out->diffAsCarbonInterval($clock_in);
+            $durationFormatted = $durationInterval->format('%H:%I:%S');
+            $ClockauthUser->update([
+                'clock_out' => $clock_out,
+                'duration' => $durationFormatted,
+            ]);
+            return $this->returnData("clock", $ClockauthUser, "Clock Out Done");
 
+        }
+        $user_location = $authUser->user_locations()->wherePivot('location_id', $ClockauthUser->location_id)->first();
         if (!$user_location) {
             return $this->returnError('User is not located at the correct location.');
         }
+
+        $this->validate($request, [
+            'latitude' => 'required',
+            'longitude' => 'required',
+        ]);
+        $latitude = $request->latitude;
+        $longitude = $request->longitude;
 
         $userLongitude = $user_location->longitude;
         $userLatitude = $user_location->latitude;
@@ -227,7 +269,7 @@ class ClockController extends Controller
 
         if ($distanceBetweenUserAndLocation < 50) {
             $clock_in = Carbon::parse($ClockauthUser->clock_in);
-            $clock_out = Carbon::now()->addRealHour(3);
+            $clock_out = $clockOut;
             $durationInterval = $clock_out->diffAsCarbonInterval($clock_in);
             $durationFormatted = $durationInterval->format('%H:%I:%S');
             $ClockauthUser->update([
