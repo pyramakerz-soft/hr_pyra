@@ -10,8 +10,9 @@
 <div class="my-6">
     <app-dashboard-hero></app-dashboard-hero>
 </div>
+
 <div class="flex flex-wrap md:flex-nowrap gap-4 justify-between">
-    <!-- First donut chart -->
+    <!-- First bar chart -->
     <div class="w-full md:w-3/4">
         <app-bar-chart></app-bar-chart>
     </div>
@@ -20,4 +21,10 @@
     <div class="w-full md:w-1/4">
         <app-donut-chart></app-donut-chart>
     </div>
+</div>
+
+<!-- Third Card -->
+<div class="flex flex-col md:flex-row justify-center md:space-x-3 mt-6">
+    <app-card-chart [Data]="Data[0]"></app-card-chart>
+    <app-card-chart [Data]="Data[1]"></app-card-chart>
 </div>
