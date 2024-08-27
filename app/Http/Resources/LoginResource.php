@@ -26,6 +26,11 @@ class LoginResource extends JsonResource
         if ($user_clockIn) {
             $clockIn = Carbon::parse($user_clockIn->clock_in)->format('H:i:s');
         }
+        $work_home = false;
+        $locationTypes = $authUser->work_types->pluck('name');
+        if (count($locationTypes) > 1) {
+            $work_home = true;
+        }
 
         return [
             'id' => $this->id,
@@ -36,6 +41,7 @@ class LoginResource extends JsonResource
             'role_name' => $this->getRoleName(),
             'is_clocked_out' => $is_clocked_out,
             'clockIn' => $clockIn,
+            'work_home' => $work_home,
         ];
 
     }
