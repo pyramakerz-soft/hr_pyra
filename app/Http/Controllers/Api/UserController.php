@@ -103,6 +103,7 @@ class UserController extends Controller
             'gender' => $request->gender,
             'department_id' => (int) $request->department_id,
             'image' => $imageUrl,
+            'serial_number' => null,
         ]);
 
         $finalData['user'] = $user;
@@ -161,12 +162,30 @@ class UserController extends Controller
 
     public function login(LoginRequest $request)
     {
+
         $credentials = $request->only('email', 'password');
         $token = JWTAuth::attempt($credentials);
 
         if (!$token) {
             return $this->returnError('You Are unauthenticated', Response::HTTP_UNAUTHORIZED);
         }
+
+        $user = auth()->user();
+        // Check if serial number is present in the request
+        $serialNumber = $request->serial_number;
+
+        if ($user && $serialNumber) {
+            if (is_null($user->serial_number)) {
+                $user->serial_number = $serialNumber;
+                $user->save();
+            } else {
+                if ($user->serial_number !== $serialNumber) {
+                    return $this->returnError('Serial number does not match', 406);
+                }
+            }
+            // dd($user->toArray());
+        }
+
         return response()->json([
             "result" => "true",
             'token' => $token,

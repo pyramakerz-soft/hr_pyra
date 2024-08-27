@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->string('national_id')->nullable()->unique();
             $table->string('code')->nullable()->unique();
-
+            $table->string('serial_number')->nullable()->unique();
             $table->string('phone')->nullable()->unique();
             $table->string('contact_phone')->nullable()->unique();
             $table->string('image')->nullable();
