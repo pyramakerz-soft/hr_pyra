@@ -14,6 +14,9 @@ import { HrEmployeeAddEditDetailsComponent } from './Pages/HR/hr-employee-add-ed
 import { AttendenceEditComponent } from './Pages/HR/attendence-edit/attendence-edit.component';
 import { doNotNavigateWithoutLoginGuard } from './Guards/do-not-navigate-without-login.guard';
 import { doNotNavigateToLoginIfTokenGuard } from './Guards/do-not-navigate-to-login-if-token.guard';
+import { DashboardHeroComponent } from './Components/dashboard-hero/dashboard-hero.component';
+import { HrDashboardComponent } from './Pages/HR/hr-dashboard/hr-dashboard.component';
+import { DoughnutController } from 'chart.js';
 
 
 export const routes: Routes = [
@@ -25,6 +28,7 @@ export const routes: Routes = [
     {path: "HR", component:HRComponent, title:"HR", children:[
         {path: "", redirectTo: "HREmployee", pathMatch: "full"},
         {path: "HREmployee", component:HREmployeeComponent, title:"HREmployee", canActivate:[doNotNavigateWithoutLoginGuard]},
+        {path: "HRDashBoard", component:HrDashboardComponent, title:"HRDashBoard", canActivate:[doNotNavigateWithoutLoginGuard]},
         {path: "HRRole", component:HrRoleComponent, title:"HRRole", canActivate:[doNotNavigateWithoutLoginGuard]},
         {path: "HRRoleAdd", component:HrRoleAddComponent, title:"HRRoleAdd", canActivate:[doNotNavigateWithoutLoginGuard]},
         {path: "HRBounders", component:HrBoundersComponent, title:"HRBounders", canActivate:[doNotNavigateWithoutLoginGuard]},
@@ -37,6 +41,7 @@ export const routes: Routes = [
 
     ], canActivate:[doNotNavigateWithoutLoginGuard]},
 
+    { path: "dountChart", component:DoughnutController, title:"dountChart" },
     { path: "Login", component:LoginComponent, title:"Login", canActivate:[doNotNavigateToLoginIfTokenGuard] },
     { path: "", component:LoginComponent, title:"Login", canActivate:[doNotNavigateToLoginIfTokenGuard] },
     { path: '**', redirectTo: '/' },

@@ -1,47 +1,41 @@
-<div class="flex justify-center space-y-5 md:space-y-0 md:space-x-8 flex-col md:flex-row">
+<!-- <div class="flex justify-center space-y-5 md:space-y-0 md:space-x-8 flex-col md:flex-row">
     <div class="flex justify-center">
         <img class="w-3/4 md:w-full" src="../../../assets/images/Group.png">
+    </div> -->
+
+<div >
+    <div class="flex justify-between">
+        <div>
+            <p class="text-base md:text-2xl text-[#111827] font-semibold mb-2">{{currentDate}}</p>
+            <!-- font edited by tailwind not style.css -->
+            <p class="text-sm md:text-base text-[#6B7280] font-medium tracking-wide">Date</p>
+        </div>
+        <div>
+            <p class="text-base md:text-2xl text-[#111827] font-semibold mb-2">{{ userDetails.name }}</p>
+            <p class="text-sm md:text-base text-[#6B7280] font-medium tracking-wide">{{userDetails.job_title}}</p>
+        </div>
     </div>
 
-    <div
-        class="bg-white border border-[#F3F4F6] rounded-3xl w-full md:w-[45%] lg:w-[34%] p-6 lg:p-9 shadow-xl text-center">
-        <div class="flex justify-between">
-            <div>
-                <p class="text-base md:text-2xl text-[#111827] font-semibold mb-2">{{currentDate}}</p>
-                <!-- font edited by tailwind not style.css -->
-                <p class="text-sm md:text-base text-[#6B7280] font-medium tracking-wide">Date</p>
-            </div>
-            <div>
-                <p class="text-base md:text-2xl text-[#111827] font-semibold mb-2">{{ userDetails.name }}</p>
-                <p class="text-sm md:text-base text-[#6B7280] font-medium tracking-wide">{{userDetails.job_title}}</p>
-            </div>
-        </div>
+    <div *ngIf="userDetails.is_clocked_out; else ClockOut">
+        <button
+            class="text-base md:text-2xl font-bold bg-[#FF7519] text-white mt-6 w-[70%] md:w-[82%] py-2 md:py-3 rounded-xl"
+            (click)="openDialog()">Clock In</button>
+    </div>
 
-        <div *ngIf="userDetails.is_clocked_out; else ClockOut">
+    <ng-template #ClockOut>
+        <div>
             <button
-                class="text-base md:text-2xl font-bold bg-[#FF7519] text-white mt-6 w-[70%] md:w-[82%] py-2 md:py-3 rounded-xl"
-                (click)="openDialog()">Clock In</button>
-        </div>
-        
-        <ng-template #ClockOut>
-            <div>
-                <button
-                    class="text-base md:text-2xl font-bold bg-[#D26053] text-white my-6 w-[70%] md:w-[82%] py-2 md:py-3 rounded-xl"
-                    (click)="sendLocation()"
-                    >
-                    Clock Out
-                </button>
-                <div class="flex justify-between items-center">
-                    <p class="text-[#707070] font-semibold text-base md:text-2xl">You are Clocked In</p>
-                    <hr class="text-[#707070] border border-[#707070] w-10 rotate-90 rounded-md">
-                    <p class="text-[#111827] font-semibold text-base md:text-2xl">{{ getFormattedTime() }}</p>
-                  </div>
+                class="text-base md:text-2xl font-bold bg-[#D26053] text-white my-6 w-[70%] md:w-[82%] py-2 md:py-3 rounded-xl"
+                (click)="sendLocation()">
+                Clock Out
+            </button>
+            <div class="flex justify-between items-center">
+                <p class="text-[#707070] font-semibold text-base md:text-2xl">You are Clocked In</p>
+                <hr class="text-[#707070] border border-[#707070] w-10 rotate-90 rounded-md">
+                <p class="text-[#111827] font-semibold text-base md:text-2xl">{{ getFormattedTime() }}</p>
             </div>
-        </ng-template>
-        
+        </div>
+    </ng-template>
 
-
-
-
-    </div>
 </div>
+<!-- </div> -->
