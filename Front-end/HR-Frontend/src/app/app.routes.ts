@@ -13,17 +13,15 @@ import { HrEmployeeDetailsComponent } from './Pages/HR/hr-employee-details/hr-em
 import { HrEmployeeAddEditDetailsComponent } from './Pages/HR/hr-employee-add-edit-details/hr-employee-add-edit-details.component';
 import { AttendenceEditComponent } from './Pages/HR/attendence-edit/attendence-edit.component';
 import { doNotNavigateWithoutLoginGuard } from './Guards/do-not-navigate-without-login.guard';
-import { doNotNavigateToLoginIfTokenGuard } from './Guards/do-not-navigate-to-login-if-token.guard';
-import { DashboardHeroComponent } from './Components/dashboard-hero/dashboard-hero.component';
+import { navigateIfEmployeeGuard } from './Guards/navigate-if-employee.guard';
 import { HrDashboardComponent } from './Pages/HR/hr-dashboard/hr-dashboard.component';
-import { DoughnutController } from 'chart.js';
-
+import { navigateIfHrGuard } from './Guards/navigate-if-hr.guard';
 
 export const routes: Routes = [
     {path: "employee", component:EmployeeComponent, title:"Dashboard", children:[
         {path: "", redirectTo: "Dashboard", pathMatch: "full" },
-        {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard", canActivate:[doNotNavigateWithoutLoginGuard] },
-    ], canActivate:[doNotNavigateWithoutLoginGuard]},
+        {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfEmployeeGuard] },
+    ], canActivate:[doNotNavigateWithoutLoginGuard, navigateIfEmployeeGuard]},
 
     {path: "HR", component:HRComponent, title:"HR", children:[
         {path: "", redirectTo: "HREmployee", pathMatch: "full"},
@@ -38,11 +36,19 @@ export const routes: Routes = [
         {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd", canActivate:[doNotNavigateWithoutLoginGuard] },
         {path: "HREmployeeDetailsEdit/:Id", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit", canActivate:[doNotNavigateWithoutLoginGuard]},
         {path: "HREmployeeAttendanceEdit", component:AttendenceEditComponent, title:"HREmployeeAttendanceEdit", canActivate:[doNotNavigateWithoutLoginGuard]},
+        {path: "HREmployee", component:HREmployeeComponent, title:"HREmployee", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HRRole", component:HrRoleComponent, title:"HRRole", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HRRoleAdd", component:HrRoleAddComponent, title:"HRRoleAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HRBounders", component:HrBoundersComponent, title:"HRBounders", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HRAttendance", component:HrAttendanceComponent, title:"HRAttendance", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HREmployeeAttendanceDetails/:Id", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HREmployeeDetails/:EmpId", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard] },
+        {path: "HREmployeeDetailsEdit/:Id", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HREmployeeAttendanceEdit", component:AttendenceEditComponent, title:"HREmployeeAttendanceEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+    ], canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
 
-    ], canActivate:[doNotNavigateWithoutLoginGuard]},
-
-    { path: "dountChart", component:DoughnutController, title:"dountChart" },
-    { path: "Login", component:LoginComponent, title:"Login", canActivate:[doNotNavigateToLoginIfTokenGuard] },
-    { path: "", component:LoginComponent, title:"Login", canActivate:[doNotNavigateToLoginIfTokenGuard] },
+    { path: "Login", component:LoginComponent, title:"Login", canActivate:[doNotNavigateWithoutLoginGuard] },
+    { path: "", component:LoginComponent, title:"Login", canActivate:[doNotNavigateWithoutLoginGuard] },
     { path: '**', redirectTo: '/' },
 ];

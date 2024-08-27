@@ -46,6 +46,7 @@ class RegisterRequest extends FormRequest
             'location_id' => ['required', 'exists:locations,id'],
             'work_type_id' => ['required', 'exists:work_types,id'],
             'image' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:15360'],
+            'serial_number' => ['nullable', 'string'],
         ];
     }
 

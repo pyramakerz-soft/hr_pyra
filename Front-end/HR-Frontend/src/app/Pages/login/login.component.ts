@@ -94,6 +94,7 @@ export class LoginComponent {
   
               const userResponse = JSON.parse(userData as string);
               this.accountService.r = userResponse.User;
+              localStorage.setItem("role", userResponse.User.role_name);
 
               // Navigate based on role
               if (this.accountService.r.role_name === "Employee") {
