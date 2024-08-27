@@ -31,7 +31,7 @@ class UpdateUserRequest extends FormRequest
             'code' => ['nullable', 'string'],
             'gender' => ['nullable', 'in:m,M,F,f'],
             'department_id' => ['nullable', 'exists:departments,id'],
-            'image' => ['nullable'],
+            // 'image' => ['nullable'],
             'salary' => ['nullable', 'numeric'],
             'working_hours_day' => ['nullable', 'numeric', 'min:4'],
             'overtime_hours' => ['nullable', 'numeric'],
@@ -42,7 +42,14 @@ class UpdateUserRequest extends FormRequest
             'end_time' => ['nullable'],
             'location_id' => ['nullable', 'exists:locations,id'],
             'work_type_id' => ['nullable', 'exists:work_types,id'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:15360'],
+            // 'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:15360'],
         ];
+    }
+    public function withValidator($validator)
+    {
+        $validator->sometimes('image', ['image', 'mimes:jpeg,png,jpg', 'max:15360'], function ($input) {
+            // Apply the image rules only if an image file is uploaded
+            return $this->hasFile('image');
+        });
     }
 }
