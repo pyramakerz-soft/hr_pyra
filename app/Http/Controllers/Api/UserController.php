@@ -186,7 +186,6 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, User $user)
     {
-        // dd($user->user_locations()->pluck('locations.id')->toArray());
         $finalData = [];
         $authUser = Auth::user();
 
@@ -217,7 +216,7 @@ class UserController extends Controller
         $user->update([
             'name' => $request->name ?? $user->name,
             'email' => $request->email ?? $user->email,
-            'password' => bcrypt($request->password) ?? $user->password,
+            // 'password' => bcrypt($request->password) ?? $user->password,
             'phone' => $request->phone ?? $user->phone,
             'contact_phone' => $request->contact_phone ?? $user->contact_phone,
             'national_id' => $request->national_id ?? $user->national_id,
@@ -310,17 +309,16 @@ class UserController extends Controller
         $usersByName = User::pluck('name');
         return $this->returnData("usersNames", $usersByName, "UsersName");
     }
-    // public function uploadImage(Request $request)
-    // {
-    //     $request->validate([
-    //         'image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
-    //     ]);
-    //     if ($request->hasFile('image')) {
-    //         $imagePath = $request->file('image')->store('images/users', 'public');
-    //         $imageUrl = asset('storage/' . $imagePath);
-    //         return $this->returnData("imageUrl", $imageUrl, "Image successfully uploaded");
+    public function updatePassword(Request $request, User $user)
+    {
 
-    //     }
-    //     return $this->returnError('Image upload failed');
-    // }
+        $request->validate([
+            'password' => ['required', 'min:6'],
+        ]);
+        $user->update([
+            'password' => bcrypt($request->password) ?? $user->password,
+        ]);
+        return $this->returnSuccessMessage("Password Updated Successfully");
+    }
+
 }
