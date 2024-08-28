@@ -16,12 +16,7 @@ class LoginResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // $authUser = Auth::user();
-        // $user_clock = $authUser->user_clocks->whereNull('clock_out')->last();
-        // $getClocks = $authUser->user_clocks->where('clock_in', Carbon::today()->toDateString())->all();
 
-        // $total_hours = $getClocks->duration;
-        // dd($total_hours);
         $authUser = Auth::user();
         $today = Carbon::today()->toDateString();
 
@@ -31,15 +26,15 @@ class LoginResource extends JsonResource
             return $clock->clock_in && $clock->clock_out && Carbon::parse($clock->clock_in)->toDateString() == $today;
         });
 
-        $total_hours = 0;
-
+        $total_seconds = 0;
         foreach ($getClocks as $clock) {
             $clockIn = Carbon::parse($clock->clock_in);
             $clockOut = Carbon::parse($clock->clock_out);
 
-            $duration = $clockIn->diffInHours($clockOut);
-            $total_hours += $duration;
+            $duration = $clockIn->diffInSeconds($clockOut);
+            $total_seconds += $duration;
         }
+        $total_hours = gmdate('H:i:s', $total_seconds);
 
         $is_clocked_out = false;
         if (!$user_clock) {
