@@ -34,7 +34,8 @@ export class ClockInComponent {
     national_id: "string",
     clockIn: "string",
     image: "string",
-    work_home:false
+    work_home:false,
+    total_hours:0
   };  
   currentDate: string | undefined;
   token: string = "";
@@ -68,13 +69,13 @@ export class ClockInComponent {
     this.accountService.GetDataFromToken().subscribe((d: string) => {
         const response = JSON.parse(d);
         this.userDetails = response.User;
-        this.clockInTime=this.userDetails.clockIn;
-        console.log(this.clockInTime)
+        this.stopwatchTime=this.userDetails.total_hours;
+        console.log(this.stopwatchTime)
 
         if(!this.userDetails.is_clocked_out){
 
 
-            this.initializeStopwatchTime();
+            // this.initializeStopwatchTime();
             this.startStopwatch();
 
         }
@@ -206,11 +207,11 @@ export class ClockInComponent {
   }
 
 
-  initializeStopwatchTime(): void {
-    const clockInSeconds = this.convertTimeToSeconds(this.clockInTime);
-    const currentSeconds = this.getCurrentTimeInSeconds();
-    this.stopwatchTime = currentSeconds - clockInSeconds;
-  }
+  // initializeStopwatchTime(): void {
+  //   const clockInSeconds = this.convertTimeToSeconds(this.clockInTime);
+  //   const currentSeconds = this.getCurrentTimeInSeconds();
+  //   this.stopwatchTime = currentSeconds - clockInSeconds;
+  // }
 
   convertTimeToSeconds(time: string): number {
     const [hours, minutes, seconds] = time.split(':').map(Number);
