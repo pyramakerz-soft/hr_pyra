@@ -32,8 +32,7 @@
                         class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
                         Location Out <i class="fa-solid fa-arrow-down mr-2"></i>
                     </th>
-                    <th
-                        class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
+                    <th class="py-3 min-w-[120px] whitespace-nowrap">
                         Site <i class="fa-solid fa-arrow-down mr-2"></i>
                     </th>
                 </tr>
@@ -80,26 +79,34 @@
 
                     <td>
                         <div class="flex justify-center">
-                            <div *ngIf="row.clockOut; else emptyState"
-                                class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] m-auto">
-                                {{ convertUTCToEgyptLocalTime(row.clockOut) }}
-
+                          <div *ngIf="row.clockOut; else emptyState"
+                            class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] m-auto">
+                            {{ convertUTCToEgyptLocalTime(row.clockOut) }}
+                          </div>
+                          <ng-template #emptyState>
+                            <div
+                              class="w-[97px] h-[36px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[8px] flex items-center justify-center">
+                              <div class="w-[50px] h-[1px] bg-[#475467]"></div>
                             </div>
-                            <ng-template #emptyState>
-                                <div
-                                    class="w-[97px] h-[36px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[8px] flex items-center justify-center">
-                                    <div class="w-[50px] h-[1px] bg-[#475467]"></div>
-                                </div>
-                            </ng-template>
+                          </ng-template>
                         </div>
-
                         <div *ngIf="showOtherClocks" class="flex flex-col mt-1 space-y-1 items-center">
-                            <div *ngFor="let cl of row.otherClocks; let j = index"
-                                class=" text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] ">
+                          <div *ngFor="let cl of row.otherClocks; let j = index">
+                            <ng-container *ngIf="cl.clockOut; else emptyClockState">
+                              <div class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
                                 {{ convertUTCToEgyptLocalTime(cl.clockOut) }}
-                            </div>
+                              </div>
+                            </ng-container>
+                            <ng-template #emptyClockState>
+                              <div
+                                class="w-[97px] h-[36px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[8px] flex items-center justify-center">
+                                <div class="w-[50px] h-[1px] bg-[#475467]"></div>
+                              </div>
+                            </ng-template>
+                          </div>
                         </div>
-                    </td>
+                      </td>
+                      
 
                     <td>{{ row.totalHours }}</td>
 
@@ -124,7 +131,21 @@
 
                     </td>
 
-                    <td>{{ row.site }}</td>
+                    <td>
+                        <div>
+                            <div
+                                class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] m-auto">
+                                {{ row.site }}
+                            </div>
+                        </div>
+                        <div *ngIf="showOtherClocks" class="flex flex-col mt-1 space-y-1 items-center">
+                            <div *ngFor="let cl of row.otherClocks; let j = index"
+                                class=" text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
+                                <p *ngIf="cl.clockOut">{{cl.site}}</p>
+                                
+                            </div>
+                        </div>
+                    </td>
 
                 </tr>
             </tbody>
