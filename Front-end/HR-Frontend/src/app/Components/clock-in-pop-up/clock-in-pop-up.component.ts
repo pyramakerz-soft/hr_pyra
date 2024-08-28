@@ -36,7 +36,7 @@ export class ClockInPopUpComponent {
 
     this.EmpName = data.Name;
     this.JobTitle = data.job_title;
-     this.WorkHome=data.work_home;
+    this.WorkHome=data.work_home;
     console.log(this.EmpName, this.JobTitle , this.WorkHome)
 
   }
