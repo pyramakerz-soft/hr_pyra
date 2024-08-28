@@ -34,9 +34,9 @@ export class ClockInComponent {
     national_id: "string",
     clockIn: "string",
     image: "string",
-    work_home:false,
-    total_hours:0
-  };  
+    work_home: false,
+    total_hours: ""
+  };
   currentDate: string | undefined;
   token: string = "";
   public IsClockedIn: boolean = false;
@@ -46,8 +46,8 @@ export class ClockInComponent {
   stopwatchTime: number = 0; // Time in seconds
   interval: any;
   isRunning: boolean = false;
-  clockInTime: string = "15:23:32"; 
-  UtcTime:string="";
+  clockInTime: string = "15:23:32";
+  UtcTime: string = "";
 
 
   constructor(public dialog: MatDialog, public accountService: AccountService, public clockService: ClockService, public clockEventService: ClockEventService) {
@@ -65,20 +65,18 @@ export class ClockInComponent {
     });
   }
 
-  getDataFromToken():void{
+  getDataFromToken(): void {
     this.accountService.GetDataFromToken().subscribe((d: string) => {
-        const response = JSON.parse(d);
-        this.userDetails = response.User;
-        this.stopwatchTime=this.userDetails.total_hours;
-        console.log(this.stopwatchTime)
+      const response = JSON.parse(d);
+      this.userDetails = response.User;
 
-        if(!this.userDetails.is_clocked_out){
+      // Check if total_hours is in the correct format before converting
+      this.stopwatchTime = this.convertTimeToSeconds(this.userDetails.total_hours) || 0; // Default to 0 if conversion fails
+      console.log(this.stopwatchTime);
 
-
-            // this.initializeStopwatchTime();
-            this.startStopwatch();
-
-        }
+      if (!this.userDetails.is_clocked_out) {
+        this.startStopwatch();
+      }
     });
   }
 
@@ -116,12 +114,12 @@ export class ClockInComponent {
 
   openDialog(): void {
     const dialogRef = this.dialog.open(ClockInPopUpComponent, {
-      data: { Name: this.userDetails.name , job_title: this.userDetails.job_title , work_home:this.userDetails.work_home } // Your data here
+      data: { Name: this.userDetails.name, job_title: this.userDetails.job_title, work_home: this.userDetails.work_home } // Your data here
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
         this.IsClockedIn = result;
-        if(result==true){
+        if (result == true) {
           this.startStopwatch();
           this.userDetails.is_clocked_out = false;
 
@@ -133,38 +131,38 @@ export class ClockInComponent {
 
 
   async sendLocation(): Promise<void> {
-       await this.getLocation(); 
-       this.UtcTime= this.getCurrentTimeInUTC();
+    await this.getLocation();
+    this.UtcTime = this.getCurrentTimeInUTC();
 
 
-      this.clockService.CreateClockOut(this.lat, this.lng ,this.UtcTime).subscribe(
-        (response: any) => {
-          localStorage.setItem("IsClockedIn", "false");
-          this.IsClockedIn = false;
-          this.clockEventService.notifyClockedIn(); // Notify other components
-          this.userDetails.is_clocked_out = true;
+    this.clockService.CreateClockOut(this.lat, this.lng, this.UtcTime).subscribe(
+      (response: any) => {
+        localStorage.setItem("IsClockedIn", "false");
+        this.IsClockedIn = false;
+        this.clockEventService.notifyClockedIn(); // Notify other components
+        this.userDetails.is_clocked_out = true;
 
-          this.stopStopwatch();
-          this.resetStopwatch();
-        },
-        (error: HttpErrorResponse) => {
-          console.log(error)
-          Swal.fire({   
-            text: "Failed to retrieve location. Please try again.",
-            confirmButtonText: "OK",
-            confirmButtonColor: "#FF7519",
-            
-          });
-        }
-      );
+        this.stopStopwatch();
+        // this.resetStopwatch();
+      },
+      (error: HttpErrorResponse) => {
+        console.log(error)
+        Swal.fire({
+          text: "Failed to retrieve location. Please try again.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#FF7519",
 
-     
+        });
+      }
+    );
+
+
 
   }
 
   getCurrentTimeInUTC(): string {
     const currentDate = new Date();
-  
+
     // Extract the individual date and time components
     const year = currentDate.getUTCFullYear();
     const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
@@ -172,10 +170,10 @@ export class ClockInComponent {
     const hours = String(currentDate.getUTCHours()).padStart(2, '0');
     const minutes = String(currentDate.getUTCMinutes()).padStart(2, '0');
     const seconds = String(currentDate.getUTCSeconds()).padStart(2, '0');
-  
+
     // Combine components into the desired format
     const formattedUTCDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  
+
     return formattedUTCDate;
   }
 
@@ -190,11 +188,11 @@ export class ClockInComponent {
             resolve();
           },
           (error: GeolocationPositionError) => {
-            Swal.fire({   
+            Swal.fire({
               text: "Error retrieving location.",
               confirmButtonText: "OK",
               confirmButtonColor: "#FF7519",
-              
+
             });
             reject(error);
           }
@@ -213,8 +211,19 @@ export class ClockInComponent {
   //   this.stopwatchTime = currentSeconds - clockInSeconds;
   // }
 
-  convertTimeToSeconds(time: string): number {
-    const [hours, minutes, seconds] = time.split(':').map(Number);
+
+  convertTimeToSeconds(time: string): number | null {
+    if (!time) return null; // Return null if time is undefined or empty
+
+    const timeParts = time.split(':');
+    if (timeParts.length !== 3) return null; // Ensure there are exactly 3 parts (hh:mm:ss)
+
+    const [hours, minutes, seconds] = timeParts.map(Number);
+
+    if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) {
+      return null; // Return null if any part is not a number
+    }
+
     return hours * 3600 + minutes * 60 + seconds;
   }
 
@@ -227,10 +236,11 @@ export class ClockInComponent {
     if (!this.isRunning) {
       this.isRunning = true;
       this.interval = setInterval(() => {
-        this.stopwatchTime++;
+        this.stopwatchTime++; // Increment as seconds
       }, 1000);
     }
   }
+
 
   stopStopwatch(): void {
     if (this.isRunning) {
@@ -239,20 +249,21 @@ export class ClockInComponent {
     }
   }
 
-  resetStopwatch(): void {
-    this.stopwatchTime = 0;
-  }
+  // resetStopwatch(): void {
+  //   this.stopwatchTime = 0;
+  // }
 
   getFormattedTime(): string {
     const hours = Math.floor(this.stopwatchTime / 3600);
     const minutes = Math.floor((this.stopwatchTime % 3600) / 60);
     const seconds = this.stopwatchTime % 60;
-    return `${this.pad(hours)} : ${this.pad(minutes)} : ${this.pad(seconds)}`;
+    return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
+  }
+  
+  pad(value: number): string {
+    return value < 10 ? `0${value}` : String(value);
   }
 
-  pad(time: number): string {
-    return time < 10 ? `0${time}` : `${time}`;
-  }
 }
 
 

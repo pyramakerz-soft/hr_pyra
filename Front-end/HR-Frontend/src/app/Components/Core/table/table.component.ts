@@ -21,6 +21,7 @@ export class TableComponent {
   CurrentPageNumber: number = 1;
   pages: number[] = [];
 
+  arr=[1,2,3]
 
   constructor(
     public empDashserv:EmployeeDashService,
@@ -43,7 +44,8 @@ export class TableComponent {
     this.empDashserv.GetClocks(this.token,pgNumb).subscribe(
      (d: any) => {
        this.Userclocks = d.data.clocks; 
-       console.log(d)
+       console.log(d.data.clocks)
+      //  console.log(this.Userclocks[0].otherClocks)
      },
      (error) => {
        console.error('Error retrieving user clocks:', error);
