@@ -5,6 +5,7 @@ import { EmployeeDashService } from '../../../Services/employee-dash.service';
 import { ClockService } from '../../../Services/clock.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { UserServiceService } from '../../../Services/user-service.service';
 
 
 
@@ -25,9 +26,12 @@ export class HrEmployeeAttendanceDetailsComponent {
   UserID: number = 1;
   DisplayPagginationOrNot: boolean = true;
   SelectedDate: string = ""
+  employee:any
+  isDateSelected = false
 
 
-  constructor(public empDashserv: EmployeeDashService, public UserClocksService: ClockService, public activatedRoute: ActivatedRoute,
+  constructor(public empDashserv: EmployeeDashService, public UserClocksService: 
+    ClockService, public activatedRoute: ActivatedRoute, public userService:UserServiceService,
     public route: Router) { }
 
 
@@ -39,6 +43,7 @@ export class HrEmployeeAttendanceDetailsComponent {
         if (id) {
           this.getAllClocks(1);
           this.generatePages();
+          this.getEmployeeByID(id)
         } else {
           console.error('No ID found in route parameters');
         }
@@ -47,6 +52,17 @@ export class HrEmployeeAttendanceDetailsComponent {
         console.error('Error in route parameters:', err);
       }
     });
+  }
+
+  getEmployeeByID(id:number){
+    this.userService.getUserById(id).subscribe(
+      (d: any) => {
+        this.employee = d.User;
+      },
+      (error) => {
+        console.log(error)
+      }
+    );
   }
 
 
@@ -90,7 +106,7 @@ export class HrEmployeeAttendanceDetailsComponent {
           this.tableData = d.data.clocks;
           this.PagesNumber = 1;
           this.DisplayPagginationOrNot = false;
-
+          
         },
         (error) => {
           this.tableData = [];
@@ -98,6 +114,7 @@ export class HrEmployeeAttendanceDetailsComponent {
           this.DisplayPagginationOrNot = false;
         }
       );
+      this.isDateSelected = true
     } else {
       this.DisplayPagginationOrNot = true;  // Ensure your logic here
     }
@@ -107,5 +124,16 @@ export class HrEmployeeAttendanceDetailsComponent {
     this.route.navigate(['HR/HREmployeeAttendanceEdit'], { state: { data: Clock } }); // Pass data via router state
   }
 
+  ClearSearch(){
+    this.isDateSelected = false
+    this.SelectedDate = ''
+    if (this.UserID) {
+      this.getAllClocks(1);
+      this.generatePages();
+    }
+  }
 
+  openDialog(){
+    
+  }
 }

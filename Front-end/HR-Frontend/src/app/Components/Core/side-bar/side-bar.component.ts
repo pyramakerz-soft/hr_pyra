@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AccountService } from '../../../Services/account.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-side-bar',
@@ -38,10 +39,22 @@ export class SideBarComponent {
   }
 
   signOut(){
-    this.AccountServ.logout();
-    this.router.navigateByUrl("Login");
-    if (window.innerWidth < 1024) { 
-      this.closeMenu();
-    }
+    Swal.fire({
+      title: 'Are you sure you want to sign out?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#FF7519',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Sign Out',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.AccountServ.logout();
+        this.router.navigateByUrl("Login");
+        if (window.innerWidth < 1024) { 
+          this.closeMenu();
+        }
+      }
+    });
   }
 }

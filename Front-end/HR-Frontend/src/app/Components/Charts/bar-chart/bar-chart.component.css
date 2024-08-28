@@ -1,0 +1,29 @@
+/* Container for the bar chart */
+.bar-chart-container {
+    display: flex;
+    align-items: flex-end; /* Align bars to the bottom of the container */
+    height: 300px; /* Fixed height for the bar chart area */
+    padding: 20px;
+    gap: 20px; /* Space between bars */
+  }
+  
+  /* Wrapper for each bar and its label */
+  .bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Bar element */
+  .bar {
+    width: 40px; /* Fixed width for bars */
+    transition: all 0.3s ease; /* Smooth transition for height changes */
+  }
+  
+  /* Label below each bar */
+  .bar-label {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #333; /* Dark color for contrast */
+  }
+  
