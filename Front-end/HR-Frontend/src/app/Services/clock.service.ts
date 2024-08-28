@@ -32,11 +32,11 @@ export class ClockService {
     return this.http.post(`${this.baseUrl}/clock_out`, body, { headers, responseType: 'json' });
   }
 
-  GetUserClocksById(id: number, PgNumber: number): Observable<EmployeeDashboard[]> {
+  GetUserClocksById(id: number, PgNumber: number, date:string): Observable<EmployeeDashboard[]> {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<EmployeeDashboard[]>(`${this.baseUrl}/clocks/user/${id}?page=${PgNumber}`, { headers });
-  }
+    return this.http.get<EmployeeDashboard[]>(`${this.baseUrl}/clocks/user/${id}?month=${date}&page=${PgNumber}`, { headers });
+  } 
 
   SearchByDate(id: number, date: string) {
     const token = localStorage.getItem("token");

@@ -6,8 +6,9 @@ import { ClockService } from '../../../Services/clock.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UserServiceService } from '../../../Services/user-service.service';
-
-
+import { MatDialog } from '@angular/material/dialog';
+import { ClockInPopUpComponent } from '../../../Components/clock-in-pop-up/clock-in-pop-up.component';
+import { AddEmployee } from '../../../Models/add-employee';
 
 @Component({
   selector: 'app-hr-employee-attendance-details',
@@ -26,17 +27,45 @@ export class HrEmployeeAttendanceDetailsComponent {
   UserID: number = 1;
   DisplayPagginationOrNot: boolean = true;
   SelectedDate: string = ""
-  employee:any
+  employee:AddEmployee = new AddEmployee(
+    null, '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [1], [], [], [], false);
+
   isDateSelected = false
   rowNumber:number=1;
 
+  selectedMonth: string = "01";
+  selectedYear: number = 0;
+  DateString: string = "2019-01";
+
+  months = [
+    { name: 'January', value: "01" },
+    { name: 'February', value: "02" },
+    { name: 'March', value: "03" },
+    { name: 'April', value: "04" },
+    { name: 'May', value: "05" },
+    { name: 'June', value: "06" },
+    { name: 'July', value: "07" },
+    { name: 'August', value: "08" },
+    { name: 'September', value: "09" },
+    { name: 'October', value: "10" },
+    { name: 'November', value: "11" },
+    { name: 'December', value: "12" }
+  ];
+  years: number[] = [];
 
   constructor(public empDashserv: EmployeeDashService, public UserClocksService: 
     ClockService, public activatedRoute: ActivatedRoute, public userService:UserServiceService,
-    public route: Router) { }
+    public route: Router, public dialog: MatDialog) { }
 
 
   ngOnInit() {
+    this.populateYears();
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1
+    this.selectedMonth = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
+    this.selectedYear = currentDate.getFullYear();
+    this.DateString = this.selectedYear + "-" + this.selectedMonth
+
     this.activatedRoute.params.subscribe({
       next: (params) => {
         const id = params['Id'];
@@ -53,8 +82,42 @@ export class HrEmployeeAttendanceDetailsComponent {
         console.error('Error in route parameters:', err);
       }
     });
+
   }
 
+  populateYears(): void {
+    const startYear = 2019;
+    const currentYear = new Date().getFullYear(); 
+
+    for (let year = startYear; year <= currentYear; year++) {
+      this.years.push(year);
+    }
+  }
+
+  onMonthChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    if (target) {
+      this.selectedMonth = target.value; 
+      this.DateString = this.selectedYear + "-" + this.selectedMonth
+      this.tableData = []
+      this.getAllClocks(1)
+    }
+  }
+
+  onYearChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    if (target) {
+      this.selectedYear = +target.value; 
+      this.DateString = this.selectedYear + "-" + this.selectedMonth
+      this.tableData = []
+      this.getAllClocks(1)
+    }
+  }
+
+  getFormattedMonthYear(): string {
+    const monthName = this.months.find(m => m.value === this.selectedMonth)?.name;
+    return monthName ? `${monthName} ${this.selectedYear}` : `${this.selectedYear}`;
+  }
 
   convertUTCToEgyptLocalTime(utcTimeStr: string): string {
     const [time, period] = utcTimeStr.split(/(AM|PM)/);
@@ -77,6 +140,7 @@ export class HrEmployeeAttendanceDetailsComponent {
     const formattedMinutes = String(localMinutes).padStart(2, '0');
     return `${formattedHours}:${formattedMinutes} ${localPeriod}`;
   }
+
   getEmployeeByID(id:number){
     this.userService.getUserById(id).subscribe(
       (d: any) => {
@@ -90,13 +154,10 @@ export class HrEmployeeAttendanceDetailsComponent {
 
 
   getAllClocks(PgNumber: number) {
-    this.UserClocksService.GetUserClocksById(this.UserID, PgNumber).subscribe(
+    this.UserClocksService.GetUserClocksById(this.UserID, PgNumber, this.DateString).subscribe(
       (d: any) => {
         this.tableData = d.data.clocks;
         this.PagesNumber = d.data.pagination.last_page;
-      },
-      (error) => {
-        console.log(error)
       }
     );
   }
@@ -158,6 +219,13 @@ export class HrEmployeeAttendanceDetailsComponent {
   }
 
   openDialog(){
-    
+    const dialogRef = this.dialog.open(ClockInPopUpComponent, {
+      data: { Name: this.employee.name , job_title: this.employee.emp_type , work_home:this.employee.work_home }  
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result !== undefined) {
+        this.getAllClocks(1)
+      }
+    });
   }
 }

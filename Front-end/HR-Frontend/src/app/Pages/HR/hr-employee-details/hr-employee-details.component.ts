@@ -16,8 +16,7 @@ import { FormsModule } from '@angular/forms';
 export class HrEmployeeDetailsComponent {
   empId:number|null = null
   employee: AddEmployee = new AddEmployee(
-    null, '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [1], [], [], []
-  );
+    null, '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [1], [], [], [], false);
 
   password:string =""
   PasswordError: string = ""; 
