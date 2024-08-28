@@ -12,7 +12,7 @@ export class AccountService {
 
   baseUrl = "http://127.0.0.1:8000/api/auth"
 
-  r: { name: string, job_title: string, id: string, image: string, role_name: string , is_clocked_out :string ,national_id:string, clockIn:string} = { name: "", job_title: "", id: "", image: "",role_name:"" , is_clocked_out :"",national_id:"" ,clockIn:""};
+  r: { name: string, job_title: string, id: string, image: string, role_name: string , is_clocked_out :string ,national_id:string, clockIn:string , work_home:boolean} = { name: "", job_title: "", id: "", image: "",role_name:"" , is_clocked_out :"",national_id:"" ,clockIn:"" , work_home:false};
 
   constructor(public http: HttpClient, private router: Router) {
     this.CheckToken();
