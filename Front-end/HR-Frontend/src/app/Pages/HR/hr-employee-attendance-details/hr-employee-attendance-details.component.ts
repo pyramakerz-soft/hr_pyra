@@ -9,6 +9,7 @@ import { UserServiceService } from '../../../Services/user-service.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ClockInPopUpComponent } from '../../../Components/clock-in-pop-up/clock-in-pop-up.component';
 import { UserDetails } from '../../../Models/user-details';
+import { AddEmployee } from '../../../Models/add-employee';
 
 
 
@@ -53,17 +54,10 @@ export class HrEmployeeAttendanceDetailsComponent {
   ];
   years: number[] = [];
 
-  userDetails: UserDetails = {
-    name: "string",
-    job_title: "string",
-    id: "string",
-    role_name: "string",
-    is_clocked_out: true,
-    national_id: "string",
-    clockIn: "string",
-    image: "string",
-    work_home:false
-  }; 
+  userDetails: AddEmployee = new AddEmployee(
+    null, '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], [], false
+  ); 
+  
   constructor(public empDashserv: EmployeeDashService, public UserClocksService: 
     ClockService, public activatedRoute: ActivatedRoute, public userService:UserServiceService,
     public route: Router, public dialog: MatDialog) { }
@@ -109,7 +103,7 @@ export class HrEmployeeAttendanceDetailsComponent {
     if (target) {
       this.selectedMonth = target.value; 
       this.SelectedDate = this.selectedYear + "-" + this.selectedMonth
-      console.log(this.SelectedDate)
+      this.getAllClocks(1)
     }
   }
 
@@ -118,7 +112,7 @@ export class HrEmployeeAttendanceDetailsComponent {
     if (target) {
       this.selectedYear = +target.value; 
       this.SelectedDate = this.selectedYear + "-" + this.selectedMonth
-      console.log(this.SelectedDate)
+      this.getAllClocks(1)
     }
   }
 
@@ -231,11 +225,11 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   openDialog(){
     const dialogRef = this.dialog.open(ClockInPopUpComponent, {
-      data: { Name: this.userDetails.name , job_title: this.userDetails.job_title , work_home:this.userDetails.work_home }  
+      data: { Name: this.userDetails.name , job_title: this.userDetails.emp_type , work_home:this.userDetails.work_home }  
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
-        // Call the data
+        this.getAllClocks(1)
       }
     });
   }

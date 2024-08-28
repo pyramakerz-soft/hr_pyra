@@ -23,7 +23,6 @@ class ClockController extends Controller
     protected function prepareClockData($clocks)
     {
         $isPaginated = $clocks instanceof \Illuminate\Pagination\LengthAwarePaginator;
-
         $groupedClocks = $clocks->groupBy(function ($clock) {
             return Carbon::parse($clock->clock_in)->toDateString();
         });
@@ -55,7 +54,6 @@ class ClockController extends Controller
 
             $totalDurationFormatted = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
             $firstClockAtTheDay->duration = $totalDurationFormatted;
-
             $otherClocksForDay = $clocksForDay->skip(1)->map(function ($clock) {
                 return [
                     'id' => $clock->id,
@@ -64,11 +62,11 @@ class ClockController extends Controller
                     'totalHours' => $clock->duration ? Carbon::parse($clock->duration)->format('h:i') : null,
                 ];
             });
-
             $data[] = (new ClockResource($firstClockAtTheDay))->toArray(request()) + [
-                'otherClocks' => $otherClocksForDay->values()->toArray(),
+                // 'otherClocks' => $otherClocksForDay->values()->toArray(),
                 'totalHours' => $totalDurationFormatted,
             ];
+
         }
 
         return [
@@ -91,6 +89,7 @@ class ClockController extends Controller
         }
 
         $query = ClockInOut::where('user_id', $user->id);
+        // dd($query->get());
 
         if ($request->has('date')) {
             $date = Carbon::parse($request->get('date'))->toDateString();
@@ -100,16 +99,25 @@ class ClockController extends Controller
         } else if ($request->has('month')) {
             $month = Carbon::parse($request->get('month'));
 
-            // Determine the start and end dates for the custom month range
-            $startOfMonth = $month->copy()->startOfMonth()->addDays(26);
-            $endOfMonth = $month->copy()->addMonth()->startOfMonth()->addDays(25);
+            $startOfMonth = $month->copy()->subMonth()->startOfMonth()->addDays(25);
+
+            $endOfMonth = $month->copy()->startOfMonth()->addDays(24);
 
             $query->whereBetween('clock_in', [$startOfMonth, $endOfMonth]);
 
             $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
         } else {
-            $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
 
+            $now = Carbon::now();
+
+            $currentStart = $now->copy()->subMonth()->startOfMonth()->addDays(25);
+            $currentEnd = $now->copy()->startOfMonth()->addDays(24);
+
+            // Filter based on the current custom month range
+            $query->whereBetween('clock_in', [$currentStart, $currentEnd]);
+
+            // Paginate and sort by clock_in in descending order
+            $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
         }
 
         if ($clocks->isEmpty()) {

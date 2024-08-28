@@ -21,6 +21,7 @@ export class AddEmployee {
         public location_id: number[],
         public location: string[],
         public work_type_id: number[],
-        public work_type_name: string[]
+        public work_type_name: string[],
+        public work_home: boolean
     ) {}
 }
