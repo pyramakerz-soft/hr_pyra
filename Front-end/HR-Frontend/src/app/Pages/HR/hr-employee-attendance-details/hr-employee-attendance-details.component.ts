@@ -28,6 +28,7 @@ export class HrEmployeeAttendanceDetailsComponent {
   SelectedDate: string = ""
   employee:any
   isDateSelected = false
+  rowNumber:number=1;
 
 
   constructor(public empDashserv: EmployeeDashService, public UserClocksService: 
@@ -54,6 +55,28 @@ export class HrEmployeeAttendanceDetailsComponent {
     });
   }
 
+
+  convertUTCToEgyptLocalTime(utcTimeStr: string): string {
+    const [time, period] = utcTimeStr.split(/(AM|PM)/);
+    let [hours, minutes] = time.split(':').map(Number);
+    if (period === 'PM' && hours !== 12) {
+      hours += 12;
+    }
+    if (period === 'AM' && hours === 12) {
+      hours = 0;
+    }
+    const currentDate = new Date();
+    const utcDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate(), hours, minutes));
+    const egyptTimeZone = 'Africa/Cairo';
+    const localDate = new Date(utcDate.toLocaleString('en-US', { timeZone: egyptTimeZone }));
+    let localHours = localDate.getHours();
+    const localMinutes = localDate.getMinutes();
+    const localPeriod = localHours >= 12 ? 'PM' : 'AM';
+    localHours = localHours % 12 || 12; // Converts '0' hours to '12'
+    const formattedHours = String(localHours).padStart(2, '0');
+    const formattedMinutes = String(localMinutes).padStart(2, '0');
+    return `${formattedHours}:${formattedMinutes} ${localPeriod}`;
+  }
   getEmployeeByID(id:number){
     this.userService.getUserById(id).subscribe(
       (d: any) => {
@@ -97,6 +120,7 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   toggleOtherClocks(index: number): void {
     this.showOtherClocks = !this.showOtherClocks;
+    this.rowNumber=index;
   }
 
   searchByDate() {

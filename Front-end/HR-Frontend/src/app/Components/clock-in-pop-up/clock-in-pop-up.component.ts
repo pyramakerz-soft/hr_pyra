@@ -23,22 +23,21 @@ export class ClockInPopUpComponent {
   public reversedGeo: any;
   public locationName: string = "";
   sites: { value: string, label: string }[] = [
-    { value: 'home', label: 'Home' },
-    { value: 'site1', label: 'Site 1' },
-    { value: 'site2', label: 'Site 2' },
-    // Add more sites as needed
+    { value: 'home', label: 'home' },
+    { value: 'site', label: 'site' },
   ];
   EmpName: string = "";
   JobTitle: string = "";
-
-
+  WorkHome:boolean=false;
+  UtcTime:string="";
   selectedSite: string = '';
 
-  constructor(public dialogRef: MatDialogRef<ClockInPopUpComponent>, public clockService: ClockService, public clockEventService: ClockEventService, public revGeo: ReverseGeocodingService, @Inject(MAT_DIALOG_DATA) public data: any) {
+  constructor(public dialogRef: MatDialogRef<ClockInPopUpComponent>, public clockService: ClockService, public clockEventService: ClockEventService, public revGeo: ReverseGeocodingService, @Inject(MAT_DIALOG_DATA) public data: any , ) {
 
     this.EmpName = data.Name;
     this.JobTitle = data.job_title;
-    console.log(this.EmpName, this.JobTitle)
+     this.WorkHome=data.work_home;
+    console.log(this.EmpName, this.JobTitle , this.WorkHome)
 
   }
 
@@ -57,10 +56,29 @@ export class ClockInPopUpComponent {
 
 
 
+  getCurrentTimeInUTC(): string {
+    const currentDate = new Date();
+  
+    // Extract the individual date and time components
+    const year = currentDate.getUTCFullYear();
+    const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
+    const day = String(currentDate.getUTCDate()).padStart(2, '0');
+    const hours = String(currentDate.getUTCHours()).padStart(2, '0');
+    const minutes = String(currentDate.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(currentDate.getUTCSeconds()).padStart(2, '0');
+  
+    // Combine components into the desired format
+    const formattedUTCDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  
+    return formattedUTCDate;
+  }
 
   async sendLocation(): Promise<void> {
     await this.getLocation();
-    this.clockService.CreateClockIn(this.lat, this.lng).subscribe(
+    this.UtcTime= this.getCurrentTimeInUTC();
+
+    if(this.WorkHome==false){
+    this.clockService.CreateClockIn(this.lat, this.lng ,this.UtcTime ,"site").subscribe(
       (response: any) => {
         this.IsClockedIn = true;
         this.dialogRef.close(this.IsClockedIn);
@@ -68,15 +86,73 @@ export class ClockInPopUpComponent {
       },
       (error: HttpErrorResponse) => {
         const errorMessage = error.error?.message || 'An unknown error occurred';
+        console.log(error.error.message)
+        if(error.error.message=="The location type field is required"){
+          Swal.fire({
+            text: "The location type field is required",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
+
+          });
+        }
+      else  if (error.error.message.includes("User is not located at the correct location")){
         Swal.fire({
-          text: "Failed to retrieve location. Please try again.",
+          text: "You Are not located at the correct location",
           confirmButtonText: "OK",
           confirmButtonColor: "#FF7519",
 
         });
+      }
+      else{
+        Swal.fire({
+          text: "Try In Another Time",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#FF7519",
+
+        });
+      }
         console.log(this.lat, this.lng)
       }
     );
+  }
+  else{
+    this.clockService.CreateClockIn(this.lat, this.lng , this.UtcTime,this.selectedSite).subscribe(
+      (response: any) => {
+        this.IsClockedIn = true;
+        this.dialogRef.close(this.IsClockedIn);
+        this.clockEventService.notifyClockedIn();
+      },
+      (error: HttpErrorResponse) => {
+        const errorMessage = error.error?.message || 'An unknown error occurred';
+        console.log(error.error.message)
+        if(error.error.message=="The location type field is required"){
+          Swal.fire({
+            text: "The location type field is required",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
+
+          });
+        }
+      else  if (error.error.message.includes("User is not located at the correct location")){
+        Swal.fire({
+          text: "You Are not located at the correct location",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#FF7519",
+
+        });
+      }
+      else{
+        Swal.fire({
+          text: "Try In Another Time",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#FF7519",
+
+        });
+      }
+        console.log(this.lat, this.lng)
+      }
+    );
+  }
   }
 
   getLocation(): Promise<void> {
@@ -136,4 +212,7 @@ export class ClockInPopUpComponent {
     });
   }
 
+  getWorkTypes(){
+
+  }
 }
