@@ -12,9 +12,11 @@ class ClockResource extends JsonResource
     {
         $clockOut = $this->clock_out ? Carbon::parse($this->clock_out)->format('h:iA') : null;
         $locationOut = null;
+
         if ($this->location_type == "site") {
 
             if ($this->clock_out) {
+
                 $locationOut = $this->location->address;
             }
         }
@@ -25,8 +27,7 @@ class ClockResource extends JsonResource
                 $locationIn = $this->location->address;
             }
         }
-
-        $totalHours = $this->clock_out ? Carbon::parse($this->duration)->format('H:i') : null;
+        $totalHours = $this->duration ? Carbon::parse($this->duration)->format('H:i') : null;
 
         $allClocks = ClockInOut::where('user_id', $this->user_id)->get();
 
@@ -35,12 +36,11 @@ class ClockResource extends JsonResource
         })->map(function ($clock) {
             return [
                 'id' => $clock->id,
-                'clockIn' => $clock->clock_in ? Carbon::parse($clock->clock_in)->format('h:iA') : null,
-                'clockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('h:iA') : null,
-                'totalHours' => $clock->duration ? Carbon::parse($clock->duration)->format('h:i') : null,
+                'clockIn' => $clock->clock_in ? Carbon::parse($clock->clock_in)->format('H:iA') : null,
+                'clockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('H:iA') : null,
+                'totalHours' => $clock->duration ? Carbon::parse($clock->duration)->format('H:i') : null,
                 'site' => $clock->location_type,
-                'location_in' => $clock->location->address,
-                'location_out' => $clock->location->address,
+                // 'location_in' =>
 
             ];
         })->values()->toArray();
@@ -50,7 +50,7 @@ class ClockResource extends JsonResource
             'Day' => Carbon::parse($this->clock_in)->format('l'),
             'Date' => Carbon::parse($this->clock_in)->format('Y-m-d'),
             'clockIn' => Carbon::parse($this->clock_in)->format('h:iA'),
-            'clockOut' => $clockOut,
+            'clockOut' => Carbon::parse($clockOut)->format('h:iA'),
             'totalHours' => $totalHours,
             'locationIn' => $locationIn,
             'locationOut' => $locationOut,
