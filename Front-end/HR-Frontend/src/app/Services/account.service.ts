@@ -54,7 +54,7 @@ export class AccountService {
     this.isAuthenticated = false;
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-    this.router.navigateByUrl("/login");
+    this.router.navigateByUrl("Login");
   }
 }  
 
