@@ -8,10 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { UserServiceService } from '../../../Services/user-service.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ClockInPopUpComponent } from '../../../Components/clock-in-pop-up/clock-in-pop-up.component';
-import { UserDetails } from '../../../Models/user-details';
 import { AddEmployee } from '../../../Models/add-employee';
-
-
 
 @Component({
   selector: 'app-hr-employee-attendance-details',
@@ -30,13 +27,15 @@ export class HrEmployeeAttendanceDetailsComponent {
   UserID: number = 1;
   DisplayPagginationOrNot: boolean = true;
   SelectedDate: string = ""
-  employee:any
+  employee:AddEmployee = new AddEmployee(
+    null, '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [1], [], [], [], false);
+
   isDateSelected = false
   rowNumber:number=1;
 
   selectedMonth: string = "01";
   selectedYear: number = 0;
-  selectedDate: string = "2019-01";
+  DateString: string = "2019-01";
 
   months = [
     { name: 'January', value: "01" },
@@ -54,16 +53,19 @@ export class HrEmployeeAttendanceDetailsComponent {
   ];
   years: number[] = [];
 
-  userDetails: AddEmployee = new AddEmployee(
-    null, '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], [], false
-  ); 
-  
   constructor(public empDashserv: EmployeeDashService, public UserClocksService: 
     ClockService, public activatedRoute: ActivatedRoute, public userService:UserServiceService,
     public route: Router, public dialog: MatDialog) { }
 
 
   ngOnInit() {
+    this.populateYears();
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1
+    this.selectedMonth = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
+    this.selectedYear = currentDate.getFullYear();
+    this.DateString = this.selectedYear + "-" + this.selectedMonth
+
     this.activatedRoute.params.subscribe({
       next: (params) => {
         const id = params['Id'];
@@ -81,12 +83,6 @@ export class HrEmployeeAttendanceDetailsComponent {
       }
     });
 
-    this.populateYears();
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1
-    this.selectedMonth = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
-    this.selectedYear = currentDate.getFullYear();
-    this.SelectedDate = this.selectedYear + "-" + this.selectedMonth
   }
 
   populateYears(): void {
@@ -102,7 +98,8 @@ export class HrEmployeeAttendanceDetailsComponent {
     const target = event.target as HTMLSelectElement;
     if (target) {
       this.selectedMonth = target.value; 
-      this.SelectedDate = this.selectedYear + "-" + this.selectedMonth
+      this.DateString = this.selectedYear + "-" + this.selectedMonth
+      this.tableData = []
       this.getAllClocks(1)
     }
   }
@@ -111,7 +108,8 @@ export class HrEmployeeAttendanceDetailsComponent {
     const target = event.target as HTMLSelectElement;
     if (target) {
       this.selectedYear = +target.value; 
-      this.SelectedDate = this.selectedYear + "-" + this.selectedMonth
+      this.DateString = this.selectedYear + "-" + this.selectedMonth
+      this.tableData = []
       this.getAllClocks(1)
     }
   }
@@ -156,13 +154,10 @@ export class HrEmployeeAttendanceDetailsComponent {
 
 
   getAllClocks(PgNumber: number) {
-    this.UserClocksService.GetUserClocksById(this.UserID, PgNumber, this.selectedDate).subscribe(
+    this.UserClocksService.GetUserClocksById(this.UserID, PgNumber, this.DateString).subscribe(
       (d: any) => {
         this.tableData = d.data.clocks;
         this.PagesNumber = d.data.pagination.last_page;
-      },
-      (error) => {
-        console.log(error)
       }
     );
   }
@@ -225,7 +220,7 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   openDialog(){
     const dialogRef = this.dialog.open(ClockInPopUpComponent, {
-      data: { Name: this.userDetails.name , job_title: this.userDetails.emp_type , work_home:this.userDetails.work_home }  
+      data: { Name: this.employee.name , job_title: this.employee.emp_type , work_home:this.employee.work_home }  
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
