@@ -22,7 +22,7 @@ export const routes: Routes = [
     {path: "employee", component:EmployeeComponent, title:"Dashboard", children:[
         {path: "", redirectTo: "Dashboard", pathMatch: "full" },
         {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfEmployeeGuard] },
-    ], canActivate:[doNotNavigateToLoginIfTokenExistsGuard, navigateIfEmployeeGuard]},
+    ], canActivate:[doNotNavigateWithoutLoginGuard, navigateIfEmployeeGuard]},
 
     {path: "HR", component:HRComponent, title:"HR", children:[
         {path: "", redirectTo: "HREmployee", pathMatch: "full"},
