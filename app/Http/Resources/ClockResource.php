@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Resources;
 
+use App\Models\ClockInOut;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
@@ -24,7 +25,7 @@ class ClockResource extends JsonResource
         $locationIn = null;
         $totalHours = $this->clock_out ? Carbon::parse($this->duration)->format('H:i') : null;
 
-        $allClocks = $this->resource->first()->get();
+        $allClocks = ClockInOut::where('user_id', $this->user_id)->get();
 
         $otherClocksForDay = $allClocks->filter(function ($clock) {
             return Carbon::parse($clock->clock_in)->toDateString() === Carbon::parse($this->clock_in)->toDateString() && $clock->id !== $this->id;
