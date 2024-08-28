@@ -89,7 +89,6 @@ class ClockController extends Controller
         }
 
         $query = ClockInOut::where('user_id', $user->id);
-        // dd($query->get());
 
         if ($request->has('date')) {
             $date = Carbon::parse($request->get('date'))->toDateString();
@@ -101,7 +100,7 @@ class ClockController extends Controller
 
             $startOfMonth = $month->copy()->subMonth()->startOfMonth()->addDays(25);
 
-            $endOfMonth = $month->copy()->startOfMonth()->addDays(24);
+            $endOfMonth = $month->copy()->startOfMonth()->addDays(25);
 
             $query->whereBetween('clock_in', [$startOfMonth, $endOfMonth]);
 
@@ -111,7 +110,7 @@ class ClockController extends Controller
             $now = Carbon::now();
 
             $currentStart = $now->copy()->subMonth()->startOfMonth()->addDays(25);
-            $currentEnd = $now->copy()->startOfMonth()->addDays(24);
+            $currentEnd = $now->copy()->startOfMonth()->addDays(25);
 
             // Filter based on the current custom month range
             $query->whereBetween('clock_in', [$currentStart, $currentEnd]);
@@ -178,7 +177,7 @@ class ClockController extends Controller
             $userLatitude = $userLocation->latitude;
 
             $distance = $this->haversineDistance($userLatitude, $userLongitude, $latitude, $longitude);
-
+            // dd($location_id);
             if (is_null($shortestDistance) || $distance < $shortestDistance) {
                 $shortestDistance = $distance;
                 $closestLocation = [
@@ -227,7 +226,6 @@ class ClockController extends Controller
     public function clockOut(UpdateClockInOutRequest $request)
     {
         $authUser = Auth::user();
-
         $ClockauthUser = ClockInOut::where('user_id', $authUser->id)
             ->whereNull('clock_out')
             ->orderBy('clock_in', 'desc')
