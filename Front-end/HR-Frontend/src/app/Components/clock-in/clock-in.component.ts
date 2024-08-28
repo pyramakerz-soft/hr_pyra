@@ -33,7 +33,8 @@ export class ClockInComponent {
     is_clocked_out: true,
     national_id: "string",
     clockIn: "string",
-    image: "string"
+    image: "string",
+    work_home:false
   };  
   currentDate: string | undefined;
   token: string = "";
@@ -45,6 +46,8 @@ export class ClockInComponent {
   interval: any;
   isRunning: boolean = false;
   clockInTime: string = "15:23:32"; 
+  UtcTime:string="";
+
 
   constructor(public dialog: MatDialog, public accountService: AccountService, public clockService: ClockService, public clockEventService: ClockEventService) {
   }
@@ -66,6 +69,8 @@ export class ClockInComponent {
         const response = JSON.parse(d);
         this.userDetails = response.User;
         this.clockInTime=this.userDetails.clockIn;
+        console.log(this.clockInTime)
+
         if(!this.userDetails.is_clocked_out){
 
 
@@ -75,6 +80,29 @@ export class ClockInComponent {
         }
     });
   }
+
+  convertUTCToEgyptLocalTime(utcTimeStr: string): string {
+    const [time, period] = utcTimeStr.split(/(AM|PM)/);
+    let [hours, minutes] = time.split(':').map(Number);
+    if (period === 'PM' && hours !== 12) {
+      hours += 12;
+    }
+    if (period === 'AM' && hours === 12) {
+      hours = 0;
+    }
+    const currentDate = new Date();
+    const utcDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate(), hours, minutes));
+    const egyptTimeZone = 'Africa/Cairo';
+    const localDate = new Date(utcDate.toLocaleString('en-US', { timeZone: egyptTimeZone }));
+    let localHours = localDate.getHours();
+    const localMinutes = localDate.getMinutes();
+    const localPeriod = localHours >= 12 ? 'PM' : 'AM';
+    localHours = localHours % 12 || 12; // Converts '0' hours to '12'
+    const formattedHours = String(localHours).padStart(2, '0');
+    const formattedMinutes = String(localMinutes).padStart(2, '0');
+    return `${formattedHours}:${formattedMinutes} ${localPeriod}`;
+  }
+
 
   getCurrentDate(): string {
     const date = new Date();
@@ -87,7 +115,7 @@ export class ClockInComponent {
 
   openDialog(): void {
     const dialogRef = this.dialog.open(ClockInPopUpComponent, {
-      data: { Name: this.userDetails.name , job_title: this.userDetails.job_title ,  } // Your data here
+      data: { Name: this.userDetails.name , job_title: this.userDetails.job_title , work_home:this.userDetails.work_home } // Your data here
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
@@ -104,9 +132,11 @@ export class ClockInComponent {
 
 
   async sendLocation(): Promise<void> {
-    try {
-       await this.getLocation();  
-      this.clockService.CreateClockOut(this.lat, this.lng).subscribe(
+       await this.getLocation(); 
+       this.UtcTime= this.getCurrentTimeInUTC();
+
+
+      this.clockService.CreateClockOut(this.lat, this.lng ,this.UtcTime).subscribe(
         (response: any) => {
           localStorage.setItem("IsClockedIn", "false");
           this.IsClockedIn = false;
@@ -117,18 +147,35 @@ export class ClockInComponent {
           this.resetStopwatch();
         },
         (error: HttpErrorResponse) => {
-          const errorMessage = error.error?.message || 'An unknown error occurred';
-          console.log(errorMessage);
+          console.log(error)
+          Swal.fire({   
+            text: "Failed to retrieve location. Please try again.",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
+            
+          });
         }
       );
-    } catch (error) {
-      Swal.fire({   
-        text: "Failed to retrieve location. Please try again.",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#FF7519",
-        
-      });
-    }
+
+     
+
+  }
+
+  getCurrentTimeInUTC(): string {
+    const currentDate = new Date();
+  
+    // Extract the individual date and time components
+    const year = currentDate.getUTCFullYear();
+    const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
+    const day = String(currentDate.getUTCDate()).padStart(2, '0');
+    const hours = String(currentDate.getUTCHours()).padStart(2, '0');
+    const minutes = String(currentDate.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(currentDate.getUTCSeconds()).padStart(2, '0');
+  
+    // Combine components into the desired format
+    const formattedUTCDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  
+    return formattedUTCDate;
   }
 
 
