@@ -16,8 +16,31 @@ class LoginResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // $authUser = Auth::user();
+        // $user_clock = $authUser->user_clocks->whereNull('clock_out')->last();
+        // $getClocks = $authUser->user_clocks->where('clock_in', Carbon::today()->toDateString())->all();
+
+        // $total_hours = $getClocks->duration;
+        // dd($total_hours);
         $authUser = Auth::user();
+        $today = Carbon::today()->toDateString();
+
         $user_clock = $authUser->user_clocks->whereNull('clock_out')->last();
+
+        $getClocks = $authUser->user_clocks->filter(function ($clock) use ($today) {
+            return $clock->clock_in && $clock->clock_out && Carbon::parse($clock->clock_in)->toDateString() == $today;
+        });
+
+        $total_hours = 0;
+
+        foreach ($getClocks as $clock) {
+            $clockIn = Carbon::parse($clock->clock_in);
+            $clockOut = Carbon::parse($clock->clock_out);
+
+            $duration = $clockIn->diffInHours($clockOut);
+            $total_hours += $duration;
+        }
+
         $is_clocked_out = false;
         if (!$user_clock) {
             $is_clocked_out = true;
@@ -41,6 +64,7 @@ class LoginResource extends JsonResource
             'role_name' => $this->getRoleName(),
             'is_clocked_out' => $is_clocked_out,
             'clockIn' => $clockIn,
+            'total_hours' => $total_hours,
             'work_home' => $work_home,
         ];
 
