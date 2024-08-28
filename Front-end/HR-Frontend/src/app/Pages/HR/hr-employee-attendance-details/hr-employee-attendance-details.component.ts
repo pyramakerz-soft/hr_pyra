@@ -67,7 +67,7 @@ export class HrEmployeeAttendanceDetailsComponent {
 
 
   getAllClocks(PgNumber: number) {
-    this.UserClocksService.GetUserClocksById(this.UserID, PgNumber).subscribe(
+    this.UserClocksService.GetUserClocksById(this.UserID, PgNumber, '2024-08').subscribe(
       (d: any) => {
         this.tableData = d.data.clocks;
         this.PagesNumber = d.data.pagination.last_page;
