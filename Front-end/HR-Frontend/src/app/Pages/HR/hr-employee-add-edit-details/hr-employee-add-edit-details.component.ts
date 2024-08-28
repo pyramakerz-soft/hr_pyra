@@ -31,7 +31,7 @@ export class HrEmployeeAddEditDetailsComponent {
   imagePreview: string | ArrayBuffer | null = null;
   
   employee: AddEmployee = new AddEmployee(
-    null, '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], []
+    null, '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], [], false
   );
 
   regexPhone = /^(010|011|012|015)\d{8}$/;

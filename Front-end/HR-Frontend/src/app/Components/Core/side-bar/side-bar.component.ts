@@ -50,7 +50,6 @@ export class SideBarComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.AccountServ.logout();
-        this.router.navigateByUrl("Login");
         if (window.innerWidth < 1024) { 
           this.closeMenu();
         }
