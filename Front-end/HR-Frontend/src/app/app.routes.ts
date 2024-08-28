@@ -22,12 +22,12 @@ export const routes: Routes = [
     {path: "employee", component:EmployeeComponent, title:"Dashboard", children:[
         {path: "", redirectTo: "Dashboard", pathMatch: "full" },
         {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfEmployeeGuard] },
-    ], canActivate:[doNotNavigateToLoginIfTokenExistsGuard, navigateIfEmployeeGuard]},
+    ], canActivate:[doNotNavigateWithoutLoginGuard, navigateIfEmployeeGuard]},
 
     {path: "HR", component:HRComponent, title:"HR", children:[
-        {path: "", redirectTo: "HREmployee", pathMatch: "full"},
-        {path: "HREmployee", component:HREmployeeComponent, title:"HREmployee", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "", redirectTo: "HRDashBoard", pathMatch: "full"},
         {path: "HRDashBoard", component:HrDashboardComponent, title:"HRDashBoard", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HREmployee", component:HREmployeeComponent, title:"HREmployee", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
         {path: "HRRole", component:HrRoleComponent, title:"HRRole", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
         {path: "HRRoleAdd", component:HrRoleAddComponent, title:"HRRoleAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
         {path: "HRBounders", component:HrBoundersComponent, title:"HRBounders", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
