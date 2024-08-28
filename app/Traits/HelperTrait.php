@@ -27,10 +27,17 @@ trait HelperTrait
     public function uploadImage($request, $inputName = 'image', $directory = 'assets/images/Users')
     {
         if ($request->hasFile($inputName)) {
+            $path = public_path($directory);
+            if (!file_exists($path)) {
+                mkdir($path, 0777, true);
+            }
+
             $newImageName = uniqid() . "-employee." . $request->file($inputName)->extension();
-            $request->file($inputName)->move(public_path($directory), $newImageName);
+            $request->file($inputName)->move($path, $newImageName);
+
             return asset($directory . '/' . $newImageName);
         }
+
         return false;
     }
 

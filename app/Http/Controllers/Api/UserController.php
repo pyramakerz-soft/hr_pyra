@@ -209,7 +209,7 @@ class UserController extends Controller
         $authUser = Auth::user();
 
         if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to Update users', 403);
+            return $this->returnError('You are not authorized to update users', 403);
         }
 
         $department = Department::find($user->department_id);
@@ -217,25 +217,23 @@ class UserController extends Controller
             return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
         }
 
+        // Generate unique code for user
         do {
             $departmentPrefix = substr(Str::slug($department->name), 0, 4);
             $randomDigits = mt_rand(1000, 9999);
             $code = strtoupper($departmentPrefix) . '-' . $randomDigits;
         } while (User::where('code', $code)->exists());
 
-        if ($request->hasFile('image')) {
-            $imageUrl = $this->uploadImage($request);
-            if (!$imageUrl) {
-                return $this->returnError('Image upload failed', Response::HTTP_BAD_REQUEST);
-            }
-        } else {
+        $imageUrl = $this->uploadImage($request);
+
+        if (!$imageUrl) {
             $imageUrl = $user->image;
         }
 
+        // Update user information
         $user->update([
             'name' => $request->name ?? $user->name,
             'email' => $request->email ?? $user->email,
-            // 'password' => bcrypt($request->password) ?? $user->password,
             'phone' => $request->phone ?? $user->phone,
             'contact_phone' => $request->contact_phone ?? $user->contact_phone,
             'national_id' => $request->national_id ?? $user->national_id,
@@ -243,11 +241,11 @@ class UserController extends Controller
             'gender' => $request->gender ?? $user->gender,
             'department_id' => (int) $department->id,
             'image' => $imageUrl,
-
         ]);
 
         $finalData['user'] = $user;
 
+        // Update user detail information
         $userDetail = UserDetail::where('user_id', $user->id)->first();
         $salary = $request->salary; // Example: 24000
         $working_hours_day = $request->working_hours_day; // Example: 8
