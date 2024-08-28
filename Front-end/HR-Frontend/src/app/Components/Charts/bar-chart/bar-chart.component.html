@@ -1,24 +1,18 @@
 <div class="border p-6">
-  <!-- Header -->
   <div>
     <p class="text-lg font-semibold mb-4">Pyramakerz Employee Per Months</p>
   </div>
 
-  <!-- Responsive Bar Chart Container with Scrollable Feature -->
   <div class="bar-chart-container flex flex-wrap justify-between gap-2 max-h-[300px] overflow-y-auto">
-    <!-- Loop through each normalized segment to create bars -->
     <div
       *ngFor="let segment of normalizedSegments"
       class="bar-wrapper flex flex-col items-center flex-[1_0_20%] lg:flex-1"
     >
-      <!-- Bar element with dynamic height and background color -->
       <div
         class="mb-1 w-full"
         [ngStyle]="{ height: segment.normalizedValue + 'px', backgroundColor: segment.color }"
       ></div>
-      <!-- Display the segment value -->
       <p class="bar-value text-center text-sm">{{ segment.value }}</p>
-      <!-- Display the segment label -->
       <p class="bar-label text-center text-sm">{{ segment.label }}</p>
     </div>
   </div>
