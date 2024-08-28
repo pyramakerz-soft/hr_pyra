@@ -24,7 +24,6 @@ class ClockController extends Controller
     {
         $isPaginated = $clocks instanceof \Illuminate\Pagination\LengthAwarePaginator;
 
-        // Group clocks by date
         $groupedClocks = $clocks->groupBy(function ($clock) {
             return Carbon::parse($clock->clock_in)->toDateString();
         });
@@ -32,18 +31,13 @@ class ClockController extends Controller
         $data = [];
 
         foreach ($groupedClocks as $date => $clocksForDay) {
-            // Sort clocks by clock_in time to get the earliest one first
             $clocksForDay = $clocksForDay->sortBy(function ($clock) {
                 return Carbon::parse($clock->clock_in);
             });
-            // Get the earliest clock (the first clock of the day)
             $firstClockAtTheDay = $clocksForDay->first();
-            // dd($firstClockAtTheDay->toArray());
 
-            // Initialize total duration in seconds
             $totalDurationInSeconds = 0;
 
-            // Calculate total duration including all clocks for the day
             foreach ($clocksForDay as $clock) {
                 if ($clock->clock_out && $clock->clock_in) {
                     $clockIn = Carbon::parse($clock->clock_in);
@@ -54,17 +48,14 @@ class ClockController extends Controller
 
                 }
             }
-            // Convert total duration from seconds to H:i:s format
             $hours = floor($totalDurationInSeconds / 3600);
             $minutes = floor(($totalDurationInSeconds % 3600) / 60);
 
             $seconds = $totalDurationInSeconds % 60;
 
             $totalDurationFormatted = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
-            // Update the total duration for the first clock entry
             $firstClockAtTheDay->duration = $totalDurationFormatted;
 
-            // Prepare other clocks for the day, excluding the first one
             $otherClocksForDay = $clocksForDay->skip(1)->map(function ($clock) {
                 return [
                     'id' => $clock->id,
@@ -74,7 +65,6 @@ class ClockController extends Controller
                 ];
             });
 
-            // Prepare the final data structure for this date
             $data[] = (new ClockResource($firstClockAtTheDay))->toArray(request()) + [
                 'otherClocks' => $otherClocksForDay->values()->toArray(),
                 'totalHours' => $totalDurationFormatted,
@@ -107,6 +97,16 @@ class ClockController extends Controller
             $query->whereDate('clock_in', $date);
             $clocks = $query->orderBy('clock_in', 'desc')->get();
 
+        } else if ($request->has('month')) {
+            $month = Carbon::parse($request->get('month'));
+
+            // Determine the start and end dates for the custom month range
+            $startOfMonth = $month->copy()->startOfMonth()->addDays(26);
+            $endOfMonth = $month->copy()->addMonth()->startOfMonth()->addDays(25);
+
+            $query->whereBetween('clock_in', [$startOfMonth, $endOfMonth]);
+
+            $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
         } else {
             $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
 
@@ -231,9 +231,6 @@ class ClockController extends Controller
             return $this->returnError('You are not clocked in.');
         }
 
-        // if (Carbon::parse($ClockauthUser->clock_in)->greaterThan(Carbon::now()->addRealHour(3))) {
-        //     return $this->returnError("You Can't clocked out now");
-        // }
         $clockOut = Carbon::parse($request->clock_out);
         if ($clockOut < Carbon::parse($ClockauthUser->clock_in)) {
             return $this->returnError("You Can't clocked out now");
