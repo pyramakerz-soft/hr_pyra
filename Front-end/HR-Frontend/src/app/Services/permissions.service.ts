@@ -4,17 +4,19 @@ import { RoleModel } from '../Models/role-model';
 import { PermissionModel } from '../Models/permission-model';
 import { Observable } from 'rxjs';
 import { PermissionAddModel } from '../Models/permission-add-model';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PermissionsService {
-  baseurl = 'http://127.0.0.1:8000/api/permissions';
+  baseurl = '';
 
-  token =
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE3MjM0NDY2MTEsImV4cCI6MTcyMzQ1MDIxMSwibmJmIjoxNzIzNDQ2NjExLCJqdGkiOiJCTFVYbGxKR3JuWEY1am5hIiwic3ViIjoiMSIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.-07HgHebef-1NoR4dRDa9LPyhuCL5e1UeeIl6--cUhE';
+  token =""
+  constructor(public http: HttpClient , public Api:ApiService) {
+    this.baseurl=Api.BaseUrl+"/permissions"
 
-  constructor(public http: HttpClient) {}
+  }
 
   GetAll() {
     const token = localStorage.getItem("token");

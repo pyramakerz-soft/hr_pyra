@@ -14,11 +14,12 @@ class DepartmentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
         return [
             "id" => $this->id,
             "name" => $this->name,
             "manager_id" => $this->manager_id,
-            'userHolidays' => UserHolidayResource::collection($this->whenLoaded('user_holidays')),
+            'manager_name' => $this->manager ? $this->manager->name : null,
         ];
     }
 }
