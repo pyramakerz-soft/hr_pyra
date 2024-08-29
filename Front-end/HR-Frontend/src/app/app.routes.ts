@@ -17,6 +17,8 @@ import { navigateIfEmployeeGuard } from './Guards/navigate-if-employee.guard';
 import { HrDashboardComponent } from './Pages/HR/hr-dashboard/hr-dashboard.component';
 import { navigateIfHrGuard } from './Guards/navigate-if-hr.guard';
 import { doNotNavigateToLoginIfTokenExistsGuard } from './Guards/do-not-navigate-to-login-if-token-exists.guard';
+import { HrDepartmentComponent } from './Pages/HR/hr-department/hr-department.component';
+import { HrDepartmentAddComponent } from './Pages/HR/hr-department-add/hr-department-add.component';
 
 export const routes: Routes = [
     {path: "employee", component:EmployeeComponent, title:"Dashboard", children:[
@@ -37,6 +39,10 @@ export const routes: Routes = [
         {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard] },
         {path: "HREmployeeDetailsEdit/:Id", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
         {path: "HREmployeeAttendanceEdit", component:AttendenceEditComponent, title:"HREmployeeAttendanceEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HRDepartment", component:HrDepartmentComponent, title:"HRDepartment", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HRDepartmentAdd", component:HrDepartmentAddComponent, title:"HRDepartmentAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HRDepartmentEdit/:id", component:HrDepartmentAddComponent, title:"HRDepartmentEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+
     ], canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
 
     { path: "Login", component:LoginComponent, title:"Login", canActivate:[doNotNavigateToLoginIfTokenExistsGuard] },

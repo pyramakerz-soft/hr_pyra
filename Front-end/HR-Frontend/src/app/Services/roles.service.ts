@@ -3,16 +3,20 @@ import { Injectable } from '@angular/core';
 import { RoleModel } from '../Models/role-model';
 import { catchError, Observable, throwError } from 'rxjs';
 import { PermissionAddModel } from '../Models/permission-add-model';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RolesService {
   
-  baseurl ="http://127.0.0.1:8000/api/roles"; 
+  baseurl =""; 
   token:string=""
 
-  constructor(public http: HttpClient) { }
+  constructor(public http: HttpClient , public Api:ApiService) {
+    this.baseurl=Api.BaseUrl+"/roles"
+
+   }
 
   getall(): Observable<RoleModel[]> {
     const token = localStorage.getItem("token");
@@ -48,7 +52,6 @@ export class RolesService {
   
 
   private handleError(error: any): Observable<never> {
-    // Implement your error handling logic here
     console.error('An error occurred:', error);
     return throwError(() => new Error('Something went wrong; please try again later.'));
   }

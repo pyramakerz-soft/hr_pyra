@@ -3,15 +3,19 @@ import { Injectable } from '@angular/core';
 import { UserModel } from '../Models/user-model';
 import { Observable } from 'rxjs';
 import { AddEmployee } from '../Models/add-employee';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserServiceService {
 
-  baseURL = "http://127.0.0.1:8000/api"
+  baseURL = ""
 
-  constructor(public http:HttpClient) { }
+  constructor(public http:HttpClient , public Api:ApiService) {
+    this.baseURL=Api.BaseUrl
+
+   }
 
   getall(pageNumber:number): Observable<UserModel[]> {
     const token = localStorage.getItem("token");
