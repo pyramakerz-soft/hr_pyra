@@ -114,7 +114,7 @@ export class ClockInComponent {
 
   openDialog(): void {
     const dialogRef = this.dialog.open(ClockInPopUpComponent, {
-      data: { Name: this.userDetails.name, job_title: this.userDetails.job_title, work_home: this.userDetails.work_home } // Your data here
+      data: { Name: this.userDetails.name, job_title: this.userDetails.job_title, work_home: this.userDetails.work_home, isClockInFromHrToOtherUser:false, userId: null }
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
