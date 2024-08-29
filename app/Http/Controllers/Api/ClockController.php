@@ -23,8 +23,6 @@ class ClockController extends Controller
     protected function prepareClockData($clocks)
     {
         $isPaginated = $clocks instanceof \Illuminate\Pagination\LengthAwarePaginator;
-
-        // Group clocks by the date of clock_in
         $groupedClocks = $clocks->groupBy(function ($clock) {
             return Carbon::parse($clock->clock_in)->toDateString();
         });
@@ -32,53 +30,43 @@ class ClockController extends Controller
         $data = [];
 
         foreach ($groupedClocks as $date => $clocksForDay) {
-            // Sort clocks for the day by clock_in time
             $clocksForDay = $clocksForDay->sortBy(function ($clock) {
                 return Carbon::parse($clock->clock_in);
             });
 
-            $firstClockAtTheDay = $clocksForDay->first();
+            $firstClockAtTheDay = $clocksForDay->last();
             $totalDurationInSeconds = 0;
 
             foreach ($clocksForDay as $clock) {
                 if ($clock->clock_in) {
                     $clockIn = Carbon::parse($clock->clock_in);
 
-                    // Calculate the duration based on whether clock_out is set
                     if ($clock->clock_out) {
                         $clockOut = Carbon::parse($clock->clock_out);
                         $durationInSeconds = $clockIn->diffInSeconds($clockOut);
                     } else {
-                        // Calculate duration from clock_in to now if clock_out is not set
                         $durationInSeconds = $clockIn->diffInSeconds(Carbon::now());
                     }
 
-                    // Add duration to the total duration of the day
                     $totalDurationInSeconds += $durationInSeconds;
 
-                    // Update the individual clock's duration
                     $clock->duration = gmdate('H:i:s', $durationInSeconds);
                 }
             }
 
-            // Format total duration as H:i:s
             $totalDurationFormatted = gmdate('H:i:s', $totalDurationInSeconds);
 
-            // Set the total duration for the first clock entry of the day
             $firstClockAtTheDay->duration = $totalDurationFormatted;
 
-            // Map other clocks for the day (excluding the first entry)
             $otherClocksForDay = $clocksForDay->skip(1)->map(function ($clock) {
                 $clockIn = $clock->clock_in ? Carbon::parse($clock->clock_in) : null;
                 $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out) : null;
                 $totalHours = null;
 
                 if ($clockIn && $clockOut) {
-                    // Calculate duration if both clock_in and clock_out are available
                     $durationInSeconds = $clockIn->diffInSeconds($clockOut);
                     $totalHours = gmdate('H:i', $durationInSeconds);
                 } elseif ($clockIn) {
-                    // Calculate duration from clock_in to now if clock_out is not set
                     $durationInSeconds = $clockIn->diffInSeconds(Carbon::now());
                     $totalHours = gmdate('H:i', $durationInSeconds);
                 }
@@ -94,10 +82,9 @@ class ClockController extends Controller
                 ];
             });
 
-            // Prepare the data array for response
             $data[] = (new ClockResource($firstClockAtTheDay))->toArray(request()) + [
                 'otherClocks' => $otherClocksForDay->values()->toArray(),
-                'totalHours' => $totalDurationFormatted, // Correct total duration for the day
+                'totalHours' => $totalDurationFormatted,
             ];
         }
 
@@ -117,7 +104,7 @@ class ClockController extends Controller
     {
         $authUser = Auth::user();
         if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to view users', 403);
+            return $this->returnError('You are not authorized to view user clocks', 403);
         }
 
         $query = ClockInOut::where('user_id', $user->id);

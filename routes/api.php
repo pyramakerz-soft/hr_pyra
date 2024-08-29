@@ -45,7 +45,7 @@ Route::group(['prefix' => 'auth'], function () {
 Route::group(['middleware' => 'auth:api'], function () {
 
     Route::post('/upload_image', [UserController::class, 'uploadImage'])->name('users.image');
-
+    Route::get('department_manager_names', [DepartmentController::class, 'departmentManagerNames']);
     Route::post('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
     Route::post('/user_details/{user_detail}', [UserDetailController::class, 'update'])->name('user_details.update');
     Route::post('/user_holidays/{user_holiday}', [UserHolidayController::class, 'update'])->name('user_holidays.update');
@@ -64,7 +64,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('roles', RoleController::class)->except('update');
     Route::apiResource('permissions', PermissionController::class)->except('update');
     Route::apiResource('locations', LocationController::class)->except('update');
-    Route::get('location_names', [LocationController::class, 'indexNames']);
+    Route::get('location_names', [LocationController::class, 'locationNames']);
     Route::apiResource('work_types', WorkTypeController::class)->except('update');
     Route::apiResource('departments', DepartmentController::class)->except('update');
     Route::apiResource('user_details', UserDetailController::class)->except('update');
@@ -76,5 +76,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::post('users/{user}/workTypes', [HrController::class, 'assignWorkTypeToUser'])->name('users.assignWorkType');
     Route::get('users/workTypes', [HrController::class, 'getWorkTypeAssignedToUser'])->name('users.usersWorkTypes');
+
+    Route::post('clock_in/user/{user}', [HrController::class, 'hrClocKIn'])->name('hr.ClocKIn');
 
 });

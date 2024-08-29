@@ -73,13 +73,10 @@ class Handler extends ExceptionHandler
 
         }
         if ($exception instanceof ValidationException) {
-            // Get the validation errors
             $errors = $exception->validator->errors();
 
-            // Get the first error message
             $firstErrorMessage = $errors->first();
 
-            // Convert errors to associative array with field names
             $errorArray = $errors->toArray();
 
             return response()->json([

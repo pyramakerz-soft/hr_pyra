@@ -3,15 +3,21 @@ import { Location } from '../Models/location';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AssignLocationToUser } from '../Models/assign-location-to-user';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LocationsService {
 
-  baseurl ="http://127.0.0.1:8000/api/locations"; 
-  url="http://127.0.0.1:8000/api/";
-  constructor(public http: HttpClient) { }
+  baseurl =""; 
+  url="";
+  constructor(public http: HttpClient, public Api:ApiService) {
+    this.baseurl=Api.BaseUrl+"/locations"
+    this.url=Api.BaseUrl+"/"
+
+
+   }
 
   getall(pgNumber:number): Observable<Location[]> {
     const token = localStorage.getItem("token");
