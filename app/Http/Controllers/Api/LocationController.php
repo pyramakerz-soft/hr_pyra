@@ -27,7 +27,7 @@ class LocationController extends Controller
         }
         return $this->returnData('locations', $locations, 'Locations Data');
     }
-    public function indexNames()
+    public function locationNames()
     {
         $locationNames = Location::get()->map(function ($location) {
             return ['id' => $location->id, 'name' => $location->name];
