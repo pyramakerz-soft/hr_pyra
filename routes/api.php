@@ -45,7 +45,7 @@ Route::group(['prefix' => 'auth'], function () {
 Route::group(['middleware' => 'auth:api'], function () {
 
     Route::post('/upload_image', [UserController::class, 'uploadImage'])->name('users.image');
-
+    Route::get('department_manager_names', [DepartmentController::class, 'departmentManagerNames']);
     Route::post('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
     Route::post('/user_details/{user_detail}', [UserDetailController::class, 'update'])->name('user_details.update');
     Route::post('/user_holidays/{user_holiday}', [UserHolidayController::class, 'update'])->name('user_holidays.update');
@@ -70,12 +70,13 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('user_details', UserDetailController::class)->except('update');
     Route::apiResource('user_holidays', UserHolidayController::class)->except('update');
     Route::apiResource('user_vacations', UserVacationController::class)->except('update');
-    Route::get('department_manager_names', [DepartmentController::class, 'departmentManagerNames']);
 
     Route::post('users/{user}/locations', [HrController::class, 'assignLocationToUser'])->name('users.assignLocation');
     Route::get('users/locations', [HrController::class, 'getLocationAssignedToUser'])->name('users.userLocation');
 
     Route::post('users/{user}/workTypes', [HrController::class, 'assignWorkTypeToUser'])->name('users.assignWorkType');
     Route::get('users/workTypes', [HrController::class, 'getWorkTypeAssignedToUser'])->name('users.usersWorkTypes');
+
+    Route::post('clock_in/user/{user}', [HrController::class, 'hrClocKIn'])->name('hr.ClocKIn');
 
 });
