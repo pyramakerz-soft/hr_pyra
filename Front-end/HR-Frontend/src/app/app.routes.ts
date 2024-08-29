@@ -41,6 +41,8 @@ export const routes: Routes = [
         {path: "HREmployeeAttendanceEdit", component:AttendenceEditComponent, title:"HREmployeeAttendanceEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
         {path: "HRDepartment", component:HrDepartmentComponent, title:"HRDepartment", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
         {path: "HRDepartmentAdd", component:HrDepartmentAddComponent, title:"HRDepartmentAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HRDepartmentEdit/:id", component:HrDepartmentAddComponent, title:"HRDepartmentEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+
     ], canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
 
     { path: "Login", component:LoginComponent, title:"Login", canActivate:[doNotNavigateToLoginIfTokenExistsGuard] },
