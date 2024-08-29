@@ -152,6 +152,13 @@ class ClockController extends Controller
         $authUser = Auth::user();
         $user_id = $authUser->id;
 
+        $existingClockInWithoutClockOut = ClockInOut::where('user_id', $user_id)
+            ->whereNull('clock_out')
+            ->exists();
+
+        if ($existingClockInWithoutClockOut) {
+            return $this->returnError('You already have an existing clock-in without clocking out.');
+        }
         $this->validate($request, [
             'location_type' => 'required|string|exists:work_types,name',
             'clock_in' => ['required', 'date_format:Y-m-d H:i:s'],
