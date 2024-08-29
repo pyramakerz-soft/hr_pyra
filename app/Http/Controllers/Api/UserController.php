@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -162,8 +163,28 @@ class UserController extends Controller
 
     public function login(LoginRequest $request)
     {
-
         $credentials = $request->only('email', 'password');
+
+        $errors = [];
+
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (!$user) {
+            $errors['email'] = 'Wrong Email';
+        } else {
+            if (!Hash::check($credentials['password'], $user->password)) {
+                $errors['password'] = 'Wrong password';
+            }
+        }
+
+        if (!empty($errors)) {
+            return response()->json([
+                'message' => 'Validation errors occurred.',
+                'errors' => $errors,
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // Attempt to authenticate with JWT
         $token = JWTAuth::attempt($credentials);
 
         if (!$token) {
@@ -183,7 +204,6 @@ class UserController extends Controller
                     return $this->returnError('Serial number does not match', 406);
                 }
             }
-            // dd($user->toArray());
         }
 
         return response()->json([
