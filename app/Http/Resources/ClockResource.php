@@ -30,7 +30,7 @@ class ClockResource extends JsonResource
         $totalHours = $this->duration ? Carbon::parse($this->duration)->format('H:i') : null;
 
         $allClocks = ClockInOut::where('user_id', $this->user_id)->get();
-
+        // dd($allClocks['clock_out']);
         $otherClocksForDay = $allClocks->filter(function ($clock) {
             return Carbon::parse($clock->clock_in)->toDateString() === Carbon::parse($this->clock_in)->toDateString() && $clock->id !== $this->id;
         })->map(function ($clock) {
@@ -44,13 +44,12 @@ class ClockResource extends JsonResource
 
             ];
         })->values()->toArray();
-
         return [
             'id' => $this->id,
             'Day' => Carbon::parse($this->clock_in)->format('l'),
             'Date' => Carbon::parse($this->clock_in)->format('Y-m-d'),
             'clockIn' => Carbon::parse($this->clock_in)->format('h:iA'),
-            'clockOut' => Carbon::parse($clockOut)->format('h:iA'),
+            'clockOut' => $clockOut,
             'totalHours' => $totalHours,
             'locationIn' => $locationIn,
             'locationOut' => $locationOut,

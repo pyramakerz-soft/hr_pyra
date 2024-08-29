@@ -8,6 +8,8 @@ use App\Http\Requests\UpdateDepartmentRequest;
 use App\Http\Resources\Api\DepartmentResource;
 use App\Models\Department;
 use App\Traits\ResponseTrait;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class DepartmentController extends Controller
 {
@@ -17,7 +19,11 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        $departments = Department::all();
+        $authUser = Auth::user();
+        if (!$authUser->hasRole('Hr')) {
+            return $this->returnError('You are not authorized to view departments', Response::HTTP_FORBIDDEN);
+        }
+        $departments = Department::with('manager')->get();
         if ($departments->isEmpty()) {
             return $this->returnError('No departments Found');
         }
@@ -25,7 +31,13 @@ class DepartmentController extends Controller
         return $this->returnData("data", $data, "departments Data");
 
     }
-
+    public function departmentManagerNames()
+    {
+        $departmentManagerNames = Department::with('manager')->get()->map(function ($department) {
+            return ['manager_id' => $department->manager ? $department->manager->id : null, 'manager_name' => $department->manager ? $department->manager->name : null];
+        })->toArray();
+        return $this->returnData('departmentManagerNames', $departmentManagerNames, 'department manager names');
+    }
     /**
      * Store a newly created resource in storage.
      */
