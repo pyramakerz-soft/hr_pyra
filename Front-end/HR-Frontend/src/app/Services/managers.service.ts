@@ -2,14 +2,18 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Manager } from '../Models/manager';
 import { Observable } from 'rxjs';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ManagersService {
-  baseurl ="http://127.0.0.1:8000/api/department_manager_names"; 
+  baseurl =""; 
 
-  constructor(public http: HttpClient) { }
+  constructor(public http: HttpClient , public Api:ApiService) { 
+    this.baseurl=Api.BaseUrl+"/department_manager_names"
+
+  }
 
   getall(): Observable<Manager[]> {
     const token = localStorage.getItem("token");
