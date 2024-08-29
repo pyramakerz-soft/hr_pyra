@@ -1,0 +1,47 @@
+<div>
+    <div class="flex justify-between mb-5 items-center">
+        <div>
+            <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Department</p>
+            <p class="text-[#5F6D7E] text-xs md:text-base">Add New Department.</p>
+        </div>
+        <button class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg" >
+            Save
+        </button>
+    </div>
+
+    <div class="border border-[#ECECEC] rounded-lg p-4 md:p-8 shadow-md shadow-[#0000001F]">
+        <label htmlFor="role" class="block mb-3 font-semibold text-xs md:text-sm text-[#3A3A3C]">
+            Department
+        </label>
+        <input id="role" type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-4 text-xs md:text-base"
+            placeholder="Enter Department" 
+            >
+            <div class="mt-4 text-xs md:text-sm">
+                <label class="font-semibold block mb-2 md:mb-3">Manager</label>
+                <div class="">
+                    <!-- Dropdown toggle -->
+                    <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl cursor-pointer" >
+                        <span>Choose Permissions</span>
+                        <!-- <span  class="text-red-500 text-sm ml-2 font-normal">{{ namesArrayError }}</span> -->
+                    </div>
+                    <!-- Dropdown content -->
+                    <div class=" w-full border border-[#E5E5EA] rounded-xl bg-white mt-1 max-h-60 overflow-y-auto">
+                        @if(1 ) {
+                            <div  class="p-2 hover:bg-gray-100">
+                                <input type="checkbox"  class="mr-2" >
+                                <label  class="text-xs md:text-sm"></label>
+                            </div>
+                        }@else {
+                            <div class="p-2">No Data Found</div>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+    </div>
+</div>
+
+
+
+
+

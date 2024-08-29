@@ -25,10 +25,25 @@ export class DepartmentService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.delete(url, { headers });
   }
-  
+
+
+  createDepartment(name: string, managerId: number): Observable<Department> {
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+    const body = {
+      name: name,
+      manager_id: managerId
+    };
+
+    return this.http.post<Department>(this.baseurl, body, { headers });
+  }
+
   private handleError(error: any): Observable<never> {
     console.error('An error occurred:', error);
     return throwError(() => new Error('Something went wrong; please try again later.'));
   }
+
+
 
 }

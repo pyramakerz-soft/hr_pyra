@@ -43,6 +43,10 @@ deleteDepartment(id:number){
   );
 }
 
+CreateDeparrtment(){
+  this.CreateDeparrtment()
+}
+
 NavigateToAddDepartment(){
   this.router.navigateByUrl("/HR/HRDepartmentAdd");
 }
