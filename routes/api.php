@@ -64,12 +64,13 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('roles', RoleController::class)->except('update');
     Route::apiResource('permissions', PermissionController::class)->except('update');
     Route::apiResource('locations', LocationController::class)->except('update');
-    Route::get('location_names', [LocationController::class, 'indexNames']);
+    Route::get('location_names', [LocationController::class, 'locationNames']);
     Route::apiResource('work_types', WorkTypeController::class)->except('update');
     Route::apiResource('departments', DepartmentController::class)->except('update');
     Route::apiResource('user_details', UserDetailController::class)->except('update');
     Route::apiResource('user_holidays', UserHolidayController::class)->except('update');
     Route::apiResource('user_vacations', UserVacationController::class)->except('update');
+    Route::get('department_manager_names', [DepartmentController::class, 'departmentManagerNames']);
 
     Route::post('users/{user}/locations', [HrController::class, 'assignLocationToUser'])->name('users.assignLocation');
     Route::get('users/locations', [HrController::class, 'getLocationAssignedToUser'])->name('users.userLocation');
