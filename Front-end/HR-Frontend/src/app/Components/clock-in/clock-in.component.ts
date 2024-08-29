@@ -26,14 +26,14 @@ import Swal from 'sweetalert2';
 export class ClockInComponent {
 
   userDetails: UserDetails = {
-    name: "string",
-    job_title: "string",
-    id: "string",
-    role_name: "string",
+    name: "",
+    job_title: "",
+    id: "",
+    role_name: "",
     is_clocked_out: true,
-    national_id: "string",
-    clockIn: "string",
-    image: "string",
+    national_id: "",
+    clockIn: "",
+    image: "",
     work_home: false,
     total_hours: ""
   };
@@ -70,8 +70,7 @@ export class ClockInComponent {
       const response = JSON.parse(d);
       this.userDetails = response.User;
 
-      // Check if total_hours is in the correct format before converting
-      this.stopwatchTime = this.convertTimeToSeconds(this.userDetails.total_hours) || 0; // Default to 0 if conversion fails
+      this.stopwatchTime = this.convertTimeToSeconds(this.userDetails.total_hours) || 0; 
       console.log(this.stopwatchTime);
 
       if (!this.userDetails.is_clocked_out) {
@@ -114,7 +113,7 @@ export class ClockInComponent {
 
   openDialog(): void {
     const dialogRef = this.dialog.open(ClockInPopUpComponent, {
-      data: { Name: this.userDetails.name, job_title: this.userDetails.job_title, work_home: this.userDetails.work_home } // Your data here
+      data: { Name: this.userDetails.name, job_title: this.userDetails.job_title, work_home: this.userDetails.work_home, isClockInFromHrToOtherUser:false, userId: null }
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
@@ -227,10 +226,10 @@ export class ClockInComponent {
     return hours * 3600 + minutes * 60 + seconds;
   }
 
-  getCurrentTimeInSeconds(): number {
-    const now = new Date();
-    return now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-  }
+  // getCurrentTimeInSeconds(): number {
+  //   const now = new Date();
+  //   return now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  // }
 
   startStopwatch(): void {
     if (!this.isRunning) {

@@ -145,6 +145,7 @@ export class HrEmployeeAttendanceDetailsComponent {
     this.userService.getUserById(id).subscribe(
       (d: any) => {
         this.employee = d.User;
+        console.log(d)
       },
       (error) => {
         console.log(error)
@@ -201,12 +202,12 @@ export class HrEmployeeAttendanceDetailsComponent {
       );
       this.isDateSelected = true
     } else {
-      this.DisplayPagginationOrNot = true;  // Ensure your logic here
+      this.DisplayPagginationOrNot = true;
     }
   }
 
   EditUserClock(Clock:EmployeeDashboard) {
-    this.route.navigate(['HR/HREmployeeAttendanceEdit'], { state: { data: Clock } }); // Pass data via router state
+    this.route.navigate(['HR/HREmployeeAttendanceEdit'], { state: { data: Clock } }); 
   }
 
   ClearSearch(){
@@ -220,7 +221,7 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   openDialog(){
     const dialogRef = this.dialog.open(ClockInPopUpComponent, {
-      data: { Name: this.employee.name , job_title: this.employee.emp_type , work_home:this.employee.work_home }  
+      data: { Name: this.employee.name , job_title: this.employee.emp_type , work_home:this.employee.work_home, isClockInFromHrToOtherUser:true, userId: this.UserID }  
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
