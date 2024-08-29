@@ -3,16 +3,21 @@ import { Injectable } from '@angular/core';
 import { Department } from '../Models/department';
 import { catchError, Observable, throwError } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DepartmentService {
 
-  baseurl = "http://127.0.0.1:8000/api/departments";
+  baseurl:string = "";
   token: string = ""
 
-  constructor(private route: ActivatedRoute, public http: HttpClient,) { }
+  constructor(private route: ActivatedRoute, public http: HttpClient,public Api:ApiService) {
+
+    this.baseurl=Api.BaseUrl+"/departments"
+
+   }
 
 
   getall(): Observable<Department[]> {

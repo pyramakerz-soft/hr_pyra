@@ -1,15 +1,18 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WorkTypeService {
 
-  baseURL = "http://127.0.0.1:8000/api"
+  baseURL = ""
 
-  constructor(public http:HttpClient) { }
+  constructor(public http:HttpClient , public Api:ApiService) { 
+    this.baseURL=Api.BaseUrl
+  }
 
   getall(): Observable<WorkerType[]> {
     const token = localStorage.getItem("token");
