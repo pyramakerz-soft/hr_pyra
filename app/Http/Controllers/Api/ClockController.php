@@ -117,7 +117,7 @@ class ClockController extends Controller
     {
         $authUser = Auth::user();
         if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to view users', 403);
+            return $this->returnError('You are not authorized to view user clocks', 403);
         }
 
         $query = ClockInOut::where('user_id', $user->id);
