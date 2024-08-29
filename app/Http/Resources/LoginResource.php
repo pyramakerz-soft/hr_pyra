@@ -21,35 +21,35 @@ class LoginResource extends JsonResource
         $today = Carbon::today()->toDateString();
 
         $user_clock = $authUser->user_clocks->whereNull('clock_out')->last();
-
         $getClocks = $authUser->user_clocks->filter(function ($clock) use ($today) {
-            return $clock->clock_in && $clock->clock_out && Carbon::parse($clock->clock_in)->toDateString() == $today;
+            return $clock->clock_in && Carbon::parse($clock->clock_in)->toDateString() == $today;
         });
-
+        // dd($getClocks);
         $total_seconds = 0;
         foreach ($getClocks as $clock) {
             $clockIn = Carbon::parse($clock->clock_in);
-            $clockOut = Carbon::parse($clock->clock_out);
+            $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out) : Carbon::now();
+            // dd($clockOut->toArray());
 
             $duration = $clockIn->diffInSeconds($clockOut);
             $total_seconds += $duration;
         }
         $total_hours = gmdate('H:i:s', $total_seconds);
-
+        // dd($total_hours);
         $is_clocked_out = false;
         if (!$user_clock) {
             $is_clocked_out = true;
         }
-        $user_clockIn = $authUser->user_clocks->last();
-        if ($user_clockIn) {
-            $clockIn = Carbon::parse($user_clockIn->clock_in)->format('H:i:s');
+        $clockIn = null;
+        if ($user_clock) {
+            $clockIn = Carbon::parse($user_clock->clock_in)->format('H:i:s');
         }
+
         $work_home = false;
         $locationTypes = $authUser->work_types->pluck('name');
         if (count($locationTypes) > 1) {
             $work_home = true;
         }
-
         return [
             'id' => $this->id,
             'name' => $this->name,
