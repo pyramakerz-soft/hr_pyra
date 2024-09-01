@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exports\UserClocksExport1;
+use App\Exports\UserClocksExportById;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClockInOutRequest;
 use App\Http\Requests\UpdateClockInOutRequest;
-use App\Http\Resources\ClockResource;
 // use App\Models\Request;
+use App\Http\Resources\ClockResource;
 use App\Models\ClockInOut;
 use App\Models\User;
 use App\Traits\HelperTrait;
@@ -101,14 +101,67 @@ class ClockController extends Controller
             ] : null,
         ];
     }
-    public function allClocks()
+    // public function allClocks()
+    // {
+    //     $authUser = Auth::user();
+    //     if (!$authUser->hasRole('Hr')) {
+    //         return $this->returnError('You are not authorized to view user clocks', 403);
+    //     }
+    //     $query = ClockInOut::get();
+    //     dd($query->toArray());
+    // }
+    public function allClocks(Request $request)
     {
         $authUser = Auth::user();
         if (!$authUser->hasRole('Hr')) {
             return $this->returnError('You are not authorized to view user clocks', 403);
         }
-        $query = ClockInOut::get();
-        dd($query->toArray());
+
+        // $query = ClockInOut::get();
+
+        // if ($request->has('date')) {
+        //     $date = Carbon::parse($request->get('date'))->toDateString();
+        //     $query->whereDate('clock_in', $date);
+        //     $clocks = $query->orderBy('clock_in', 'desc')->get();
+
+        // } else if ($request->has('month')) {
+        //     $month = Carbon::parse($request->get('month'));
+
+        //     $startOfMonth = $month->copy()->subMonth()->startOfMonth()->addDays(25);
+
+        //     $endOfMonth = $month->copy()->startOfMonth()->addDays(25);
+
+        //     $query->whereBetween('clock_in', [$startOfMonth, $endOfMonth]);
+
+        //     $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+        // } else {
+
+        //     $now = Carbon::now();
+
+        //     $currentStart = $now->copy()->subMonth()->startOfMonth()->addDays(25);
+        //     $currentEnd = $now->copy()->startOfMonth()->addDays(25);
+
+        //     // Filter based on the current custom month range
+        //     $query->whereBetween('clock_in', [$currentStart, $currentEnd]);
+
+        //     // Paginate and sort by clock_in in descending order
+        //     $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+        // }
+
+        // if ($clocks->isEmpty()) {
+        //     return $this->returnError('No Clocks Found For This User');
+        // }
+
+        // if ($request->has('export')) {
+        //     $clocksCollection = ($clocks->getCollection());
+        //     return Excel::download(new UserClocksExport($clocksCollection), 'user_clocks.xlsx');
+        // }
+        // $data = $this->prepareClockData($clocks);
+
+        // if (!isset($data['clocks'])) {
+        //     return $this->returnError('No Clocks Found For This User');
+        // }
+        // return $this->returnData("data", $data, "Clocks Data for {$user->name}");
     }
     public function getUserClocksById(Request $request, User $user)
     {
@@ -151,16 +204,16 @@ class ClockController extends Controller
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clocks Found For This User');
         }
+
+        if ($request->has('export')) {
+            $clocksCollection = ($clocks->getCollection());
+            return Excel::download(new UserClocksExportById($clocksCollection), 'user_clocks.xlsx');
+        }
         $data = $this->prepareClockData($clocks);
 
         if (!isset($data['clocks'])) {
             return $this->returnError('No Clocks Found For This User');
         }
-        if ($request->has('export')) {
-            $clocksCollection = $data['clocks'];
-            return Excel::download(new UserClocksExport1($clocksCollection), 'user_clocks.xlsx');
-        }
-
         return $this->returnData("data", $data, "Clocks Data for {$user->name}");
     }
 
