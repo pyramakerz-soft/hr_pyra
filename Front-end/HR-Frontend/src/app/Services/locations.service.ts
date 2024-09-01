@@ -74,4 +74,10 @@ export class LocationsService {
 
   }
 
+  GetLocationsByUserId(userId: number){
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.get(`${this.baseurl}?search=${name}`, { headers, responseType: 'json' });
+  }
 }
