@@ -70,7 +70,7 @@ export class ClockInComponent {
       const response = JSON.parse(d);
       this.userDetails = response.User;
 
-      this.stopwatchTime = this.convertTimeToSeconds(this.userDetails.total_hours) || 0; 
+      this.stopwatchTime = this.convertTimeToSeconds(this.userDetails.total_hours) || 0;
       console.log(this.stopwatchTime);
 
       if (!this.userDetails.is_clocked_out) {
@@ -133,27 +133,41 @@ export class ClockInComponent {
     await this.getLocation();
     this.UtcTime = this.getCurrentTimeInUTC();
 
+    Swal.fire({
+      title: 'Are you sure you want to Clock out?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#FF7519',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Clock Out',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.clockService.CreateClockOut(this.lat, this.lng, this.UtcTime).subscribe(
 
-    this.clockService.CreateClockOut(this.lat, this.lng, this.UtcTime).subscribe(
-      (response: any) => {
-        localStorage.setItem("IsClockedIn", "false");
-        this.IsClockedIn = false;
-        this.clockEventService.notifyClockedIn(); // Notify other components
-        this.userDetails.is_clocked_out = true;
+          (response: any) => {
+            localStorage.setItem("IsClockedIn", "false");
+            this.IsClockedIn = false;
+            this.clockEventService.notifyClockedIn(); // Notify other components
+            this.userDetails.is_clocked_out = true;
 
-        this.stopStopwatch();
-        // this.resetStopwatch();
-      },
-      (error: HttpErrorResponse) => {
-        console.log(error)
-        Swal.fire({
-          text: "Failed to retrieve location. Please try again.",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#FF7519",
+            this.stopStopwatch();
+            // this.resetStopwatch();
+          },
+          (error: HttpErrorResponse) => {
+            console.log(error)
+            Swal.fire({
+              text: "Failed to retrieve location. Please try again.",
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
 
-        });
+            });
+          }
+        );
       }
-    );
+    });
+
+
 
 
 
@@ -258,7 +272,7 @@ export class ClockInComponent {
     const seconds = this.stopwatchTime % 60;
     return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
   }
-  
+
   pad(value: number): string {
     return value < 10 ? `0${value}` : String(value);
   }
