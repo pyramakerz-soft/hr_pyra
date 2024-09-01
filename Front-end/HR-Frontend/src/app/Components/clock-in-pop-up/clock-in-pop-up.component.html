@@ -15,6 +15,11 @@
 
         <div *ngIf="WorkHome">
             <p class="text-[#3A3A3C] mb-5 font-semibold text-base md:text-xl">Select the site</p>
+            <!-- <select [(ngModel)]="selectedSite" class="rounded-xl p-2 w-full flex items-center mb-8 md:mb-12"
+                style="border: 1px solid #E5E5EA;">
+                <option value="" disabled selected hidden>Choose</option>
+                <option *ngFor="let site of sites" [value]="site.value">{{ site.label }}</option>
+            </select> -->
             @if(sites.length !==0 ) {
                 <select [(ngModel)]="selectedSite" class="rounded-md p-2 w-full flex items-center mb-8 md:mb-12 capitalize"
                     style="border: 1px solid #E5E5EA;">
@@ -30,13 +35,13 @@
             <div>
                 <p class="font-medium text-sm md:text-lg text-[#6B7280] border-t-[3px] py-2 border-[#FF7519] inline">
                     Date</p>
-                <p *ngIf="!isClockInFromHrToOtherUser" class="font-semibold text-base md:text-2xl py-2">{{getCurrentDate()}}</p>
+                <p *ngIf="!isClockInFromHrToOtherUser" class="font-semibold text-base md:text-2xl py-2">{{formattedDate}}</p>
                 <input [(ngModel)]="DateClockInFromHrForOthers" type="date" *ngIf="isClockInFromHrToOtherUser" class="w-full text-base p-2 block border rounded-md focus:outline-none focus:border-[#c8c8c8]">
             </div>
             <div>
                 <p class="font-medium text-sm md:text-lg text-[#6B7280] border-t-[3px] py-2 border-[#FF7519] inline">
                     Time</p>
-                <p *ngIf="!isClockInFromHrToOtherUser" class="font-semibold text-base md:text-2xl py-2">{{ getCurrentFormattedTime() }}</p>
+                <p *ngIf="!isClockInFromHrToOtherUser" class="font-semibold text-base md:text-2xl py-2">{{formattedTime}}</p>
                 <input [(ngModel)]="TimeClockInFromHrForOthers" type="time" *ngIf="isClockInFromHrToOtherUser" class="w-full text-base p-2 block border rounded-md focus:outline-none focus:border-[#c8c8c8]">
             </div>
         </div>
