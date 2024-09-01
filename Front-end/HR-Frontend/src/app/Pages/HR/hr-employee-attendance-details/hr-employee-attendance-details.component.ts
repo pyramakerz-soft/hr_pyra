@@ -142,15 +142,22 @@ export class HrEmployeeAttendanceDetailsComponent {
   }
 
   getEmployeeByID(id:number){
-    this.userService.getUserById(id).subscribe(
-      (d: any) => {
-        this.employee = d.User;
-        console.log(d)
-      },
-      (error) => {
-        console.log(error)
+    this.activatedRoute.data.subscribe(
+      (data) => {
+        console.log(data)
+        console.log(data['user'].User)
+        this.employee = data['user'].User ;
       }
-    );
+    )
+    // this.userService.getUserById(id).subscribe(
+    //   (d: any) => {
+    //     this.employee = d.User;
+    //     console.log(d)
+    //   },
+    //   (error) => {
+    //     console.log(error)
+    //   }
+    // );
   }
 
 

@@ -315,7 +315,8 @@ export class ClockInPopUpComponent {
     if(this.userId){
       this.locationService.GetLocationsByUserId(this.userId).subscribe(
         (locations: any) => {
-          this.Locations = locations.locationNames
+          console.log(locations)
+          this.Locations = locations.userLocations
         } 
       );
     }
