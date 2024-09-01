@@ -28,9 +28,15 @@ export class AttendenceEditComponent {
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras.state) {
       this.data = navigation.extras.state['data'] as EmployeeDashboard;
+      console.log(this.data )
+
       this.data.formattedClockIn= this.transformUTCToEgyptTime(this.data.formattedClockIn);
-      this.data.formattedClockOut= this.transformUTCToEgyptTime(this.data.formattedClockOut);
-      console.log(this.data.otherClocks )
+      //this.data.formattedClockOut= this.transformUTCToEgyptTime(this.data.formattedClockOut);
+    //   this.data.otherClocks = this.data.otherClocks.map((clock:any) => ({
+    //     ...clock,
+    //     formattedClockIn: this.transformUTCToEgyptTime(clock.formattedClockIn),
+    //     formattedClockOut: this.transformUTCToEgyptTime(clock.formattedClockOut)
+    //   }));
 
     }
     
