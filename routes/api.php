@@ -72,7 +72,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('user_vacations', UserVacationController::class)->except('update');
 
     Route::post('users/{user}/locations', [HrController::class, 'assignLocationToUser'])->name('users.assignLocation');
-    Route::get('users/locations', [HrController::class, 'getLocationAssignedToUser'])->name('users.userLocation');
+    Route::get('users/{user}/locations', [HrController::class, 'getLocationAssignedToUser'])->name('users.userLocation');
 
     Route::post('users/{user}/workTypes', [HrController::class, 'assignWorkTypeToUser'])->name('users.assignWorkType');
     Route::get('users/workTypes', [HrController::class, 'getWorkTypeAssignedToUser'])->name('users.usersWorkTypes');
