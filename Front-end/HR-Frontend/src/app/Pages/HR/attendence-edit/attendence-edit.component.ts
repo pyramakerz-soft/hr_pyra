@@ -18,6 +18,9 @@ export class AttendenceEditComponent {
   ClockInAfterClockOut: boolean = false;
   DataIsNotTheSame: boolean = false;
 
+  ClockInEgyptFormat:string=""
+  ClockOutEgyptFormat:string=""
+  
 
 
   constructor(private router: Router, public ClockServ: ClockService) {
@@ -27,6 +30,7 @@ export class AttendenceEditComponent {
       this.data = navigation.extras.state['data'] as EmployeeDashboard;
       this.data.formattedClockIn= this.transformUTCToEgyptTime(this.data.formattedClockIn);
       this.data.formattedClockOut= this.transformUTCToEgyptTime(this.data.formattedClockOut);
+      console.log(this.data.otherClocks )
 
     }
     
@@ -54,13 +58,15 @@ export class AttendenceEditComponent {
 
     }
     else{
+      this.data.formattedClockIn=this.transformEgyptTimeToUTC(this.data.formattedClockIn);
+      this.data.formattedClockOut=this.transformEgyptTimeToUTC(this.data.formattedClockOut);
+
       this.SaveData();
     }
   }
 
 
   SaveData() {
-
 
     this.ClockServ.UpdateUserClock(this.data.userId, this.data.id, this.data.formattedClockIn, this.data.formattedClockOut).subscribe(
       (d: any) => {
@@ -116,4 +122,27 @@ export class AttendenceEditComponent {
     // Return formatted string
     return `${egyptDate['year']}-${egyptDate['month']}-${egyptDate['day']} ${egyptDate['hour']}:${egyptDate['minute']}`;
   }
+
+
+
+  transformEgyptTimeToUTC(egyptDateTime: string): string {
+    // Parse the input Egypt local datetime string to a Date object
+    const [datePart, timePart] = egyptDateTime.split(' ');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hours, minutes] = timePart.split(':').map(Number);
+  
+    // Create a new Date object with the Egypt local time
+    const egyptDate = new Date(year, month - 1, day, hours, minutes);
+  
+    // Convert Egypt local time to UTC
+    const utcYear = egyptDate.getUTCFullYear();
+    const utcMonth = String(egyptDate.getUTCMonth() + 1).padStart(2, '0'); // Ensure two-digit month
+    const utcDay = String(egyptDate.getUTCDate()).padStart(2, '0'); // Ensure two-digit day
+    const utcHours = String(egyptDate.getUTCHours()).padStart(2, '0'); // Ensure two-digit hours
+    const utcMinutes = String(egyptDate.getUTCMinutes()).padStart(2, '0'); // Ensure two-digit minutes
+  
+    // Construct the formatted UTC date string in "YYYY-MM-DD HH:mm" format
+    return `${utcYear}-${utcMonth}-${utcDay} ${utcHours}:${utcMinutes}`;
+  }
+
 }
