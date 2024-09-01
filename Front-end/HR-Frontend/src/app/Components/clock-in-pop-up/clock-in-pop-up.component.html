@@ -17,7 +17,7 @@
             <p class="text-[#3A3A3C] mb-5 font-semibold text-base md:text-xl">Select the site</p>
             <select [(ngModel)]="selectedSite" class="rounded-xl p-2 w-full flex items-center mb-8 md:mb-12"
                 style="border: 1px solid #E5E5EA;">
-                <option value="" disabled selected>Choose</option>
+                <option value="" disabled selected hidden>Choose</option>
                 <option *ngFor="let site of sites" [value]="site.value">{{ site.label }}</option>
             </select>
         </div>
