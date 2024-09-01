@@ -35,13 +35,13 @@
             <div>
                 <p class="font-medium text-sm md:text-lg text-[#6B7280] border-t-[3px] py-2 border-[#FF7519] inline">
                     Date</p>
-                <p *ngIf="!isClockInFromHrToOtherUser" class="font-semibold text-base md:text-2xl py-2">{{getCurrentDate()}}</p>
+                <p *ngIf="!isClockInFromHrToOtherUser" class="font-semibold text-base md:text-2xl py-2">{{formattedDate}}</p>
                 <input [(ngModel)]="DateClockInFromHrForOthers" type="date" *ngIf="isClockInFromHrToOtherUser" class="w-full text-base p-2 block border rounded-md focus:outline-none focus:border-[#c8c8c8]">
             </div>
             <div>
                 <p class="font-medium text-sm md:text-lg text-[#6B7280] border-t-[3px] py-2 border-[#FF7519] inline">
                     Time</p>
-                <p *ngIf="!isClockInFromHrToOtherUser" class="font-semibold text-base md:text-2xl py-2">{{ getCurrentFormattedTime() }}</p>
+                <p *ngIf="!isClockInFromHrToOtherUser" class="font-semibold text-base md:text-2xl py-2">{{formattedTime}}</p>
                 <input [(ngModel)]="TimeClockInFromHrForOthers" type="time" *ngIf="isClockInFromHrToOtherUser" class="w-full text-base p-2 block border rounded-md focus:outline-none focus:border-[#c8c8c8]">
             </div>
         </div>
