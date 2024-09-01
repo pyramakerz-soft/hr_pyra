@@ -63,6 +63,7 @@ return array(
     'App\\Http\\Resources\\Api\\UserVacationResource' => $baseDir . '/app/Http/Resources/Api/UserVacationResource.php',
     'App\\Http\\Resources\\ClockResource' => $baseDir . '/app/Http/Resources/ClockResource.php',
     'App\\Http\\Resources\\LoginResource' => $baseDir . '/app/Http/Resources/LoginResource.php',
+    'App\\Imports\\UsersImport' => $baseDir . '/app/Imports/UsersImport.php',
     'App\\Models\\ClockInOut' => $baseDir . '/app/Models/ClockInOut.php',
     'App\\Models\\Department' => $baseDir . '/app/Models/Department.php',
     'App\\Models\\Location' => $baseDir . '/app/Models/Location.php',
