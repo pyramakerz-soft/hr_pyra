@@ -9,6 +9,7 @@ import { UserServiceService } from '../../../Services/user-service.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ClockInPopUpComponent } from '../../../Components/clock-in-pop-up/clock-in-pop-up.component';
 import { AddEmployee } from '../../../Models/add-employee';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-hr-employee-attendance-details',
@@ -82,7 +83,7 @@ export class HrEmployeeAttendanceDetailsComponent {
         console.error('Error in route parameters:', err);
       }
     });
-
+    console.log(this.employee)
   }
 
   populateYears(): void {
@@ -239,6 +240,27 @@ export class HrEmployeeAttendanceDetailsComponent {
   }
 
   ExportData(){
-    
+    console.log(this.DateString)
+    this.UserClocksService.ExportUserDataById(this.UserID, this.DateString).subscribe(
+      (result: Blob) => {
+        const url = window.URL.createObjectURL(result);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.employee.name}_ClockIn.xlsx`; 
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      (error) => {
+        console.log(error)
+
+        if(error.status == 404){
+          Swal.fire({   
+            text: "There are no clock in for this User at this Date",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
+          });
+        }
+      }
+    );
   }
 }

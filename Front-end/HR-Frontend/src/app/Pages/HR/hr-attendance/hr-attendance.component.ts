@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { UserModel } from '../../../Models/user-model';
 import { UserServiceService } from '../../../Services/user-service.service';
 import { FormsModule } from '@angular/forms';
+import { ClockService } from '../../../Services/clock.service';
+import Swal from 'sweetalert2';
 
 interface data{
   Employees:string,
@@ -27,7 +29,29 @@ export class HrAttendanceComponent {
   UsersNames:string[]=[];
   filteredUsers: string[] = [];
 
-  constructor(public router:Router , public userServ:UserServiceService){}
+
+  selectedMonth: string = "01";
+  selectedYear: number = 0;
+  DateString: string = "2019-01";
+
+  months = [
+    { name: 'January', value: "01" },
+    { name: 'February', value: "02" },
+    { name: 'March', value: "03" },
+    { name: 'April', value: "04" },
+    { name: 'May', value: "05" },
+    { name: 'June', value: "06" },
+    { name: 'July', value: "07" },
+    { name: 'August', value: "08" },
+    { name: 'September', value: "09" },
+    { name: 'October', value: "10" },
+    { name: 'November', value: "11" },
+    { name: 'December', value: "12" }
+  ];
+  years: number[] = [];
+
+
+  constructor(public router:Router , public userServ:UserServiceService, public UserClocksService: ClockService){}
 
   tableData:UserModel[]= [];
 
@@ -35,6 +59,12 @@ export class HrAttendanceComponent {
     this.getAllEmployees(1);
     this.getUsersName();
 
+    this.populateYears();
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1
+    this.selectedMonth = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
+    this.selectedYear = currentDate.getFullYear();
+    this.DateString = this.selectedYear + "-" + this.selectedMonth
   }
 
   NavigateToEmployeeAttendanceDetails(EmpId:number){
@@ -140,6 +170,56 @@ export class HrAttendanceComponent {
   resetfilteredUsers(){
     this.filteredUsers = [];
 
+  }
+
+  populateYears(): void {
+    const startYear = 2019;
+    const currentYear = new Date().getFullYear(); 
+
+    for (let year = startYear; year <= currentYear; year++) {
+      this.years.push(year);
+    }
+  }
+
+  onMonthChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    if (target) {
+      this.selectedMonth = target.value; 
+      this.DateString = this.selectedYear + "-" + this.selectedMonth
+    }
+  }
+
+  onYearChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    if (target) {
+      this.selectedYear = +target.value; 
+      this.DateString = this.selectedYear + "-" + this.selectedMonth
+    }
+  }
+
+  ExportData(){
+    console.log(this.DateString)
+    // this.UserClocksService.ExportAllUserDataById(this.DateString).subscribe(
+    //   (result: Blob) => {
+    //     const url = window.URL.createObjectURL(result);
+    //     const a = document.createElement('a');
+    //     a.href = url;
+    //     a.download = `Employee_ClockIn.xlsx`; 
+    //     a.click();
+    //     window.URL.revokeObjectURL(url);
+    //   },
+    //   (error) => {
+    //     console.log(error)
+
+    //     if(error.status == 404){
+    //       Swal.fire({   
+    //         text: "There are no clock in for this Date",
+    //         confirmButtonText: "OK",
+    //         confirmButtonColor: "#FF7519",
+    //       });
+    //     }
+    //   }
+    // );
   }
 
 }
