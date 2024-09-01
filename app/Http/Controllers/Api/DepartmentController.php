@@ -31,16 +31,7 @@ class DepartmentController extends Controller
         return $this->returnData("data", $data, "departments Data");
 
     }
-    public function departmentManagerNames()
-    {
-        $departmentManagerNames = Department::with('manager')->get()->map(function ($department) {
-            return ['manager_id' => $department->manager ? $department->manager->id : null, 'manager_name' => $department->manager ? $department->manager->name : null];
-        })->toArray();
-        return $this->returnData('departmentManagerNames', $departmentManagerNames, 'department manager names');
-    }
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(StoreDepartmentRequest $request)
     {
         $department = new Department();
