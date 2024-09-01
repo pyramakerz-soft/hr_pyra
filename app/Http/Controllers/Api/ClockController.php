@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exports\UserClocksExport;
+use App\Exports\UserClocksExport1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClockInOutRequest;
 use App\Http\Requests\UpdateClockInOutRequest;
@@ -158,7 +158,7 @@ class ClockController extends Controller
         }
         if ($request->has('export')) {
             $clocksCollection = $data['clocks'];
-            return Excel::download(new UserClocksExport($clocksCollection), 'user_clocks.xlsx');
+            return Excel::download(new UserClocksExport1($clocksCollection), 'user_clocks.xlsx');
         }
 
         return $this->returnData("data", $data, "Clocks Data for {$user->name}");
