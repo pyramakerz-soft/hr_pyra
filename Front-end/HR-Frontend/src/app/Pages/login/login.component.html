@@ -21,14 +21,7 @@
             (input)="onPasswordChange()"
             class="h5 w-full bg-white border rounded border-[#D0D5DD] shadow-sm shadow-[#1018280D] h-[22%] py-[7.5px] px-[10.5px]" [(ngModel)]="password">
             <span *ngIf="passwordError" class="text-red-500 text-sm ml-2 font-normal">{{ passwordError }}</span>
-            
-            <!-- <div class="h6 flex items-center mt-4 justify-between">
-                <div class="flex items-center">
-                    <input id="remember-me" type="checkbox">
-                    <label htmlFor="remember-me" class="text-[#344054] font-medium ml-1 md:ml-2">Remember for 30 days</label>
-                </div>
-                <a href="#" class="font-semibold text-[#17253E]">Forget password</a>    
-            </div> -->
+
         </div>
 
         <button class="mt-4 w-full text-white font-semibold text-xs shadow-sm bg-[#17253E] border border-[#17253E] py-2 rounded-md"
@@ -44,25 +37,6 @@
             <p class="D1 my-8 lg:block hidden"><span class="font-bold">Do more</span> with Real state</p>
         </div>
 
-        <!-- <c-carousel class=" text-center" [interval]="1000" transition="slide">
-            <c-carousel-inner>
-                <c-carousel-item *ngFor="let slide of slides">
-                    <img
-                    [src]="slide.src"
-                    alt="{{ slide.title }}"
-                    class="w-[500px] h-[297.73px] mb-6"
-                    loading="lazy" />
-                    <p class="text-[21px] leading-7">Connect Realstate CRM with more than 2K+ popular apps<br>through our <span class="font-bold">State integration.</span></p>
-                    <p class="text-4xl my-8"><span class="font-bold">Do more</span> with Real state</p>
-                </c-carousel-item>
-            </c-carousel-inner>
-        </c-carousel> -->
-
-        <!-- <owl-carousel-o [options]="customOptions">
-            <ng-template carouselSlide *ngFor="let slide of slidesStore">
-              <img [src]="slide" alt="image">
-            </ng-template>
-        </owl-carousel-o> -->
     </div>
 </div>
     

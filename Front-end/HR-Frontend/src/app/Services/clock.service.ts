@@ -16,14 +16,20 @@ export class ClockService {
     this.baseUrl=Api.BaseUrl
   }
 
-
-
   CreateClockIn(latitude: number, longitude: number ,clock_in:string, location_type:string="site") {
     const body = { latitude, longitude ,clock_in,location_type};
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
     return this.http.post(`${this.baseUrl}/clock_in`, body, { headers, responseType: 'json' });
+  }
+  
+  CreateClockInByHrForOther(userId: number, location_id: number ,clock_in:string, location_type:string="site") {
+    const body = { location_type, clock_in, location_id};
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.post(`${this.baseUrl}/clock_in/user/${userId}`, body, { headers, responseType: 'json' });
   }
 
   CreateClockOut(latitude: number, longitude: number ,clock_out:string) {
