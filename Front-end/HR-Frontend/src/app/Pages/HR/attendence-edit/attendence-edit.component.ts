@@ -14,7 +14,7 @@ import Swal from 'sweetalert2';
   styleUrl: './attendence-edit.component.css'
 })
 export class AttendenceEditComponent {
-  data: any = new EmployeeDashboard("", "", "", "", "", "", "", "", []);
+  data: any = new EmployeeDashboard("", "", "", "", "", "", "", "","","", []);
   ClockInAfterClockOut: boolean = false;
   DataIsNotTheSame: boolean = false;
 
@@ -25,11 +25,12 @@ export class AttendenceEditComponent {
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras.state) {
       this.data = navigation.extras.state['data'] as EmployeeDashboard;
-      console.log(this.data)
-    }
-    console.log(this.data)
+      this.data.formattedClockIn= this.transformUTCToEgyptTime(this.data.formattedClockIn);
+      this.data.formattedClockOut= this.transformUTCToEgyptTime(this.data.formattedClockOut);
 
-    console.log(this.data.formattedClockIn  )
+    }
+    
+    console.log(this.data.formattedClockIn )
   }
 
   CheckValidate() {
@@ -75,5 +76,44 @@ export class AttendenceEditComponent {
   Cancel() {
     this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/" + this.data.userId)
 
+  }
+
+
+  transformUTCToEgyptTime(utcDateTime: string): string {
+    // Parse the input UTC datetime string to a Date object
+    const [datePart, timePart] = utcDateTime.split(' ');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hours, minutes] = timePart.split(':').map(Number);
+    
+    // Create a new Date object with the UTC time
+    const utcDate = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+  
+    // Convert to Egypt local time using Intl.DateTimeFormat
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false, // Use 24-hour format
+      timeZone: 'Africa/Cairo'
+    };
+  
+    // Format the date into the desired output
+    const egyptTimeFormatter = new Intl.DateTimeFormat('en-GB', options);
+    const formattedDateParts = egyptTimeFormatter.formatToParts(utcDate);
+  
+    // Construct the formatted date string in "YYYY-MM-DD HH:mm" format
+    const egyptDate = formattedDateParts.reduce((acc, part) => {
+      if (part.type === 'year') acc['year'] = part.value;
+      if (part.type === 'month') acc['month'] = part.value;
+      if (part.type === 'day') acc['day'] = part.value;
+      if (part.type === 'hour') acc['hour'] = part.value;
+      if (part.type === 'minute') acc['minute'] = part.value;
+      return acc;
+    }, {} as Record<string, string>);
+  
+    // Return formatted string
+    return `${egyptDate['year']}-${egyptDate['month']}-${egyptDate['day']} ${egyptDate['hour']}:${egyptDate['minute']}`;
   }
 }

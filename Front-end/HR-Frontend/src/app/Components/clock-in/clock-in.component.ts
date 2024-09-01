@@ -10,6 +10,7 @@ import { TableComponent } from '../Core/table/table.component';
 import { ClockEventService } from '../../Services/clock-event.service';
 import { UserDetails } from '../../Models/user-details';
 import Swal from 'sweetalert2';
+import { TimeApiService } from '../../Services/time-api.service';
 
 @Component({
   selector: 'app-clock-in',
@@ -50,7 +51,7 @@ export class ClockInComponent {
   UtcTime: string = "";
 
 
-  constructor(public dialog: MatDialog, public accountService: AccountService, public clockService: ClockService, public clockEventService: ClockEventService) {
+  constructor(public dialog: MatDialog, public accountService: AccountService, public clockService: ClockService, public clockEventService: ClockEventService , public TimeApi:TimeApiService) {
   }
 
 
@@ -131,7 +132,7 @@ export class ClockInComponent {
 
   async sendLocation(): Promise<void> {
     await this.getLocation();
-    this.UtcTime = this.getCurrentTimeInUTC();
+    this.UtcTime = await this.getCurrentTimeInUTC();
 
     Swal.fire({
       title: 'Are you sure you want to Clock out?',
@@ -143,6 +144,8 @@ export class ClockInComponent {
       cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
+
+
         this.clockService.CreateClockOut(this.lat, this.lng, this.UtcTime).subscribe(
 
           (response: any) => {
@@ -173,22 +176,22 @@ export class ClockInComponent {
 
   }
 
-  getCurrentTimeInUTC(): string {
-    const currentDate = new Date();
+  // getCurrentTimeInUTC(): string {
+  //   const currentDate = new Date();
 
-    // Extract the individual date and time components
-    const year = currentDate.getUTCFullYear();
-    const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
-    const day = String(currentDate.getUTCDate()).padStart(2, '0');
-    const hours = String(currentDate.getUTCHours()).padStart(2, '0');
-    const minutes = String(currentDate.getUTCMinutes()).padStart(2, '0');
-    const seconds = String(currentDate.getUTCSeconds()).padStart(2, '0');
+  //   // Extract the individual date and time components
+  //   const year = currentDate.getUTCFullYear();
+  //   const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
+  //   const day = String(currentDate.getUTCDate()).padStart(2, '0');
+  //   const hours = String(currentDate.getUTCHours()).padStart(2, '0');
+  //   const minutes = String(currentDate.getUTCMinutes()).padStart(2, '0');
+  //   const seconds = String(currentDate.getUTCSeconds()).padStart(2, '0');
 
-    // Combine components into the desired format
-    const formattedUTCDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  //   // Combine components into the desired format
+  //   const formattedUTCDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
-    return formattedUTCDate;
-  }
+  //   return formattedUTCDate;
+  // }
 
 
   getLocation(): Promise<void> {
@@ -276,6 +279,36 @@ export class ClockInComponent {
   pad(value: number): string {
     return value < 10 ? `0${value}` : String(value);
   }
+
+
+  getCurrentTimeInUTC(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.TimeApi.getCurrentTime().subscribe(
+        (response) => {
+          const currentDate = new Date(response.datetime);
+  
+          // Extract the individual date and time components
+          const year = currentDate.getUTCFullYear();
+          const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
+          const day = String(currentDate.getUTCDate()).padStart(2, '0');
+          const hours = String(currentDate.getUTCHours()).padStart(2, '0');
+          const minutes = String(currentDate.getUTCMinutes()).padStart(2, '0');
+          const seconds = String(currentDate.getUTCSeconds()).padStart(2, '0');
+  
+          // Combine components into the desired format 'YYYY-MM-DD HH:mm:ss'
+          const currentUTCDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  
+          console.log(currentUTCDateTime); // For debugging purposes
+          resolve(currentUTCDateTime); // Resolve the promise with formatted time
+        },
+        (error) => {
+          console.error('Error fetching time from API:', error);
+          reject('Error fetching time'); // Reject the promise in case of an error
+        }
+      );
+    });
+  }
+
 
 }
 
