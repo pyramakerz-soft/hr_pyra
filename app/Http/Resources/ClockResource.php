@@ -11,6 +11,7 @@ class ClockResource extends JsonResource
     public function toArray(Request $request): array
     {
         $clockOut = $this->clock_out ? Carbon::parse($this->clock_out)->format('h:iA') : null;
+        $clockOutFormatted = $this->clock_out ? Carbon::parse($this->clock_out)->format('Y-m-d h:i') : null;
         $locationOut = null;
 
         if ($this->location_type == "site") {
@@ -40,8 +41,8 @@ class ClockResource extends JsonResource
                 'clockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('H:iA') : null,
                 'totalHours' => $clock->duration ? Carbon::parse($clock->duration)->format('H:i') : null,
                 'site' => $clock->location_type,
-                // 'location_in' =>
-
+                'formattedClockIn' => $clock->clock_in ? Carbon::parse($clock->clock_in)->format('Y-m-d H:i') : null,
+                'formattedClockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('Y-m-d H:i') : null,
             ];
         })->values()->toArray();
         return [
@@ -56,7 +57,7 @@ class ClockResource extends JsonResource
             'userId' => $this->user->id,
             'site' => $this->location_type,
             'formattedClockIn' => Carbon::parse($this->clock_in)->format('Y-m-d H:i'),
-            'formattedClockOut' => Carbon::parse($this->clock_out)->format('Y-m-d H:i'),
+            'formattedClockOut' => $clockOutFormatted,
             'otherClocks' => $otherClocksForDay,
 
         ];

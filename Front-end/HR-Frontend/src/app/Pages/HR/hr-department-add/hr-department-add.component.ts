@@ -45,8 +45,8 @@ export class HrDepartmentAddComponent {
   getMnagerNames() {
     this.managerServ.getall().subscribe(
       (d: any) => {
-        console.log(d.departmentManagerNames)
-        this.ManagerNames = d.departmentManagerNames;
+        console.log(d.managerNames)
+        this.ManagerNames = d.managerNames;
       },
       (error) => {
         console.error('Error :', error);

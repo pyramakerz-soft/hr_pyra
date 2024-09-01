@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exports\UserClocksExport;
+use App\Exports\UserClocksExport1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClockInOutRequest;
 use App\Http\Requests\UpdateClockInOutRequest;
@@ -22,28 +22,6 @@ class ClockController extends Controller
     use ResponseTrait;
     use HelperTrait;
 
-    // protected function exportUserClocks(array $preparedData)
-    // {
-    //     // Flatten the data for export
-    //     $clocksData = collect($preparedData['clocks'])->map(function ($clock) {
-    //         return [
-    //             'id' => $clock['id'],
-    //             'Day' => $clock['Day'],
-    //             'Date' => $clock['Date'],
-    //             'clockIn' => $clock['clockIn'],
-    //             'clockOut' => $clock['clockOut'],
-    //             'totalHours' => $clock['duration'],
-    //             'locationIn' => $clock['locationIn'],
-    //             'locationOut' => $clock['locationOut'],
-    //             'userId' => $clock['userId'],
-    //             'site' => $clock['site'],
-    //             'formattedClockIn' => $clock['formattedClockIn'],
-    //             'formattedClockOut' => $clock['formattedClockOut'],
-    //         ];
-    //     })->toArray();
-
-    //     return Excel::download(new UserClocksExport($clocksData), 'user_clocks.xlsx');
-    // }
     protected function prepareClockData($clocks)
     {
         $isPaginated = $clocks instanceof \Illuminate\Pagination\LengthAwarePaginator;
@@ -123,7 +101,15 @@ class ClockController extends Controller
             ] : null,
         ];
     }
-
+    public function allClocks()
+    {
+        $authUser = Auth::user();
+        if (!$authUser->hasRole('Hr')) {
+            return $this->returnError('You are not authorized to view user clocks', 403);
+        }
+        $query = ClockInOut::get();
+        dd($query->toArray());
+    }
     public function getUserClocksById(Request $request, User $user)
     {
         $authUser = Auth::user();
@@ -167,14 +153,12 @@ class ClockController extends Controller
         }
         $data = $this->prepareClockData($clocks);
 
-        // Check if 'clocks' key exists in the prepared data
         if (!isset($data['clocks'])) {
             return $this->returnError('No Clocks Found For This User');
         }
-
         if ($request->has('export')) {
             $clocksCollection = $data['clocks'];
-            return Excel::download(new UserClocksExport($clocksCollection), 'user_clocks.xlsx');
+            return Excel::download(new UserClocksExport1($clocksCollection), 'user_clocks.xlsx');
         }
 
         return $this->returnData("data", $data, "Clocks Data for {$user->name}");
