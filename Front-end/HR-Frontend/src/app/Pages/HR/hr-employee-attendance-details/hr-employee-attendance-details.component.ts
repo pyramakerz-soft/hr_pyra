@@ -215,6 +215,7 @@ export class HrEmployeeAttendanceDetailsComponent {
   EditUserClock(Clock:EmployeeDashboard) {
 
 
+    console.log(Clock)
     this.route.navigate(['HR/HREmployeeAttendanceEdit'], { state: { data: Clock } }); 
   }
 
