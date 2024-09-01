@@ -22,8 +22,8 @@ class HrController extends Controller
         foreach ($users as $user) {
             foreach ($user->user_locations as $location) {
                 $data[] = [
-                    'location_id' => $location->id,
-                    'location_name' => $location->name,
+                    'id' => $location->id,
+                    'name' => $location->name,
                 ];
             }
 
