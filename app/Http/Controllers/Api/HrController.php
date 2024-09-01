@@ -13,21 +13,23 @@ use Illuminate\Support\Facades\Auth;
 class HrController extends Controller
 {
     use ResponseTrait;
-    public function getLocationAssignedToUser()
+    public function getLocationAssignedToUser(User $user)
     {
 
-        $users = User::with('user_locations')->get();
-
+        $users = User::with('user_locations')->where('id', $user->id)->get();
         $data = [];
 
         foreach ($users as $user) {
             foreach ($user->user_locations as $location) {
-                $pivotData = $location->pivot->toArray();
-                $data[] = ['user_location' => $pivotData];
+                $data[] = [
+                    'location_id' => $location->id,
+                    'location_name' => $location->name,
+                ];
             }
 
-            return $this->returnData('user_locations', $data, 'User Location Data');
         }
+        return $this->returnData('userLocations', $data, 'User Location Data');
+
     }
     public function getWorkTypeAssignedToUser()
     {
