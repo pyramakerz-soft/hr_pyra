@@ -11,7 +11,7 @@ class ClockResource extends JsonResource
     public function toArray(Request $request): array
     {
         $clockOut = $this->clock_out ? Carbon::parse($this->clock_out)->format('h:iA') : null;
-        $clockOutFormatted = $this->clock_out ? Carbon::parse($this->clock_out)->format('Y-m-d h:iA') : null;
+        $clockOutFormatted = $this->clock_out ? Carbon::parse($this->clock_out)->format('Y-m-d h:i') : null;
         $locationOut = null;
 
         if ($this->location_type == "site") {
