@@ -144,8 +144,6 @@ export class HrEmployeeAttendanceDetailsComponent {
   getEmployeeByID(id:number){
     this.activatedRoute.data.subscribe(
       (data) => {
-        console.log(data)
-        console.log(data['user'].User)
         this.employee = data['user'].User ;
       }
     )
@@ -235,5 +233,9 @@ export class HrEmployeeAttendanceDetailsComponent {
         this.getAllClocks(1)
       }
     });
+  }
+
+  ExportData(){
+    
   }
 }
