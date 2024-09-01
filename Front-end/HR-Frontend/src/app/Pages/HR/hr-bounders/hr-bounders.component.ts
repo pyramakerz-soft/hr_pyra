@@ -75,7 +75,7 @@ export class HrBoundersComponent {
 
   deleteLocation(id: number) {
     this.locationServ.DeleteByID(id).subscribe(result => {
-      this.getAllLocations(this.CurrentPageNumber);
+      this.getAllLocations(1);
     });
   }
 
