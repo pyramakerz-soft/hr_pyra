@@ -1,12 +1,12 @@
-<div class="border p-6">
-  <div>
-    <p class="text-lg font-semibold mb-4">Pyramakerz Employee Per Months</p>
+<div class="rounded-xl border">
+  <div class="border-b py-4 px-5">
+    <p class="text-base font-medium">Pyramakerz Employee Per Months</p>
   </div>
-
-  <div class="bar-chart-container flex flex-wrap justify-between gap-2 max-h-[300px] overflow-y-auto">
+  
+  <div class="flex flex-wrap items-end justify-between space-x-3 max-h-[300px] overflow-y-auto py-4 px-5">
     <div
       *ngFor="let segment of normalizedSegments"
-      class="bar-wrapper flex flex-col items-center flex-[1_0_20%] lg:flex-1"
+      class="flex flex-col items-center flex-[1_0_20%] lg:flex-1"
     >
       <div
         class="mb-1 w-full"
