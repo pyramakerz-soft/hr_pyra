@@ -55,6 +55,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/locations/{location}', [LocationController::class, 'update'])->name('locations.update');
     Route::post('/work_types/{workType}', [WorkTypeController::class, 'update'])->name('work_types.update');
 
+    Route::get('/all_clocks', [ClockController::class, 'allClocks'])->name('clocks.usersClocks');
     Route::get('/clocks/user/{user}', [ClockController::class, 'getUserClocksById'])->name('clocks.userById');
     Route::post('/clock_in', [ClockController::class, 'clockIn'])->name('clocks.clockIn');
     Route::post('/clock_out', [ClockController::class, 'clockOut'])->name('clocks.clockOut');
@@ -78,6 +79,5 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('users/workTypes', [HrController::class, 'getWorkTypeAssignedToUser'])->name('users.usersWorkTypes');
 
     Route::post('clock_in/user/{user}', [HrController::class, 'hrClocKIn'])->name('hr.ClocKIn');
-
 
 });
