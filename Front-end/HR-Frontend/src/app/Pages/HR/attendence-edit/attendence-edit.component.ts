@@ -31,6 +31,7 @@ export class AttendenceEditComponent {
       this.UserId = navigation.extras.state['UserId'] ;
 
 
+      console.log(this.data)
       this.data.formattedClockIn= this.transformUTCToEgyptTime(this.data.formattedClockIn);
       this.data.formattedClockOut= this.transformUTCToEgyptTime(this.data.formattedClockOut);
 

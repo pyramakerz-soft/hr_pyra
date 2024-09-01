@@ -19,14 +19,14 @@
     <div *ngIf="userDetails.is_clocked_out; else ClockOut">
         <button
             class="text-base md:text-2xl font-bold bg-[#FF7519] text-white mt-6 w-[70%] md:w-[82%] py-2 md:py-3 rounded-xl"
-            (click)="openDialog()">Clock In</button>
+            (click)="openDialog()"  [disabled]="!isDateLoaded">Clock In</button>
     </div>
 
     <ng-template #ClockOut>
         <div>
             <button
                 class="text-base md:text-2xl font-bold bg-[#D26053] text-white my-6 w-[70%] md:w-[82%] py-2 md:py-3 rounded-xl"
-                (click)="sendLocation()">
+                (click)="sendLocation()"  [disabled]="!isDateLoaded">
                 Clock Out
             </button>
             <div class="flex justify-between items-center">
