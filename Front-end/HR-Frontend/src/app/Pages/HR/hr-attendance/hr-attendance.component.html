@@ -1,8 +1,28 @@
 <div (click)="resetfilteredUsers()">
-  <div class="mb-2">
-        <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Attendance</p>
-        <p class="text-[#5F6D7E] text-xs md:text-base">Created: 22 May, 2020</p>
+  <div class="mb-2 flex flex-col md:flex-row justify-between md:items-center">
+    <div>
+      <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Attendance</p>
+      <p class="text-[#5F6D7E] text-xs md:text-base">Created: 22 May, 2020</p>
     </div>
+    <button (click)="ExportData()"
+          class="border border-[#FF7519] text-[#FF7519] font-medium text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
+          Export
+    </button>
+  </div>
+
+  <div class="flex items-center justify-end mb-4 space-x-3">
+    <div>
+      <select class="p-2 border rounded w-full" [(ngModel)]="selectedMonth" (change)="onMonthChange($event)">
+        <option *ngFor="let month of months" [value]="month.value">{{ month.name }}</option>
+      </select>
+    </div>
+
+    <div>
+      <select class="p-2 border rounded w-full" [(ngModel)]="selectedYear" (change)="onYearChange($event)">
+        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+      </select>
+    </div>
+  </div>
 
 
     <div class="mt-5 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 space-x-2 flex items-center relative">

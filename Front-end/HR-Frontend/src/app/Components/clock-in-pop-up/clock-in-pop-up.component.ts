@@ -128,22 +128,30 @@ export class ClockInPopUpComponent {
 
           });
         }
-      else  if (error.error.message.includes("User is not located at the correct location")){
-        Swal.fire({
-          text: "You Are not located at the correct location",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#FF7519",
+        else  if (error.error.message.includes("User is not located at the correct location")){
+          Swal.fire({
+            text: "You Are not located at the correct location",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
 
-        });
-      }
-      else{
-        Swal.fire({
-          text: "Try In Another Time",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#FF7519",
+          });
+        }
+        else  if (error.error.message.includes("You already have an existing clock-in without clocking out")){
+          Swal.fire({
+            text: "You Didn't clock out from the last clock in",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
 
-        });
-      }
+          });
+        }
+        else{
+          Swal.fire({
+            text: "Try In Another Time",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
+
+          });
+        }
         console.log(this.lat, this.lng)
       }
     );
@@ -171,6 +179,14 @@ export class ClockInPopUpComponent {
             confirmButtonText: "OK",
             confirmButtonColor: "#FF7519",
 
+          });
+        }
+        else  if (error.error.message.includes("You already have an existing clock-in without clocking out")){
+          Swal.fire({
+            text: "You Didn't clock out from the last clock in",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
+  
           });
         }
         else{
@@ -203,12 +219,21 @@ export class ClockInPopUpComponent {
           },
           (error: HttpErrorResponse) => {
             console.log(error.error.message)
-            Swal.fire({
-              text: "Try In Another Time",
-              confirmButtonText: "OK",
-              confirmButtonColor: "#FF7519",
-  
-            });
+            if (error.error.message.includes("You already have an existing clock-in without clocking out")){
+              Swal.fire({
+                text: "You Didn't clock out from the last clock in",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#FF7519",
+      
+              });
+            } else{
+              Swal.fire({
+                text: "Try In Another Time",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#FF7519",
+    
+              });
+            }
           }
         );
       }
@@ -221,12 +246,21 @@ export class ClockInPopUpComponent {
           },
           (error: HttpErrorResponse) => {
             console.log(error.error.message)
-            Swal.fire({
-              text: "Try In Another Time",
-              confirmButtonText: "OK",
-              confirmButtonColor: "#FF7519",
-  
-            });
+            if (error.error.message.includes("You already have an existing clock-in without clocking out")){
+              Swal.fire({
+                text: "You Didn't clock out from the last clock in",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#FF7519",
+      
+              });
+            } else{
+              Swal.fire({
+                text: "Try In Another Time",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#FF7519",
+    
+              });
+            }
           }
         );
       }
