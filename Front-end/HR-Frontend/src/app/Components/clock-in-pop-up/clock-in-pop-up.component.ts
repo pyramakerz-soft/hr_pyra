@@ -11,6 +11,8 @@ import { WorkTypeService } from '../../Services/work-type.service';
 import { WorkType } from '../../Models/work-type';
 import { LocationsService } from '../../Services/locations.service';
 import { AssignLocationToUser } from '../../Models/assign-location-to-user';
+import { TimeApiService } from '../../Services/time-api.service';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-clock-in-pop-up',
@@ -43,7 +45,7 @@ export class ClockInPopUpComponent {
 
   constructor(public dialogRef: MatDialogRef<ClockInPopUpComponent>, public clockService: ClockService, 
     public clockEventService: ClockEventService, public revGeo: ReverseGeocodingService, @Inject(MAT_DIALOG_DATA) public data: any , 
-    public locationService: LocationsService, public workType:WorkTypeService) {
+    public locationService: LocationsService, public workType:WorkTypeService , public TimeApi:TimeApiService) {
       this.EmpName = data.Name;
       this.JobTitle = data.job_title;
       this.WorkHome=data.work_home;
@@ -63,28 +65,38 @@ export class ClockInPopUpComponent {
       this.reversedGeo = result.formatted_address;
       this.locationName = result.address_components[1].long_name + " , " + result.address_components[2].long_name + " , " + result.address_components[3].long_name
     }else{
-      this.getLocationsFromServer()
+      this.getLocationsFromServerByUserId()
     }
     this.getWorkTypes()
   }
 
-  getCurrentTimeInUTC(): string {
-    const currentDate = new Date();
-  
-    // Extract the individual date and time components
-    const year = currentDate.getUTCFullYear();
-    const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
-    const day = String(currentDate.getUTCDate()).padStart(2, '0');
-    const hours = String(currentDate.getUTCHours()).padStart(2, '0');
-    const minutes = String(currentDate.getUTCMinutes()).padStart(2, '0');
-    const seconds = String(currentDate.getUTCSeconds()).padStart(2, '0');
-  
-    // Combine components into the desired format
-    const formattedUTCDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  
-    return formattedUTCDate;
+  getCurrentTimeInUTC(): any {
+
+    this.TimeApi.getCurrentTime().subscribe(
+      (response) => {
+        const currentDate = new Date(response.datetime);
+
+        // Extract the individual date and time components
+        const year = currentDate.getUTCFullYear();
+        const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(currentDate.getUTCDate()).padStart(2, '0');
+        const hours = String(currentDate.getUTCHours()).padStart(2, '0');
+        const minutes = String(currentDate.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(currentDate.getUTCSeconds()).padStart(2, '0');
+
+        // Combine components into the desired format
+        const currentUTCDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        return currentUTCDateTime;
+      },
+      (error) => {
+        return of('error');
+
+      }
+    );
   }
 
+
+  
   async sendLocationByToken(): Promise<void> {
     await this.getLocation();
     this.UtcTime= this.getCurrentTimeInUTC();
@@ -126,52 +138,90 @@ export class ClockInPopUpComponent {
         console.log(this.lat, this.lng)
       }
     );
-  }
-  else{
-    this.clockService.CreateClockIn(this.lat, this.lng , this.UtcTime,this.selectedSite).subscribe(
-      (response: any) => {
-        this.IsClockedIn = true;
-        this.dialogRef.close(this.IsClockedIn);
-        this.clockEventService.notifyClockedIn();
-      },
-      (error: HttpErrorResponse) => {
-        const errorMessage = error.error?.message || 'An unknown error occurred';
-        if(error.error.message.includes("The location type field is required")){
+    }
+    else{
+      this.clockService.CreateClockIn(this.lat, this.lng , this.UtcTime,this.selectedSite).subscribe(
+        (response: any) => {
+          this.IsClockedIn = true;
+          this.dialogRef.close(this.IsClockedIn);
+          this.clockEventService.notifyClockedIn();
+        },
+        (error: HttpErrorResponse) => {
+          const errorMessage = error.error?.message || 'An unknown error occurred';
+          if(error.error.message.includes("The location type field is required")){
+            Swal.fire({
+              text: "The location type field is required",
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+
+            });
+          }
+        else  if (error.error.message.includes("User is not located at the correct location")){
           Swal.fire({
-            text: "The location type field is required",
+            text: "You Are not located at the correct location",
             confirmButtonText: "OK",
             confirmButtonColor: "#FF7519",
 
           });
         }
-      else  if (error.error.message.includes("User is not located at the correct location")){
-        Swal.fire({
-          text: "You Are not located at the correct location",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#FF7519",
+        else{
+          console.log(error.error.message)
+          Swal.fire({
+            text: "Try In Another Time",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
 
-        });
-      }
-      else{
-        console.log(error.error.message)
-        Swal.fire({
-          text: "Try In Another Time",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#FF7519",
-
-        });
-      }
-        console.log(this.lat, this.lng)
-      }
-    );
-  }
+          });
+        }
+          console.log(this.lat, this.lng)
+        }
+      );
+    }
   }
 
   sendLocationByHrForOthers(){
-    console.log(this.DateClockInFromHrForOthers + " " + this.TimeClockInFromHrForOthers + ":00")
-    console.log(this.selectedSite )
-    console.log(this.LocationClockInFromHrForOthers)
-    console.log(this.userId)
+    const clockIn = this.DateClockInFromHrForOthers + " " + this.TimeClockInFromHrForOthers + ":00"
+    if(this.userId){
+      console.log(this.LocationClockInFromHrForOthers)
+      console.log(this.userId)
+      console.log(clockIn)
+      if(this.WorkHome==false){
+        this.clockService.CreateClockInByHrForOther(this.userId, this.LocationClockInFromHrForOthers, clockIn ,"site").subscribe(
+          (response: any) => {
+            this.IsClockedIn = true;
+            this.dialogRef.close(this.IsClockedIn);
+            this.clockEventService.notifyClockedIn();
+          },
+          (error: HttpErrorResponse) => {
+            console.log(error.error.message)
+            Swal.fire({
+              text: "Try In Another Time",
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+  
+            });
+          }
+        );
+      }
+      else{
+        this.clockService.CreateClockInByHrForOther(this.userId, this.LocationClockInFromHrForOthers, clockIn,this.selectedSite).subscribe(
+          (response: any) => {
+            this.IsClockedIn = true;
+            this.dialogRef.close(this.IsClockedIn);
+            this.clockEventService.notifyClockedIn();
+          },
+          (error: HttpErrorResponse) => {
+            console.log(error.error.message)
+            Swal.fire({
+              text: "Try In Another Time",
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+  
+            });
+          }
+        );
+      }
+    }
   }
 
   getLocation(): Promise<void> {
@@ -206,17 +256,42 @@ export class ClockInPopUpComponent {
     });
   }
  
-  getCurrentFormattedTime(): string {
-    const now = new Date();
-    let hours = now.getHours();
-    const minutes = now.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
+  getCurrentFormattedTime(): any {
 
-    hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
-    const minutesStr = minutes < 10 ? '0' + minutes : minutes.toString();
 
-    return `${hours}:${minutesStr} ${ampm}`;
+    this.TimeApi.getCurrentTime().subscribe(
+      (response) => {
+        const currentDate = new Date(response.datetime);
+
+        // Extract the individual date and time components
+        const year = currentDate.getUTCFullYear();
+        const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(currentDate.getUTCDate()).padStart(2, '0');
+        const hours = String(currentDate.getUTCHours()).padStart(2, '0');
+        const minutes = String(currentDate.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(currentDate.getUTCSeconds()).padStart(2, '0');
+
+        // Combine components into the desired format
+        const currentUTCDateTime = `${hours}:${minutes}:${seconds}`;
+        console.log(currentDate)
+        return currentUTCDateTime;
+      },
+      (error) => {
+        return of('error');
+
+      }
+    );
+
+    // const now = new Date();
+    // let hours = now.getHours();
+    // const minutes = now.getMinutes();
+    // const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    // hours = hours % 12;
+    // hours = hours ? hours : 12; // the hour '0' should be '12'
+    // const minutesStr = minutes < 10 ? '0' + minutes : minutes.toString();
+
+    // return `${hours}:${minutesStr} ${ampm}`;
   }
 
   getCurrentDate(): string {
@@ -236,12 +311,14 @@ export class ClockInPopUpComponent {
     );
   }
 
-  getLocationsFromServer(){
-    this.locationService.GetAllNames().subscribe(
-      (locations: any) => {
-        this.Locations = locations.locationNames
-      } 
-    );
+  getLocationsFromServerByUserId(){
+    if(this.userId){
+      this.locationService.GetLocationsByUserId(this.userId).subscribe(
+        (locations: any) => {
+          this.Locations = locations.locationNames
+        } 
+      );
+    }
   }
 
   toggleDropdown() {
