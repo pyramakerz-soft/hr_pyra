@@ -60,10 +60,16 @@ export class ClockService {
     return this.http.post<EmployeeDashboard>(`${this.baseUrl}/update_clock/user/${Userid}/clock/${clockId}`,body,{ headers, responseType: 'json' });
   }
 
-  ExportUserDAta(){
+  ExportUserDataById(id:number, date:string){
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.post<EmployeeDashboard>(`${this.baseUrl}/`,{ headers, responseType: 'json' });  
+    return this.http.get(`${this.baseUrl}/clocks/user/${id}?month=${date}&export=true`, { headers, responseType: 'blob' });  
+  }
+
+  ExportAllUserDataById(date:string){
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get(`${this.baseUrl}/clocks/user/?month=${date}&export=true`, { headers, responseType: 'blob' });  
   }
 }
 
