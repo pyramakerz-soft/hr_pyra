@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -65,6 +66,25 @@ class UserController extends Controller
         }
 
         return $this->returnData("data", $data, "Users Data");
+    }
+    public function ManagerNames()
+    {
+        $managerData = DB::table('model_has_roles')
+            ->where('role_id', 2)
+            ->get();
+
+        foreach ($managerData as $manager) {
+            $user = User::find($manager->model_id);
+            if ($user) {
+                $data[] = [
+                    'manager_id' => $user->id,
+                    'manager_name' => $user->name,
+                ];
+            }
+        }
+
+        return $this->returnData('managerNames', $data, 'manager names');
+
     }
 
     public function store(RegisterRequest $request)
@@ -184,7 +204,6 @@ class UserController extends Controller
             ], Response::HTTP_UNAUTHORIZED);
         }
 
-        // Attempt to authenticate with JWT
         $token = JWTAuth::attempt($credentials);
 
         if (!$token) {
