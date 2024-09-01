@@ -1,20 +1,28 @@
 <?php
-
 namespace App\Exports;
 
 use App\Http\Resources\ClockResource;
-use App\Models\ClockInOut;
+use Illuminate\Database\Eloquent\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class UserClocksExport1 implements FromCollection, WithHeadings
+class UserClocksExportById implements FromCollection, WithHeadings
 {
+    /**
+     * @param int $userId
+     */
+    public function __construct(public Collection $clocks)
+    {
+    }
+
     /**
      * @return \Illuminate\Support\Collection
      */
     public function collection()
     {
-        return ClockResource::collection(ClockInOut::get());
+        return $this->clocks->map(function ($clock) {
+            return new ClockResource($clock);
+        });
     }
 
     /**
@@ -39,5 +47,4 @@ class UserClocksExport1 implements FromCollection, WithHeadings
             'Formatted_Clock_Out',
         ];
     }
-
 }
