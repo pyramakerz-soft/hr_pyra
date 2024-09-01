@@ -37,12 +37,12 @@ class UserClocksExport implements FromArray, WithHeadings, WithMapping
             'ID',
             'Day',
             'Date',
-            'Clock In',
-            'Clock Out',
-            'Total Hours',
-            'Location In',
-            'Location Out',
-            'User ID',
+            'Clock_In',
+            'Clock_Out',
+            'Total_Hours',
+            'Location_In',
+            'Location_Out',
+            'User_ID',
             'Site',
 
         ];
@@ -63,6 +63,7 @@ class UserClocksExport implements FromArray, WithHeadings, WithMapping
         $totalHours = $clock['totalHours'] ? Carbon::parse($clock['totalHours'])->format('H:i') : null;
         $day = $clockIn->format('l');
         $date = $clockIn->format('Y-m-d');
+        dd($date);
         return [
             $clock['id'],
             $day, // Day
