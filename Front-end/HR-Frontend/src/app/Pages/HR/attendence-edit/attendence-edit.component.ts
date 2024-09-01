@@ -20,7 +20,7 @@ export class AttendenceEditComponent {
 
   ClockInEgyptFormat:string=""
   ClockOutEgyptFormat:string=""
-  
+  UserId:number=1
 
 
   constructor(private router: Router, public ClockServ: ClockService) {
@@ -28,19 +28,15 @@ export class AttendenceEditComponent {
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras.state) {
       this.data = navigation.extras.state['data'] as EmployeeDashboard;
-      console.log(this.data )
+      this.UserId = navigation.extras.state['UserId'] ;
+
 
       this.data.formattedClockIn= this.transformUTCToEgyptTime(this.data.formattedClockIn);
-      //this.data.formattedClockOut= this.transformUTCToEgyptTime(this.data.formattedClockOut);
-    //   this.data.otherClocks = this.data.otherClocks.map((clock:any) => ({
-    //     ...clock,
-    //     formattedClockIn: this.transformUTCToEgyptTime(clock.formattedClockIn),
-    //     formattedClockOut: this.transformUTCToEgyptTime(clock.formattedClockOut)
-    //   }));
+      this.data.formattedClockOut= this.transformUTCToEgyptTime(this.data.formattedClockOut);
+
 
     }
     
-    console.log(this.data.formattedClockIn )
   }
 
   CheckValidate() {
@@ -73,10 +69,9 @@ export class AttendenceEditComponent {
 
 
   SaveData() {
-
-    this.ClockServ.UpdateUserClock(this.data.userId, this.data.id, this.data.formattedClockIn, this.data.formattedClockOut).subscribe(
+    this.ClockServ.UpdateUserClock(this.UserId, this.data.id, this.data.formattedClockIn, this.data.formattedClockOut).subscribe(
       (d: any) => {
-        this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/" + this.data.userId)
+        this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/" + this.UserId)
       },
       (error) => {
         console.error('Error:', error);
