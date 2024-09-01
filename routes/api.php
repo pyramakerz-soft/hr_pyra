@@ -60,11 +60,11 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/clock_out', [ClockController::class, 'clockOut'])->name('clocks.clockOut');
     Route::get('/user_clocks', [ClockController::class, 'showUserClocks'])->name('clocks.UserClocks');
     Route::post('/update_clock/user/{user}/clock/{clock}', [ClockController::class, 'updateUserClock'])->name('clocks.updateUserClock');
+    Route::get('location_names', [LocationController::class, 'locationNames']);
 
     Route::apiResource('roles', RoleController::class)->except('update');
     Route::apiResource('permissions', PermissionController::class)->except('update');
     Route::apiResource('locations', LocationController::class)->except('update');
-    Route::get('location_names', [LocationController::class, 'locationNames']);
     Route::apiResource('work_types', WorkTypeController::class)->except('update');
     Route::apiResource('departments', DepartmentController::class)->except('update');
     Route::apiResource('user_details', UserDetailController::class)->except('update');
@@ -78,5 +78,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('users/workTypes', [HrController::class, 'getWorkTypeAssignedToUser'])->name('users.usersWorkTypes');
 
     Route::post('clock_in/user/{user}', [HrController::class, 'hrClocKIn'])->name('hr.ClocKIn');
+
 
 });

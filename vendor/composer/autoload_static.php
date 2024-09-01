@@ -663,6 +663,7 @@ class ComposerStaticInitec5a779e39a4835be1be4bc7580a81d0
         'App\\Http\\Resources\\Api\\UserVacationResource' => __DIR__ . '/../..' . '/app/Http/Resources/Api/UserVacationResource.php',
         'App\\Http\\Resources\\ClockResource' => __DIR__ . '/../..' . '/app/Http/Resources/ClockResource.php',
         'App\\Http\\Resources\\LoginResource' => __DIR__ . '/../..' . '/app/Http/Resources/LoginResource.php',
+        'App\\Imports\\UsersImport' => __DIR__ . '/../..' . '/app/Imports/UsersImport.php',
         'App\\Models\\ClockInOut' => __DIR__ . '/../..' . '/app/Models/ClockInOut.php',
         'App\\Models\\Department' => __DIR__ . '/../..' . '/app/Models/Department.php',
         'App\\Models\\Location' => __DIR__ . '/../..' . '/app/Models/Location.php',
