@@ -19,6 +19,7 @@ import { navigateIfHrGuard } from './Guards/navigate-if-hr.guard';
 import { doNotNavigateToLoginIfTokenExistsGuard } from './Guards/do-not-navigate-to-login-if-token-exists.guard';
 import { HrDepartmentComponent } from './Pages/HR/hr-department/hr-department.component';
 import { HrDepartmentAddComponent } from './Pages/HR/hr-department-add/hr-department-add.component';
+import { UserDataService } from './Services/Resolvers/user-data.service';
 
 export const routes: Routes = [
     {path: "employee", component:EmployeeComponent, title:"Dashboard", children:[
@@ -34,7 +35,7 @@ export const routes: Routes = [
         {path: "HRRoleAdd", component:HrRoleAddComponent, title:"HRRoleAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
         {path: "HRBounders", component:HrBoundersComponent, title:"HRBounders", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
         {path: "HRAttendance", component:HrAttendanceComponent, title:"HRAttendance", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-        {path: "HREmployeeAttendanceDetails/:Id", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HREmployeeAttendanceDetails/:Id", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard], resolve:{user:UserDataService}},
         {path: "HREmployeeDetails/:EmpId", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
         {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard] },
         {path: "HREmployeeDetailsEdit/:Id", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},

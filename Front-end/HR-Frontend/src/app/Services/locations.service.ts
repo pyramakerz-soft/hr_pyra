@@ -15,9 +15,7 @@ export class LocationsService {
   constructor(public http: HttpClient, public Api:ApiService) {
     this.baseurl=Api.BaseUrl+"/locations"
     this.url=Api.BaseUrl+"/"
-
-
-   }
+  }
 
   getall(pgNumber:number): Observable<Location[]> {
     const token = localStorage.getItem("token");
@@ -78,6 +76,6 @@ export class LocationsService {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    return this.http.get(`${this.baseurl}?search=${name}`, { headers, responseType: 'json' });
+    return this.http.get(`${this.url}users/${userId}/locations`, { headers, responseType: 'json' });
   }
 }
