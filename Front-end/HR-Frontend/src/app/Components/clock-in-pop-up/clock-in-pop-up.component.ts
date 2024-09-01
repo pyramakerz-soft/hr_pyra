@@ -7,6 +7,10 @@ import { ReverseGeocodingService } from '../../Services/reverse-geocoding.servic
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { WorkTypeService } from '../../Services/work-type.service';
+import { WorkType } from '../../Models/work-type';
+import { LocationsService } from '../../Services/locations.service';
+import { AssignLocationToUser } from '../../Models/assign-location-to-user';
 
 @Component({
   selector: 'app-clock-in-pop-up',
@@ -20,25 +24,31 @@ export class ClockInPopUpComponent {
   public lat: number = 196.0000000;
   public lng: number = 173.0000000;
   public IsClockedIn: boolean = false;
-  public reversedGeo: any;
+  WorkHome:boolean=false;
+  isClockInFromHrToOtherUser: boolean = false;
+  isDropdownOpen = false;
+  sites:WorkType[] = [];
+  Locations: AssignLocationToUser[] = [];
   public locationName: string = "";
-  sites: { value: string, label: string }[] = [
-    { value: 'home', label: 'home' },
-    { value: 'site', label: 'site' },
-  ];
   EmpName: string = "";
   JobTitle: string = "";
-  WorkHome:boolean=false;
   UtcTime:string="";
   selectedSite: string = '';
+  public reversedGeo: any;
 
-  constructor(public dialogRef: MatDialogRef<ClockInPopUpComponent>, public clockService: ClockService, public clockEventService: ClockEventService, public revGeo: ReverseGeocodingService, @Inject(MAT_DIALOG_DATA) public data: any , ) {
+  userId:number|null = null
+  TimeClockInFromHrForOthers:string = ""
+  DateClockInFromHrForOthers:string = ""
+  LocationClockInFromHrForOthers:number = 0
 
-    this.EmpName = data.Name;
-    this.JobTitle = data.job_title;
-    this.WorkHome=data.work_home;
-    console.log(this.EmpName, this.JobTitle , this.WorkHome)
-
+  constructor(public dialogRef: MatDialogRef<ClockInPopUpComponent>, public clockService: ClockService, 
+    public clockEventService: ClockEventService, public revGeo: ReverseGeocodingService, @Inject(MAT_DIALOG_DATA) public data: any , 
+    public locationService: LocationsService, public workType:WorkTypeService) {
+      this.EmpName = data.Name;
+      this.JobTitle = data.job_title;
+      this.WorkHome=data.work_home;
+      this.isClockInFromHrToOtherUser=data.isClockInFromHrToOtherUser;
+      this.userId=data.userId;
   }
 
   closeDialog(): void {
@@ -47,14 +57,16 @@ export class ClockInPopUpComponent {
   }
 
   public async ngOnInit(): Promise<void> {
-    await this.getLocation();
-
-    const result = await this.revGeo.getAddress(this.lat, this.lng);
-    this.reversedGeo = result.formatted_address;
-    this.locationName = result.address_components[1].long_name + " , " + result.address_components[2].long_name + " , " + result.address_components[3].long_name
+    if(this.isClockInFromHrToOtherUser == false){
+      await this.getLocation();
+      const result = await this.revGeo.getAddress(this.lat, this.lng);
+      this.reversedGeo = result.formatted_address;
+      this.locationName = result.address_components[1].long_name + " , " + result.address_components[2].long_name + " , " + result.address_components[3].long_name
+    }else{
+      this.getLocationsFromServer()
+    }
+    this.getWorkTypes()
   }
-
-
 
   getCurrentTimeInUTC(): string {
     const currentDate = new Date();
@@ -73,7 +85,7 @@ export class ClockInPopUpComponent {
     return formattedUTCDate;
   }
 
-  async sendLocation(): Promise<void> {
+  async sendLocationByToken(): Promise<void> {
     await this.getLocation();
     this.UtcTime= this.getCurrentTimeInUTC();
 
@@ -87,7 +99,7 @@ export class ClockInPopUpComponent {
       (error: HttpErrorResponse) => {
         const errorMessage = error.error?.message || 'An unknown error occurred';
         console.log(error.error.message)
-        if(error.error.message=="The location type field is required"){
+        if(error.error.message.includes("The location type field is required")){
           Swal.fire({
             text: "The location type field is required",
             confirmButtonText: "OK",
@@ -124,8 +136,7 @@ export class ClockInPopUpComponent {
       },
       (error: HttpErrorResponse) => {
         const errorMessage = error.error?.message || 'An unknown error occurred';
-        console.log(error.error.message)
-        if(error.error.message=="The location type field is required"){
+        if(error.error.message.includes("The location type field is required")){
           Swal.fire({
             text: "The location type field is required",
             confirmButtonText: "OK",
@@ -142,6 +153,7 @@ export class ClockInPopUpComponent {
         });
       }
       else{
+        console.log(error.error.message)
         Swal.fire({
           text: "Try In Another Time",
           confirmButtonText: "OK",
@@ -153,6 +165,13 @@ export class ClockInPopUpComponent {
       }
     );
   }
+  }
+
+  sendLocationByHrForOthers(){
+    console.log(this.DateClockInFromHrForOthers + " " + this.TimeClockInFromHrForOthers + ":00")
+    console.log(this.selectedSite )
+    console.log(this.LocationClockInFromHrForOthers)
+    console.log(this.userId)
   }
 
   getLocation(): Promise<void> {
@@ -186,10 +205,7 @@ export class ClockInPopUpComponent {
       }
     });
   }
-
-
-
-
+ 
   getCurrentFormattedTime(): string {
     const now = new Date();
     let hours = now.getHours();
@@ -213,6 +229,22 @@ export class ClockInPopUpComponent {
   }
 
   getWorkTypes(){
+    this.workType.getall().subscribe(
+      (workTypes: any) => {
+        this.sites = workTypes.workTypes
+      }
+    );
+  }
 
+  getLocationsFromServer(){
+    this.locationService.GetAllNames().subscribe(
+      (locations: any) => {
+        this.Locations = locations.locationNames
+      } 
+    );
+  }
+
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
   }
 }

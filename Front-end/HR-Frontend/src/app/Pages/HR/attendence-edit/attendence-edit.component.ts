@@ -27,6 +27,9 @@ export class AttendenceEditComponent {
       this.data = navigation.extras.state['data'] as EmployeeDashboard;
       console.log(this.data)
     }
+    console.log(this.data)
+
+    console.log(this.data.formattedClockIn  )
   }
 
   CheckValidate() {
