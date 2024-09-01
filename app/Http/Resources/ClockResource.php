@@ -41,9 +41,8 @@ class ClockResource extends JsonResource
                 'clockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('H:iA') : null,
                 'totalHours' => $clock->duration ? Carbon::parse($clock->duration)->format('H:i') : null,
                 'site' => $clock->location_type,
-                'formattedClockIn' => $clock->clock_in ? Carbon::parse($clock->clock_in)->format('Y-m-d H:iA') : null,
-                'formattedClockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('Y-m-d H:iA') : null,
-
+                'formattedClockIn' => $clock->clock_in ? Carbon::parse($clock->clock_in)->format('Y-m-d H:i') : null,
+                'formattedClockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('Y-m-d H:i') : null,
             ];
         })->values()->toArray();
         return [
