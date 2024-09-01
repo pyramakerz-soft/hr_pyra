@@ -72,7 +72,6 @@ export class ClockInComponent {
       this.userDetails = response.User;
 
       this.stopwatchTime = this.convertTimeToSeconds(this.userDetails.total_hours) || 0;
-      console.log(this.stopwatchTime);
 
       if (!this.userDetails.is_clocked_out) {
         this.startStopwatch();
