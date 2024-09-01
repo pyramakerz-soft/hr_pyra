@@ -5,29 +5,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import Swal from 'sweetalert2';
-// import { CarouselComponent, CarouselControlComponent, CarouselIndicatorsComponent, CarouselInnerComponent, CarouselItemComponent, ThemeDirective } from '@coreui/angular';
-// import { RouterLink } from '@angular/router';
-// import { CarouselModule } from '@coreui/angular';
-
-// import { CommonModule } from '@angular/common';
-// import { CarouselModule } from 'ngx-owl-carousel-o';
-// import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
-    // CarouselComponent,
-    // CarouselControlComponent,
-    // CarouselIndicatorsComponent,
-    // CarouselInnerComponent,
-    // CarouselItemComponent,
-    // ThemeDirective,
-    // RouterLink,
     CommonModule, 
     FormsModule,
-    // CarouselModule,
-    // BrowserAnimationsModule
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
@@ -106,13 +90,10 @@ export class LoginComponent {
           
         },
         (error: HttpErrorResponse) => {
-          if (error.status === 401) {
-            Swal.fire({
-              icon: "error",
-              title: "Invalid Email or Password",
-              confirmButtonText: "OK",
-              confirmButtonColor: "#FF7519",
-            });
+          if (error.error.includes("Wrong Email")) {
+            this.emailError = '*Wrong Email'
+          }else if (error.error.includes("Wrong password")) {
+            this.passwordError = '*Wrong Password';
           } else if(error.status === 400) {
             this.passwordError = '*Password Is Less then 6 Chars';
           } else if(error.status === 500){
@@ -126,73 +107,4 @@ export class LoginComponent {
       );
     }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // slides: any[] = new Array(3).fill({ id: -1, src: '', title: '', subtitle: '' });
-
-  // ngOnInit(): void {
-  //   this.slides[0] = {
-  //     src: '../../../assets/Layer 2.png'
-  //   };
-  //   this.slides[1] = {
-  //     src: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREoRGyXmHy_6aIgXYqWHdOT3KjfmnuSyxypw&s'
-  //   };
-  //   this.slides[2] = {
-  //     src: '../../../assets/Paragraphcontainer.png'
-  //   };
-  // }
-
-  // customOptions: any = {
-  //   loop: true,
-  //   mouseDrag: true,
-  //   touchDrag: true,
-  //   pullDrag: true,
-  //   dots: true,
-  //   navSpeed: 700,
-  //   navText: ['&#8249;', '&#8250;'],
-  //   responsive: {
-  //     0: {
-  //       items: 1
-  //     },
-  //     400: {
-  //       items: 2
-  //     },
-  //     740: {
-  //       items: 3
-  //     },
-  //     940: {
-  //       items: 4
-  //     }
-  //   },
-  //   nav: true,
-  //   autoplay: true,
-  //   autoplayTimeout: 3000,
-  //   autoplayHoverPause: true
-  // }
-
-  // slidesStore: string[] = [
-  //   'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREoRGyXmHy_6aIgXYqWHdOT3KjfmnuSyxypw&s',
-  //   '../../../assets/Layer 2.png',
-  //   '../../../assets/Paragraphcontainer.png'
-  // ];
 }
