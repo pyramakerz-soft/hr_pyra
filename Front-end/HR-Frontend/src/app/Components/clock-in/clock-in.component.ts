@@ -51,6 +51,8 @@ export class ClockInComponent {
   UtcTime: string = "";
 
 
+  isDateLoaded = false
+
   constructor(public dialog: MatDialog, public accountService: AccountService, public clockService: ClockService, public clockEventService: ClockEventService , public TimeApi:TimeApiService) {
   }
 
@@ -70,7 +72,7 @@ export class ClockInComponent {
     this.accountService.GetDataFromToken().subscribe((d: string) => {
       const response = JSON.parse(d);
       this.userDetails = response.User;
-
+      this.isDateLoaded = true
       this.stopwatchTime = this.convertTimeToSeconds(this.userDetails.total_hours) || 0;
 
       if (!this.userDetails.is_clocked_out) {
