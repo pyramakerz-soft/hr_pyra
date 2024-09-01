@@ -219,7 +219,7 @@ export class HrEmployeeAddEditDetailsComponent {
     for (const key in this.employee) {
       if (this.employee.hasOwnProperty(key)) {
         const field = key as keyof AddEmployee;
-        if (!this.employee[field] && field != "code") {
+        if (!this.employee[field] && field != "code" && field !='work_home') {
           if(this.EmployeeId !== 0){
             continue
           }
