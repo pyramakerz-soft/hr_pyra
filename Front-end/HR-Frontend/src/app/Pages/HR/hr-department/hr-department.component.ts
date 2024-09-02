@@ -22,7 +22,6 @@ export class HrDepartmentComponent {
  GetAll(){
   this.departmentServ.getall().subscribe(
     (d: any) => {
-      console.log(d.data.departments)
       this.departments=d.data.departments;
     },
     (error) => {

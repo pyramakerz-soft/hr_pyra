@@ -83,7 +83,6 @@ export class HrEmployeeAttendanceDetailsComponent {
         console.error('Error in route parameters:', err);
       }
     });
-    console.log(this.employee)
   }
 
   populateYears(): void {
@@ -215,7 +214,6 @@ export class HrEmployeeAttendanceDetailsComponent {
   EditUserClock(Clock:EmployeeDashboard) {
 
 
-    console.log(Clock)
     this.route.navigate(['HR/HREmployeeAttendanceEdit'], { state: { data: Clock ,UserId:this.UserID } }); 
   }
 
@@ -240,9 +238,9 @@ export class HrEmployeeAttendanceDetailsComponent {
   }
 
   ExportData(){
-    console.log(this.DateString)
     this.UserClocksService.ExportUserDataById(this.UserID, this.DateString).subscribe(
       (result: Blob) => {
+        console.log(result)
         const url = window.URL.createObjectURL(result);
         const a = document.createElement('a');
         a.href = url;

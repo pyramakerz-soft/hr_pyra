@@ -27,4 +27,10 @@ export class EmployeeDashService {
     return this.http.get<EmployeeDashboard[]>(`${this.baseUrl}/user_clocks?page=${pageNumber}`, { headers });
   }
   
+  SearchByDateInClockByToken( date: string) {
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<EmployeeDashboard[]>(`${this.baseUrl}/user_clocks?date=${date}`, { headers });
+
+  }
 }
