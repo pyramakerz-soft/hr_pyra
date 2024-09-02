@@ -97,7 +97,9 @@
               <button (click)="NavigateToEditEmployee(row.id)">
                 <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
               </button>
-              <i class="fa fa-trash text-[#CC161D] ml-2 w-3 md:w-4"></i>
+              <button (click)="DeleteEmp(row.id)">
+                <i class="fa fa-trash text-[#CC161D] ml-2 w-3 md:w-4"></i>
+              </button>
             </div>
           </td>
         </tr>

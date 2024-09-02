@@ -171,11 +171,133 @@ export class ClockInComponent {
       }
     });
 
-
-
-
-
   }
+
+
+  getLocation(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (typeof window !== 'undefined' && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position: GeolocationPosition) => {
+            this.lat = position.coords.latitude;
+            this.lng = position.coords.longitude;
+
+            resolve();
+          },
+          (error: GeolocationPositionError) => {
+            Swal.fire({
+              text: "Error retrieving location.",
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+
+            });
+            reject(error);
+          },
+          {
+            enableHighAccuracy: true,
+            maximumAge: 0, // Disable caching for the most up-to-date reading
+            timeout: 10000 // Allow up to 10 seconds to retrieve location
+          }
+        );
+      } else {
+        console.warn('Geolocation is not supported or not running in a browser.');
+        reject(new Error('Geolocation is not supported or not running in a browser.'));
+      }
+    });
+  }
+
+
+
+  convertTimeToSeconds(time: string): number | null {
+    if (!time) return null; // Return null if time is undefined or empty
+
+    const timeParts = time.split(':');
+    if (timeParts.length !== 3) return null; // Ensure there are exactly 3 parts (hh:mm:ss)
+
+    const [hours, minutes, seconds] = timeParts.map(Number);
+
+    if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) {
+      return null; // Return null if any part is not a number
+    }
+
+    return hours * 3600 + minutes * 60 + seconds;
+  }
+
+  startStopwatch(): void {
+    if (!this.isRunning) {
+      this.isRunning = true;
+      this.interval = setInterval(() => {
+        this.stopwatchTime++; // Increment as seconds
+      }, 1000);
+    }
+  }
+
+
+  stopStopwatch(): void {
+    if (this.isRunning) {
+      this.isRunning = false;
+      clearInterval(this.interval);
+    }
+  }
+
+
+  getFormattedTime(): string {
+    const hours = Math.floor(this.stopwatchTime / 3600);
+    const minutes = Math.floor((this.stopwatchTime % 3600) / 60);
+    const seconds = this.stopwatchTime % 60;
+    return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
+  }
+
+  pad(value: number): string {
+    return value < 10 ? `0${value}` : String(value);
+  }
+
+
+  getCurrentTimeInUTC(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const timestamp = Math.floor(Date.now() / 1000); 
+
+      this.TimeApi.getCurrentTimeGoogle(this.lat, this.lng).subscribe((response) => {
+        if (response ) {
+          const dstOffset = response.dstOffset;
+          const rawOffset = response.rawOffset;
+
+          const totalOffsetInSeconds = dstOffset + rawOffset;
+          
+          const localTimestamp = timestamp + totalOffsetInSeconds;
+          
+          const utcTimestamp = localTimestamp - totalOffsetInSeconds;
+
+          const utcDate = new Date(utcTimestamp * 1000);
+
+          const year = utcDate.getUTCFullYear();
+          const month = ('0' + (utcDate.getUTCMonth() + 1)).slice(-2); 
+          const day = ('0' + utcDate.getUTCDate()).slice(-2);
+          const hours = ('0' + utcDate.getUTCHours()).slice(-2);
+          const minutes = ('0' + utcDate.getUTCMinutes()).slice(-2);
+          const seconds = ('0' + utcDate.getUTCSeconds()).slice(-2);
+
+          const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+          resolve(formattedDateTime); // Resolve the promise with formatted UTC time
+        } else {
+          console.error('Error fetching time zone data:');
+          reject('Error fetching time zone data');
+        }
+      }, (error) => {
+        console.error('Subscription error:', error);
+        reject('Subscription error');
+      });
+    });
+  }
+
+  
+
+}
+
+
+
+
+
 
   // getCurrentTimeInUTC(): string {
   //   const currentDate = new Date();
@@ -195,122 +317,18 @@ export class ClockInComponent {
   // }
 
 
-  getLocation(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (typeof window !== 'undefined' && navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position: GeolocationPosition) => {
-            this.lat = position.coords.latitude;
-            this.lng = position.coords.longitude;
-            resolve();
-          },
-          (error: GeolocationPositionError) => {
-            Swal.fire({
-              text: "Error retrieving location.",
-              confirmButtonText: "OK",
-              confirmButtonColor: "#FF7519",
+    // resetStopwatch(): void {
+  //   this.stopwatchTime = 0;
+  // }
 
-            });
-            reject(error);
-          }
-        );
-      } else {
-        console.warn('Geolocation is not supported or not running in a browser.');
-        reject(new Error('Geolocation is not supported or not running in a browser.'));
-      }
-    });
-  }
+    // getCurrentTimeInSeconds(): number {
+  //   const now = new Date();
+  //   return now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  // }
 
-
+  
   // initializeStopwatchTime(): void {
   //   const clockInSeconds = this.convertTimeToSeconds(this.clockInTime);
   //   const currentSeconds = this.getCurrentTimeInSeconds();
   //   this.stopwatchTime = currentSeconds - clockInSeconds;
   // }
-
-
-  convertTimeToSeconds(time: string): number | null {
-    if (!time) return null; // Return null if time is undefined or empty
-
-    const timeParts = time.split(':');
-    if (timeParts.length !== 3) return null; // Ensure there are exactly 3 parts (hh:mm:ss)
-
-    const [hours, minutes, seconds] = timeParts.map(Number);
-
-    if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) {
-      return null; // Return null if any part is not a number
-    }
-
-    return hours * 3600 + minutes * 60 + seconds;
-  }
-
-  // getCurrentTimeInSeconds(): number {
-  //   const now = new Date();
-  //   return now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-  // }
-
-  startStopwatch(): void {
-    if (!this.isRunning) {
-      this.isRunning = true;
-      this.interval = setInterval(() => {
-        this.stopwatchTime++; // Increment as seconds
-      }, 1000);
-    }
-  }
-
-
-  stopStopwatch(): void {
-    if (this.isRunning) {
-      this.isRunning = false;
-      clearInterval(this.interval);
-    }
-  }
-
-  // resetStopwatch(): void {
-  //   this.stopwatchTime = 0;
-  // }
-
-  getFormattedTime(): string {
-    const hours = Math.floor(this.stopwatchTime / 3600);
-    const minutes = Math.floor((this.stopwatchTime % 3600) / 60);
-    const seconds = this.stopwatchTime % 60;
-    return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
-  }
-
-  pad(value: number): string {
-    return value < 10 ? `0${value}` : String(value);
-  }
-
-
-  getCurrentTimeInUTC(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      this.TimeApi.getCurrentTime().subscribe(
-        (response) => {
-          const currentDate = new Date(response.datetime);
-  
-          // Extract the individual date and time components
-          const year = currentDate.getUTCFullYear();
-          const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
-          const day = String(currentDate.getUTCDate()).padStart(2, '0');
-          const hours = String(currentDate.getUTCHours()).padStart(2, '0');
-          const minutes = String(currentDate.getUTCMinutes()).padStart(2, '0');
-          const seconds = String(currentDate.getUTCSeconds()).padStart(2, '0');
-  
-          // Combine components into the desired format 'YYYY-MM-DD HH:mm:ss'
-          const currentUTCDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  
-          console.log(currentUTCDateTime); // For debugging purposes
-          resolve(currentUTCDateTime); // Resolve the promise with formatted time
-        },
-        (error) => {
-          console.error('Error fetching time from API:', error);
-          reject('Error fetching time'); // Reject the promise in case of an error
-        }
-      );
-    });
-  }
-
-
-}
-
-

@@ -1,9 +1,14 @@
 <div>
-    <div
-        class="h-[44px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] flex items-center">
-        <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]"></i>
-        <input type="text" placeholder="Enter Keyword..."
-            class="flex-1 outline-none border-none placeholder-[#667085] bg-transparent" />
+    <div class="flex items-center space-x-4">
+        <div
+            class="w-full my-5 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 space-x-2 flex items-center">
+            <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]" (click)="searchByDate()"></i>
+            <input type="date" placeholder="Enter Date..." (change)="searchByDate()"
+                class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full"
+                [(ngModel)]="SelectedDate" />
+        </div>
+        <button class="w-8 md:w-9 h-7 md:h-9 bg-[#FF7519] rounded-full p-1 md:p-2" *ngIf="isDateSelected"><i
+                class="fi fi-bs-undo text-white test-xs md:text-base" (click)="ClearSearch()"></i></button>
     </div>
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">
         <table class="overflow-auto bg-[#FFFFFF] text-center text-[#475467] w-full">

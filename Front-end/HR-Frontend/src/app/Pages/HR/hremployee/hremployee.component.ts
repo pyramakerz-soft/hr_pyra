@@ -168,6 +168,18 @@ export class HREmployeeComponent {
   }
 
 
+  DeleteEmp(id:number){
+
+    this.userServ.DeleteById(id).subscribe(
+      (d: any) => {
+        this.getAllEmployees(1);
+        this.getUsersName()
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+  }
 
 
 

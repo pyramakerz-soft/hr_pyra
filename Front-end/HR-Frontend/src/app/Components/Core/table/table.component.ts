@@ -20,6 +20,8 @@ export class TableComponent {
   PagesNumber: number = 1;
   CurrentPageNumber: number = 1;
   pages: number[] = [];
+  SelectedDate: string = ""
+  isDateSelected = false
 
   rowNumber:number=1;
 
@@ -44,8 +46,6 @@ export class TableComponent {
     this.empDashserv.GetClocks(this.token,pgNumb).subscribe(
      (d: any) => {
        this.Userclocks = d.data.clocks; 
-       console.log(d.data.clocks)
-      //  console.log(this.Userclocks[0].otherClocks)
      },
      (error) => {
        console.error('Error retrieving user clocks:', error);
@@ -98,4 +98,34 @@ export class TableComponent {
     return `${formattedHours}:${formattedMinutes} ${localPeriod}`;
   }
 
+  searchByDate() {
+    if (this.SelectedDate) {
+      this.empDashserv.SearchByDateInClockByToken( this.SelectedDate).subscribe(
+        (d: any) => {
+          this.Userclocks=[]
+          this.Userclocks = d.data.clocks;
+          this.PagesNumber = 1;
+          console.log(this.Userclocks)
+        },
+        (error) => {
+          if(error.status == 404){
+            this.Userclocks=[]
+          }
+          this.PagesNumber = 1;
+        }
+      );
+      this.isDateSelected = true
+    } else {
+    }
+  }
+
+  ClearSearch(){
+    this.isDateSelected = false
+    this.SelectedDate = ''
+    this.GetClockss(1);
+    this.clockEventService.clockedIn$.subscribe(() => {
+      this.GetClockss(this.pageNumber);
+    });
+  
+  }
 }
