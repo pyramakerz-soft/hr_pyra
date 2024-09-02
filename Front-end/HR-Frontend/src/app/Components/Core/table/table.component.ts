@@ -44,8 +44,6 @@ export class TableComponent {
     this.empDashserv.GetClocks(this.token,pgNumb).subscribe(
      (d: any) => {
        this.Userclocks = d.data.clocks; 
-       console.log(d.data.clocks)
-      //  console.log(this.Userclocks[0].otherClocks)
      },
      (error) => {
        console.error('Error retrieving user clocks:', error);
