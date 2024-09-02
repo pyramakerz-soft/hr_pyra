@@ -13,6 +13,77 @@ use Illuminate\Support\Facades\Auth;
 class HrController extends Controller
 {
     use ResponseTrait;
+    // public function employeesPerMonth()
+    // {
+    //     $earliestUser = User::orderBy('created_at', 'asc')->first();
+    //     dd($earliestUser);
+    // }
+    //@TODO: Month must be sorted from asc
+    public function employeesPerMonth(Request $request)
+    {
+        // Validate the year parameter
+        $year = $request->input('year');
+        if (!$year || !preg_match('/^\d{4}$/', $year)) {
+            return response()->json([
+                'result' => 'false',
+                'message' => 'Invalid year parameter',
+            ], 400);
+        }
+
+        // Define the start and end of the year
+        $startOfYear = Carbon::create($year, 1, 1);
+        $endOfYear = Carbon::create($year, 12, 31);
+
+        // Get the current date
+        $currentDate = Carbon::now();
+
+        // Initialize an array to store counts by month
+        $employeeCounts = collect();
+        $cumulativeCount = 0;
+
+        // Iterate through each month of the specified year
+        for ($month = 1; $month <= 12; $month++) {
+            // Calculate the start and end dates of the current month
+            $startOfMonth = $startOfYear->copy()->month($month)->startOfMonth();
+            $endOfMonth = $startOfYear->copy()->month($month)->endOfMonth();
+
+            // Check if the month is after the current month
+            if ($startOfMonth->isAfter($currentDate)) {
+                $employeeCounts[$startOfMonth->format('Y-M')] = [
+                    'employee_count' => 0,
+                    'custom_month' => $startOfMonth->format('Y-M'),
+                ];
+                continue;
+            }
+
+            // Calculate the month label for the response
+            $customMonth = $startOfMonth->format('Y-M');
+
+            // Count employees hired within the month
+            $employeeCount = User::whereHas('user_detail', function ($query) use ($startOfMonth, $endOfMonth) {
+                $query->whereBetween('hiring_date', [$startOfMonth, $endOfMonth]);
+            })->count();
+
+            // Update the cumulative count
+            $cumulativeCount += $employeeCount;
+
+            // Store the cumulative count in the collection
+            $employeeCounts[$customMonth] = [
+                'employee_count' => $cumulativeCount,
+                'custom_month' => $customMonth,
+            ];
+        }
+
+        // Sort the months from January to December
+        $formattedCounts = $employeeCounts->sortKeys();
+
+        return response()->json([
+            'result' => 'true',
+            'message' => 'Employee count per month',
+            'employeeCount' => $formattedCounts,
+        ]);
+    }
+
     public function getEmployeesWorkTypesprecentage()
     {
         $data = [
@@ -184,35 +255,4 @@ class HrController extends Controller
         return $this->returnError('Invalid location type provided.');
     }
 
-    // public function assignLocationToUser(Request $request, User $user)
-    // {
-    //     // $auth = Auth::user();
-    //     // if (!$auth->hasRole('Hr')) {
-    //     //     return $this->returnError('User is unauthorized to assign location', 403);
-    //     // }
-    //     // $this->validate($request, [
-    //     //     'location_id' => 'required|exists:locations,id',
-
-    //     // ]);
-
-    //     // $LocationAssignedToUser = $user->user_locations()->wherePivot('location_id', $request->location_id)->first();
-    //     // if ($LocationAssignedToUser) {
-    //     //     return $this->returnError('User has already been assigned to this location');
-    //     // }
-    //     // $user->user_locations()->attach($request->location_id);
-    //     // return $this->returnSuccessMessage('Location Assigned Successfully To User');
-
-    // }
-    // public function assignWorkTypeToUser(Request $request, User $user)
-    // {
-    //     // $this->validate($request, [
-    //     //     'work_type_id' => 'required|exists:work_types,id',
-    //     // ]);
-    //     // $workTypeAssignedToUser = $user->work_types()->where('work_type_id', $request->work_type_id)->exists();
-    //     // if ($workTypeAssignedToUser) {
-    //     //     return $this->returnError('User has already been assigned to this workType');
-    //     // }
-    //     // $user->work_types()->attach($request->work_type_id);
-    //     // return $this->returnSuccessMessage('WorkType Assigned Successfully to User');
-    // }
 }
