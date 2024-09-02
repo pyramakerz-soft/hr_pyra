@@ -29,7 +29,6 @@ export class HrDepartmentAddComponent {
 
     this.route.params.subscribe(params => {
       if (params['id']) {
-        console.log(params['id'])
         this.GetByID(params['id']);
         this.mode = "Edit"
       }
@@ -45,7 +44,6 @@ export class HrDepartmentAddComponent {
   getMnagerNames() {
     this.managerServ.getall().subscribe(
       (d: any) => {
-        console.log(d.managerNames)
         this.ManagerNames = d.managerNames;
       },
       (error) => {
@@ -92,7 +90,6 @@ export class HrDepartmentAddComponent {
       const ManagerId = manager.manager_id;
       this.departmentServ.createDepartment(this.DeptName, ManagerId).subscribe(
         (response: any) => {
-          console.log('Department created successfully:', response);
           this.router.navigateByUrl("/HR/HRDepartment");
 
         },
@@ -119,7 +116,6 @@ export class HrDepartmentAddComponent {
 GetByID(id: number){
   this.departmentServ.GetByID(id).subscribe(
     (d: any) => {
-      console.log(d.department)
       this.DeptName = d.department.name;
       this.nameSelected = d.department.manager_name
     },
@@ -135,7 +131,6 @@ UpdateDepartment(){
     const ManagerId = manager.manager_id;
     this.departmentServ.UpdateDept(this.DeptId, this.DeptName, ManagerId).subscribe(
       (response: any) => {
-        console.log('Department Updated successfully:', response);
         this.router.navigateByUrl("/HR/HRDepartment");
 
       },

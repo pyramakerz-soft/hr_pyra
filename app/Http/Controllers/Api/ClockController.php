@@ -117,51 +117,54 @@ class ClockController extends Controller
             return $this->returnError('You are not authorized to view user clocks', 403);
         }
 
-        // $query = ClockInOut::get();
+        $query = ClockInOut::query();
 
-        // if ($request->has('date')) {
-        //     $date = Carbon::parse($request->get('date'))->toDateString();
-        //     $query->whereDate('clock_in', $date);
-        //     $clocks = $query->orderBy('clock_in', 'desc')->get();
+        if ($request->has('date')) {
+            $date = Carbon::parse($request->get('date'))->toDateString();
+            $query->whereDate('clock_in', $date);
+            $clocks = $query->orderBy('clock_in', 'desc')->get();
+        } else if ($request->has('month')) {
 
-        // } else if ($request->has('month')) {
-        //     $month = Carbon::parse($request->get('month'));
+            $month = Carbon::parse($request->get('month'));
 
-        //     $startOfMonth = $month->copy()->subMonth()->startOfMonth()->addDays(25);
+            $startOfMonth = $month->copy()->subMonth()->startOfMonth()->addDays(25);
+            $endOfMonth = $month->copy()->startOfMonth()->addDays(25);
 
-        //     $endOfMonth = $month->copy()->startOfMonth()->addDays(25);
+            $query->whereBetween('clock_in', [$startOfMonth, $endOfMonth]);
+            $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+        } else {
+            $now = Carbon::now();
 
-        //     $query->whereBetween('clock_in', [$startOfMonth, $endOfMonth]);
+            $currentStart = $now->copy()->subMonth()->startOfMonth()->addDays(25);
+            $currentEnd = $now->copy()->startOfMonth()->addDays(25);
 
-        //     $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
-        // } else {
+            // Filter based on the current custom month range
+            $query->whereBetween('clock_in', [$currentStart, $currentEnd]);
 
-        //     $now = Carbon::now();
+            // Paginate and sort by clock_in in descending order
+            $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+        }
 
-        //     $currentStart = $now->copy()->subMonth()->startOfMonth()->addDays(25);
-        //     $currentEnd = $now->copy()->startOfMonth()->addDays(25);
+        if ($clocks->isEmpty()) {
+            return $this->returnError('No Clocks Found');
+        }
 
-        //     // Filter based on the current custom month range
-        //     $query->whereBetween('clock_in', [$currentStart, $currentEnd]);
+        if ($request->has('export')) {
 
-        //     // Paginate and sort by clock_in in descending order
-        //     $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
-        // }
+            $clocksCollection = $clocks instanceof \Illuminate\Pagination\LengthAwarePaginator
+            ? $clocks->getCollection()
+            : $clocks;
 
-        // if ($clocks->isEmpty()) {
-        //     return $this->returnError('No Clocks Found For This User');
-        // }
+            return Excel::download(new UserClocksExportById($clocksCollection), 'all_user_clocks.xlsx');
+        }
 
-        // if ($request->has('export')) {
-        //     $clocksCollection = ($clocks->getCollection());
-        //     return Excel::download(new UserClocksExport($clocksCollection), 'user_clocks.xlsx');
-        // }
-        // $data = $this->prepareClockData($clocks);
+        $data = $this->prepareClockData($clocks);
 
-        // if (!isset($data['clocks'])) {
-        //     return $this->returnError('No Clocks Found For This User');
-        // }
-        // return $this->returnData("data", $data, "Clocks Data for {$user->name}");
+        if (!isset($data['clocks'])) {
+            return $this->returnError('No Clocks Found');
+        }
+
+        return $this->returnData("data", $data, "All Clocks Data");
     }
     public function getUserClocksById(Request $request, User $user)
     {

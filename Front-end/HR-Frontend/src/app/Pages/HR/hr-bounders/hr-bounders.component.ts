@@ -54,7 +54,7 @@ export class HrBoundersComponent {
     }
   }
 
-  openDialog(EditedLocationName?: string, id?: number, EditedLocationAddress?: string): void {
+  openDialog(lat?:string , long?:string ,EditedLocationName?: string, id?: number, EditedLocationAddress?: string ): void {
     const dialogRef = this.dialog.open(BoundersPopUpComponent, {
       data: EditedLocationName
         ? {
@@ -62,6 +62,8 @@ export class HrBoundersComponent {
             locationName: EditedLocationName,
             id: id,
             LocationAddress: EditedLocationAddress,
+            Lat:lat,
+            Long:long
           }
         : {
             mode: 'add',
@@ -121,7 +123,6 @@ export class HrBoundersComponent {
     this.selectedName = location;
     this.locationServ.SearchByNames(this.selectedName).subscribe(
       (d: any) => {
-        console.log(d)
         this.tableData = d.locations;
         this.DisplayPagginationOrNot=false;
       },

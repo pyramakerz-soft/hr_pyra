@@ -37,6 +37,9 @@ export class BoundersPopUpComponent implements AfterViewInit {
       this.Boundname = data.locationName;
       this.id = data.id;
       this.address = data.LocationAddress;
+      this.lat=data.Lat,
+      this.long=data.Long
+
     }
   }
 
