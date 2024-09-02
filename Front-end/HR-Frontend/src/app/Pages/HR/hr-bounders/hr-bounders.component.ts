@@ -38,7 +38,6 @@ export class HrBoundersComponent {
     this.locationServ.getall(page).subscribe(
       (d: any) => {
         this.tableData = d.locations.data;
-        console.log(this.tableData)
         this.PagesNumber = d.locations.last_page;
         this.generatePages();
       },
@@ -124,7 +123,6 @@ export class HrBoundersComponent {
     this.selectedName = location;
     this.locationServ.SearchByNames(this.selectedName).subscribe(
       (d: any) => {
-        console.log(d)
         this.tableData = d.locations;
         this.DisplayPagginationOrNot=false;
       },

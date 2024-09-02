@@ -172,7 +172,6 @@ export class HREmployeeComponent {
 
     this.userServ.DeleteById(id).subscribe(
       (d: any) => {
-        console.log(d)
         this.getAllEmployees(1);
         this.getUsersName()
       },

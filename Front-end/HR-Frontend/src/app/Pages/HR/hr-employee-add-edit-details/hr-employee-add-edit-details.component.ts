@@ -346,9 +346,6 @@ export class HrEmployeeAddEditDetailsComponent {
   
   SaveEmployee() {
 
-    console.log(this.employee)
-    console.log(this.isFormValid())
-    console.log(this.validationErrors)
     if (this.isFormValid()) {
       this.employee.department_id = Number(this.employee.department_id);
 
