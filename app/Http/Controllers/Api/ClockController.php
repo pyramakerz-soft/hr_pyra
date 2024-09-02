@@ -124,6 +124,7 @@ class ClockController extends Controller
             $query->whereDate('clock_in', $date);
             $clocks = $query->orderBy('clock_in', 'desc')->get();
         } else if ($request->has('month')) {
+
             $month = Carbon::parse($request->get('month'));
 
             $startOfMonth = $month->copy()->subMonth()->startOfMonth()->addDays(25);
