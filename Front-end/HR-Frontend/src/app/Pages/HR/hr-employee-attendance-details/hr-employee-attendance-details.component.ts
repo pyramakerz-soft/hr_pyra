@@ -240,9 +240,9 @@ export class HrEmployeeAttendanceDetailsComponent {
   }
 
   ExportData(){
-    console.log(this.DateString)
     this.UserClocksService.ExportUserDataById(this.UserID, this.DateString).subscribe(
       (result: Blob) => {
+        console.log(result)
         const url = window.URL.createObjectURL(result);
         const a = document.createElement('a');
         a.href = url;
