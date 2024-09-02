@@ -38,6 +38,7 @@ export class HrBoundersComponent {
     this.locationServ.getall(page).subscribe(
       (d: any) => {
         this.tableData = d.locations.data;
+        console.log(this.tableData)
         this.PagesNumber = d.locations.last_page;
         this.generatePages();
       },
@@ -54,7 +55,7 @@ export class HrBoundersComponent {
     }
   }
 
-  openDialog(EditedLocationName?: string, id?: number, EditedLocationAddress?: string): void {
+  openDialog(lat?:string , long?:string ,EditedLocationName?: string, id?: number, EditedLocationAddress?: string ): void {
     const dialogRef = this.dialog.open(BoundersPopUpComponent, {
       data: EditedLocationName
         ? {
@@ -62,6 +63,8 @@ export class HrBoundersComponent {
             locationName: EditedLocationName,
             id: id,
             LocationAddress: EditedLocationAddress,
+            Lat:lat,
+            Long:long
           }
         : {
             mode: 'add',
