@@ -82,5 +82,6 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::get('employees_workTypes_precentage', [HrController::class, 'getEmployeesWorkTypesprecentage']);
     Route::get('department_employees', [HrController::class, 'getDepartmentEmployees']);
+    Route::get('employees_per_month', [HrController::class, 'employeesPerMonth']);
 
 });

@@ -101,15 +101,7 @@ class ClockController extends Controller
             ] : null,
         ];
     }
-    // public function allClocks()
-    // {
-    //     $authUser = Auth::user();
-    //     if (!$authUser->hasRole('Hr')) {
-    //         return $this->returnError('You are not authorized to view user clocks', 403);
-    //     }
-    //     $query = ClockInOut::get();
-    //     dd($query->toArray());
-    // }
+
     public function allClocks(Request $request)
     {
         $authUser = Auth::user();
