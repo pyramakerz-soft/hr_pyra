@@ -13,6 +13,56 @@ use Illuminate\Support\Facades\Auth;
 class HrController extends Controller
 {
     use ResponseTrait;
+    public function getEmployeesWorkTypesprecentage()
+    {
+        $data = [
+            'site' => 0,
+            'home' => 0,
+        ];
+
+        $employees = User::with('work_types')->get();
+        if ($employees->isEmpty()) {
+            return $this->returnError("There is no employees found");
+        }
+        foreach ($employees as $employee) {
+            foreach ($employee->work_types as $work_type) {
+                if ($work_type->pivot->work_type_id == 1) {
+                    $data['site']++;
+                } elseif ($work_type->pivot->work_type_id == 2) {
+                    $data['home']++;
+                }
+                // $data[] = $work_type->pivot;
+            }
+        }
+        $totalWorkTypes = $data['site'] + $data['home'];
+
+        $percentages = [
+            'site' => $totalWorkTypes > 0 ? ($data['site'] / $totalWorkTypes) * 100 : 0,
+            'home' => $totalWorkTypes > 0 ? ($data['home'] / $totalWorkTypes) * 100 : 0,
+        ];
+        return $this->returnData('userWorkTypes', $percentages, 'precentage of employee work types');
+    }
+    public function getDepartmentEmployees()
+    {
+        $departments = [
+            'software' => 0,
+            'academic' => 0,
+            'graphic' => 0,
+
+        ];
+        $users = User::get()->toArray();
+        foreach ($users as $user) {
+            if ($user['department_id'] == 1) {
+                $departments['software']++;
+            } else if ($user['department_id'] == 2) {
+                $departments['academic']++;
+            } else if ($user['department_id'] == 3) {
+                $departments['graphic']++;
+            }
+
+        }
+        return $this->returnData('departmentEmployeesCounts', $departments, 'Count of Employee Departments');
+    }
     public function getLocationAssignedToUser(User $user)
     {
 

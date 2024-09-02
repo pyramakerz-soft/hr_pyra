@@ -19,34 +19,35 @@ class UserClocksExportById implements FromCollection, WithHeadings
     /**
      * @return \Illuminate\Support\Collection
      */
+
     public function collection()
     {
+
         return $this->clocks->map(function ($clock) {
             $clockIn = Carbon::parse($clock->clock_in)->addHours(3);
             $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out)->addHours(3) : null;
             $now = Carbon::now()->addHours(3);
 
             if ($clockOut) {
-                $realHours = $clockIn->diffInHours($clockOut);
+                $totalHours = $clockIn->diffInHours($clockOut);
             } else {
-                $realHours = $clockIn->diffInHours($now);
+                $totalHours = $clockIn->diffInHours($now);
             }
 
-            return [
+            return collect([
                 'ID' => $clock->id,
                 'Day' => $clockIn->format('l'),
                 'Date' => $clockIn->format('Y-m-d'),
                 'Clock_In' => $clockIn->format('h:iA'),
                 'Clock_Out' => $clockOut ? $clockOut->format('h:iA') : null,
-                'Total_Hours' => $clock->duration ? Carbon::parse($clock->duration)->format('H:i') : null,
+                'Total_Hours' => $totalHours,
                 'Location_In' => $clock->location_type == "site" && $clock->clock_in ? $clock->location->address : null,
                 'Location_Out' => $clock->location_type == "site" && $clock->clock_out ? $clock->location->address : null,
-                'User_ID' => $clock->user_id,
+                'User_Name' => $clock->user->name,
                 'Site' => $clock->location_type,
                 'Formatted_Clock_In' => $clockIn->format('Y-m-d H:i'),
                 'Formatted_Clock_Out' => $clockOut ? $clockOut->format('Y-m-d H:i') : null,
-                'Real_Hours' => $realHours + 3, // Add 3 hours to Real Hours
-            ];
+            ]);
         });
     }
 
@@ -66,11 +67,10 @@ class UserClocksExportById implements FromCollection, WithHeadings
             'Total_Hours',
             'Location_In',
             'Location_Out',
-            'User_ID',
+            'User_Name',
             'Site',
             'Formatted_Clock_In',
             'Formatted_Clock_Out',
-            'Real_Hours', // Add Real Hours heading
         ];
     }
 }
