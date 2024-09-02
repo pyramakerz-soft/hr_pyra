@@ -1,4 +1,7 @@
 <div class="bg-[#dddddd5e] w-full fixed inset-0 ">
+    <div *ngIf="isLoading" class="spinner-overlay">
+        <div class="spinner"></div>
+    </div>
     <div
         class="relative max-h-[91vh] overflow-auto p-6 md:p-12 m-auto w-[85%] md:w-2/3 lg:w-1/2 top-10 rounded-2xl shadow-2xl text-[#111827] bg-white">
         <img class="absolute right-0 top-0 w-[30%]" src="../../../assets/images/logo-orange 1.png">
@@ -21,13 +24,13 @@
                 <option *ngFor="let site of sites" [value]="site.value">{{ site.label }}</option>
             </select> -->
             @if(sites.length !==0 ) {
-                <select [(ngModel)]="selectedSite" class="rounded-md p-2 w-full flex items-center mb-8 md:mb-12 capitalize"
-                    style="border: 1px solid #E5E5EA;">
-                    <option value="" disabled selected hidden>Choose</option>
-                    <option *ngFor="let site of sites" [value]="site.name">{{ site.name }}</option>
-                </select>
+            <select [(ngModel)]="selectedSite" class="rounded-md p-2 w-full flex items-center mb-8 md:mb-12 capitalize"
+                style="border: 1px solid #E5E5EA;">
+                <option value="" disabled selected hidden>Choose</option>
+                <option *ngFor="let site of sites" [value]="site.name">{{ site.name }}</option>
+            </select>
             }@else {
-                <div class="p-2">No Data Found</div>
+            <div class="p-2">No Data Found</div>
             }
         </div>
 
@@ -35,14 +38,18 @@
             <div>
                 <p class="font-medium text-sm md:text-lg text-[#6B7280] border-t-[3px] py-2 border-[#FF7519] inline">
                     Date</p>
-                <p *ngIf="!isClockInFromHrToOtherUser" class="font-semibold text-base md:text-2xl py-2">{{formattedDate}}</p>
-                <input [(ngModel)]="DateClockInFromHrForOthers" type="date" *ngIf="isClockInFromHrToOtherUser" class="w-full text-base p-2 block border rounded-md focus:outline-none focus:border-[#c8c8c8]">
+                <p *ngIf="!isClockInFromHrToOtherUser" class="font-semibold text-base md:text-2xl py-2">
+                    {{formattedDate}}</p>
+                <input [(ngModel)]="DateClockInFromHrForOthers" type="date" *ngIf="isClockInFromHrToOtherUser"
+                    class="w-full text-base p-2 block border rounded-md focus:outline-none focus:border-[#c8c8c8]">
             </div>
             <div>
                 <p class="font-medium text-sm md:text-lg text-[#6B7280] border-t-[3px] py-2 border-[#FF7519] inline">
                     Time</p>
-                <p *ngIf="!isClockInFromHrToOtherUser" class="font-semibold text-base md:text-2xl py-2">{{formattedTime}}</p>
-                <input [(ngModel)]="TimeClockInFromHrForOthers" type="time" *ngIf="isClockInFromHrToOtherUser" class="w-full text-base p-2 block border rounded-md focus:outline-none focus:border-[#c8c8c8]">
+                <p *ngIf="!isClockInFromHrToOtherUser" class="font-semibold text-base md:text-2xl py-2">
+                    {{formattedTime}}</p>
+                <input [(ngModel)]="TimeClockInFromHrForOthers" type="time" *ngIf="isClockInFromHrToOtherUser"
+                    class="w-full text-base p-2 block border rounded-md focus:outline-none focus:border-[#c8c8c8]">
             </div>
         </div>
         <p class="font-medium text-sm md:text-lg text-[#6B7280] border-t-[3px] py-2 border-[#FF7519] inline">Location
@@ -50,13 +57,14 @@
         <p *ngIf="!isClockInFromHrToOtherUser" class="font-semibold text-base md:text-2xl py-2">{{locationName}}</p>
         <div *ngIf="isClockInFromHrToOtherUser">
             @if(Locations.length !==0 ) {
-                <select [(ngModel)]="LocationClockInFromHrForOthers" class="rounded-md p-2 w-full flex items-center mb-8 md:mb-12 capitalize"
-                    style="border: 1px solid #E5E5EA;">
-                    <option value="" disabled selected hidden>Choose</option>
-                    <option *ngFor="let location of Locations" [value]="location.id">{{ location.name }}</option>
-                </select>
+            <select [(ngModel)]="LocationClockInFromHrForOthers"
+                class="rounded-md p-2 w-full flex items-center mb-8 md:mb-12 capitalize"
+                style="border: 1px solid #E5E5EA;">
+                <option value="" disabled selected hidden>Choose</option>
+                <option *ngFor="let location of Locations" [value]="location.id">{{ location.name }}</option>
+            </select>
             }@else {
-                <div class="p-2">No Data Found</div>
+            <div class="p-2">No Data Found</div>
             }
         </div>
 

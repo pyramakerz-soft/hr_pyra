@@ -40,7 +40,6 @@ export class BoundersPopUpComponent implements AfterViewInit {
       this.lat=data.Lat,
       this.long=data.Long
 
-      console.log(data)
     }
   }
 
