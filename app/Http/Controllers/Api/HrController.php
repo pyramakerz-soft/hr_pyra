@@ -17,23 +17,41 @@ class HrController extends Controller
 
     public function employeesPerMonth(Request $request)
     {
+        // Check if 'year' is provided in the request, otherwise default to current year
         $year = $request->has('year') ? $request->input('year') : date('Y');
 
+        // Validate the year input if provided in the request
         if (!preg_match('/^\d{4}$/', $year)) {
             return $this->returnError("Invalid year parameter");
         }
 
-        $startOfYear = Carbon::create($year, 1, 1);
-
+        // Get the current year and date
+        $currentYear = date('Y');
         $currentDate = Carbon::now();
 
+        // Initialize the employee counts
         $employeeCounts = collect();
         $cumulativeCount = 0;
 
-        for ($month = 1; $month <= 12; $month++) {
-            $startOfMonth = $startOfYear->copy()->month($month)->startOfMonth();
-            $endOfMonth = $startOfYear->copy()->month($month)->endOfMonth();
+        // Handle future years by returning 0 for all months
+        if ($year > $currentYear) {
+            for ($month = 1; $month <= 12; $month++) {
+                $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
+                $employeeCounts[$startOfMonth->format('Y-M')] = [
+                    'employee_count' => 0,
+                    'custom_month' => $startOfMonth->format('Y-M'),
+                ];
+            }
+            return $this->returnData('employeeCount', $employeeCounts->values()->all(), 'Employees count for future year ' . $year);
+        }
 
+        // Loop through each month of the year
+        for ($month = 1; $month <= 12; $month++) {
+            // Set the start and end of the month
+            $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
+            $endOfMonth = $startOfMonth->copy()->endOfMonth();
+
+            // If the month is after the current date, set the count to 0 and continue
             if ($startOfMonth->isAfter($currentDate)) {
                 $employeeCounts[$startOfMonth->format('Y-M')] = [
                     'employee_count' => 0,
@@ -44,11 +62,12 @@ class HrController extends Controller
 
             $customMonth = $startOfMonth->format('Y-M');
 
-            $employeeCount = User::whereHas('user_detail', function ($query) use ($startOfMonth, $endOfMonth) {
-                $query->whereBetween('hiring_date', [$startOfMonth, $endOfMonth]);
+            // Count employees hired up to and including the end of the current month
+            $employeeCount = User::whereHas('user_detail', function ($query) use ($endOfMonth) {
+                $query->where('hiring_date', '<=', $endOfMonth);
             })->count();
 
-            $cumulativeCount += $employeeCount;
+            $cumulativeCount = $employeeCount;
 
             $employeeCounts[$customMonth] = [
                 'employee_count' => $cumulativeCount,
@@ -56,11 +75,23 @@ class HrController extends Controller
             ];
         }
 
+        // Reset count for future months within the current year
+        if ($year == $currentYear) {
+            for ($month = $currentDate->month + 1; $month <= 12; $month++) {
+                $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
+                $employeeCounts[$startOfMonth->format('Y-M')] = [
+                    'employee_count' => 0,
+                    'custom_month' => $startOfMonth->format('Y-M'),
+                ];
+            }
+        }
+
+        // Sort the employee counts by month
         $formattedCounts = $employeeCounts->sortBy(function ($value, $key) {
             return Carbon::parse($key)->month;
         });
 
-        return $this->returnData('employeeCount', $formattedCounts->values()->all(), 'Employees count');
+        return $this->returnData('employeeCount', $formattedCounts->values()->all(), 'Employees count up to the year ' . $year);
     }
 
     public function getEmployeesWorkTypesPercentage(Request $request)
@@ -78,17 +109,17 @@ class HrController extends Controller
             return $this->returnError("Invalid year provided");
         }
 
-        $startOfYear = Carbon::create($year, 1, 1)->startOfDay();
+        // Define the end of the specified year
         $endOfYear = Carbon::create($year, 12, 31)->endOfDay();
 
-        // Filter employees based on hiring_date
+        // Filter employees based on hiring_date up to the end of the specified year
         $employees = User::join('user_details', 'users.id', '=', 'user_details.user_id')
-            ->whereBetween('user_details.hiring_date', [$startOfYear, $endOfYear])
+            ->where('user_details.hiring_date', '<=', $endOfYear)
             ->with('work_types')
             ->get();
 
         if ($employees->isEmpty()) {
-            return $this->returnError("There are no employees found for the year {$year}");
+            return $this->returnError("There are no employees found up to the year {$year}");
         }
 
         foreach ($employees as $employee) {
@@ -108,36 +139,59 @@ class HrController extends Controller
             'home' => $totalWorkTypes > 0 ? ($data['home'] / $totalWorkTypes) * 100 : 0,
         ];
 
-        return $this->returnData('userWorkTypes', $percentages, 'percentage of employee work types');
+        return $this->returnData('userWorkTypes', $percentages, 'Percentage of employee work types up to the year ' . $year);
     }
 
     public function getDepartmentEmployees(Request $request)
     {
-        $departments = Department::get()->mapWithKeys(function ($department) {
-            return [$department->name => 0];
-        })->toArray();
+        $data = [];
 
-        // dd($departments);
+        // Get all department names and initialize their employee count to 0
+        $departments = Department::pluck('name')->toArray();
+        foreach ($departments as $department) {
+            $data[$department] = 0;
+        }
 
+        // Initialize the count for users with no department
+        $data['No Department'] = 0;
+
+        // Check if 'year' is provided in the request, otherwise default to current year
         $year = $request->has('year') ? $request->input('year') : date('Y');
 
+        // Validate the year input if provided in the request
         if (!$year || !preg_match('/^\d{4}$/', $year)) {
             return $this->returnError("Invalid year provided");
         }
 
-        $startOfYear = Carbon::create($year, 1, 1);
-        $endOfYear = Carbon::create($year, 12, 31);
+        // Get the current year
+        $currentYear = date('Y');
 
-        $users = User::whereBetween('created_at', [$startOfYear, $endOfYear])->get();
+        // If the provided year is greater than the current year, return zero counts
+        if ($year > $currentYear) {
+            return $this->returnData('departmentEmployeesCounts', $data, 'Count of Employee Departments for future year ' . $year);
+        }
 
-        foreach ($users as $user) {
-            $departmentName = Department::find($user->department_id)->name ?? 'Unknown';
-            if (array_key_exists($departmentName, $departments)) {
-                $departments[$departmentName]++;
+        // Define the end of the specified year
+        $endOfYear = Carbon::create($year, 12, 31)->endOfDay();
+
+        // Filter employees based on hiring_date up to the end of the specified year
+        $employees = User::join('user_details', 'users.id', '=', 'user_details.user_id')
+            ->where('user_details.hiring_date', '<=', $endOfYear)
+            ->get();
+        // If no employees are found up to the specified year, return an error
+        if ($employees->isEmpty()) {
+            return $this->returnError("There are no employees found up to the year {$year}");
+        }
+
+        // Count employees for each department
+        foreach ($employees as $employee) {
+            $departmentName = Department::find($employee->department_id)->name ?? 'No Department';
+            if (array_key_exists($departmentName, $data)) {
+                $data[$departmentName]++;
             }
         }
 
-        return $this->returnData('departmentEmployeesCounts', $departments, 'Count of Employee Departments for the year ' . $year);
+        return $this->returnData('departmentEmployeesCounts', $data, 'Count of Employee Departments for the year ' . $year);
     }
 
     public function getWorkTypeAssignedToUser()
