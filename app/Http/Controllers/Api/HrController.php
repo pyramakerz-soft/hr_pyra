@@ -240,5 +240,21 @@ class HrController extends Controller
 
         return $this->returnError('Invalid location type provided.');
     }
+    public function getLocationAssignedToUser(User $user)
+    {
+        $users = User::with('user_locations')->where('id', $user->id)->get();
+        $data = [];
+        foreach ($users as $user) {
+            // dd($user);
+            foreach ($user->user_locations as $user_location) {
+                if ($user_location->pivot['user_id'] === $user->id) {
+                    $pivotData = $user_location->pivot->toArray();
 
+                }
+                $data[] = ['user_work_type' => $pivotData];
+
+            }
+        }
+        return $this->returnData('user_locations', $data, 'User Locations Data');
+    }
 }
