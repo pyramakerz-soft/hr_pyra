@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('contact_phone')->nullable()->unique();
             $table->string('image')->nullable();
             $table->enum('gender', ['m', 'f'])->nullable();
-            $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('cascade');
+            $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('set null');
             $table->rememberToken();
             $table->timestamps();
         });
