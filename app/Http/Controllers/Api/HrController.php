@@ -13,41 +13,27 @@ use Illuminate\Support\Facades\Auth;
 class HrController extends Controller
 {
     use ResponseTrait;
-    // public function employeesPerMonth()
-    // {
-    //     $earliestUser = User::orderBy('created_at', 'asc')->first();
-    //     dd($earliestUser);
-    // }
-    //@TODO: Month must be sorted from asc
+
     public function employeesPerMonth(Request $request)
     {
-        // Validate the year parameter
-        $year = $request->input('year');
-        if (!$year || !preg_match('/^\d{4}$/', $year)) {
-            return response()->json([
-                'result' => 'false',
-                'message' => 'Invalid year parameter',
-            ], 400);
+        $year = $request->has('year') ? $request->input('year') : date('Y');
+
+        if (!preg_match('/^\d{4}$/', $year)) {
+            return $this->returnError("Invalid year parameter");
         }
 
-        // Define the start and end of the year
         $startOfYear = Carbon::create($year, 1, 1);
-        $endOfYear = Carbon::create($year, 12, 31);
+        // $endOfYear = Carbon::create($year, 12, 31);
 
-        // Get the current date
         $currentDate = Carbon::now();
 
-        // Initialize an array to store counts by month
         $employeeCounts = collect();
         $cumulativeCount = 0;
 
-        // Iterate through each month of the specified year
         for ($month = 1; $month <= 12; $month++) {
-            // Calculate the start and end dates of the current month
             $startOfMonth = $startOfYear->copy()->month($month)->startOfMonth();
             $endOfMonth = $startOfYear->copy()->month($month)->endOfMonth();
 
-            // Check if the month is after the current month
             if ($startOfMonth->isAfter($currentDate)) {
                 $employeeCounts[$startOfMonth->format('Y-M')] = [
                     'employee_count' => 0,
@@ -56,45 +42,53 @@ class HrController extends Controller
                 continue;
             }
 
-            // Calculate the month label for the response
             $customMonth = $startOfMonth->format('Y-M');
 
-            // Count employees hired within the month
             $employeeCount = User::whereHas('user_detail', function ($query) use ($startOfMonth, $endOfMonth) {
                 $query->whereBetween('hiring_date', [$startOfMonth, $endOfMonth]);
             })->count();
 
-            // Update the cumulative count
             $cumulativeCount += $employeeCount;
 
-            // Store the cumulative count in the collection
             $employeeCounts[$customMonth] = [
                 'employee_count' => $cumulativeCount,
                 'custom_month' => $customMonth,
             ];
         }
 
-        // Sort the months from January to December
-        $formattedCounts = $employeeCounts->sortKeys();
+        $formattedCounts = $employeeCounts->sortBy(function ($value, $key) {
+            return Carbon::parse($key)->month;
+        });
 
-        return response()->json([
-            'result' => 'true',
-            'message' => 'Employee count per month',
-            'employeeCount' => $formattedCounts,
-        ]);
+        return $this->returnData('employeeCount', $formattedCounts->values()->all(), 'Employees count');
     }
 
-    public function getEmployeesWorkTypesprecentage()
+    public function getEmployeesWorkTypesPercentage(Request $request)
     {
         $data = [
             'site' => 0,
             'home' => 0,
         ];
 
-        $employees = User::with('work_types')->get();
-        if ($employees->isEmpty()) {
-            return $this->returnError("There is no employees found");
+        // Check if 'year' is provided in the request, otherwise default to current year
+        $year = $request->has('year') ? $request->input('year') : date('Y');
+
+        // Validate the year input if provided in the request
+        if (!$year || !preg_match('/^\d{4}$/', $year)) {
+            return $this->returnError("Invalid year provided");
         }
+
+        // Filter by year, either the provided year or the current year
+        $employees = User::whereHas('work_types', function ($query) use ($year) {
+            $query->whereYear('user_work_type.created_at', $year); // Specify the table for created_at
+        })->with(['work_types' => function ($query) use ($year) {
+            $query->whereYear('user_work_type.created_at', $year); // Specify the table for created_at
+        }])->get();
+
+        if ($employees->isEmpty()) {
+            return $this->returnError("There are no employees found for the year {$year}");
+        }
+
         foreach ($employees as $employee) {
             foreach ($employee->work_types as $work_type) {
                 if ($work_type->pivot->work_type_id == 1) {
@@ -102,56 +96,51 @@ class HrController extends Controller
                 } elseif ($work_type->pivot->work_type_id == 2) {
                     $data['home']++;
                 }
-                // $data[] = $work_type->pivot;
             }
         }
+
         $totalWorkTypes = $data['site'] + $data['home'];
 
         $percentages = [
             'site' => $totalWorkTypes > 0 ? ($data['site'] / $totalWorkTypes) * 100 : 0,
             'home' => $totalWorkTypes > 0 ? ($data['home'] / $totalWorkTypes) * 100 : 0,
         ];
-        return $this->returnData('userWorkTypes', $percentages, 'precentage of employee work types');
+
+        return $this->returnData('userWorkTypes', $percentages, 'percentage of employee work types');
     }
-    public function getDepartmentEmployees()
+
+    public function getDepartmentEmployees(Request $request)
     {
         $departments = [
             'software' => 0,
             'academic' => 0,
             'graphic' => 0,
-
         ];
-        $users = User::get()->toArray();
+
+        $year = $request->has('year') ? $request->input('year') : date('Y');
+
+        if (!$year || !preg_match('/^\d{4}$/', $year)) {
+            return $this->returnError("Invalid year provided");
+
+        }
+
+        $startOfYear = Carbon::create($year, 1, 1);
+        $endOfYear = Carbon::create($year, 12, 31);
+
+        $users = User::whereBetween('created_at', [$startOfYear, $endOfYear])->get();
         foreach ($users as $user) {
-            if ($user['department_id'] == 1) {
+            if ($user->department_id == 1) {
                 $departments['software']++;
-            } else if ($user['department_id'] == 2) {
+            } elseif ($user->department_id == 2) {
                 $departments['academic']++;
-            } else if ($user['department_id'] == 3) {
+            } elseif ($user->department_id == 3) {
                 $departments['graphic']++;
             }
-
         }
-        return $this->returnData('departmentEmployeesCounts', $departments, 'Count of Employee Departments');
+
+        return $this->returnData('departmentEmployeesCounts', $departments, 'Count of Employee Departments for the year ' . $year);
     }
-    public function getLocationAssignedToUser(User $user)
-    {
 
-        $users = User::with('user_locations')->where('id', $user->id)->get();
-        $data = [];
-
-        foreach ($users as $user) {
-            foreach ($user->user_locations as $location) {
-                $data[] = [
-                    'id' => $location->id,
-                    'name' => $location->name,
-                ];
-            }
-
-        }
-        return $this->returnData('userLocations', $data, 'User Location Data');
-
-    }
     public function getWorkTypeAssignedToUser()
     {
         $users = User::with('work_types')->get();
