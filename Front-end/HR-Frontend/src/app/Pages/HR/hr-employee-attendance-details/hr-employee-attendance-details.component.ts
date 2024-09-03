@@ -213,7 +213,7 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   EditUserClock(Clock:EmployeeDashboard) {
 
-
+    console.log(Clock)
     this.route.navigate(['HR/HREmployeeAttendanceEdit'], { state: { data: Clock ,UserId:this.UserID } }); 
   }
 
@@ -227,8 +227,10 @@ export class HrEmployeeAttendanceDetailsComponent {
   }
 
   openDialog(){
+
     const dialogRef = this.dialog.open(ClockInPopUpComponent, {
-      data: { Name: this.employee.name , job_title: this.employee.emp_type , work_home:this.employee.work_home, isClockInFromHrToOtherUser:true, userId: this.UserID }  
+      data: { Name: this.employee.name , job_title: this.employee.emp_type , work_home:this.employee.work_home, isClockInFromHrToOtherUser:true, userId: this.UserID } 
+
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
