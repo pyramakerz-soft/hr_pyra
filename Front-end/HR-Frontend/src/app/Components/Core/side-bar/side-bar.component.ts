@@ -18,7 +18,7 @@ export class SideBarComponent {
 
   constructor(public AccountServ:AccountService ,private router: Router){}
 
-  activeIndex: number | null = null;
+  activeIndex: number | null = 0;
   
   ngOnInit(): void {
     this.setActiveIndexByRoute(this.router.url);
