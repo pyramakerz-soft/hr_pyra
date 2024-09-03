@@ -366,6 +366,8 @@ export class HrEmployeeAddEditDetailsComponent {
             this.router.navigateByUrl("HR/HREmployee")
           },
           error => {
+            console.log(error)
+            console.log(error.error.errors)
             if (error.error && error.error.errors) {
               this.handleServerErrors(error.error.errors as Record<keyof AddEmployee, string[]>);
             }

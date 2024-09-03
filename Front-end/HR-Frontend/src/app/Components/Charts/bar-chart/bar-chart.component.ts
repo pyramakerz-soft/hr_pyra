@@ -86,6 +86,8 @@ export class BarChartComponent {
 
   GetDataFromApi(){
     this.ChartServ.GetEmployeePerMonth(this.Year).subscribe((d:any)=>{
+      this.DataFromApi=[]
+
       console.log(d.employeeCount["2024-Apr"]);
       Object.keys(d.employeeCount).forEach((item) => {
         this.DataFromApi.push(d.employeeCount[item].employee_count)
