@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ClockInOut;
+use App\Models\Department;
 use App\Models\User;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
@@ -111,30 +112,27 @@ class HrController extends Controller
 
     public function getDepartmentEmployees(Request $request)
     {
-        $departments = [
-            'software' => 0,
-            'academic' => 0,
-            'graphic' => 0,
-        ];
+        $departments = Department::get()->mapWithKeys(function ($department) {
+            return [$department->name => 0];
+        })->toArray();
+
+        // dd($departments);
 
         $year = $request->has('year') ? $request->input('year') : date('Y');
 
         if (!$year || !preg_match('/^\d{4}$/', $year)) {
             return $this->returnError("Invalid year provided");
-
         }
 
         $startOfYear = Carbon::create($year, 1, 1);
         $endOfYear = Carbon::create($year, 12, 31);
 
         $users = User::whereBetween('created_at', [$startOfYear, $endOfYear])->get();
+
         foreach ($users as $user) {
-            if ($user->department_id == 1) {
-                $departments['software']++;
-            } elseif ($user->department_id == 2) {
-                $departments['academic']++;
-            } elseif ($user->department_id == 3) {
-                $departments['graphic']++;
+            $departmentName = Department::find($user->department_id)->name ?? 'Unknown';
+            if (array_key_exists($departmentName, $departments)) {
+                $departments[$departmentName]++;
             }
         }
 
