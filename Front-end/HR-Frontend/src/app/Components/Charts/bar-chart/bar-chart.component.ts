@@ -1,24 +1,28 @@
 import { Component, Input, SimpleChanges } from '@angular/core';
 import Chart from 'chart.js/auto'; 
 import { ChartsService } from '../../../Services/charts.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-bar-chart',
   standalone: true,
-  imports: [],
+  imports: [CommonModule,FormsModule],
   templateUrl: './bar-chart.component.html',
   styleUrl: './bar-chart.component.css'
 })
 export class BarChartComponent {
   @Input() Year: Number = 0;
 
-  public chart: any;
-  DataFromApi:any;
+  public chart: Chart | undefined ;
+  DataFromApi:number[]=[];
+  flag=false
+  
   constructor(public ChartServ:ChartsService){}
 
-  ngOnInit(): void {
-    this.createChart();
-    this.GetDataFromApi()
+  ngOnInit() {
+    this.GetDataFromApi();
+
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -28,6 +32,9 @@ export class BarChartComponent {
   }
 
   createChart(){
+    if (this.chart) {
+      this.chart.destroy();
+    }
     this.chart = new Chart("EmployeesPerMonth", {
       type: 'bar',
       data: {
@@ -35,7 +42,7 @@ export class BarChartComponent {
 	       datasets: [
           {
             label: "Count",
-            data: ['30','50', '70', '40', '60', '20', '80', '55', '45', '65', '35', '75'],
+            data: this.DataFromApi,
             backgroundColor: '#437EF7',
             borderRadius: 5
           }, 
@@ -79,17 +86,18 @@ export class BarChartComponent {
 
   GetDataFromApi(){
     this.ChartServ.GetEmployeePerMonth(this.Year).subscribe((d:any)=>{
-
       console.log(d.employeeCount["2024-Apr"]);
       Object.keys(d.employeeCount).forEach((item) => {
-        console.log(d.employeeCount[item].employee_count)
+        this.DataFromApi.push(d.employeeCount[item].employee_count)
       })
-
+    this.createChart();
+      
     })
+    console.log(this.DataFromApi)
 
   }
-}
 
+}
 
 
 

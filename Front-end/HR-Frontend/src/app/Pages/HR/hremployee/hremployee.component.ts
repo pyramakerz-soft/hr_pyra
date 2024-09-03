@@ -7,6 +7,7 @@ import { ImportEmployeeDataPopUpComponent } from '../../../Components/import-emp
 import { Router } from '@angular/router';
 import { UserModel } from '../../../Models/user-model';
 import { UserServiceService } from '../../../Services/user-service.service';
+import Swal from 'sweetalert2';
 
 interface data {
   Name: string,
@@ -34,8 +35,8 @@ export class HREmployeeComponent {
   CurrentPageNumber: number = 1;
   pages: number[] = [];
   selectedName: string = "";
-  DisplayPagginationOrNot:boolean=true;
-  UsersNames:string[]=[];
+  DisplayPagginationOrNot: boolean = true;
+  UsersNames: string[] = [];
   filteredUsers: string[] = [];
 
 
@@ -55,24 +56,24 @@ export class HREmployeeComponent {
     });
   }
 
-  NavigateToAddEmployee(){
+  NavigateToAddEmployee() {
     this.router.navigateByUrl("HR/HREmployeeDetailsAdd")
   }
 
-  NavigateToEmployeeDetails(id:number) {
+  NavigateToEmployeeDetails(id: number) {
     this.router.navigateByUrl(`HR/HREmployeeDetails/${id}`)
   }
- 
-  NavigateToEditEmployee(empId:number){
+
+  NavigateToEditEmployee(empId: number) {
     this.router.navigateByUrl(`HR/HREmployeeDetailsEdit/${empId}`)
   }
 
-  getAllEmployees(PgNumber:number) {
-    this.CurrentPageNumber=PgNumber;
+  getAllEmployees(PgNumber: number) {
+    this.CurrentPageNumber = PgNumber;
     this.userServ.getall(PgNumber).subscribe(
       (d: any) => {
         this.tableData = d.data[0].users;
-        this.PagesNumber=d.data[0].pagination.last_page;
+        this.PagesNumber = d.data[0].pagination.last_page;
         this.generatePages();
       },
       (error) => {
@@ -98,31 +99,31 @@ export class HREmployeeComponent {
     this.getAllEmployees(this.CurrentPageNumber);
   }
 
-  
-  Search(){
-    if(this.selectedName){
-    this.userServ.SearchByName(this.selectedName).subscribe(
-      (d: any) => {
-        this.tableData = d.data[0].users;
-        this.PagesNumber=1;
-        this.DisplayPagginationOrNot=false;
-        this.filteredUsers=[];
-      },
-      (error) => {
-        console.log(error)
-      }
-    );
-  }
-  else{
-    this.DisplayPagginationOrNot=true;
-  }
+
+  Search() {
+    if (this.selectedName) {
+      this.userServ.SearchByName(this.selectedName).subscribe(
+        (d: any) => {
+          this.tableData = d.data[0].users;
+          this.PagesNumber = 1;
+          this.DisplayPagginationOrNot = false;
+          this.filteredUsers = [];
+        },
+        (error) => {
+          console.log(error)
+        }
+      );
+    }
+    else {
+      this.DisplayPagginationOrNot = true;
+    }
   }
 
 
-  getUsersName(){
+  getUsersName() {
     this.userServ.getAllUsersName().subscribe(
       (d: any) => {
-        this.UsersNames=d.usersNames;
+        this.UsersNames = d.usersNames;
       },
       (error) => {
         console.log(error)
@@ -137,22 +138,22 @@ export class HREmployeeComponent {
     if (query.trim() === '') {
       // If the input is empty, call getAllLocations with the current page number
       this.getAllEmployees(this.CurrentPageNumber);
-      this.DisplayPagginationOrNot=true;
+      this.DisplayPagginationOrNot = true;
       this.filteredUsers = []; // Clear the dropdown list
     } else {
-    this.filteredUsers = this.UsersNames;
-    this.filteredUsers = this.UsersNames.filter(name => 
-      name.toLowerCase().includes(query)
-    );
-  }
+      this.filteredUsers = this.UsersNames;
+      this.filteredUsers = this.UsersNames.filter(name =>
+        name.toLowerCase().includes(query)
+      );
+    }
   }
 
   selectUser(location: string) {
     this.selectedName = location;
     this.userServ.SearchByName(this.selectedName).subscribe(
       (d: any) => {
-        this.tableData=d.data[0].users;
-        this.DisplayPagginationOrNot=false;
+        this.tableData = d.data[0].users;
+        this.DisplayPagginationOrNot = false;
       },
       (error) => {
         console.log(error);
@@ -162,28 +163,41 @@ export class HREmployeeComponent {
 
   }
 
-  resetfilteredUsers(){
+  resetfilteredUsers() {
     this.filteredUsers = [];
 
   }
 
 
-  DeleteEmp(id:number){
+  DeleteEmp(id: number) {
 
-    this.userServ.DeleteById(id).subscribe(
-      (d: any) => {
-        this.getAllEmployees(1);
-        this.getUsersName()
-      },
-      (error) => {
-        console.log(error);
+    Swal.fire({
+      title: 'Are you sure you want to Delete This Employee?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#FF7519',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.userServ.DeleteById(id).subscribe(
+          (d: any) => {
+            this.getAllEmployees(1);
+            this.getUsersName()
+          },
+          (error) => {
+            console.log(error);
+          }
+        );
+
       }
-    );
+    });
   }
 
 
 
 
-  }
+}
 
 

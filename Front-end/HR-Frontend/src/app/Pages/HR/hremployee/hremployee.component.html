@@ -81,9 +81,11 @@
           <td class="py-5 px-4"><button (click)="NavigateToEmployeeDetails(row.id)">{{ row.name }}</button></td>
           <td class="py-5 px-4">{{ row.national_id }}</td>
           <td class="py-5 px-4">
-            <div class="text-center w-[80%] rounded-lg border border-[#D0D5DD] py-2 text-[#FFFFFF]" [ngClass]="{
+            <div class="text-center w-[80%] rounded-lg border border-[#D0D5DD] py-2 text-[#FFFFFF] " [ngClass]="{
                   'bg-[#1B5724]': row.department === 'Software',
                   'bg-[#63233C]': row.department === 'Academic',
+                  'bg-[#57571B]': row.department !== 'Software' && row.department !== 'Academic'
+
                 }">
               {{ row.department }}
             </div>
