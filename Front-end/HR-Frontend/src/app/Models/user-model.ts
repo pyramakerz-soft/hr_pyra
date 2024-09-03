@@ -8,7 +8,7 @@ export class UserModel {
         public department: string,
         public role : string ,
         public position : string ,
-        public national_id : string ,
+        public code : string ,
     ){}
 }
 
