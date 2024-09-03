@@ -29,7 +29,7 @@ export class AttendenceEditComponent {
     if (navigation?.extras.state) {
       this.data = navigation.extras.state['data'] as EmployeeDashboard;
       this.UserId = navigation.extras.state['UserId'] ;
-
+      console.log(this.data)
 
       this.data.formattedClockIn= this.transformUTCToEgyptTime(this.data.formattedClockIn);
       this.data.formattedClockOut= this.transformUTCToEgyptTime(this.data.formattedClockOut);
