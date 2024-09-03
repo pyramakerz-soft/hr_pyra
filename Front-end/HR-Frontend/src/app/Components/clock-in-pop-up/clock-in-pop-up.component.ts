@@ -62,7 +62,6 @@ export class ClockInPopUpComponent {
   }
 
   public async ngOnInit(): Promise<void> {
-    await this.getLocation();
     this.getCurrentFormattedTime();
     if(this.isClockInFromHrToOtherUser == false){
       await this.getLocation();
@@ -72,6 +71,7 @@ export class ClockInPopUpComponent {
       this.isLoading=false;
     }else{
       this.getLocationsFromServerByUserId()
+      this.isLoading = false
     }
     this.getWorkTypes()
   }
@@ -123,8 +123,8 @@ export class ClockInPopUpComponent {
   async sendLocationByToken(): Promise<void> {
     this.UtcTime=await this.getCurrentTimeInUTC();
     if(this.WorkHome==false){
-    this.clockService.CreateClockIn(this.lat, this.lng ,this.UtcTime ,"site").subscribe(
-      (response: any) => {
+      this.clockService.CreateClockIn(this.lat, this.lng ,this.UtcTime ,"site").subscribe(
+        (response: any) => {
         this.IsClockedIn = true;
         this.dialogRef.close(this.IsClockedIn);
         this.clockEventService.notifyClockedIn();
@@ -217,6 +217,7 @@ export class ClockInPopUpComponent {
   }
 
   sendLocationByHrForOthers(){
+    console.log(this.DateClockInFromHrForOthers)
     const clockIn = this.DateClockInFromHrForOthers + " " + this.TimeClockInFromHrForOthers + ":00"
     if(this.userId){
       if(this.WorkHome==false){
@@ -308,15 +309,13 @@ export class ClockInPopUpComponent {
     });
   }
  
-
-
   getCurrentFormattedTime() {
     const timestamp = Math.floor(Date.now() / 1000); // Current timestamp in seconds
   
     this.TimeApi.getCurrentTimeGoogle(this.lat, this.lng).subscribe((data) => {
       if (data) {
- // Calculate local time
-         const totalOffsetInSeconds = data.dstOffset + data.rawOffset;
+        // Calculate local time
+        const totalOffsetInSeconds = data.dstOffset + data.rawOffset;
         const localTimeInSeconds = timestamp + totalOffsetInSeconds;
 
         // Convert local time from seconds to milliseconds
@@ -350,9 +349,6 @@ export class ClockInPopUpComponent {
 
   }
   
-
-
-
   getWorkTypes(){
     this.workType.getall().subscribe(
       (workTypes: any) => {
@@ -365,7 +361,7 @@ export class ClockInPopUpComponent {
     if(this.userId){
       this.locationService.GetLocationsByUserId(this.userId).subscribe(
         (locations: any) => {
-          this.Locations = locations.userLocations
+          this.Locations = locations.user_locations
         } 
       );
     }
@@ -375,42 +371,3 @@ export class ClockInPopUpComponent {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 }
-
-
-
-    // this.TimeApi.getCurrentTime().subscribe(
-    //   (response) => {
-    //     const currentDate = new Date(response.datetime)
-    //     // Convert UTC time to Egypt time
-    //     const egyptTimeZone = 'Africa/Cairo';
-    //     const egyptTime = new Date(currentDate.toLocaleString('en-US', { timeZone: egyptTimeZone }));
-
-    //     const year = egyptTime.getFullYear();
-    //     const month = egyptTime.toLocaleString('default', { month: 'short' }); // e.g., "Sep"
-    //     const day = String(egyptTime.getDate()).padStart(2, '0'); // e.g., "01"
-  
-    //     // Combine components into the desired format "Sep 01 2024"
-    //      this.formattedDate = `${month} ${day} ${year}`;
-  
-    //     // Extract the individual date and time components in Egypt time
-    //     let hours = egyptTime.getHours();
-    //     const minutes = egyptTime.getMinutes();
-    //     const ampm = hours >= 12 ? 'PM' : 'AM';
-  
-    //     hours = hours % 12;
-    //     hours = hours ? hours : 12; // Convert '0' hour to '12' for 12-hour format
-    //     const minutesStr = minutes < 10 ? '0' + minutes : minutes.toString();
-  
-    //     // Combine components into the desired 12-hour format with AM/PM
-    //     const formattedTime = `${hours}:${minutesStr} ${ampm}`;
-  
-    //     // Update a class property or use a callback to handle this value
-    //     this.formattedTime = formattedTime; // Assuming you have a class property to store the result
-    //     console.log(this.formattedTime)
-    //     this.IsLoaded=true
-    //   },
-    //   (error) => {
-    //     console.error('Error fetching time from API:', error);
-    //     this.formattedTime = 'Error fetching time'; // Handle error case
-    //   }
-    // );
