@@ -5,6 +5,7 @@ import { BarChartComponent } from '../../../Components/Charts/bar-chart/bar-char
 import { CardChartComponent } from '../../../Components/Charts/card-chart/card-chart.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ChartsService } from '../../../Services/charts.service';
 
 @Component({
   selector: 'app-hr-dashboard',
@@ -25,6 +26,13 @@ export class HrDashboardComponent {
 
   formattedWorkTypes: { [key: string]: string } = {};
 
+  userWorkTypes = {
+    home: 0,
+    site: 0
+  };
+
+  constructor(public chartService:ChartsService){}
+
   ngOnInit(){
     this.populateYears()
     const currentDate = new Date();
@@ -35,8 +43,8 @@ export class HrDashboardComponent {
   onYearChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     if (target) {
-      this.selectedYear = +target.value; 
-      console.log(this.selectedYear)
+      this.selectedYear = +target.value
+      this.getDataPercentage()
     }
   }
 
@@ -49,24 +57,29 @@ export class HrDashboardComponent {
     }
   }
 
-  // API return ex:
-  userWorkTypes = {
-    site: 66.66666666666666,
-    home: 33.33333333333333,
-  };
-  
   getDataPercentage(){
-    Object.keys(this.userWorkTypes).forEach((key) => {
-      const workTypeKey = key as keyof typeof this.userWorkTypes;
-      this.formattedWorkTypes[key] = `${this.userWorkTypes[workTypeKey].toFixed(2)}%`;
-    });
+    this.chartService.getEmployeesWorkTypesprecentage(this.selectedYear).subscribe(
+      (d:any)=>{
+        this.userWorkTypes = d.userWorkTypes
+        
+        Object.keys(this.userWorkTypes).forEach((key) => {
+          const workTypeKey = key as keyof typeof this.userWorkTypes;
+          this.formattedWorkTypes[key] = `${(this.userWorkTypes[workTypeKey]).toFixed(2)}%`;
+        });
 
-    this.Data.forEach((item) => {
-      if (item.label === 'Work From Home') {
-        item.percentage = this.formattedWorkTypes['home'];
-      } else if (item.label === 'On Site') {
-        item.percentage = this.formattedWorkTypes['site'];
-      };
-    });
+        this.Data = [
+          {
+            label: 'Work From Home',
+            icon: 'fi fi-rs-chart-pie',
+            percentage: this.formattedWorkTypes['home']
+          },
+          {
+            label: 'On Site',
+            icon: 'fi fi-tr-dot-circle',
+            percentage: this.formattedWorkTypes['site']
+          }
+        ];
+      }
+    )
   }
 }
