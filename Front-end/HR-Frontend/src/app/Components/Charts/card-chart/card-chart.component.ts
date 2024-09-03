@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, SimpleChanges } from '@angular/core';
 
 @Component({
   selector: 'app-card-chart',
@@ -14,4 +14,10 @@ export class CardChartComponent {
     icon: '',
     percentage: ''
   };
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['Data'] && !changes['Data'].isFirstChange()) {
+      console.log('Data changed:', this.Data);
+    }
+  }
 }

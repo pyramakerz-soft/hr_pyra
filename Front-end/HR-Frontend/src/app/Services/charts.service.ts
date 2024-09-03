@@ -21,6 +21,20 @@ export class ChartsService {
 
     return this.http.get(`${this.baseUrl}/employees_per_month?year=${Year}`, { headers, responseType: 'json' });
   }
+  
+  getEmployeesWorkTypesprecentage(Year:Number){
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.get(`${this.baseUrl}/employees_workTypes_percentage?year=${Year}`, { headers, responseType: 'json' });
+  }
+  
+  getDepartmentEmployees(Year:Number){
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.get(`${this.baseUrl}/department_employees?year=${Year}`, { headers, responseType: 'json' });
+  }
 
 
 }
