@@ -78,13 +78,16 @@ class HrController extends Controller
             return $this->returnError("Invalid year provided");
         }
 
-        // Filter by year, either the provided year or the current year
-        $employees = User::whereHas('work_types', function ($query) use ($year) {
-            $query->whereYear('user_work_type.created_at', $year); // Specify the table for created_at
-        })->with(['work_types' => function ($query) use ($year) {
-            $query->whereYear('user_work_type.created_at', $year); // Specify the table for created_at
-        }])->get();
+        $startOfYear = Carbon::create($year, 1, 1)->startOfDay();
+        $endOfYear = Carbon::create($year, 12, 31)->endOfDay();
 
+        // Filter employees based on hiring_date
+        $employees = User::join('user_details', 'users.id', '=', 'user_details.user_id')
+            ->whereBetween('user_details.hiring_date', [$startOfYear, $endOfYear])
+            ->with('work_types')
+            ->get();
+
+        dd($employees->toArray());
         if ($employees->isEmpty()) {
             return $this->returnError("There are no employees found for the year {$year}");
         }
