@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use App\Traits\ResponseTrait;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
@@ -88,8 +89,11 @@ class Handler extends ExceptionHandler
             return $this->returnError('There is no role by this name', Response::HTTP_BAD_REQUEST);
 
         }
+        // if ($exception instanceof UniqueConstraintViolationException) {
 
+        // }
         return parent::render($request, $exception);
+
     }
 
     /**
