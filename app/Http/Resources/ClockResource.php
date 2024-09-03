@@ -10,9 +10,11 @@ class ClockResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $clockIn = $this->clock_in ? Carbon::parse($this->clock_in)->format('h:iA') : null;
-        $clockOut = $this->clock_out ? Carbon::parse($this->clock_out)->format('h:iA') : null;
+        // $clockIn = $this->clock_in ? Carbon::parse($this->clock_in)->format('h:iA') : null;
+        // dd(Carbon::parse($this->clock_in)->format('Y-m-d'));
+        // $clockOut = $this->clock_out ? Carbon::parse($this->clock_out)->format('h:iA') : null;
         // $clockOutFormatted = $clockOut ? Carbon::parse($clockOut)->format('Y-m-d h:i') : null;
+
         $locationOut = null;
 
         if ($this->location_type == "site") {
@@ -48,17 +50,17 @@ class ClockResource extends JsonResource
         })->values()->toArray();
         return [
             'id' => $this->id,
-            'Day' => Carbon::parse($clockIn)->format('l'),
-            'Date' => Carbon::parse($clockIn)->format('Y-m-d'),
-            'clockIn' => $clockIn,
-            'clockOut' => $clockOut,
+            'Day' => Carbon::parse($this->clock_in)->format('l'),
+            'Date' => Carbon::parse($this->clock_in)->format('Y-m-d'),
+            'clockIn' => Carbon::parse($this->clock_in)->format('h:iA'),
+            'clockOut' => Carbon::parse($this->clock_out)->format('h:iA'),
             'totalHours' => $totalHours,
             'locationIn' => $locationIn,
             'locationOut' => $locationOut,
             'userId' => $this->user->id,
             'site' => $this->location_type,
-            'formattedClockIn' => Carbon::parse($clockIn)->format('Y-m-d H:i'),
-            'formattedClockOut' => Carbon::parse($clockOut)->format('Y-m-d H:i'),
+            'formattedClockIn' => Carbon::parse($this->clock_in)->format('Y-m-d H:i'),
+            'formattedClockOut' => Carbon::parse($this->clock_out)->format('Y-m-d H:i'),
             'otherClocks' => $otherClocksForDay,
 
         ];
