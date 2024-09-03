@@ -62,9 +62,9 @@ export class ClockInPopUpComponent {
   }
 
   public async ngOnInit(): Promise<void> {
+    await this.getLocation();
     this.getCurrentFormattedTime();
     if(this.isClockInFromHrToOtherUser == false){
-      await this.getLocation();
       const result = await this.revGeo.getAddress(this.lat, this.lng);
       this.reversedGeo = result.formatted_address;
       this.locationName = result.address_components[1].long_name + " , " + result.address_components[2].long_name + " , " + result.address_components[3].long_name
@@ -315,6 +315,7 @@ export class ClockInPopUpComponent {
     this.TimeApi.getCurrentTimeGoogle(this.lat, this.lng).subscribe((data) => {
       if (data) {
         // Calculate local time
+        console.log("data is:",data)
         const totalOffsetInSeconds = data.dstOffset + data.rawOffset;
         const localTimeInSeconds = timestamp + totalOffsetInSeconds;
 
