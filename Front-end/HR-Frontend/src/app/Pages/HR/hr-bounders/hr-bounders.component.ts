@@ -5,11 +5,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { Location } from '../../../Models/location';
 import { LocationsService } from '../../../Services/locations.service';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-hr-bounders',
   standalone: true,
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './hr-bounders.component.html',
   styleUrls: ['./hr-bounders.component.css']
 })
@@ -21,18 +22,18 @@ export class HrBoundersComponent {
   locationsNames: string[] = [];
   filteredLocations: string[] = [];
   selectedName: string = "";
-  DisplayPagginationOrNot:boolean=true;
+  DisplayPagginationOrNot: boolean = true;
 
 
 
-  constructor(public dialog: MatDialog, public locationServ: LocationsService) {}
+  constructor(public dialog: MatDialog, public locationServ: LocationsService) { }
 
   ngOnInit() {
     this.getAllLocations(1);
     this.getLocationsName();
   }
 
-  
+
   getAllLocations(page: number) {
     this.CurrentPageNumber = page;
     this.locationServ.getall(page).subscribe(
@@ -46,7 +47,7 @@ export class HrBoundersComponent {
       }
     );
   }
-  
+
   generatePages() {
     this.pages = [];
     for (let i = 1; i <= this.PagesNumber; i++) {
@@ -54,20 +55,20 @@ export class HrBoundersComponent {
     }
   }
 
-  openDialog(lat?:string , long?:string ,EditedLocationName?: string, id?: number, EditedLocationAddress?: string ): void {
+  openDialog(lat?: string, long?: string, EditedLocationName?: string, id?: number, EditedLocationAddress?: string): void {
     const dialogRef = this.dialog.open(BoundersPopUpComponent, {
       data: EditedLocationName
         ? {
-            mode: 'edit',
-            locationName: EditedLocationName,
-            id: id,
-            LocationAddress: EditedLocationAddress,
-            Lat:lat,
-            Long:long
-          }
+          mode: 'edit',
+          locationName: EditedLocationName,
+          id: id,
+          LocationAddress: EditedLocationAddress,
+          Lat: lat,
+          Long: long
+        }
         : {
-            mode: 'add',
-          },
+          mode: 'add',
+        },
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -76,9 +77,23 @@ export class HrBoundersComponent {
   }
 
   deleteLocation(id: number) {
-    this.locationServ.DeleteByID(id).subscribe(result => {
-      this.getAllLocations(1);
+    Swal.fire({
+      title: 'Are you sure you want to Delete This Location?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#FF7519',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+        this.locationServ.DeleteByID(id).subscribe(result => {
+          this.getAllLocations(1);
+        });
+      }
     });
+
   }
 
   getNextPage() {
@@ -109,14 +124,14 @@ export class HrBoundersComponent {
     if (query.trim() === '') {
       // If the input is empty, call getAllLocations with the current page number
       this.getAllLocations(this.CurrentPageNumber);
-      this.DisplayPagginationOrNot=true
+      this.DisplayPagginationOrNot = true
       this.filteredLocations = []; // Clear the dropdown list
     } else {
-    this.filteredLocations = this.locationsNames;
-    this.filteredLocations = this.locationsNames.filter(name => 
-      name.toLowerCase().includes(query)
-    );
-  }
+      this.filteredLocations = this.locationsNames;
+      this.filteredLocations = this.locationsNames.filter(name =>
+        name.toLowerCase().includes(query)
+      );
+    }
   }
 
   selectLocation(location: string) {
@@ -124,7 +139,7 @@ export class HrBoundersComponent {
     this.locationServ.SearchByNames(this.selectedName).subscribe(
       (d: any) => {
         this.tableData = d.locations;
-        this.DisplayPagginationOrNot=false;
+        this.DisplayPagginationOrNot = false;
       },
       (error) => {
         console.log(error);
@@ -133,30 +148,30 @@ export class HrBoundersComponent {
 
   }
 
-  resetfilteredLocations(){
+  resetfilteredLocations() {
     this.filteredLocations = [];
 
   }
 
 
 
-  Search(){
-    if(this.selectedName){
-    this.locationServ.SearchByNames(this.selectedName).subscribe(
-      (d: any) => {
-        this.tableData =  d.locations;
-        this.PagesNumber=1;
-        this.DisplayPagginationOrNot=false;
-        this.filteredLocations=[];
-      },
-      (error) => {
-        console.log(error)
-      }
-    );
-  }
-  else{
-    this.DisplayPagginationOrNot=true;
-  }
+  Search() {
+    if (this.selectedName) {
+      this.locationServ.SearchByNames(this.selectedName).subscribe(
+        (d: any) => {
+          this.tableData = d.locations;
+          this.PagesNumber = 1;
+          this.DisplayPagginationOrNot = false;
+          this.filteredLocations = [];
+        },
+        (error) => {
+          console.log(error)
+        }
+      );
+    }
+    else {
+      this.DisplayPagginationOrNot = true;
+    }
   }
 
 }

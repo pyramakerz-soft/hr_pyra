@@ -215,7 +215,7 @@ export class HrEmployeeAddEditDetailsComponent {
 
   isFormValid(): boolean {
     let isValid = true;
-
+    console.log(this.employee)
     for (const key in this.employee) {
       if (this.employee.hasOwnProperty(key)) {
         const field = key as keyof AddEmployee;
@@ -348,7 +348,7 @@ export class HrEmployeeAddEditDetailsComponent {
 
     if (this.isFormValid()) {
       this.employee.department_id = Number(this.employee.department_id);
-
+      console.log(this.employee.department_id)
       if(this.EmployeeId === 0){
         this.userService.createUser(this.employee).subscribe(
           (result: any) => {
