@@ -15,7 +15,7 @@ export class ChartsService {
   }
 
 
-  GetEmployeePerMonth(Year:number){
+  GetEmployeePerMonth(Year:Number){
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
