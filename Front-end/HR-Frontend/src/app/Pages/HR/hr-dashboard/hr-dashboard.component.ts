@@ -58,6 +58,18 @@ export class HrDashboardComponent {
   }
 
   getDataPercentage(){
+    this.Data = [
+      {
+        label: 'Work From Home',
+        icon: 'fi fi-rs-chart-pie',
+        percentage: '0%'
+      },
+      {
+        label: 'On Site',
+        icon: 'fi fi-tr-dot-circle',
+        percentage: '0%'
+      }
+    ];
     this.chartService.getEmployeesWorkTypesprecentage(this.selectedYear).subscribe(
       (d:any)=>{
         this.userWorkTypes = d.userWorkTypes
