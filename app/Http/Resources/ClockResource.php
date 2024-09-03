@@ -48,8 +48,8 @@ class ClockResource extends JsonResource
         })->values()->toArray();
         return [
             'id' => $this->id,
-            'Day' => Carbon::parse($this->clock_in)->format('l'),
-            'Date' => Carbon::parse($this->clock_in)->format('Y-m-d'),
+            'Day' => Carbon::parse($clockIn)->format('l'),
+            'Date' => Carbon::parse($clockIn)->format('Y-m-d'),
             'clockIn' => $clockIn,
             'clockOut' => $clockOut,
             'totalHours' => $totalHours,
