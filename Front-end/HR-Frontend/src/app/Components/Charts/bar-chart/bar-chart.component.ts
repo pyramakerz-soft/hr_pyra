@@ -1,26 +1,30 @@
-import { Component } from '@angular/core';
+import { Component, Input, SimpleChanges } from '@angular/core';
 import Chart from 'chart.js/auto'; 
 import { ChartsService } from '../../../Services/charts.service';
 
 @Component({
   selector: 'app-bar-chart',
   standalone: true,
-  // imports: [CommonModule,FormsModule],
   imports: [],
   templateUrl: './bar-chart.component.html',
   styleUrl: './bar-chart.component.css'
 })
 export class BarChartComponent {
+  @Input() Year: Number = 0;
 
   public chart: any;
   DataFromApi:any;
-  Year:number=2024;
   constructor(public ChartServ:ChartsService){}
-
 
   ngOnInit(): void {
     this.createChart();
     this.GetDataFromApi()
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['Year'] && !changes['Year'].isFirstChange()) {
+      this.GetDataFromApi()
+    }
   }
 
   createChart(){
@@ -61,7 +65,6 @@ export class BarChartComponent {
             grid: {
               display: true,
               color: 'rgb(223,221,221,0.32)', 
-              // borderDash: [5, 5], 
             },
             border: {
               color: 'transparent', 

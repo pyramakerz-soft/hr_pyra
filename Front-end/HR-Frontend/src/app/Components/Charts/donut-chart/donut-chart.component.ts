@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, SimpleChanges } from '@angular/core';
 import Chart from 'chart.js/auto';
 
 
@@ -11,41 +11,26 @@ import Chart from 'chart.js/auto';
   styleUrl: './donut-chart.component.css'
 })
 export class DonutChartComponent {
+  @Input() Year: Number = 0;
+  baseColor = '#437EF7';
+  data = [300, 240, 100];
+  labels = ['Segment 1', 'Segment 2', 'Segment 3'];
+  colors = [this.baseColor]; 
 
-
-  strokeDasharrays: string[] = [];
-  strokeOffsets: number[] = [];
-  totalValue: number = 0;
-
-
-  calculateSegments(): void {
-    this.totalValue = this.segments.reduce((sum, segment) => sum + segment.value, 0);
-    let cumulativePercentage = 0;
-
-    this.strokeDasharrays = this.segments.map(segment => {
-      const dasharrayValue = (segment.value / this.totalValue) * 100;
-      const dasharray = `${dasharrayValue} ${100 - dasharrayValue}`;
-      const strokeOffset = cumulativePercentage;
-      cumulativePercentage += dasharrayValue;
-      this.strokeOffsets.push(strokeOffset);
-      return dasharray;
-    });
-  }
   public chart: any;
   segments: { color: any; label: string, value: number }[] = [];
 
   ngOnInit(): void {
     this.createChart();
-    this.calculateSegments();
+  }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['Year'] && !changes['Year'].isFirstChange()) {
+      console.log(this.Year);
+    }
   }
 
   createChart() {
-    const data = [300, 240, 100];
-    const labels = ['Segment 1', 'Segment 2', 'Segment 3'];
-
-    const baseColor = '#437EF7';
-  
     function lightenColor(color: string, percent: number) {
       color = color.replace(/^#/, '');
   
@@ -60,26 +45,24 @@ export class DonutChartComponent {
       return `#${[r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
     }
   
-    const colors = [baseColor]; 
-  
     for (let i = 1; i < 6; i++) {
-      colors.push(lightenColor(baseColor, i * 0.3)); 
+      this.colors.push(lightenColor(this.baseColor, i * 0.3)); 
     }
 
-    this.segments = labels.map((label, index) => ({
+    this.segments = this.labels.map((label, index) => ({
       label,
-      value: data[index],
-      color: colors[index]
+      value: this.data[index],
+      color: this.colors[index]
     }));
   
-    this.chart = new Chart("MyChart", {
+    this.chart = new Chart("DoughnutChart", {
       type: 'doughnut',
       data: {
-        labels: labels,
+        labels: this.labels,
         datasets: [{
           label: 'PieChart',
-          data: data,
-          backgroundColor: colors,
+          data: this.data,
+          backgroundColor: this.colors,
           hoverOffset: 4
         }],
       },
