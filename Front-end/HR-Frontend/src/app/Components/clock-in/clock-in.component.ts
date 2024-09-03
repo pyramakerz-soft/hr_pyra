@@ -147,6 +147,7 @@ export class ClockInComponent {
       if (result.isConfirmed) {
 
 
+        
         this.clockService.CreateClockOut(this.lat, this.lng, this.UtcTime).subscribe(
 
           (response: any) => {

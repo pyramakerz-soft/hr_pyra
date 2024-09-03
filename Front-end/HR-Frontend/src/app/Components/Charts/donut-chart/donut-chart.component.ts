@@ -125,10 +125,10 @@ export class DonutChartComponent {
   getData(){
     this.chartService.getDepartmentEmployees(this.Year).subscribe(
       (d:any)=>{
-        console.log(d)
         this.data = []
         this.labels = []
         this.colors = [this.baseColor];
+        this.total = 0
 
         Object.keys(d.departmentEmployeesCounts).forEach((key) => {
           this.data.push(d.departmentEmployeesCounts[key])
