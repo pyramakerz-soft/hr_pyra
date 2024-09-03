@@ -79,7 +79,7 @@
           class="border-t border-gray-300 text-xs md:text-sm">
 
           <td class="py-5 px-4"><button (click)="NavigateToEmployeeDetails(row.id)">{{ row.name }}</button></td>
-          <td class="py-5 px-4">{{ row.national_id }}</td>
+          <td class="py-5 px-4">{{ row.code }}</td>
           <td class="py-5 px-4">
             <div class="text-center w-[80%] rounded-lg border border-[#D0D5DD] py-2 text-[#FFFFFF] " [ngClass]="{
                   'bg-[#1B5724]': row.department === 'Software',
