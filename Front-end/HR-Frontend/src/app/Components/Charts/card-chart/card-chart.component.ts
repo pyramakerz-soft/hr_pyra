@@ -9,10 +9,9 @@ import { Component, Input } from '@angular/core';
   styleUrl: './card-chart.component.css'
 })
 export class CardChartComponent {
-  @Input() Data: { label: string; icon: string; percentage: string; } = {
+  @Input() Data: { label: string; icon: string; percentage: string;} = {
     label: '',
     icon: '',
     percentage: ''
   };
-
 }
