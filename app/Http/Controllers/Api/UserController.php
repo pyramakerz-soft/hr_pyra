@@ -250,13 +250,13 @@ class UserController extends Controller
         if (!$authUser->hasRole('Hr')) {
             return $this->returnError('You are not authorized to update users', 403);
         }
-
-        $department = Department::find($user->department_id);
+        $department_id = $request->has('department_id') ? $request->department_id : $user->department_id;
+        // dd($department_id);
+        $department = Department::find($department_id);
         if (!$department) {
             return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
         }
 
-        // Generate unique code for user
         do {
             $departmentPrefix = substr(Str::slug($department->name), 0, 4);
             $randomDigits = mt_rand(1000, 9999);
@@ -278,7 +278,7 @@ class UserController extends Controller
             'national_id' => $request->national_id ?? $user->national_id,
             'code' => $code,
             'gender' => $request->gender ?? $user->gender,
-            'department_id' => (int) $department->id,
+            'department_id' => (int) $department_id,
             'image' => $imageUrl,
         ]);
 
@@ -286,6 +286,9 @@ class UserController extends Controller
 
         // Update user detail information
         $userDetail = UserDetail::where('user_id', $user->id)->first();
+        if (!$userDetail) {
+            return $this->returnError('No User Detail Found for this User');
+        }
         $salary = $request->salary; // Example: 24000
         $working_hours_day = $request->working_hours_day; // Example: 8
         if ($working_hours_day === null || $working_hours_day == 0) {

@@ -24,7 +24,6 @@ class HrController extends Controller
         }
 
         $startOfYear = Carbon::create($year, 1, 1);
-        // $endOfYear = Carbon::create($year, 12, 31);
 
         $currentDate = Carbon::now();
 

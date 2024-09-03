@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -21,13 +22,36 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        $user = $this->route('user'); // Assuming you're passing the user ID as a route parameter
+        // dd($user->id);
         return [
             'name' => ['nullable', 'string', 'min:3'],
-            'email' => ['nullable', 'email'],
+            'email' => [
+                'nullable',
+                'email',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'phone' => [
+                'nullable',
+                'regex:/^01[0125][0-9]{8}$/',
+                Rule::unique('users', 'phone')->ignore($user->id),
+            ],
+            'contact_phone' => [
+                'nullable',
+                'regex:/^01[0125][0-9]{8}$/',
+                Rule::unique('users', 'contact_phone')->ignore($user->id),
+            ],
+            'national_id' => [
+                'nullable',
+                'string',
+                'regex:/^[0-9]{14}$/',
+                Rule::unique('users', 'national_id')->ignore($user->id),
+            ],
+            // 'email' => ['nullable', 'email'],
             // 'password' => ['nullable', 'min:6'],
-            'phone' => ['nullable', 'regex:/^01[0125][0-9]{8}$/'],
-            'contact_phone' => ['nullable', 'regex:/^01[0125][0-9]{8}$/'],
-            'national_id' => ['nullable', 'string', 'regex:/^[0-9]{14}$/'],
+            // 'phone' => ['nullable', 'regex:/^01[0125][0-9]{8}$/'],
+            // 'contact_phone' => ['nullable', 'regex:/^01[0125][0-9]{8}$/'],
+            // 'national_id' => ['nullable', 'string', 'regex:/^[0-9]{14}$/'],
             'code' => ['nullable', 'string'],
             'gender' => ['nullable', 'in:m,M,F,f'],
             'department_id' => ['nullable', 'exists:departments,id'],
