@@ -87,7 +87,6 @@ class HrController extends Controller
             ->with('work_types')
             ->get();
 
-        dd($employees->toArray());
         if ($employees->isEmpty()) {
             return $this->returnError("There are no employees found for the year {$year}");
         }
