@@ -26,8 +26,7 @@ export class ChartsService {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    // return this.http.get(`${this.baseUrl}/employees_workTypes_precentage?year=${Year}`, { headers, responseType: 'json' });
-    return this.http.get(`${this.baseUrl}/employees_workTypes_precentage`, { headers, responseType: 'json' });
+    return this.http.get(`${this.baseUrl}/employees_workTypes_percentage?year=${Year}`, { headers, responseType: 'json' });
   }
   
   getDepartmentEmployees(Year:Number){
@@ -35,7 +34,6 @@ export class ChartsService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
     return this.http.get(`${this.baseUrl}/department_employees?year=${Year}`, { headers, responseType: 'json' });
-    // return this.http.get(`${this.baseUrl}/department_employees`, { headers, responseType: 'json' });
   }
 
 
