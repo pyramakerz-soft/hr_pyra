@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, SimpleChanges } from '@angular/core';
 import Chart from 'chart.js/auto';
+import { ChartsService } from '../../../Services/charts.service';
 
 
 @Component({
@@ -13,24 +14,37 @@ import Chart from 'chart.js/auto';
 export class DonutChartComponent {
   @Input() Year: Number = 0;
   baseColor = '#437EF7';
-  data = [300, 240, 100];
-  labels = ['Segment 1', 'Segment 2', 'Segment 3'];
+  data:any = [];
+  labels:any = [];
   colors = [this.baseColor]; 
+  total = 0
 
   public chart: any;
   segments: { color: any; label: string, value: number }[] = [];
 
-  ngOnInit(): void {
-    this.createChart();
+  constructor(public chartService:ChartsService){}
+
+  ngOnInit() {
+    this.getData();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['Year'] && !changes['Year'].isFirstChange()) {
-      console.log(this.Year);
+      this.getData()
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.chart) {
+      this.chart.destroy();
     }
   }
 
   createChart() {
+    if (this.chart) {
+      this.chart.destroy();
+    }
+
     function lightenColor(color: string, percent: number) {
       color = color.replace(/^#/, '');
   
@@ -45,11 +59,12 @@ export class DonutChartComponent {
       return `#${[r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
     }
   
-    for (let i = 1; i < 6; i++) {
+    for (let i = 1; i <= this.data.length; i++) {
       this.colors.push(lightenColor(this.baseColor, i * 0.3)); 
+      this.total = this.total + this.data[i - 1]
     }
 
-    this.segments = this.labels.map((label, index) => ({
+    this.segments = this.labels.map((label: any, index: number ) => ({
       label,
       value: this.data[index],
       color: this.colors[index]
@@ -82,7 +97,7 @@ export class DonutChartComponent {
       },
       plugins: [{
         id: 'custom-text-in-center',
-        afterDraw: function(chart) {
+        afterDraw: (chart) => { 
           const ctx = chart.ctx;
           const chartArea = chart.chartArea;
           const centerX = (chartArea.left + chartArea.right) / 2;
@@ -90,6 +105,7 @@ export class DonutChartComponent {
           
           ctx.save();
           const additionalText = 'Total'; 
+          const totalNum = (this.total).toString(); 
           ctx.textBaseline = 'middle';
           ctx.textAlign = 'center';
           
@@ -98,11 +114,29 @@ export class DonutChartComponent {
           ctx.fillText(additionalText, centerX, centerY -11);
           ctx.fillStyle = '#272D37'; 
           ctx.font = "bold 22px poppins";
-          ctx.fillText("500", centerX, centerY + 11);
+          ctx.fillText(totalNum, centerX, centerY + 11);
 
           ctx.restore();
         }
       }]
     });
+  }
+
+  getData(){
+    this.chartService.getDepartmentEmployees(this.Year).subscribe(
+      (d:any)=>{
+        console.log(d)
+        this.data = []
+        this.labels = []
+        this.colors = [this.baseColor];
+
+        Object.keys(d.departmentEmployeesCounts).forEach((key) => {
+          this.data.push(d.departmentEmployeesCounts[key])
+          this.labels.push(key)
+        });
+
+        this.createChart();
+      }
+    )
   }
 }
