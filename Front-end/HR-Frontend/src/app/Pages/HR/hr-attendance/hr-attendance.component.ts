@@ -198,28 +198,25 @@ export class HrAttendanceComponent {
   }
 
   ExportData(){
-    console.log(this.DateString)
-    // this.UserClocksService.ExportAllUserDataById(this.DateString).subscribe(
-    //   (result: Blob) => {
-    //     const url = window.URL.createObjectURL(result);
-    //     const a = document.createElement('a');
-    //     a.href = url;
-    //     a.download = `Employee_ClockIn.xlsx`; 
-    //     a.click();
-    //     window.URL.revokeObjectURL(url);
-    //   },
-    //   (error) => {
-    //     console.log(error)
-
-    //     if(error.status == 404){
-    //       Swal.fire({   
-    //         text: "There are no clock in for this Date",
-    //         confirmButtonText: "OK",
-    //         confirmButtonColor: "#FF7519",
-    //       });
-    //     }
-    //   }
-    // );
+    this.UserClocksService.ExportAllUserDataById(this.DateString).subscribe(
+      (result: Blob) => {
+        const url = window.URL.createObjectURL(result);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Employees_ClockIn.xlsx`; 
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      (error) => {
+        if(error.status == 404){
+          Swal.fire({   
+            text: "There are no clock in for this Date",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
+          });
+        }
+      }
+    );
   }
 
 }

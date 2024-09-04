@@ -24,8 +24,14 @@ export class ClockService {
     return this.http.post(`${this.baseUrl}/clock_in`, body, { headers, responseType: 'json' });
   }
   
-  CreateClockInByHrForOther(userId: number, location_id: number ,clock_in:string, location_type:string="site") {
-    const body = { location_type, clock_in, location_id};
+  CreateClockInByHrForOther(userId: number, location_id: number|null ,clock_in:string, location_type:string="site") {
+    let body
+    if(location_type == "home"){
+      body = { location_type, clock_in};
+    }
+    else{
+      body = { location_type, clock_in, location_id};
+    }
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
@@ -69,21 +75,6 @@ export class ClockService {
   ExportAllUserDataById(date:string){
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get(`${this.baseUrl}/clocks/user/?month=${date}&export=true`, { headers, responseType: 'blob' });  
+    return this.http.get(`${this.baseUrl}/all_clocks?month=${date}&export=true`, { headers, responseType: 'blob' });  
   }
-
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-

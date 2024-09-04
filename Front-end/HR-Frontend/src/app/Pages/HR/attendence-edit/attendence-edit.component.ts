@@ -29,9 +29,10 @@ export class AttendenceEditComponent {
     if (navigation?.extras.state) {
       this.data = navigation.extras.state['data'] as EmployeeDashboard;
       this.UserId = navigation.extras.state['UserId'] ;
-      console.log(this.data)
 
+      if(this.data.formattedClockIn)
       this.data.formattedClockIn= this.transformUTCToEgyptTime(this.data.formattedClockIn);
+      if(this.data.formattedClockOut)
       this.data.formattedClockOut= this.transformUTCToEgyptTime(this.data.formattedClockOut);
 
 
@@ -88,6 +89,7 @@ export class AttendenceEditComponent {
 
   transformUTCToEgyptTime(utcDateTime: string): string {
     // Parse the input UTC datetime string to a Date object
+    console.log()
     const [datePart, timePart] = utcDateTime.split(' ');
     const [year, month, day] = datePart.split('-').map(Number);
     const [hours, minutes] = timePart.split(':').map(Number);

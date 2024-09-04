@@ -15,8 +15,8 @@ class LocationSeeder extends Seeder
         Location::create([
             'name' => "Yehia Mosque",
             'address' => "AboQeir Street Zizinya",
-            'latitude' => "31.2403946",
-            'longitude' => "29.9653698",
+            'latitude' => "31.2475701",
+            'longitude' => "29.9632017",
 
         ]);
         Location::factory()->count(19)->create();

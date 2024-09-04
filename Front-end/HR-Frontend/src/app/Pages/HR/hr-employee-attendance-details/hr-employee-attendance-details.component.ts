@@ -28,11 +28,11 @@ export class HrEmployeeAttendanceDetailsComponent {
   UserID: number = 1;
   DisplayPagginationOrNot: boolean = true;
   SelectedDate: string = ""
-  employee:AddEmployee = new AddEmployee(
+  employee: AddEmployee = new AddEmployee(
     null, '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [1], [], [], [], false);
 
   isDateSelected = false
-  rowNumber:number=1;
+  rowNumber: boolean[] = [];
 
   selectedMonth: string = "01";
   selectedYear: number = 0;
@@ -54,8 +54,8 @@ export class HrEmployeeAttendanceDetailsComponent {
   ];
   years: number[] = [];
 
-  constructor(public empDashserv: EmployeeDashService, public UserClocksService: 
-    ClockService, public activatedRoute: ActivatedRoute, public userService:UserServiceService,
+  constructor(public empDashserv: EmployeeDashService, public UserClocksService:
+    ClockService, public activatedRoute: ActivatedRoute, public userService: UserServiceService,
     public route: Router, public dialog: MatDialog) { }
 
 
@@ -87,7 +87,7 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   populateYears(): void {
     const startYear = 2019;
-    const currentYear = new Date().getFullYear(); 
+    const currentYear = new Date().getFullYear();
 
     for (let year = startYear; year <= currentYear; year++) {
       this.years.push(year);
@@ -97,7 +97,7 @@ export class HrEmployeeAttendanceDetailsComponent {
   onMonthChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     if (target) {
-      this.selectedMonth = target.value; 
+      this.selectedMonth = target.value;
       this.DateString = this.selectedYear + "-" + this.selectedMonth
       this.tableData = []
       this.getAllClocks(1)
@@ -107,7 +107,7 @@ export class HrEmployeeAttendanceDetailsComponent {
   onYearChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     if (target) {
-      this.selectedYear = +target.value; 
+      this.selectedYear = +target.value;
       this.DateString = this.selectedYear + "-" + this.selectedMonth
       this.tableData = []
       this.getAllClocks(1)
@@ -141,21 +141,13 @@ export class HrEmployeeAttendanceDetailsComponent {
     return `${formattedHours}:${formattedMinutes} ${localPeriod}`;
   }
 
-  getEmployeeByID(id:number){
+  getEmployeeByID(id: number) {
     this.activatedRoute.data.subscribe(
       (data) => {
-        this.employee = data['user'].User ;
+        this.employee = data['user'].User;
       }
     )
-    // this.userService.getUserById(id).subscribe(
-    //   (d: any) => {
-    //     this.employee = d.User;
-    //     console.log(d)
-    //   },
-    //   (error) => {
-    //     console.log(error)
-    //   }
-    // );
+
   }
 
 
@@ -163,6 +155,7 @@ export class HrEmployeeAttendanceDetailsComponent {
     this.UserClocksService.GetUserClocksById(this.UserID, PgNumber, this.DateString).subscribe(
       (d: any) => {
         this.tableData = d.data.clocks;
+        this.rowNumber = new Array(this.tableData.length).fill(false);
         this.PagesNumber = d.data.pagination.last_page;
       }
     );
@@ -186,8 +179,9 @@ export class HrEmployeeAttendanceDetailsComponent {
   }
 
   toggleOtherClocks(index: number): void {
-    this.showOtherClocks = !this.showOtherClocks;
-    this.rowNumber=index;
+
+    this.rowNumber[index] = !this.rowNumber[index];
+    this.showOtherClocks = this.rowNumber.some(state => state);
   }
 
   searchByDate() {
@@ -197,7 +191,7 @@ export class HrEmployeeAttendanceDetailsComponent {
           this.tableData = d.data.clocks;
           this.PagesNumber = 1;
           this.DisplayPagginationOrNot = false;
-          
+
         },
         (error) => {
           this.tableData = [];
@@ -211,13 +205,12 @@ export class HrEmployeeAttendanceDetailsComponent {
     }
   }
 
-  EditUserClock(Clock:EmployeeDashboard) {
+  EditUserClock(Clock: EmployeeDashboard) {
 
-    console.log(Clock)
-    this.route.navigate(['HR/HREmployeeAttendanceEdit'], { state: { data: Clock ,UserId:this.UserID } }); 
+    this.route.navigate(['HR/HREmployeeAttendanceEdit'], { state: { data: Clock, UserId: this.UserID } });
   }
 
-  ClearSearch(){
+  ClearSearch() {
     this.isDateSelected = false
     this.SelectedDate = ''
     if (this.UserID) {
@@ -226,10 +219,10 @@ export class HrEmployeeAttendanceDetailsComponent {
     }
   }
 
-  openDialog(){
+  openDialog() {
 
     const dialogRef = this.dialog.open(ClockInPopUpComponent, {
-      data: { Name: this.employee.name , job_title: this.employee.emp_type , work_home:this.employee.work_home, isClockInFromHrToOtherUser:true, userId: this.UserID } 
+      data: { Name: this.employee.name, job_title: this.employee.emp_type, work_home: this.employee.work_home, isClockInFromHrToOtherUser: true, userId: this.UserID }
 
     });
     dialogRef.afterClosed().subscribe(result => {
@@ -239,22 +232,21 @@ export class HrEmployeeAttendanceDetailsComponent {
     });
   }
 
-  ExportData(){
+  ExportData() {
     this.UserClocksService.ExportUserDataById(this.UserID, this.DateString).subscribe(
       (result: Blob) => {
-        console.log(result)
         const url = window.URL.createObjectURL(result);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${this.employee.name}_ClockIn.xlsx`; 
+        a.download = `${this.employee.name}_ClockIn.xlsx`;
         a.click();
         window.URL.revokeObjectURL(url);
       },
       (error) => {
         console.log(error)
 
-        if(error.status == 404){
-          Swal.fire({   
+        if (error.status == 404) {
+          Swal.fire({
             text: "There are no clock in for this User at this Date",
             confirmButtonText: "OK",
             confirmButtonColor: "#FF7519",

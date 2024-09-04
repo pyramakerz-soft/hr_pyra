@@ -8,49 +8,52 @@ import { ClockEventService } from '../../../Services/clock-event.service';
 @Component({
   selector: 'app-table',
   standalone: true,
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css'
 })
 export class TableComponent {
-  token:any="";
-  Userclocks:EmployeeDashboard[]=[];
-  pageNumber=1;
-  showOtherClocks: boolean= false; 
+  token: any = "";
+  Userclocks: EmployeeDashboard[] = [];
+  pageNumber = 1;
+  showOtherClocks: boolean = false;
   PagesNumber: number = 1;
   CurrentPageNumber: number = 1;
   pages: number[] = [];
   SelectedDate: string = ""
   isDateSelected = false
 
-  rowNumber:number=1;
+  rowNumber: boolean[] = [];
 
   constructor(
-    public empDashserv:EmployeeDashService,
+    public empDashserv: EmployeeDashService,
     private clockEventService: ClockEventService
 
-  ){
+  ) {
   }
 
   ngOnInit(): void {
     this.GetClockss(1);
+
     this.clockEventService.clockedIn$.subscribe(() => {
       this.GetClockss(this.pageNumber);
     });
   }
 
- 
-  GetClockss(pgNumb:number){
-    this.pageNumber=pgNumb;
+
+  GetClockss(pgNumb: number) {
+    this.pageNumber = pgNumb;
     this.token = localStorage.getItem("token");
-    this.empDashserv.GetClocks(this.token,pgNumb).subscribe(
-     (d: any) => {
-       this.Userclocks = d.data.clocks; 
-     },
-     (error) => {
-       console.error('Error retrieving user clocks:', error);
-     }
-   );
+    this.empDashserv.GetClocks(this.token, pgNumb).subscribe(
+      (d: any) => {
+        this.Userclocks = d.data.clocks;
+        this.rowNumber = new Array(this.Userclocks.length).fill(false);
+
+      },
+      (error) => {
+        console.error('Error retrieving user clocks:', error);
+      }
+    );
   }
 
   generatePages() {
@@ -71,8 +74,9 @@ export class TableComponent {
   }
 
   toggleOtherClocks(index: number): void {
-    this.showOtherClocks = !this.showOtherClocks;
-    this.rowNumber=index;
+
+    this.rowNumber[index] = !this.rowNumber[index];
+    this.showOtherClocks = this.rowNumber.some(state => state);
 
   }
 
@@ -100,16 +104,15 @@ export class TableComponent {
 
   searchByDate() {
     if (this.SelectedDate) {
-      this.empDashserv.SearchByDateInClockByToken( this.SelectedDate).subscribe(
+      this.empDashserv.SearchByDateInClockByToken(this.SelectedDate).subscribe(
         (d: any) => {
-          this.Userclocks=[]
+          this.Userclocks = []
           this.Userclocks = d.data.clocks;
           this.PagesNumber = 1;
-          console.log(this.Userclocks)
         },
         (error) => {
-          if(error.status == 404){
-            this.Userclocks=[]
+          if (error.status == 404) {
+            this.Userclocks = []
           }
           this.PagesNumber = 1;
         }
@@ -119,13 +122,13 @@ export class TableComponent {
     }
   }
 
-  ClearSearch(){
+  ClearSearch() {
     this.isDateSelected = false
     this.SelectedDate = ''
     this.GetClockss(1);
     this.clockEventService.clockedIn$.subscribe(() => {
       this.GetClockss(this.pageNumber);
     });
-  
+
   }
 }

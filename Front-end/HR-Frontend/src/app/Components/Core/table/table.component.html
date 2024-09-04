@@ -71,7 +71,7 @@
                             </div>
                         </div>
 
-                        <div *ngIf="showOtherClocks && i==rowNumber" class="flex flex-col mt-1 space-y-1 items-center">
+                        <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
                             <div *ngFor="let cl of row.otherClocks; let j = index"
                                 class=" text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
                                 {{ convertUTCToEgyptLocalTime(cl.clockIn)}}
@@ -95,7 +95,7 @@
                                 </div>
                             </ng-template>
                         </div>
-                        <div *ngIf="showOtherClocks && i==rowNumber" class="flex flex-col mt-1 space-y-1 items-center">
+                        <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
                             <div *ngFor="let cl of row.otherClocks; let j = index">
                                 <ng-container *ngIf="cl.clockOut; else emptyClockState">
                                     <div
@@ -150,7 +150,7 @@
                                 {{ row.site }}
                             </div>
                         </div>
-                        <div *ngIf="showOtherClocks" class="flex flex-col mt-1 space-y-1 items-center">
+                        <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
                             <div *ngFor="let cl of row.otherClocks; let j = index"
                                 class=" text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
                                 <p *ngIf="cl.clockOut">{{cl.site}}</p>
