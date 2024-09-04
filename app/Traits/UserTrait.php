@@ -5,7 +5,6 @@ namespace App\Traits;
 use App\Models\Department;
 use App\Models\User;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 
 trait UserTrait
 {
@@ -25,18 +24,18 @@ trait UserTrait
         return $code;
     }
 
-    public function uploadImage(Request $request, $inputName = 'image', $directory = 'assets/images/Users')
+    public function uploadImage($image)
     {
-        if ($request->hasFile($inputName)) {
-            $path = public_path($directory);
+        if ($image->isValid()) {
+            $path = public_path('assets/images/Users');
             if (!file_exists($path)) {
                 mkdir($path, 0777, true);
             }
 
-            $newImageName = uniqid() . "-employee." . $request->file($inputName)->extension();
-            $request->file($inputName)->move($path, $newImageName);
+            $newImageName = uniqid() . "-employee." . $image->extension();
+            $image->move($path, $newImageName);
 
-            return asset($directory . '/' . $newImageName);
+            return asset('assets/images/Users/' . $newImageName);
         }
 
         return false;
