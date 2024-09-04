@@ -234,7 +234,7 @@ export class ClockInPopUpComponent {
   sendLocationByHrForOthers(){
     const clockIn = this.DateClockInFromHrForOthers + " " + this.TimeClockInFromHrForOthers + ":00"
     const UTCTime = this.formatDateToUTCForHr(clockIn)
-
+    console.log(this.selectedSite)
     if(this.userId){
       if(this.WorkHome==false){
         this.clockService.CreateClockInByHrForOther(this.userId, this.LocationClockInFromHrForOthers, UTCTime ,"site").subscribe(

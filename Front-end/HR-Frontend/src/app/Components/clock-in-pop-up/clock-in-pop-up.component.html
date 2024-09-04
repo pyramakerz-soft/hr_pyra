@@ -18,11 +18,6 @@
 
         <div *ngIf="WorkHome">
             <p class="text-[#3A3A3C] mb-5 font-semibold text-base md:text-xl">Select the site</p>
-            <!-- <select [(ngModel)]="selectedSite" class="rounded-xl p-2 w-full flex items-center mb-8 md:mb-12"
-                style="border: 1px solid #E5E5EA;">
-                <option value="" disabled selected hidden>Choose</option>
-                <option *ngFor="let site of sites" [value]="site.value">{{ site.label }}</option>
-            </select> -->
             @if(sites.length !==0 ) {
             <select [(ngModel)]="selectedSite" class="rounded-md p-2 w-full flex items-center mb-8 md:mb-12 capitalize"
                 style="border: 1px solid #E5E5EA;">
@@ -78,8 +73,8 @@
                 In
             </button>
             <button *ngIf="isClockInFromHrToOtherUser" (click)="sendLocationByHrForOthers()"
-                [disabled]="TimeClockInFromHrForOthers === '' || DateClockInFromHrForOthers === '' || LocationClockInFromHrForOthers === 0 || (WorkHome ? selectedSite === '' : '' )"
-                [ngClass]="{'opacity-50 cursor-not-allowed disabled:': TimeClockInFromHrForOthers === '' || DateClockInFromHrForOthers === '' || LocationClockInFromHrForOthers === 0 || (WorkHome ? selectedSite === '' : '' )}"
+                [disabled]="TimeClockInFromHrForOthers === '' || DateClockInFromHrForOthers === '' || (WorkHome && selectedSite === 'home' ? false : LocationClockInFromHrForOthers === 0 ) || (WorkHome ? selectedSite === '' : '' )"
+                [ngClass]="{'opacity-50 cursor-not-allowed disabled:': TimeClockInFromHrForOthers === '' || DateClockInFromHrForOthers === '' || (WorkHome && selectedSite === 'home' ? false : LocationClockInFromHrForOthers === 0 ) || (WorkHome ? selectedSite === '' : '' )}"
                 class="font-bold text-base md:text-2xl text-white py-2 md:py-4 px-5 md:px-9 rounded-2xl border border-[#FF7519] bg-[#FF7519]">Clock
                 In
             </button>
