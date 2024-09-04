@@ -69,11 +69,8 @@ export class ClockService {
   ExportAllUserDataById(date:string){
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get(`${this.baseUrl}/clocks/user/?month=${date}&export=true`, { headers, responseType: 'blob' });  
+    return this.http.get(`${this.baseUrl}/all_clocks?month=${date}&export=true`, { headers, responseType: 'blob' });  
   }
-
-
-
 }
 
 
