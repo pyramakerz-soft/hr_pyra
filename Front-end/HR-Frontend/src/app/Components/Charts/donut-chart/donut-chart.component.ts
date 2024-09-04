@@ -13,7 +13,7 @@ import { ChartsService } from '../../../Services/charts.service';
 })
 export class DonutChartComponent {
   @Input() Year: Number = 0;
-  baseColor = '#437EF7';
+  baseColor = '#135DCB';
   data:any = [];
   labels:any = [];
   colors = [this.baseColor]; 
@@ -60,7 +60,7 @@ export class DonutChartComponent {
     }
   
     for (let i = 1; i <= this.data.length; i++) {
-      this.colors.push(lightenColor(this.baseColor, i * 0.3)); 
+      this.colors.push(lightenColor(this.baseColor, i * 0.22)); 
       this.total = this.total + this.data[i - 1]
     }
 

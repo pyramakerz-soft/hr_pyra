@@ -17,7 +17,6 @@ export class CardChartComponent {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['Data'] && !changes['Data'].isFirstChange()) {
-      console.log('Data changed:', this.Data);
     }
   }
 }

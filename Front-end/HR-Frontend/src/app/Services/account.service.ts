@@ -61,7 +61,3 @@ export class AccountService {
   }
 }  
 
-function jwt_decode(token: string): any {
-  console.log('Function not implemented.');
-}
-
