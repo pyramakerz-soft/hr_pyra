@@ -33,4 +33,13 @@ export class EmployeeDashService {
     return this.http.get<EmployeeDashboard[]>(`${this.baseUrl}/user_clocks?date=${date}`, { headers });
 
   }
+
+  
+  ImportEmployee(file:File){
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<any>(`${this.baseUrl}/import-users-from-excel`, formData, { headers });
+  }
 }

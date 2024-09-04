@@ -138,7 +138,6 @@ class UserController extends Controller
         if (!$authUser->hasRole('Hr')) {
             return $this->returnError('You are not authorized to update users', 403);
         }
-
         $department_id = $request->has('department_id') ? $request->department_id : $user->department_id;
         $department = Department::find($department_id);
         if (!$department) {
@@ -159,6 +158,7 @@ class UserController extends Controller
         if (!$updatedUserDetail) {
             return $this->returnError('Failed to Update User Detail');
         }
+        // Assign roles, locations, and work types
         if ($request->has('roles')) {
             $this->assignRoles($user, $request->input('roles'));
         }
@@ -177,8 +177,7 @@ class UserController extends Controller
         ];
 
         return $this->returnData("data", $data, "User Updated");
-
-        // // Update Assigning Roles to User
+        // Update Assigning Roles to User
         // $newRoles = $request->input('roles') ?? $user->getRoleNames()->toArray();
         // $user->syncRoles($newRoles);
 
@@ -190,10 +189,6 @@ class UserController extends Controller
         // $newWorkTypes = $request->input('work_type_id') ?? $user->work_types()->pluck('work_types.id')->toArray();
         // $user->work_types()->sync($newWorkTypes);
 
-        // Assign roles, locations, and work types
-        // $this->assignRoles($user, $request->input('roles', []));
-        // $this->assignLocations($user, $request->input('location_id', []));
-        // $this->assignWorkTypes($user, $request->input('work_type_id', []));
         // return $this->returnData("data", $finalData, "User Updated");
     }
 
