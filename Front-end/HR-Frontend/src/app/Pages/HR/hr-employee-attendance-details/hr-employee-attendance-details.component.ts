@@ -147,15 +147,7 @@ export class HrEmployeeAttendanceDetailsComponent {
         this.employee = data['user'].User;
       }
     )
-    // this.userService.getUserById(id).subscribe(
-    //   (d: any) => {
-    //     this.employee = d.User;
-    //     console.log(d)
-    //   },
-    //   (error) => {
-    //     console.log(error)
-    //   }
-    // );
+
   }
 
 
@@ -215,7 +207,6 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   EditUserClock(Clock: EmployeeDashboard) {
 
-    console.log(Clock)
     this.route.navigate(['HR/HREmployeeAttendanceEdit'], { state: { data: Clock, UserId: this.UserID } });
   }
 
@@ -244,7 +235,6 @@ export class HrEmployeeAttendanceDetailsComponent {
   ExportData() {
     this.UserClocksService.ExportUserDataById(this.UserID, this.DateString).subscribe(
       (result: Blob) => {
-        console.log(result)
         const url = window.URL.createObjectURL(result);
         const a = document.createElement('a');
         a.href = url;
