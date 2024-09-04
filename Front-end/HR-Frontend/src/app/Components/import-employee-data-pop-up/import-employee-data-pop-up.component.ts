@@ -27,7 +27,6 @@ export class ImportEmployeeDataPopUpComponent {
     { Day: "Saturday", Date: 'Apr 28th 2024', Clock_in: "10:25 Am", Clock_out: "10:25 Am", Total_hours: "8:00 H", Location_In: "42 Abd Al Aziz Agamea, Sidi Gaber, Alexandria Governorate 5433112,Egypt", Location_out: "42 Abd Al Aziz Agamea, Sidi Gaber, Alexandria Governorate 5433112,Egypt", Site: "Home"},
     { Day: "Saturday", Date: 'Apr 28th 2024', Clock_in: "10:25 Am", Clock_out: "10:25 Am", Total_hours: "8:00 H", Location_In: "42 Abd Al Aziz Agamea, Sidi Gaber, Alexandria Governorate 5433112,Egypt", Location_out: "42 Abd Al Aziz Agamea, Sidi Gaber, Alexandria Governorate 5433112,Egypt", Site: "Home"},
     { Day: "Saturday", Date: 'Apr 28th 2024', Clock_in: "10:25 Am", Clock_out: "10:25 Am", Total_hours: "8:00 H", Location_In: "42 Abd Al Aziz Agamea, Sidi Gaber, Alexandria Governorate 5433112,Egypt", Location_out: "42 Abd Al Aziz Agamea, Sidi Gaber, Alexandria Governorate 5433112,Egypt", Site: "Home"},
-    // Add more data as needed
   ];
 
   constructor(public dialogRef: MatDialogRef<ImportEmployeeDataPopUpComponent>){}
