@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClockController;
 use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\HrController;
@@ -29,14 +30,20 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::group(['prefix' => 'auth'], function () {
-    Route::get('/user_by_token', [UserController::class, 'profile'])->name('user.profile');
+    Route::post('login', [AuthController::class, 'login'])->name('auth.login');
+    Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
+    Route::get('/user_by_token', [AuthController::class, 'profile'])->name('auth.profile');
+
+});
+Route::group(['prefix' => 'auth'], function () {
+    // Route::get('/user_by_token', [UserController::class, 'profile'])->name('user.profile');
     Route::get('/users_by_name', [UserController::class, 'getAllUsersNames'])->name('user.names');
     Route::post('/update_user/{user}', [UserController::class, 'update'])->name('user.update');
     Route::get('/getAllUsers', [UserController::class, 'index'])->name('users.all');
     Route::delete('/delete_user/{user}', [UserController::class, 'destroy'])->name('user.delete');
     Route::post('/create_user', [UserController::class, 'store'])->name('user.store');
-    Route::post('login', [UserController::class, 'login'])->name('user.login');
-    Route::post('logout', [UserController::class, 'logout'])->name('user.logout');
+    // Route::post('login', [UserController::class, 'login'])->name('user.login');
+    // Route::post('logout', [UserController::class, 'logout'])->name('user.logout');
     Route::post('assign_role/{user}', [UserController::class, 'AssignRole'])->name('user.roles');
     Route::get('/get_user_by_id/{user}', [UserController::class, 'show'])->name('user.show');
     Route::post('update_password/{user}', [UserController::class, 'updatePassword'])->name('user.updatePassword');

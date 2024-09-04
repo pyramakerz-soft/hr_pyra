@@ -41,7 +41,7 @@
         </div>
     </div>
 
-    <div class="flex justify-between mb-2 items-center">
+    <!-- <div class="flex justify-between mb-2 items-center">
         <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">{{ getFormattedMonthYear() }}</p>
         <div class="flex space-x-2 md:space-x-4">
             <button class="h-9 md:h-11 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-4 py-3 flex items-center"
@@ -55,7 +55,7 @@
                 Next<i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>
-    </div>
+    </div> -->
 
     <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">
         <table class="overflow-auto bg-[#FFFFFF] text-center text-[#475467] w-full">
@@ -229,7 +229,6 @@
         </table>
     </div>
     <div class="mt-5 md:flex justify-between items-center" *ngIf="DisplayPagginationOrNot">
-        <!-- Previous Button -->
         <button
             class="h-[44px] w-[119px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center"
             [ngClass]="{'hidden': CurrentPageNumber === 1, 'opacity-50 cursor-not-allowed': CurrentPageNumber === 1}"
@@ -237,7 +236,6 @@
             <i class="fa-solid fa-arrow-left"></i> Previous
         </button>
 
-        <!-- Pagination Buttons -->
         <div class="flex justify-center items-center space-x-5 md:block">
             <button *ngFor="let page of pages" class="h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
                 [ngClass]="{'border border-[#D0D5DD]': page === CurrentPageNumber}" (click)="getAllClocks(page)">
@@ -245,7 +243,6 @@
             </button>
         </div>
 
-        <!-- Next Button -->
         <button
             class="h-[44px] w-[92px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center"
             [ngClass]="{'hidden': CurrentPageNumber === PagesNumber, 'opacity-50 cursor-not-allowed': CurrentPageNumber === PagesNumber}"
