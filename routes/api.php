@@ -74,6 +74,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::post('users/{user}/locations', [HrController::class, 'assignLocationToUser'])->name('users.assignLocation');
     Route::get('users/{user}/locations', [HrController::class, 'getLocationAssignedToUser'])->name('users.userLocation');
+    Route::post('/import-users-from-excel', [UserController::class, 'importUsersFromExcel']);
 
     Route::post('users/{user}/workTypes', [HrController::class, 'assignWorkTypeToUser'])->name('users.assignWorkType');
     Route::get('users/workTypes', [HrController::class, 'getWorkTypeAssignedToUser'])->name('users.usersWorkTypes');

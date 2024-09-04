@@ -20,7 +20,9 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
@@ -89,7 +91,125 @@ class UserController extends Controller
 
     public function store(RegisterRequest $request)
     {
+        return $this->createOrUpdateUser($request);
+    }
+    public function importUsersFromExcel(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|mimes:xlsx'
+        ]);
 
+        if ($validator->fails()) {
+            return $this->returnError('Invalid file format. Please upload an Excel file (.xlsx).', Response::HTTP_BAD_REQUEST);
+        }
+
+        $file = $request->file('file');
+
+        try {
+            $users = Excel::toArray([], $file);
+
+            if (empty($users) || empty($users[0])) {
+                return $this->returnError('No data found in the Excel file.', Response::HTTP_BAD_REQUEST);
+            }
+
+            $sheetData = $users[0];
+
+            $headers = array_map('trim', $sheetData[0]);
+
+            $headers = array_map('strtolower', $headers);
+
+            $requiredFields = ['name', 'email', 'password', 'phone', 'contact_phone', 'national_id', 'department_id', 'gender', 'salary', 'working_hours_day', 'overtime_hours', 'start_time', 'end_time', 'emp_type', 'hiring_date', 'roles', 'location_id', 'work_type_id'];
+
+            foreach ($requiredFields as $requiredField) {
+                if (!in_array($requiredField, $headers)) {
+                    return $this->returnError("Invalid data format: Missing '$requiredField' header in the Excel file. Headers found: " . implode(', ', $headers), Response::HTTP_BAD_REQUEST);
+                }
+            }
+
+            $results = [];
+
+            for ($i = 1; $i < count($sheetData); $i++) {
+                $row = array_combine($headers, $sheetData[$i]);
+
+                $row = array_map('trim', $row);
+
+                foreach ($requiredFields as $field) {
+                    if (!isset($row[$field]) || empty($row[$field])) {
+                        return $this->returnError("Missing or empty required field '$field' in row " . ($i + 1), Response::HTTP_BAD_REQUEST);
+                    }
+                }
+
+                $department = Department::find((int) $row['department_id']);
+                if (!$department) {
+                    return $this->returnError('Invalid department selected in row ' . ($i + 1), Response::HTTP_BAD_REQUEST);
+                }
+
+                do {
+                    $departmentPrefix = substr(Str::slug($department->name), 0, 4);
+                    $randomDigits = mt_rand(1000, 9999);
+                    $code = strtoupper($departmentPrefix) . '-' . $randomDigits;
+                } while (User::where('code', $code)->exists());
+
+                $user = User::create([
+                    'name' => $row['name'],
+                    'email' => $row['email'],
+                    'password' => bcrypt($row['password']),
+                    'phone' => $row['phone'],
+                    'contact_phone' => $row['contact_phone'],
+                    'national_id' => $row['national_id'],
+                    'code' => $code,
+                    'department_id' => (int) $row['department_id'],
+                    'gender' => $row['gender'],
+                    'serial_number' => null,
+                ]);
+
+                $salary = $row['salary'];
+                $working_hours_day = $row['working_hours_day'];
+                $overtime_hours = $row['overtime_hours'];
+                $hourly_rate = ($salary / 22) / $working_hours_day;
+                $overtime_hourly_rate = (($salary / 30) / $working_hours_day) * $overtime_hours;
+
+                $start_time = $row['start_time'];
+                $end_time = $row['end_time'];
+
+                if ($end_time <= $start_time) {
+                    return $this->returnError('End time must be later than start time for user ' . $row['name'], Response::HTTP_BAD_REQUEST);
+                }
+
+                $userDetail = UserDetail::create([
+                    'salary' => $salary,
+                    'working_hours_day' => $working_hours_day,
+                    'hourly_rate' => $hourly_rate,
+                    'overtime_hourly_rate' => $overtime_hourly_rate,
+                    'overtime_hours' => $overtime_hours,
+                    'start_time' => $start_time,
+                    'end_time' => $end_time,
+                    'emp_type' => $row['emp_type'],
+                    'hiring_date' => $row['hiring_date'],
+                    'user_id' => $user->id,
+                ]);
+
+                $results[] = [
+                    'user' => $user,
+                    'user_detail' => $userDetail,
+                ];
+            }
+
+            return $this->returnData('results', $results, 'Users Imported from Excel successfully.');
+
+        } catch (\Exception $e) {
+            return $this->returnError('Failed to import users from Excel: ' . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+
+
+
+
+
+
+    private function createOrUpdateUser(RegisterRequest $request)
+    {
         $finalData = [];
         $authUser = Auth::user();
 
@@ -136,6 +256,7 @@ class UserController extends Controller
         $overtime_hourly_rate = (($salary / 30) / $working_hours_day) * $overtime_hours;
         $start_time = $request->start_time;
         $end_time = $request->end_time;
+
         if ($end_time <= $start_time) {
             return $this->returnError('End time must be later than start time', Response::HTTP_BAD_REQUEST);
         }
@@ -158,10 +279,9 @@ class UserController extends Controller
         if (!$user || !$userDetail) {
             return $this->returnError('Failed to Store User');
         }
-        //assign role to user
+
         $user->syncRoles($request->input('roles', []));
 
-        // Assign Location to user
         $newLocations = $request->input('location_id', []);
         foreach ($newLocations as $locationId) {
             $LocationAssignedToUser = $user->user_locations()->wherePivot('location_id', $locationId)->exists();
@@ -169,7 +289,7 @@ class UserController extends Controller
                 $user->user_locations()->attach($locationId);
             }
         }
-        // Assign workType to User
+
         $newWorkTypes = $request->input('work_type_id', []);
         foreach ($newWorkTypes as $workTypeId) {
             $workTypeAssignedToUser = $user->work_types()->wherePivot('work_type_id', $workTypeId)->exists();
@@ -180,6 +300,7 @@ class UserController extends Controller
 
         return $this->returnData("data", $finalData, "User Created");
     }
+
 
     public function login(LoginRequest $request)
     {
