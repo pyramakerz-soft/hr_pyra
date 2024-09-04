@@ -9,13 +9,21 @@ use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 class ClocksExport implements WithMultipleSheets
 {
     use Exportable;
+
     public function sheets(): array
     {
         $sheets = [];
-        $users = ClockInOut::all()->toArray();
+
+        $users = ClockInOut::with('user')->select('user_id')->distinct()->get();
+
         foreach ($users as $user) {
-            $sheets[] = new UserClocksExportById($user);
+            $clocks = ClockInOut::where('user_id', $user->user_id)->get();
+
+            $userName = $user->user->name;
+
+            $sheets[] = new UserClocksExportById($clocks, $userName);
         }
+
         return $sheets;
     }
 }
