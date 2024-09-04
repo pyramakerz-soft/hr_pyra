@@ -11,7 +11,11 @@
                     <span class="bg-[#0665EC] text-white py-2 lg:py-4 w-full lg:w-[45%] lg:font-semibold text-xs md:text-sm rounded-lg my-2 md:my-4 text-center">Select Files CSV</span>
                     <p class="font-normal text-xs md:text-sm">or drag File here</p>
                 </label>
-                <input id="file-upload" type="file" class="hidden" accept=".xls, .xlsx, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                <input id="file-upload" type="file"
+                (change)="onFileSelected($event)"
+                class="hidden" 
+                #fileInput
+                accept=".xls, .xlsx, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
             </div>
  
             <div class="my-3 overflow-x-auto rounded-2xl border border-[#EAECF0]">
@@ -111,7 +115,7 @@
     
             <div class=" flex justify-center">
                 <button (click)="closeDialog()" class="font-bold text-base md:text-xl text-[#707070] py-1 md:py-2 px-4 md:px-7 rounded-xl border border-[#9F9999] mr-5">Cancel</button>
-                <button class="font-bold text-base md:text-xl text-white py-1 md:py-2 px-4 md:px-7 rounded-xl border border-[#FF7519] bg-[#FF7519]">Upload</button>
+                <button (click)="ImportEmployees()" class="font-bold text-base md:text-xl text-white py-1 md:py-2 px-4 md:px-7 rounded-xl border border-[#FF7519] bg-[#FF7519]">Upload</button>
             </div>
         </div>
     </div>
