@@ -10,31 +10,22 @@ class ClockResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        // $clockIn = $this->clock_in ? Carbon::parse($this->clock_in)->format('h:iA') : null;
-        // dd(Carbon::parse($this->clock_in)->format('Y-m-d'));
-        // $clockOut = $this->clock_out ? Carbon::parse($this->clock_out)->format('h:iA') : null;
-        // $clockOutFormatted = $clockOut ? Carbon::parse($clockOut)->format('Y-m-d h:i') : null;
+        $clockIn = $this->clock_in ? Carbon::parse($this->clock_in)->format('h:iA') : null;
 
-        $locationOut = null;
-
-        if ($this->location_type == "site") {
-
-            if ($this->clock_out) {
-
-                $locationOut = $this->location->address;
-            }
+        if ($this->clock_out) {
+            $clockOut = Carbon::parse($this->clock_out)->format('h:iA');
+            $formattedClockOut = Carbon::parse($this->clock_out)->format('Y-m-d H:i');
+            $duration = Carbon::parse($this->clock_in)->diff(Carbon::parse($this->clock_out))->format('%H:%I');
+        } else {
+            $clockOut = null;
+            $formattedClockOut = null;
+            $duration = Carbon::parse($this->clock_in)->diff(Carbon::now())->format('%H:%I');
         }
-        $locationIn = null;
 
-        if ($this->location_type == "site") {
-            if ($this->clock_in) {
-                $locationIn = $this->location->address;
-            }
-        }
-        $totalHours = $this->duration ? Carbon::parse($this->duration)->format('H:i') : null;
+        $locationIn = $this->location_type === "site" && $this->clock_in ? $this->location->address : null;
+        $locationOut = $this->location_type === "site" && $this->clock_out ? $this->location->address : null;
 
         $allClocks = ClockInOut::where('user_id', $this->user_id)->get();
-        // dd($allClocks['clock_out']);
         $otherClocksForDay = $allClocks->filter(function ($clock) {
             return Carbon::parse($clock->clock_in)->toDateString() === Carbon::parse($this->clock_in)->toDateString() && $clock->id !== $this->id;
         })->map(function ($clock) {
@@ -48,21 +39,21 @@ class ClockResource extends JsonResource
                 'formattedClockOut' => $clock->clock_out ? Carbon::parse($clock->clock_out)->format('Y-m-d H:i') : null,
             ];
         })->values()->toArray();
+
         return [
             'id' => $this->id,
             'Day' => Carbon::parse($this->clock_in)->format('l'),
             'Date' => Carbon::parse($this->clock_in)->format('Y-m-d'),
-            'clockIn' => Carbon::parse($this->clock_in)->format('h:iA'),
-            'clockOut' => Carbon::parse($this->clock_out)->format('h:iA'),
-            'totalHours' => $totalHours,
+            'clockIn' => $clockIn,
+            'clockOut' => $clockOut,
+            'totalHours' => $duration,
             'locationIn' => $locationIn,
             'locationOut' => $locationOut,
             'userId' => $this->user->id,
             'site' => $this->location_type,
             'formattedClockIn' => Carbon::parse($this->clock_in)->format('Y-m-d H:i'),
-            'formattedClockOut' => Carbon::parse($this->clock_out)->format('Y-m-d H:i'),
+            'formattedClockOut' => $formattedClockOut,
             'otherClocks' => $otherClocksForDay,
-
         ];
     }
 }
