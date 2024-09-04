@@ -52,8 +52,12 @@ class UserService
         $code = $this->generateUniqueCode($data['department_id']);
         $code = $code ?? $user->code;
 
-        $imageUrl = $this->uploadImage($data['image'] ?? null);
-        $imageUrl = $imageUrl ?? $user->image;
+        // Check if an image is provided in the request
+        if (isset($data['image']) && $data['image']->isValid()) {
+            $imageUrl = $this->uploadImage($data['image']);
+        } else {
+            $imageUrl = $user->image;
+        }
 
         // Update user information
         $user->update([
