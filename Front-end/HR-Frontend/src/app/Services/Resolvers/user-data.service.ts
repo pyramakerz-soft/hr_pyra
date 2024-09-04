@@ -11,7 +11,6 @@ export class UserDataService implements Resolve<any> {
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     let userId = Number(route.paramMap.get('Id'));
-    console.log(route.paramMap.get('Id'))
     return this.userService.getUserById(userId);
   }
 }
