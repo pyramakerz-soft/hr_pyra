@@ -198,7 +198,6 @@ export class HrAttendanceComponent {
   }
 
   ExportData(){
-    console.log(this.DateString)
     // this.UserClocksService.ExportAllUserDataById(this.DateString).subscribe(
     //   (result: Blob) => {
     //     const url = window.URL.createObjectURL(result);

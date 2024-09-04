@@ -128,7 +128,6 @@ GetByID(id: number){
 
 UpdateDepartment(){
   const manager = this.ManagerNames.find(manager => manager.manager_name === this.nameSelected);
-  console.log("edit",manager)
   if (manager) {
     const ManagerId = manager.manager_id;
     this.departmentServ.UpdateDept(this.DeptId, this.DeptName, ManagerId).subscribe(
