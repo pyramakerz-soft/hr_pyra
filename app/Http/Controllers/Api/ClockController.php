@@ -205,7 +205,6 @@ class ClockController extends Controller
             $clocksCollection = ($clocks->getCollection());
             return Excel::download(new UserClocksExportById($clocksCollection, $user->name), 'user_clocks_' . $user->name . '.xlsx');
 
-            
         }
         $data = $this->prepareClockData($clocks);
 
