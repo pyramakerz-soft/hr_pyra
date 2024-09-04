@@ -208,8 +208,6 @@ export class HrAttendanceComponent {
         window.URL.revokeObjectURL(url);
       },
       (error) => {
-        console.log(error)
-
         if(error.status == 404){
           Swal.fire({   
             text: "There are no clock in for this Date",

@@ -131,7 +131,6 @@ export class ClockInPopUpComponent {
       },
       (error: HttpErrorResponse) => {
         const errorMessage = error.error?.message || 'An unknown error occurred';
-        console.log(error.error.message)
         if(error.error.message.includes("The location type field is required")){
           Swal.fire({
             text: "The location type field is required",
@@ -216,12 +215,29 @@ export class ClockInPopUpComponent {
     }
   }
 
+  formatDateToUTCForHr(dateString: string): string {
+    const isoDateString: string = dateString.replace(' ', 'T');
+    
+    const date: Date = new Date(isoDateString);
+    
+    const year: string = date.getUTCFullYear().toString();
+    const month: string = String(date.getUTCMonth() + 1).padStart(2, '0'); 
+    const day: string = String(date.getUTCDate()).padStart(2, '0');
+    const hours: string = String(date.getUTCHours()).padStart(2, '0');
+    const minutes: string = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds: string = String(date.getUTCSeconds()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
+
+
   sendLocationByHrForOthers(){
-    console.log(this.DateClockInFromHrForOthers)
     const clockIn = this.DateClockInFromHrForOthers + " " + this.TimeClockInFromHrForOthers + ":00"
+    const UTCTime = this.formatDateToUTCForHr(clockIn)
+
     if(this.userId){
       if(this.WorkHome==false){
-        this.clockService.CreateClockInByHrForOther(this.userId, this.LocationClockInFromHrForOthers, clockIn ,"site").subscribe(
+        this.clockService.CreateClockInByHrForOther(this.userId, this.LocationClockInFromHrForOthers, UTCTime ,"site").subscribe(
           (response: any) => {
             this.IsClockedIn = true;
             this.dialogRef.close(this.IsClockedIn);
@@ -248,7 +264,7 @@ export class ClockInPopUpComponent {
         );
       }
       else{
-        this.clockService.CreateClockInByHrForOther(this.userId, this.LocationClockInFromHrForOthers, clockIn,this.selectedSite).subscribe(
+        this.clockService.CreateClockInByHrForOther(this.userId, this.LocationClockInFromHrForOthers, UTCTime,this.selectedSite).subscribe(
           (response: any) => {
             this.IsClockedIn = true;
             this.dialogRef.close(this.IsClockedIn);
@@ -315,7 +331,6 @@ export class ClockInPopUpComponent {
     this.TimeApi.getCurrentTimeGoogle(this.lat, this.lng).subscribe((data) => {
       if (data) {
         // Calculate local time
-        console.log("data is:",data)
         const totalOffsetInSeconds = data.dstOffset + data.rawOffset;
         const localTimeInSeconds = timestamp + totalOffsetInSeconds;
 
