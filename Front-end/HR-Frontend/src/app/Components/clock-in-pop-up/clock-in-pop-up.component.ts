@@ -163,7 +163,6 @@ export class ClockInPopUpComponent {
 
           });
         }
-        console.log(this.lat, this.lng)
       }
     );
     }
@@ -209,7 +208,6 @@ export class ClockInPopUpComponent {
 
           });
         }
-          console.log(this.lat, this.lng)
         }
       );
     }
