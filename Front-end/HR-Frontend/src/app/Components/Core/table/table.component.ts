@@ -105,7 +105,6 @@ export class TableComponent {
           this.Userclocks=[]
           this.Userclocks = d.data.clocks;
           this.PagesNumber = 1;
-          console.log(this.Userclocks)
         },
         (error) => {
           if(error.status == 404){

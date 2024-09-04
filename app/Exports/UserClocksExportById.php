@@ -12,7 +12,7 @@ class UserClocksExportById implements FromCollection, WithHeadings
     /**
      * @param Collection $clocks
      */
-    public function __construct(public Collection $clocks)
+    public function __construct(public Collection $clocks, public string $userName)
     {
     }
 
@@ -72,5 +72,9 @@ class UserClocksExportById implements FromCollection, WithHeadings
             'Formatted_Clock_In',
             'Formatted_Clock_Out',
         ];
+    }
+    public function title(): string
+    {
+        return $this->userName;
     }
 }
