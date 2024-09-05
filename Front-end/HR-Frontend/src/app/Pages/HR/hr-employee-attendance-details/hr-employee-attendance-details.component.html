@@ -200,7 +200,7 @@
                         </div>
                         <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
                             <div *ngFor="let cl of row.otherClocks; let j = index"
-                                class=" text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
+                                class="  text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
                                 <p *ngIf="cl.clockOut">{{cl.site}}</p>
                             </div>
                         </div>
@@ -236,12 +236,26 @@
             <i class="fa-solid fa-arrow-left"></i> Previous
         </button>
 
-        <div class="flex justify-center items-center space-x-5 md:block">
+        <!-- <div class="flex justify-center items-center space-x-5 md:block">
             <button *ngFor="let page of pages" class="h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
                 [ngClass]="{'border border-[#D0D5DD]': page === CurrentPageNumber}" (click)="getAllClocks(page)">
                 {{ page }}
             </button>
+        </div> -->
+        <div class="flex justify-center items-center space-x-2 md:space-x-4">
+            <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="getAllClocks(CurrentPageNumber)">
+                {{ CurrentPageNumber }}
+            </button>
+            <button  *ngIf="CurrentPageNumber+1<PagesNumber" class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="getAllClocks(CurrentPageNumber+1)">
+                {{ CurrentPageNumber+1 }}
+            </button>
+            <span class="text-gray-800 text-sm md:text-base font-semibold">...</span>
+            <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="getAllClocks(PagesNumber)">
+                {{ PagesNumber }}
+            </button>
         </div>
+        
+        
 
         <button
             class="h-[44px] w-[92px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center"
