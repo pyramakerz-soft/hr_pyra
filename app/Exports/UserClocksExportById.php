@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
-class UserClocksExportById implements FromCollection, WithHeadings
+class UserClocksExportById implements FromCollection, WithHeadings, WithTitle
 {
     /**
      * @param Collection $clocks
