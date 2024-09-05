@@ -141,7 +141,18 @@ class ClockController extends Controller
         }
 
         $query = ClockInOut::query();
+        // Join with the users table and then the departments table
+        $query->join('users', 'users.id', '=', 'clock_in_outs.user_id')
+            ->join('departments', 'departments.id', '=', 'users.department_id')
+            ->select('clock_in_outs.*'); // Adjust this if you need to select other columns
 
+        // Filtering by department name with a "like" clause
+        if ($request->has('department')) {
+            $departmentName = $request->get('department');
+            $query->where('departments.name', 'like', '%' . $departmentName . '%');
+            // $clocks = $query->orderBy('clock_in', 'desc')->get();
+            // dd($clocks);
+        }
         if ($request->has('date')) {
             $date = Carbon::parse($request->get('date'))->toDateString();
             $query->whereDate('clock_in', $date);
@@ -177,7 +188,7 @@ class ClockController extends Controller
             $clocksCollection = $clocks instanceof \Illuminate\Pagination\LengthAwarePaginator
             ? $clocks->getCollection()
             : $clocks;
-            return (new ClocksExport)->download('all_user_clocks.xlsx');
+            return (new ClocksExport($request->get('department')))->download('all_user_clocks.xlsx');
 
         }
 
