@@ -98,7 +98,26 @@ export class ImportEmployeeDataPopUpComponent {
           }
         },
         (err) => {
-          console.log(err.message)
+          console.log(err.error)
+          if(err.error.message.includes("Invalid data format")){
+            Swal.fire({
+              icon: "error",
+              title: "Invalid",
+              text: err.error.message, 
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+              
+            });
+          } else if(err.error.message.includes("Duplicate entry")){
+            Swal.fire({
+              icon: "error",
+              title: "Duplicate Entry",
+              html: err.error.message.replace(/\n/g, '<br>'), 
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+              
+            });
+          }
           if(this.fileInput){
             this.fileInput.nativeElement.value = ''; 
             this.file = undefined
@@ -106,6 +125,18 @@ export class ImportEmployeeDataPopUpComponent {
           }
         }
       )
+    }else{
+      Swal.fire({
+        icon: "question",
+        title: "Select an Excel File",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#FF7519",
+        
+      });
     }
   }
 }
+
+
+// "Duplicate entry found for email \"khaled2@test.com\" in row 2\nDuplicate entry found for email \"jane2@example.com\" in row 3"
+"Invalid data format: Missing headers in the Excel file. Missing: name, email, password, phone, contact_phone, national_id, department_id, gender, salary, working_hours_day, overtime_hours, start_time, end_time, emp_type, hiring_date, roles, location_id, work_type_id"
