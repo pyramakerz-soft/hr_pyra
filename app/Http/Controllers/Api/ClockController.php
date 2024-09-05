@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Traits\HelperTrait;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -21,46 +22,53 @@ class ClockController extends Controller
 {
     use ResponseTrait;
     use HelperTrait;
+    protected function paginateArray(array $items, int $perPage)
+    {
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $items = collect($items);
+        $total = $items->count();
+        $items = $items->forPage($page, $perPage)->values();
 
+        return new LengthAwarePaginator($items, $total, $perPage, $page, [
+            'path' => LengthAwarePaginator::resolveCurrentPath(),
+        ]);
+    }
     protected function prepareClockData($clocks)
     {
         $isPaginated = $clocks instanceof \Illuminate\Pagination\LengthAwarePaginator;
+
+        // Group clocks by date
         $groupedClocks = $clocks->groupBy(function ($clock) {
             return Carbon::parse($clock->clock_in)->toDateString();
         });
 
+        // Sort dates in descending order
+        $groupedDates = $groupedClocks->keys()->sortDesc()->values()->toArray();
+        $paginatedDates = $this->paginateArray($groupedDates, 7); // Paginate dates with 7 rows per page
+
+        // Prepare data for the current page
+        $currentDates = $paginatedDates->getCollection();
         $data = [];
 
-        foreach ($groupedClocks as $date => $clocksForDay) {
-            $clocksForDay = $clocksForDay->sortBy(function ($clock) {
-                return Carbon::parse($clock->clock_in);
-            });
+        foreach ($currentDates as $date) {
+            $clocksForDay = $groupedClocks->get($date);
 
-            $firstClockAtTheDay = $clocksForDay->last();
-            $totalDurationInSeconds = 0;
-
-            foreach ($clocksForDay as $clock) {
-                if ($clock->clock_in) {
-                    $clockIn = Carbon::parse($clock->clock_in);
-
-                    if ($clock->clock_out) {
-                        $clockOut = Carbon::parse($clock->clock_out);
-                        $durationInSeconds = $clockIn->diffInSeconds($clockOut);
-                    } else {
-                        $durationInSeconds = $clockIn->diffInSeconds(Carbon::now());
-                    }
-
-                    $totalDurationInSeconds += $durationInSeconds;
-
-                    $clock->duration = gmdate('H:i:s', $durationInSeconds);
-                }
+            if (!$clocksForDay) {
+                continue;
             }
 
-            $totalDurationFormatted = gmdate('H:i:s', $totalDurationInSeconds);
+            // Sort clocks for the day so that the last clock appears first and the rest are ordered chronologically
+            $clocksForDay = $clocksForDay->sortByDesc(function ($clock) {
+                return Carbon::parse($clock->created_at);
+            });
 
-            $firstClockAtTheDay->duration = $totalDurationFormatted;
-
-            $otherClocksForDay = $clocksForDay->skip(1)->map(function ($clock) {
+            // Move the last clock to the top and other clocks to `otherClocks`
+            $firstClockAtTheDay = $clocksForDay->first();
+            $otherClocksForDay = $clocksForDay->filter(function ($clock) use ($firstClockAtTheDay) {
+                return $clock->id !== $firstClockAtTheDay->id;
+            })->sortBy(function ($clock) {
+                return Carbon::parse($clock->clock_in);
+            })->map(function ($clock) {
                 $clockIn = $clock->clock_in ? Carbon::parse($clock->clock_in) : null;
                 $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out) : null;
                 $totalHours = null;
@@ -81,9 +89,32 @@ class ClockController extends Controller
                     'site' => $clock->location_type,
                     'location_in' => $clock->location->address ?? null,
                     'location_out' => $clock->location->address ?? null,
+                    'formattedClockIn' => $clockIn ? $clockIn->format('Y-m-d H:i') : null,
+                    'formattedClockOut' => $clockOut ? $clockOut->format('Y-m-d H:i') : null,
                 ];
             });
 
+            $totalDurationInSeconds = 0;
+            foreach ($clocksForDay as $clock) {
+                if ($clock->clock_in) {
+                    $clockIn = Carbon::parse($clock->clock_in);
+
+                    if ($clock->clock_out) {
+                        $clockOut = Carbon::parse($clock->clock_out);
+                        $durationInSeconds = $clockIn->diffInSeconds($clockOut);
+                    } else {
+                        $durationInSeconds = $clockIn->diffInSeconds(Carbon::now());
+                    }
+
+                    $totalDurationInSeconds += $durationInSeconds;
+                    $clock->duration = gmdate('H:i:s', $durationInSeconds);
+                }
+            }
+
+            $totalDurationFormatted = gmdate('H:i:s', $totalDurationInSeconds);
+            $firstClockAtTheDay->duration = $totalDurationFormatted;
+
+            // Prepare the final output for the day
             $data[] = (new ClockResource($firstClockAtTheDay))->toArray(request()) + [
                 'otherClocks' => $otherClocksForDay->values()->toArray(),
                 'totalHours' => $totalDurationFormatted,
@@ -93,11 +124,11 @@ class ClockController extends Controller
         return [
             'clocks' => $data,
             'pagination' => $isPaginated ? [
-                'current_page' => $clocks->currentPage(),
-                'next_page_url' => $clocks->nextPageUrl(),
-                'previous_page_url' => $clocks->previousPageUrl(),
-                'last_page' => $clocks->lastPage(),
-                'total' => $clocks->total(),
+                'current_page' => $paginatedDates->currentPage(),
+                'next_page_url' => $paginatedDates->nextPageUrl(),
+                'previous_page_url' => $paginatedDates->previousPageUrl(),
+                'last_page' => $paginatedDates->lastPage(),
+                'total' => $paginatedDates->total(),
             ] : null,
         ];
     }
