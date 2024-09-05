@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\RegisterRequest;
 use App\Http\Requests\Api\UpdateUserRequest;
 use App\Http\Resources\Api\UserDetailResource;
-use App\Http\Resources\Api\UserResource;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\UserDetail;
@@ -42,36 +41,17 @@ class UserController extends Controller
         $authUser = Auth::user();
 
         if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to Update users', 403);
-        }
-        if (request()->has('search')) {
-            $users = UserResource::collection(
-                User::where('name', 'like', '%' . request()->get('search', '') . '%')
-                    ->orWhere('code', 'like', '%' . request()->get('search', '') . '%')->get()
-            );
-            if ($users->isEmpty()) {
-                return $this->returnError('No Users Found');
-            }
-            $data[] = [
-                'users' => UserResource::collection($users),
-
-            ];
-        } else {
-            $users = User::paginate(5);
-            $data[] = [
-                'users' => UserResource::collection($users),
-                'pagination' => [
-                    'current_page' => $users->currentPage(),
-                    'next_page_url' => $users->nextPageUrl(),
-                    'previous_page_url' => $users->previousPageUrl(),
-                    'last_page' => $users->lastPage(),
-                    'total' => $users->total(),
-                ],
-
-            ];
+            return $this->returnError('You are not authorized to update users', 403);
         }
 
-        return $this->returnData("data", $data, "Users Data");
+        $search = request()->get('search', null);
+        $usersData = $this->userService->getAllUsers($search);
+
+        if (!$usersData) {
+            return $this->returnError('No Users Found');
+        }
+
+        return $this->returnData("data", $usersData, "Users Data");
     }
     public function ManagerNames()
     {
@@ -249,11 +229,6 @@ class UserController extends Controller
         if (!$authUser->hasRole('Hr')) {
             return $this->returnError('You are not authorized to update users', 403);
         }
-        $department_id = $request->has('department_id') ? $request->department_id : $user->department_id;
-        $department = Department::find($department_id);
-        if (!$department) {
-            return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
-        }
 
         $updatedUser = $this->userService->updateUser($user, $request->validated());
         if (!$updatedUser) {
@@ -288,19 +263,7 @@ class UserController extends Controller
         ];
 
         return $this->returnData("data", $data, "User Updated");
-        // Update Assigning Roles to User
-        // $newRoles = $request->input('roles') ?? $user->getRoleNames()->toArray();
-        // $user->syncRoles($newRoles);
 
-        // // Update Assigning Locations to User
-        // $newLocations = $request->input('location_id') ?? $user->user_locations()->pluck('locations.id')->toArray();
-        // $user->user_locations()->sync($newLocations);
-
-        // // Update Assigning WorkTypes to User
-        // $newWorkTypes = $request->input('work_type_id') ?? $user->work_types()->pluck('work_types.id')->toArray();
-        // $user->work_types()->sync($newWorkTypes);
-
-        // return $this->returnData("data", $finalData, "User Updated");
     }
 
     public function destroy(User $user)
