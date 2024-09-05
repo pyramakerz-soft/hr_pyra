@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use App\Models\ClockInOut;
@@ -12,26 +13,18 @@ class ClockSeeder extends Seeder
      */
     public function run(): void
     {
-        $userId = 3; // Replace with the desired user ID
-
-        // Set the start and end dates for the desired month range
-        $startDate = Carbon::create(2024, 9, 1);
-        $endDate = Carbon::create(2024, 9, 31);
-
-        // Generate random clock-in times within the specified range
-        while ($startDate <= $endDate) {
-            $clockIn = $startDate->copy()->addHours(rand(8, 17)); // Adjust hours as needed
-            $clockOut = $clockIn->copy()->addHours(rand(1, 8));
+        $user_id = 3;
+        $clockIn = Carbon::now();
+        for ($i = 1; $i <= 5; $i++) {
+            $clockOut = $clockIn->copy()->addHours(rand(1, 8)); // Randomly add 1 to 8 hours
 
             ClockInOut::create([
                 'clock_in' => $clockIn,
                 'clock_out' => $clockOut,
-                'duration' => $clockOut->diff($clockIn)->format('%H:%I:%S'),
-                'user_id' => $userId,
-                'location_id' => 1, // Replace with the actual location ID
+                'duration' => $clockOut->diff($clockIn)->format('%H:%I:%S'), // Calculate the duration
+                'user_id' => $user_id, // Assumes a user with ID 1 exists
+                'location_id' => 1, // Assumes a location with ID 1 exists
             ]);
-
-            $startDate = $startDate->addDay();
         }
     }
 }
