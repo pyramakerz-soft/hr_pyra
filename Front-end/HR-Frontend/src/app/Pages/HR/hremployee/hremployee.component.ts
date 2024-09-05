@@ -72,8 +72,9 @@ export class HREmployeeComponent {
     this.CurrentPageNumber = PgNumber;
     this.userServ.getall(PgNumber).subscribe(
       (d: any) => {
-        this.tableData = d.data[0].users;
-        this.PagesNumber = d.data[0].pagination.last_page;
+        console.log(d)
+        this.tableData = d.data.users;
+        this.PagesNumber = d.data.pagination.last_page;
         this.generatePages();
       },
       (error) => {

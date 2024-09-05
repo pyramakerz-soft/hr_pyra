@@ -125,6 +125,7 @@ export class DonutChartComponent {
   getData(){
     this.chartService.getDepartmentEmployees(this.Year).subscribe(
       (d:any)=>{
+        console.log(d)
         this.data = []
         this.labels = []
         this.colors = [this.baseColor];
@@ -136,6 +137,14 @@ export class DonutChartComponent {
         });
 
         this.createChart();
+      },
+      (error) => {
+        if(error.error.status == 404){
+          this.data = []
+          this.colors = [];
+          this.total = 0
+          this.createChart();
+        }
       }
     )
   }
