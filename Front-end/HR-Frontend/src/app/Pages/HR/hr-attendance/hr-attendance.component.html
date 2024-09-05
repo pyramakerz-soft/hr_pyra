@@ -23,7 +23,25 @@
         <option *ngFor="let year of years" [value]="year">{{ year }}</option>
       </select>
     </div>
+
+    
+    <div>
+      <select class="p-2 border rounded w-full" [(ngModel)]="SelectDepartment" (change)="onDepartmentChange($event)">
+        <option value="AllDepartment">All Departments</option>
+        <option *ngFor="let Dept of departments" [value]="Dept.name">{{ Dept.name }}</option>
+      </select>
+    </div>
+    
+
+    <!-- <div>
+      <select class="p-2 border rounded w-full" [(ngModel)]="SelectDepartment" (change)="onDepartmentChange($event)">
+        <option *ngFor="let Dept of departments" [value]="let.name">{{ Dept.name }}</option>
+      </select>
+    </div> -->
+
+
   </div>
+  
 
 
     <div class="mt-5 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 space-x-2 flex items-center relative">
@@ -91,7 +109,7 @@
       </button>
     
       <!-- Pagination Buttons -->
-      <div class="flex justify-center items-center space-x-5 md:block">
+      <!-- <div class="flex justify-center items-center space-x-5 md:block">
         <button
           *ngFor="let page of pages"
           class="h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
@@ -99,7 +117,21 @@
           (click)="getAllEmployees(page)">
           {{ page }}
         </button>
-      </div>
+      </div> -->
+
+
+      <div class="flex justify-center items-center space-x-2 md:space-x-4">
+        <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="getAllEmployees(CurrentPageNumber)">
+            {{ CurrentPageNumber }}
+        </button>
+        <button  *ngIf="CurrentPageNumber+1<PagesNumber" class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="getAllEmployees(CurrentPageNumber+1)">
+            {{ CurrentPageNumber+1 }}
+        </button>
+        <span class="text-gray-800 text-sm md:text-base font-semibold">...</span>
+        <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="getAllEmployees(PagesNumber)">
+            {{ PagesNumber }}
+        </button>
+    </div>
     
       <!-- Next Button -->
       <button 
