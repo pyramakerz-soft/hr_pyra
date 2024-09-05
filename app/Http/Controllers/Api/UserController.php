@@ -101,6 +101,7 @@ class UserController extends Controller
 
         return $this->returnData("data", $data, "User Created");
     }
+
     public function importUsersFromExcel(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -121,35 +122,51 @@ class UserController extends Controller
             }
 
             $sheetData = $users[0];
-
             $headers = array_map('trim', $sheetData[0]);
-
             $headers = array_map('strtolower', $headers);
 
             $requiredFields = ['name', 'email', 'password', 'phone', 'contact_phone', 'national_id', 'department_id', 'gender', 'salary', 'working_hours_day', 'overtime_hours', 'start_time', 'end_time', 'emp_type', 'hiring_date', 'roles', 'location_id', 'work_type_id'];
 
+            $errors = [];
+            $missingHeaders = [];
+
             foreach ($requiredFields as $requiredField) {
                 if (!in_array($requiredField, $headers)) {
-                    return $this->returnError("Invalid data format: Missing '$requiredField' header in the Excel file. Headers found: " . implode(', ', $headers), Response::HTTP_BAD_REQUEST);
+                    $missingHeaders[] = $requiredField;
                 }
+            }
+
+            if (!empty($missingHeaders)) {
+                $errors[] = "Invalid data format: Missing headers in the Excel file. Missing: " . implode(', ', $missingHeaders);
+            }
+
+            if (!empty($errors)) {
+                return $this->returnError(implode("\n", $errors), Response::HTTP_BAD_REQUEST);
             }
 
             $results = [];
 
             for ($i = 1; $i < count($sheetData); $i++) {
                 $row = array_combine($headers, $sheetData[$i]);
-
                 $row = array_map('trim', $row);
+
+                $rowErrors = [];
 
                 foreach ($requiredFields as $field) {
                     if (!isset($row[$field]) || empty($row[$field])) {
-                        return $this->returnError("Missing or empty required field '$field' in row " . ($i + 1), Response::HTTP_BAD_REQUEST);
+                        $rowErrors[] = "Missing or empty required field '$field'";
                     }
+                }
+
+                if (!empty($rowErrors)) {
+                    $errors[] = "Row " . ($i + 1) . ": " . implode(", ", $rowErrors);
+                    continue;
                 }
 
                 $department = Department::find((int) $row['department_id']);
                 if (!$department) {
-                    return $this->returnError('Invalid department selected in row ' . ($i + 1), Response::HTTP_BAD_REQUEST);
+                    $errors[] = 'Invalid department in row ' . ($i + 1);
+                    continue;
                 }
 
                 do {
@@ -158,49 +175,58 @@ class UserController extends Controller
                     $code = strtoupper($departmentPrefix) . '-' . $randomDigits;
                 } while (User::where('code', $code)->exists());
 
-                $user = User::create([
-                    'name' => $row['name'],
-                    'email' => $row['email'],
-                    'password' => bcrypt($row['password']),
-                    'phone' => $row['phone'],
-                    'contact_phone' => $row['contact_phone'],
-                    'national_id' => $row['national_id'],
-                    'code' => $code,
-                    'department_id' => (int) $row['department_id'],
-                    'gender' => $row['gender'],
-                    'serial_number' => null,
-                ]);
-
-                $salary = $row['salary'];
-                $working_hours_day = $row['working_hours_day'];
-                $overtime_hours = $row['overtime_hours'];
-                $hourly_rate = ($salary / 22) / $working_hours_day;
-                $overtime_hourly_rate = (($salary / 30) / $working_hours_day) * $overtime_hours;
-
                 $start_time = $row['start_time'];
                 $end_time = $row['end_time'];
 
                 if ($end_time <= $start_time) {
-                    return $this->returnError('End time must be later than start time for user ' . $row['name'], Response::HTTP_BAD_REQUEST);
+                    $errors[] = 'End time must be later than start time for user ' . $row['name'] . ' in row ' . ($i + 1);
+                    continue;
                 }
 
-                $userDetail = UserDetail::create([
-                    'salary' => $salary,
-                    'working_hours_day' => $working_hours_day,
-                    'hourly_rate' => $hourly_rate,
-                    'overtime_hourly_rate' => $overtime_hourly_rate,
-                    'overtime_hours' => $overtime_hours,
-                    'start_time' => $start_time,
-                    'end_time' => $end_time,
-                    'emp_type' => $row['emp_type'],
-                    'hiring_date' => $row['hiring_date'],
-                    'user_id' => $user->id,
-                ]);
+                try {
+                    $user = User::create([
+                        'name' => $row['name'],
+                        'email' => $row['email'],
+                        'password' => bcrypt($row['password']),
+                        'phone' => $row['phone'],
+                        'contact_phone' => $row['contact_phone'],
+                        'national_id' => $row['national_id'],
+                        'code' => $code,
+                        'department_id' => (int) $row['department_id'],
+                        'gender' => $row['gender'],
+                        'serial_number' => null,
+                    ]);
 
-                $results[] = [
-                    'user' => $user,
-                    'user_detail' => $userDetail,
-                ];
+                    $salary = $row['salary'];
+                    $working_hours_day = $row['working_hours_day'];
+                    $overtime_hours = $row['overtime_hours'];
+                    $hourly_rate = ($salary / 22) / $working_hours_day;
+                    $overtime_hourly_rate = (($salary / 30) / $working_hours_day) * $overtime_hours;
+
+                    $userDetail = UserDetail::create([
+                        'salary' => $salary,
+                        'working_hours_day' => $working_hours_day,
+                        'hourly_rate' => $hourly_rate,
+                        'overtime_hourly_rate' => $overtime_hourly_rate,
+                        'overtime_hours' => $overtime_hours,
+                        'start_time' => $start_time,
+                        'end_time' => $end_time,
+                        'emp_type' => $row['emp_type'],
+                        'hiring_date' => $row['hiring_date'],
+                        'user_id' => $user->id,
+                    ]);
+
+                    $results[] = [
+                        'user' => $user,
+                        'user_detail' => $userDetail,
+                    ];
+                } catch (\Exception $e) {
+                    $errors[] = 'Failed to import user in row ' . ($i + 1) . ': ' . $e->getMessage();
+                }
+            }
+
+            if (!empty($errors)) {
+                return $this->returnError(implode("\n", $errors), Response::HTTP_BAD_REQUEST);
             }
 
             return $this->returnData('results', $results, 'Users Imported from Excel successfully.');
@@ -209,6 +235,115 @@ class UserController extends Controller
             return $this->returnError('Failed to import users from Excel: ' . $e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
     }
+
+    // public function importUsersFromExcel(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'file' => 'required|mimes:xlsx',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return $this->returnError('Invalid file format. Please upload an Excel file (.xlsx).', Response::HTTP_BAD_REQUEST);
+    //     }
+
+    //     $file = $request->file('file');
+
+    //     try {
+    //         $users = Excel::toArray([], $file);
+
+    //         if (empty($users) || empty($users[0])) {
+    //             return $this->returnError('No data found in the Excel file.', Response::HTTP_BAD_REQUEST);
+    //         }
+
+    //         $sheetData = $users[0];
+
+    //         $headers = array_map('trim', $sheetData[0]);
+
+    //         $headers = array_map('strtolower', $headers);
+
+    //         $requiredFields = ['name', 'email', 'password', 'phone', 'contact_phone', 'national_id', 'department_id', 'gender', 'salary', 'working_hours_day', 'overtime_hours', 'start_time', 'end_time', 'emp_type', 'hiring_date', 'roles', 'location_id', 'work_type_id'];
+
+    //         foreach ($requiredFields as $requiredField) {
+    //             if (!in_array($requiredField, $headers)) {
+    //                 return $this->returnError("Invalid data format: Missing '$requiredField' header in the Excel file. Headers found: " . implode(', ', $headers), Response::HTTP_BAD_REQUEST);
+    //             }
+    //         }
+
+    //         $results = [];
+
+    //         for ($i = 1; $i < count($sheetData); $i++) {
+    //             $row = array_combine($headers, $sheetData[$i]);
+
+    //             $row = array_map('trim', $row);
+
+    //             foreach ($requiredFields as $field) {
+    //                 if (!isset($row[$field]) || empty($row[$field])) {
+    //                     return $this->returnError("Missing or empty required field '$field' in row " . ($i + 1), Response::HTTP_BAD_REQUEST);
+    //                 }
+    //             }
+
+    //             $department = Department::find((int) $row['department_id']);
+    //             if (!$department) {
+    //                 return $this->returnError('Invalid department selected in row ' . ($i + 1), Response::HTTP_BAD_REQUEST);
+    //             }
+
+    //             do {
+    //                 $departmentPrefix = substr(Str::slug($department->name), 0, 4);
+    //                 $randomDigits = mt_rand(1000, 9999);
+    //                 $code = strtoupper($departmentPrefix) . '-' . $randomDigits;
+    //             } while (User::where('code', $code)->exists());
+
+    //             $user = User::create([
+    //                 'name' => $row['name'],
+    //                 'email' => $row['email'],
+    //                 'password' => bcrypt($row['password']),
+    //                 'phone' => $row['phone'],
+    //                 'contact_phone' => $row['contact_phone'],
+    //                 'national_id' => $row['national_id'],
+    //                 'code' => $code,
+    //                 'department_id' => (int) $row['department_id'],
+    //                 'gender' => $row['gender'],
+    //                 'serial_number' => null,
+    //             ]);
+
+    //             $salary = $row['salary'];
+    //             $working_hours_day = $row['working_hours_day'];
+    //             $overtime_hours = $row['overtime_hours'];
+    //             $hourly_rate = ($salary / 22) / $working_hours_day;
+    //             $overtime_hourly_rate = (($salary / 30) / $working_hours_day) * $overtime_hours;
+
+    //             $start_time = $row['start_time'];
+    //             $end_time = $row['end_time'];
+
+    //             if ($end_time <= $start_time) {
+    //                 return $this->returnError('End time must be later than start time for user ' . $row['name'], Response::HTTP_BAD_REQUEST);
+    //             }
+
+    //             $userDetail = UserDetail::create([
+    //                 'salary' => $salary,
+    //                 'working_hours_day' => $working_hours_day,
+    //                 'hourly_rate' => $hourly_rate,
+    //                 'overtime_hourly_rate' => $overtime_hourly_rate,
+    //                 'overtime_hours' => $overtime_hours,
+    //                 'start_time' => $start_time,
+    //                 'end_time' => $end_time,
+    //                 'emp_type' => $row['emp_type'],
+    //                 'hiring_date' => $row['hiring_date'],
+    //                 'user_id' => $user->id,
+    //             ]);
+
+    //             $results[] = [
+    //                 'user' => $user,
+    //                 'user_detail' => $userDetail,
+    //             ];
+    //         }
+
+    //         return $this->returnData('results', $results, 'Users Imported from Excel successfully.');
+
+    //     } catch (\Exception $e) {
+    //         return $this->returnError('Failed to import users from Excel: ' . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+    //     }
+    // }
 
     public function show(User $user)
     {
