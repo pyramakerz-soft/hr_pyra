@@ -13,16 +13,16 @@ class ClockSeeder extends Seeder
      */
     public function run(): void
     {
-        $user_id = 1;
+        $user_id = 3;
         $clockIn = Carbon::now();
-        for ($i = 1; $i <= 3; $i++) {
+        for ($i = 1; $i <= 30; $i++) {
             $clockOut = $clockIn->copy()->addHours(rand(1, 8)); // Randomly add 1 to 8 hours
 
             ClockInOut::create([
                 'clock_in' => $clockIn,
                 'clock_out' => $clockOut,
                 'duration' => $clockOut->diff($clockIn)->format('%H:%I:%S'), // Calculate the duration
-                'user_id' => $user_id++, // Assumes a user with ID 1 exists
+                'user_id' => $user_id, // Assumes a user with ID 1 exists
                 'location_id' => 1, // Assumes a location with ID 1 exists
             ]);
         }

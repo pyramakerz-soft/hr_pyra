@@ -50,7 +50,6 @@ class AuthController extends Controller
         }
 
         $user = auth()->user();
-        // Check if serial number is present in the request
         $serialNumber = $request->serial_number;
 
         if ($user && $serialNumber) {
