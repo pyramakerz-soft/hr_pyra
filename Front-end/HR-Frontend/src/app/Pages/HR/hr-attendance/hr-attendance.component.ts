@@ -82,8 +82,8 @@ export class HrAttendanceComponent {
     this.CurrentPageNumber = pgNumber;
     this.userServ.getall(pgNumber).subscribe(
       (d: any) => {
-        this.tableData = d.data[0].users;
-        this.PagesNumber=d.data[0].pagination.last_page;
+        this.tableData = d.data.users;
+        this.PagesNumber=d.data.pagination.last_page;
         this.generatePages();
       },
       (error) => {
