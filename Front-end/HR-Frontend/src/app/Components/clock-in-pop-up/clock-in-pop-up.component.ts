@@ -23,6 +23,10 @@ import { catchError, map, Observable, of } from 'rxjs';
 })
 export class ClockInPopUpComponent {
 
+  apiKey = 'AIzaSyA3LxsmNEJv-yxSF8khxA4LgZwF_k0xePU';
+  url = `https://www.googleapis.com/geolocation/v1/geolocate?key=${this.apiKey}`;
+
+
   public lat: number = 196.0000000;
   public lng: number = 173.0000000;
   public IsClockedIn: boolean = false;

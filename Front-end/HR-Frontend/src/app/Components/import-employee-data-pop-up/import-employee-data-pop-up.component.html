@@ -1,5 +1,5 @@
-<div class="bg-[#dddddd5e] w-full fixed inset-0 h-[100vh] py-5">
-    <div class="relative p-5 md:px-10 m-auto w-[85%] md:w-2/3 rounded-2xl shadow-2xl text-[#111827] bg-white">
+<div class="bg-[#dddddd5e] w-full fixed inset-0 py-5">
+    <div class="relative p-5 md:px-10 m-auto w-[85%] md:w-2/3 rounded-2xl shadow-2xl text-[#111827] bg-white overflow-auto max-h-[95vh]">
         <p class="text-lg md:text-xl lg:text-2xl font-bold">Import File</p>
 
         <img class="absolute top-0 right-1/4 w-[25%] z-0" src="../../../assets/images/logo-orange 1.png">
@@ -7,7 +7,8 @@
         <div class="relative z-10">
             <div class="flex justify-center">
                 <label for="file-upload" class="cursor-pointer flex flex-col items-center border rounded-xl w-full md:w-1/2 md:p-7 px-12 lg:px-0 py-5 lg:py-10 my-4">
-                    <img src="../../../assets/images/02 Add Photo.png" class="w-12">
+                    <img *ngIf="!file" src="../../../assets/images/02 Add Photo.png" class="w-12">
+                    <img *ngIf="file" src="../../../assets/images/FileAttached.png" class="w-12">
                     <span class="bg-[#0665EC] text-white py-2 lg:py-4 w-full lg:w-[45%] lg:font-semibold text-xs md:text-sm rounded-lg my-2 md:my-4 text-center">Select Files CSV</span>
                     <p class="font-normal text-xs md:text-sm">or drag File here</p>
                 </label>
@@ -23,91 +24,114 @@
                 <thead class="bg-[#F9FAFB] text-sm md:text-base">
                   <tr>
                       <th class="py-3 px-4 whitespace-nowrap">
-                          Day <i class="fa-solid fa-arrow-down mx-2"></i>
+                          Name <i class="fa-solid fa-arrow-down mx-2"></i>
                       </th>
                       <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-                          Date <i class="fa-solid fa-arrow-down mx-2"></i>
+                          Email <i class="fa-solid fa-arrow-down mx-2"></i>
                       </th>
                       <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-                          Clock In <i class="fa-solid fa-arrow-down mx-2"></i>
+                          Password <i class="fa-solid fa-arrow-down mx-2"></i>
                       </th>
                       <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-                          Clock Out <i class="fa-solid fa-arrow-down mx-2"></i>
+                          Phone <i class="fa-solid fa-arrow-down mx-2"></i>
                       </th>
                       <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-                          Total Hours <i class="fa-solid fa-arrow-down mx-2"></i>
-                      </th>
-                      <th class="py-3 px-4 min-w-[120px] max-w-[150px] whitespace-nowrap text-ellipsis">
-                          Location In <i class="fa-solid fa-arrow-down mx-2"></i>
-                      </th>
-                      <th class="py-3 px-4 min-w-[120px] max-w-[150px] whitespace-nowrap text-ellipsis">
-                          Location Out <i class="fa-solid fa-arrow-down mx-2"></i>
+                          Contact Phone <i class="fa-solid fa-arrow-down mx-2"></i>
                       </th>
                       <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-                          Site<i class="fa-solid fa-arrow-down mx-2"></i>
+                          National ID <i class="fa-solid fa-arrow-down mx-2"></i>
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Department<i class="fa-solid fa-arrow-down mx-2"></i>
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Gender<i class="fa-solid fa-arrow-down mx-2"></i>
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Salary<i class="fa-solid fa-arrow-down mx-2"></i>
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Working Hours<i class="fa-solid fa-arrow-down mx-2"></i>
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Overtime Hours<i class="fa-solid fa-arrow-down mx-2"></i>
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Start Time<i class="fa-solid fa-arrow-down mx-2"></i>
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          End Time<i class="fa-solid fa-arrow-down mx-2"></i>
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Position<i class="fa-solid fa-arrow-down mx-2"></i>
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Hiring Date<i class="fa-solid fa-arrow-down mx-2"></i>
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Roles<i class="fa-solid fa-arrow-down mx-2"></i>
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Location Id<i class="fa-solid fa-arrow-down mx-2"></i>
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Work Type Id<i class="fa-solid fa-arrow-down mx-2"></i>
                       </th>
                   </tr>
                 </thead>
                 <tbody>
                   <!-- No Data Row -->
-                  <tr *ngIf="tableData.length === 0">
-                    <td colspan="8" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                  <tr *ngIf="dataObjects.length === 0">
+                    <td colspan="19" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
                       No Data Found
                     </td>
                   </tr>
             
                   <!-- Data Rows -->
-                  <tr *ngFor="let row of tableData; let i = index"
+                  <tr *ngFor="let row of dataObjects; let i = index"
                       [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300 text-xs md:text-sm">
                     
-                      <td class="py-5 px-4">{{ row.Day }}</td>
-                      <td class="py-5 px-4">{{ row.Date }}</td>
+                      <td class="py-5 px-4">{{ row.name }}</td>
+                      <td class="py-5 px-4">{{ row.email }}</td>
+                      <td class="py-5 px-4">{{ row.password }}</td>
+                      <td class="py-5 px-4">{{ row.phone }}</td>
+                      <td class="py-5 px-4">{{ row.contact_phone }}</td>
+                      <td class="py-5 px-4">{{ row.national_id }}</td>
+                      <td class="py-5 px-4">{{ row.department_id }}</td>
+                      <td class="py-5 px-4">{{ row.gender }}</td>
+                      <td class="py-5 px-4">{{ row.salary }}</td>
+                      <td class="py-5 px-4">{{ row.working_hours_day }}</td>
+                      <td class="py-5 px-4">{{ row.overtime_hours }}</td>
       
+                      
                       <td>
                           <div class="flex justify-center">
                             <div class="text-center w-[97px] rounded-xl border border-[#D0D5DD] bg-[#FFFFFF] py-2">
-                              {{ row.Clock_in }}
+                              {{ row.start_time }}
                             </div>
                           </div>
-                        </td>
-          
-                        
+                      </td>
                       <td>
                           <div class="flex justify-center">
-                              <div *ngIf="row.Clock_out; else emptyState"
-                                  class="text-center w-[97px] rounded-xl border border-[#D0D5DD] bg-[#FFFFFF] py-2">
-                                  {{ row.Clock_out }}
-                              </div>
-                              <ng-template #emptyState>
-                                  <div class="w-[97px] h-9 rounded-xl border border-[#D0D5DD] bg-[#FFFFFF] px-4 py-2 flex items-center justify-center">
-                                  <div class="w-[50px] h-[1px] bg-[#475467]"></div>
-                                  </div>
-                              </ng-template>
+                            <div class="text-center w-[97px] rounded-xl border border-[#D0D5DD] bg-[#FFFFFF] py-2">
+                              {{ row.end_time }}
+                            </div>
                           </div>
                       </td>
+                        
+                      <td class="py-5 px-4">{{ row.emp_type }}</td>
+
+                      <td>
+                        <div class="flex justify-center">
+                          <div class="text-center w-[97px] rounded-xl border border-[#D0D5DD] bg-[#FFFFFF] py-2">
+                            {{ row.hiring_date }}
+                          </div>
+                        </div>
+                    </td>
       
-                      <td class="py-5 px-4">{{ row.Total_hours }}</td>
-                      
-                      <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
-                          <div class="truncate" title="{{ row.Location_In }}">
-                            {{ row.Location_In }}
-                          </div>
-                      </td>
-      
-                      <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
-                          <div *ngIf="row.Location_out; else emptyLocation">
-                              <div class="truncate" title="{{ row.Location_out }}">
-                                  {{ row.Location_out }}
-                              </div>
-                          </div>
-          
-                          <ng-template #emptyLocation>
-                              <div class="flex justify-center">
-                                  <div class="w-[90%] h-[1px] bg-[#475467] "></div>
-                              </div>
-                          </ng-template>
-                      </td>
-                      <td class="py-5 px-4">{{ row.Site }}</td>
+                      <td class="py-5 px-4">{{ row.roles }}</td>
+                      <td class="py-5 px-4">{{ row.location_id }}</td>
+                      <td class="py-5 px-4">{{ row.work_type_id }}</td>
                   </tr>
                 </tbody>
               </table>
