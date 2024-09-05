@@ -6,6 +6,8 @@ import { UserServiceService } from '../../../Services/user-service.service';
 import { FormsModule } from '@angular/forms';
 import { ClockService } from '../../../Services/clock.service';
 import Swal from 'sweetalert2';
+import { DepartmentService } from '../../../Services/department.service';
+import { Department } from '../../../Models/department';
 
 interface data{
   Employees:string,
@@ -32,7 +34,10 @@ export class HrAttendanceComponent {
 
   selectedMonth: string = "01";
   selectedYear: number = 0;
+  SelectDepartment:string="AllDepartment";
+  departments:Department[]=[]
   DateString: string = "2019-01";
+
 
   months = [
     { name: 'January', value: "01" },
@@ -51,19 +56,20 @@ export class HrAttendanceComponent {
   years: number[] = [];
 
 
-  constructor(public router:Router , public userServ:UserServiceService, public UserClocksService: ClockService){}
+  constructor(public router:Router , public userServ:UserServiceService, public UserClocksService: ClockService , public departmentServ: DepartmentService){}
 
   tableData:UserModel[]= [];
 
   ngOnInit(){
     this.getAllEmployees(1);
     this.getUsersName();
-
+    this.GetAllDepartment()
     this.populateYears();
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1
     this.selectedMonth = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
     this.selectedYear = currentDate.getFullYear();
+    this.SelectDepartment="AllDepartment";
     this.DateString = this.selectedYear + "-" + this.selectedMonth
   }
 
@@ -86,6 +92,16 @@ export class HrAttendanceComponent {
     );
   }
 
+  GetAllDepartment(){
+    this.departmentServ.getall().subscribe(
+      (d: any) => {
+        this.departments = d.data.departments;
+      },
+      (error) => {
+        console.error('Error retrieving user clocks:', error);
+      }
+    );
+  }
 
   generatePages() {
     this.pages = [];
@@ -181,6 +197,7 @@ export class HrAttendanceComponent {
     }
   }
 
+
   onMonthChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     if (target) {
@@ -195,6 +212,16 @@ export class HrAttendanceComponent {
       this.selectedYear = +target.value; 
       this.DateString = this.selectedYear + "-" + this.selectedMonth
     }
+  }
+
+
+  onDepartmentChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    if (target) {
+      this.SelectDepartment = target.value; 
+      console.log(this.SelectDepartment)
+    }
+
   }
 
   ExportData(){
