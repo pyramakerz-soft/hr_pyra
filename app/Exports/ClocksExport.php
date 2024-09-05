@@ -10,17 +10,34 @@ class ClocksExport implements WithMultipleSheets
 {
     use Exportable;
 
+    protected $department;
+
+    public function __construct($department = null)
+    {
+        $this->department = $department;
+    }
     public function sheets(): array
     {
         $sheets = [];
 
-        $users = ClockInOut::with('user')->select('user_id')->distinct()->get();
+        // Build query to get all clocks with filtering based on department
+        $query = ClockInOut::with('user')
+            ->join('users', 'users.id', '=', 'clock_in_outs.user_id')
+            ->join('departments', 'departments.id', '=', 'users.department_id')
+            ->select('clock_in_outs.*')
+            ->when($this->department, function ($q) {
+                $q->where('departments.name', 'like', '%' . $this->department . '%');
+            });
 
-        foreach ($users as $user) {
-            $clocks = ClockInOut::where('user_id', $user->user_id)->get();
+        // Get distinct user IDs with their clocks
+        $userClocks = $query->get()->groupBy('user_id');
 
-            $userName = $user->user->name;
+        foreach ($userClocks as $userId => $clocks) {
+            // Fetch user details for sheet title
+            $user = $clocks->first()->user;
+            $userName = $user->name ?? 'Unknown';
 
+            // Add sheet for each unique user
             $sheets[] = new UserClocksExportById($clocks, $userName);
         }
 
