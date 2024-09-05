@@ -136,7 +136,3 @@ export class ImportEmployeeDataPopUpComponent {
     }
   }
 }
-
-
-// "Duplicate entry found for email \"khaled2@test.com\" in row 2\nDuplicate entry found for email \"jane2@example.com\" in row 3"
-"Invalid data format: Missing headers in the Excel file. Missing: name, email, password, phone, contact_phone, national_id, department_id, gender, salary, working_hours_day, overtime_hours, start_time, end_time, emp_type, hiring_date, roles, location_id, work_type_id"
