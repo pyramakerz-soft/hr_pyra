@@ -2,6 +2,8 @@
 
 namespace App\Services\Api;
 
+use App\Http\Resources\Api\UserResource;
+use App\Models\Department;
 use App\Models\User;
 use App\Traits\ResponseTrait;
 use App\Traits\UserTrait;
@@ -14,7 +16,11 @@ class UserService
 
     public function createUser($data)
     {
-        // dd($data);
+        // Validate department inside createUser
+        $department = Department::find($data['department_id']);
+        if (!$department) {
+            return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
+        }
         $code = $this->generateUniqueCode($data['department_id']);
         if (!$code) {
             return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
@@ -49,6 +55,12 @@ class UserService
 
     public function updateUser($user, $data)
     {
+        // Validate department inside updateUser
+        $department = Department::find($data['department_id'] ?? $user->department_id);
+        if (!$department) {
+            return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
+        }
+
         $code = $this->generateUniqueCode($data['department_id']);
         $code = $code ?? $user->code;
 
@@ -74,5 +86,22 @@ class UserService
 
         return $user;
     }
-
+    public function getAllUsers($search = null)
+    {
+        if ($search) {
+            $users = $this->searchUsersByNameOrCode($search);
+            if ($users->isEmpty()) {
+                return null; // Handle no users found case in controller
+            }
+            return [
+                'users' => UserResource::collection($users),
+            ];
+        } else {
+            $users = User::paginate(5);
+            return [
+                'users' => UserResource::collection($users),
+                'pagination' => $this->formatPagination($users),
+            ];
+        }
+    }
 }

@@ -63,4 +63,36 @@ trait UserTrait
             }
         }
     }
+    public function searchUsersByNameOrCode($search)
+    {
+        return User::where('name', 'like', '%' . $search . '%')
+            ->orWhere('code', 'like', '%' . $search . '%')
+            ->get();
+    }
+
+    public function formatPagination($users)
+    {
+        return [
+            'current_page' => $users->currentPage(),
+            'next_page_url' => $users->nextPageUrl(),
+            'previous_page_url' => $users->previousPageUrl(),
+            'last_page' => $users->lastPage(),
+            'total' => $users->total(),
+        ];
+    }
+
+    // private function assignAttributes(User $user, $request)
+    // {
+    //     if ($request->filled('roles')) {
+    //         $this->assignRoles($user, $request->input('roles'));
+    //     }
+
+    //     if ($request->filled('location_id')) {
+    //         $this->assignLocations($user, $request->input('location_id'));
+    //     }
+
+    //     if ($request->filled('work_type_id')) {
+    //         $this->assignWorkTypes($user, $request->input('work_type_id'));
+    //     }
+    // }
 }
