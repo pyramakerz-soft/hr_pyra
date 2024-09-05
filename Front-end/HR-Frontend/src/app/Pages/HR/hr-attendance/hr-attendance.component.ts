@@ -225,7 +225,7 @@ export class HrAttendanceComponent {
   }
 
   ExportData(){
-    this.UserClocksService.ExportAllUserDataById(this.DateString).subscribe(
+    this.UserClocksService.ExportAllUserDataById(this.DateString, this.SelectDepartment).subscribe(
       (result: Blob) => {
         const url = window.URL.createObjectURL(result);
         const a = document.createElement('a');
