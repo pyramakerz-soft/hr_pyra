@@ -220,6 +220,14 @@ class UserController extends Controller
                         'user' => $user,
                         'user_detail' => $userDetail,
                     ];
+                } catch (\Illuminate\Database\QueryException $e) {
+                    if ($e->getCode() == '23000') { // SQLSTATE[23000]: Integrity constraint violation
+                        // This handles duplicate entry errors
+                        $errorMessage = 'Duplicate entry found for email "' . $row['email'] . '" in row ' . ($i + 1);
+                        $errors[] = $errorMessage;
+                    } else {
+                        $errors[] = 'Failed to import user in row ' . ($i + 1) . ': ' . $e->getMessage();
+                    }
                 } catch (\Exception $e) {
                     $errors[] = 'Failed to import user in row ' . ($i + 1) . ': ' . $e->getMessage();
                 }
