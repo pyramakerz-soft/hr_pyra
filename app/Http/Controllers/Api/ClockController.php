@@ -390,5 +390,7 @@ class ClockController extends Controller
         ]);
         return $this->returnData("clock", new ClockResource($clock), "Clock Updated Successfully for {$user->name}");
     }
-
+    public function clockById(ClockInOut $clock){
+        return 
+    }
 }
