@@ -110,7 +110,6 @@ export class BoundersPopUpComponent implements AfterViewInit {
             autocompleteInput.value = this.address || '';
           }
         } else {
-          console.log('No details available for input: ' + place.name);
         }
       });
     } else {
@@ -153,7 +152,6 @@ export class BoundersPopUpComponent implements AfterViewInit {
             this.dialogRef.close();
           },
           (error) => {
-            console.log(error);
           }
         );
       } else if (this.mode === 'add') {
@@ -162,7 +160,6 @@ export class BoundersPopUpComponent implements AfterViewInit {
             this.dialogRef.close();
           },
           (error) => {
-            console.log(error);
           }
         );
       }

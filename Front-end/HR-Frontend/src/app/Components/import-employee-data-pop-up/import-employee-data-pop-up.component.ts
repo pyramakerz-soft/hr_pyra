@@ -97,7 +97,6 @@ export class ImportEmployeeDataPopUpComponent {
           }
         },
         (err) => {
-          console.log(err.error)
           if(err.error.message.includes("Invalid data format")){
             Swal.fire({
               icon: "error",

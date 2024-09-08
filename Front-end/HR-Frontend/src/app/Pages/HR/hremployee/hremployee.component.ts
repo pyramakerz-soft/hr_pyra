@@ -77,7 +77,6 @@ export class HREmployeeComponent {
         this.generatePages();
       },
       (error) => {
-        console.log(error)
       }
     );
   }
@@ -110,7 +109,6 @@ export class HREmployeeComponent {
           this.filteredUsers = [];
         },
         (error) => {
-          console.log(error)
         }
       );
     }
@@ -126,7 +124,6 @@ export class HREmployeeComponent {
         this.UsersNames = d.usersNames;
       },
       (error) => {
-        console.log(error)
       }
     );
   }
@@ -156,7 +153,6 @@ export class HREmployeeComponent {
         this.DisplayPagginationOrNot = false;
       },
       (error) => {
-        console.log(error);
 
       }
     );
@@ -187,7 +183,6 @@ export class HREmployeeComponent {
             this.getUsersName()
           },
           (error) => {
-            console.log(error);
           }
         );
 

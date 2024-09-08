@@ -210,7 +210,6 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   EditUserClock(Clock: any) {
 
-    // console.log(Clock.id)
     this.route.navigate(['HR/HREmployeeAttendanceEdit/'+Clock.id], { state: { data: Clock, UserId: this.UserID } });
   }
 
@@ -247,7 +246,6 @@ export class HrEmployeeAttendanceDetailsComponent {
         window.URL.revokeObjectURL(url);
       },
       (error) => {
-        console.log(error)
 
         if (error.status == 404) {
           Swal.fire({
