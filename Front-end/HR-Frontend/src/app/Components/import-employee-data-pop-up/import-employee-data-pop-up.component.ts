@@ -98,7 +98,26 @@ export class ImportEmployeeDataPopUpComponent {
           }
         },
         (err) => {
-          console.log(err.message)
+          console.log(err.error)
+          if(err.error.message.includes("Invalid data format")){
+            Swal.fire({
+              icon: "error",
+              title: "Invalid",
+              text: err.error.message, 
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+              
+            });
+          } else if(err.error.message.includes("Duplicate entry")){
+            Swal.fire({
+              icon: "error",
+              title: "Duplicate Entry",
+              html: err.error.message.replace(/\n/g, '<br>'), 
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+              
+            });
+          }
           if(this.fileInput){
             this.fileInput.nativeElement.value = ''; 
             this.file = undefined
@@ -106,6 +125,14 @@ export class ImportEmployeeDataPopUpComponent {
           }
         }
       )
+    }else{
+      Swal.fire({
+        icon: "question",
+        title: "Select an Excel File",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#FF7519",
+        
+      });
     }
   }
 }

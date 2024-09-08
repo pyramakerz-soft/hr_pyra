@@ -10,128 +10,17 @@ use App\Http\Requests\UpdateClockInOutRequest;
 use App\Http\Resources\ClockResource;
 use App\Models\ClockInOut;
 use App\Models\User;
+use App\Traits\ClockTrait;
 use App\Traits\HelperTrait;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ClockController extends Controller
 {
-    use ResponseTrait;
-    use HelperTrait;
-    protected function paginateArray(array $items, int $perPage)
-    {
-        $page = LengthAwarePaginator::resolveCurrentPage();
-        $items = collect($items);
-        $total = $items->count();
-        $items = $items->forPage($page, $perPage)->values();
-
-        return new LengthAwarePaginator($items, $total, $perPage, $page, [
-            'path' => LengthAwarePaginator::resolveCurrentPath(),
-        ]);
-    }
-    protected function prepareClockData($clocks)
-    {
-        $isPaginated = $clocks instanceof \Illuminate\Pagination\LengthAwarePaginator;
-
-        // Group clocks by date
-        $groupedClocks = $clocks->groupBy(function ($clock) {
-            return Carbon::parse($clock->clock_in)->toDateString();
-        });
-
-        // Sort dates in descending order
-        $groupedDates = $groupedClocks->keys()->sortDesc()->values()->toArray();
-        $paginatedDates = $this->paginateArray($groupedDates, 7); // Paginate dates with 7 rows per page
-
-        // Prepare data for the current page
-        $currentDates = $paginatedDates->getCollection();
-        $data = [];
-
-        foreach ($currentDates as $date) {
-            $clocksForDay = $groupedClocks->get($date);
-
-            if (!$clocksForDay) {
-                continue;
-            }
-
-            // Sort clocks for the day so that the last clock appears first and the rest are ordered chronologically
-            $clocksForDay = $clocksForDay->sortByDesc(function ($clock) {
-                return Carbon::parse($clock->created_at);
-            });
-
-            // Move the last clock to the top and other clocks to `otherClocks`
-            $firstClockAtTheDay = $clocksForDay->first();
-            $otherClocksForDay = $clocksForDay->filter(function ($clock) use ($firstClockAtTheDay) {
-                return $clock->id !== $firstClockAtTheDay->id;
-            })->sortBy(function ($clock) {
-                return Carbon::parse($clock->clock_in);
-            })->map(function ($clock) {
-                $clockIn = $clock->clock_in ? Carbon::parse($clock->clock_in) : null;
-                $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out) : null;
-                $totalHours = null;
-
-                if ($clockIn && $clockOut) {
-                    $durationInSeconds = $clockIn->diffInSeconds($clockOut);
-                    $totalHours = gmdate('H:i', $durationInSeconds);
-                } elseif ($clockIn) {
-                    $durationInSeconds = $clockIn->diffInSeconds(Carbon::now());
-                    $totalHours = gmdate('H:i', $durationInSeconds);
-                }
-
-                return [
-                    'id' => $clock->id,
-                    'clockIn' => $clockIn ? $clockIn->format('H:i') : null,
-                    'clockOut' => $clockOut ? $clockOut->format('H:i') : null,
-                    'totalHours' => $totalHours,
-                    'site' => $clock->location_type,
-                    'location_in' => $clock->location->address ?? null,
-                    'location_out' => $clock->location->address ?? null,
-                    'formattedClockIn' => $clockIn ? $clockIn->format('Y-m-d H:i') : null,
-                    'formattedClockOut' => $clockOut ? $clockOut->format('Y-m-d H:i') : null,
-                ];
-            });
-
-            $totalDurationInSeconds = 0;
-            foreach ($clocksForDay as $clock) {
-                if ($clock->clock_in) {
-                    $clockIn = Carbon::parse($clock->clock_in);
-
-                    if ($clock->clock_out) {
-                        $clockOut = Carbon::parse($clock->clock_out);
-                        $durationInSeconds = $clockIn->diffInSeconds($clockOut);
-                    } else {
-                        $durationInSeconds = $clockIn->diffInSeconds(Carbon::now());
-                    }
-
-                    $totalDurationInSeconds += $durationInSeconds;
-                    $clock->duration = gmdate('H:i:s', $durationInSeconds);
-                }
-            }
-
-            $totalDurationFormatted = gmdate('H:i:s', $totalDurationInSeconds);
-            $firstClockAtTheDay->duration = $totalDurationFormatted;
-
-            // Prepare the final output for the day
-            $data[] = (new ClockResource($firstClockAtTheDay))->toArray(request()) + [
-                'otherClocks' => $otherClocksForDay->values()->toArray(),
-                'totalHours' => $totalDurationFormatted,
-            ];
-        }
-
-        return [
-            'clocks' => $data,
-            'pagination' => $isPaginated ? [
-                'current_page' => $paginatedDates->currentPage(),
-                'next_page_url' => $paginatedDates->nextPageUrl(),
-                'previous_page_url' => $paginatedDates->previousPageUrl(),
-                'last_page' => $paginatedDates->lastPage(),
-                'total' => $paginatedDates->total(),
-            ] : null,
-        ];
-    }
+    use ResponseTrait, HelperTrait, ClockTrait;
 
     public function allClocks(Request $request)
     {
@@ -141,13 +30,11 @@ class ClockController extends Controller
         }
 
         $query = ClockInOut::query();
-        // Join with the users table and then the departments table
-        $query->join('users', 'users.id', '=', 'clock_in_outs.user_id')
-            ->join('departments', 'departments.id', '=', 'users.department_id')
-            ->select('clock_in_outs.*'); // Adjust this if you need to select other columns
 
-        // Filtering by department name with a "like" clause
         if ($request->has('department')) {
+            $query->join('users', 'users.id', '=', 'clock_in_outs.user_id')
+                ->join('departments', 'departments.id', '=', 'users.department_id')
+                ->select('clock_in_outs.*');
             $departmentName = $request->get('department');
             $query->where('departments.name', 'like', '%' . $departmentName . '%');
             // $clocks = $query->orderBy('clock_in', 'desc')->get();
@@ -167,18 +54,18 @@ class ClockController extends Controller
             $query->whereBetween('clock_in', [$startOfMonth, $endOfMonth]);
             $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
         } else {
-            $now = Carbon::now();
+            // $now = Carbon::now();
 
-            $currentStart = $now->copy()->subMonth()->startOfMonth()->addDays(25);
-            $currentEnd = $now->copy()->startOfMonth()->addDays(25);
+            // $currentStart = $now->copy()->subMonth()->startOfMonth()->addDays(25);
+            // $currentEnd = $now->copy()->startOfMonth()->addDays(25);
 
             // Filter based on the current custom month range
-            $query->whereBetween('clock_in', [$currentStart, $currentEnd]);
+            // $query->whereBetween('clock_in', [$currentStart, $currentEnd]);
 
             // Paginate and sort by clock_in in descending order
             $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
         }
-
+        // dd($clocks->toArray());
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clocks Found');
         }
@@ -501,7 +388,7 @@ class ClockController extends Controller
             'clock_out' => $clockOut->format('Y-m-d H:i:s'),
             'duration' => $durationFormatted,
         ]);
-        return $this->returnData("clock", new ClockResource($clock), "Clock data for {$user->name}");
+        return $this->returnData("clock", new ClockResource($clock), "Clock Updated Successfully for {$user->name}");
     }
 
 }
