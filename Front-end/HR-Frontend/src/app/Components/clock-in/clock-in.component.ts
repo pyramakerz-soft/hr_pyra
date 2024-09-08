@@ -72,7 +72,6 @@ export class ClockInComponent {
     this.accountService.GetDataFromToken().subscribe((d: string) => {
       const response = JSON.parse(d);
       this.userDetails = response.User;
-      console.log(this.userDetails)
       this.isDateLoaded = true
       this.stopwatchTime = this.convertTimeToSeconds(this.userDetails.total_hours) || 0;
 

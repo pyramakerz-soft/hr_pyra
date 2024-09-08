@@ -83,7 +83,6 @@ export class ImportEmployeeDataPopUpComponent {
     if(this.file){
       this.employeeService.ImportEmployee(this.file).subscribe(
         (d:any)=>{
-          console.log(d)
           if(this.fileInput){
             this.fileInput.nativeElement.value = ''; 
             this.file = undefined

@@ -125,7 +125,6 @@ export class DonutChartComponent {
   getData(){
     this.chartService.getDepartmentEmployees(this.Year).subscribe(
       (d:any)=>{
-        console.log(d)
         this.data = []
         this.labels = []
         this.colors = [this.baseColor];
