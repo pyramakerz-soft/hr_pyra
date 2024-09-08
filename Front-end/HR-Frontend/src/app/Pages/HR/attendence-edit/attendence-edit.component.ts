@@ -49,9 +49,7 @@ export class AttendenceEditComponent {
   GetClocksById(id: number) {
     this.ClockServ.GetClockByID(this.ClockId).subscribe(
       (d: any) => {
-        console.log(d.clock)
         this.data = d.clock
-        console.log(this.data)
         if (this.data.formattedClockIn)
           this.data.formattedClockIn = this.transformUTCToEgyptTime(this.data.formattedClockIn);
         if (this.data.formattedClockOut)
@@ -112,7 +110,6 @@ export class AttendenceEditComponent {
 
   transformUTCToEgyptTime(utcDateTime: string): string {
     // Parse the input UTC datetime string to a Date object
-    console.log()
     const [datePart, timePart] = utcDateTime.split(' ');
     const [year, month, day] = datePart.split('-').map(Number);
     const [hours, minutes] = timePart.split(':').map(Number);
