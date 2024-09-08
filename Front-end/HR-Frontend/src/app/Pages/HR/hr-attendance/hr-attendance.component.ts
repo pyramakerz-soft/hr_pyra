@@ -74,7 +74,7 @@ export class HrAttendanceComponent {
   }
 
   NavigateToEmployeeAttendanceDetails(EmpId:number){
-    this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/"+EmpId)
+    this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/"+EmpId)
   }
 
 

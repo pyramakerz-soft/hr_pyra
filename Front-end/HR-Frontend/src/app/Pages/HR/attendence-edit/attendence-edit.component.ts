@@ -23,20 +23,7 @@ export class AttendenceEditComponent {
   ClockOutEgyptFormat: string = ""
   ClockId: number = 1;
 
-  constructor(private router: Router, public ClockServ: ClockService, private route: ActivatedRoute) {
-
-    // const navigation = this.router.getCurrentNavigation();
-    // if (navigation?.extras.state) {
-    //   this.data = navigation.extras.state['data'] as EmployeeDashboard;
-    //   this.UserId = navigation.extras.state['UserId'] ;
-
-    //   if(this.data.formattedClockIn)
-    //   this.data.formattedClockIn= this.transformUTCToEgyptTime(this.data.formattedClockIn);
-    //   if(this.data.formattedClockOut)
-    //   this.data.formattedClockOut= this.transformUTCToEgyptTime(this.data.formattedClockOut);
-    // }
-
-  }
+  constructor(private router: Router, public ClockServ: ClockService, private route: ActivatedRoute) {}
   ngOnInit() {
     this.route.params.subscribe(params => {
       if (params['Id']) {
@@ -105,7 +92,7 @@ export class AttendenceEditComponent {
     }else{
       this.ClockServ.UpdateUserClock(this.data.userId, this.data.id, this.data.formattedClockIn, this.data.formattedClockOut).subscribe(
         (d: any) => {
-          this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/" + this.data.userId)
+          this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/" + this.data.userId)
         },
         (error) => {
           console.error('Error:', error);
@@ -116,7 +103,7 @@ export class AttendenceEditComponent {
   
   }
   Cancel() {
-    this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/" + this.data.userId)
+    this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/" + this.data.userId)
 
   }
 
