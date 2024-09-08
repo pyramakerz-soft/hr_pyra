@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { EmployeeDashboard } from '../Models/employee-dashboard';
 import { ApiService } from './api.service';
+import { Clock } from '../Models/clock';
 
 @Injectable({
   providedIn: 'root'
@@ -79,5 +80,11 @@ export class ClockService {
       return this.http.get(`${this.baseUrl}/all_clocks?month=${date}&export=true`, { headers, responseType: 'blob' });  
     }
     return this.http.get(`${this.baseUrl}/all_clocks?month=${date}&department=${department}&export=true`, { headers, responseType: 'blob' });  
+  }
+
+  GetClockByID(id:number){
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<Clock>(`${this.baseUrl}/clock_by_id/${id}`, { headers });
   }
 }

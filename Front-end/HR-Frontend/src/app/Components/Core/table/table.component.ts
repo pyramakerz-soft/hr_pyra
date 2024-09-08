@@ -25,6 +25,7 @@ export class TableComponent {
 
   rowNumber: boolean[] = [];
 
+  
   constructor(
     public empDashserv: EmployeeDashService,
     private clockEventService: ClockEventService
