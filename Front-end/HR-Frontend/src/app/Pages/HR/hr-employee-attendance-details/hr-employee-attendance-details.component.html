@@ -105,10 +105,11 @@
                 <tr *ngFor="let row of tableData; let i = index"
                     [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300">
                     <td class="py-5">
-                        <i *ngIf="row.otherClocks.length > 0" class="fa-solid fa-chevron-down ml-1"
-                            (click)="toggleOtherClocks(i)"></i>
+                        <i *ngIf="hasOtherClocks(row.otherClocks)" class="fa-solid fa-chevron-down ml-1"
+                           (click)="toggleOtherClocks(i)"></i>
                         {{ row.Day }}
-                    </td>
+                      </td>
+
                     <td>{{ row.Date }}</td>
 
 
