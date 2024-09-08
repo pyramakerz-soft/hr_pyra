@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClockService } from '../../../Services/clock.service';
 import Swal from 'sweetalert2';
+import { Clock } from '../../../Models/clock';
 
 @Component({
   selector: 'app-attendence-edit',
@@ -14,30 +15,51 @@ import Swal from 'sweetalert2';
   styleUrl: './attendence-edit.component.css'
 })
 export class AttendenceEditComponent {
-  data: any = new EmployeeDashboard("", "", "", "", "", "", "", "","","", []);
+  data: Clock = new Clock(1, "", "", 1);
   ClockInAfterClockOut: boolean = false;
   DataIsNotTheSame: boolean = false;
 
-  ClockInEgyptFormat:string=""
-  ClockOutEgyptFormat:string=""
-  UserId:number=1
+  ClockInEgyptFormat: string = ""
+  ClockOutEgyptFormat: string = ""
+  ClockId: number = 1;
 
+  constructor(private router: Router, public ClockServ: ClockService, private route: ActivatedRoute) {
 
-  constructor(private router: Router, public ClockServ: ClockService) {
+    // const navigation = this.router.getCurrentNavigation();
+    // if (navigation?.extras.state) {
+    //   this.data = navigation.extras.state['data'] as EmployeeDashboard;
+    //   this.UserId = navigation.extras.state['UserId'] ;
 
-    const navigation = this.router.getCurrentNavigation();
-    if (navigation?.extras.state) {
-      this.data = navigation.extras.state['data'] as EmployeeDashboard;
-      this.UserId = navigation.extras.state['UserId'] ;
+    //   if(this.data.formattedClockIn)
+    //   this.data.formattedClockIn= this.transformUTCToEgyptTime(this.data.formattedClockIn);
+    //   if(this.data.formattedClockOut)
+    //   this.data.formattedClockOut= this.transformUTCToEgyptTime(this.data.formattedClockOut);
+    // }
 
-      if(this.data.formattedClockIn)
-      this.data.formattedClockIn= this.transformUTCToEgyptTime(this.data.formattedClockIn);
-      if(this.data.formattedClockOut)
-      this.data.formattedClockOut= this.transformUTCToEgyptTime(this.data.formattedClockOut);
+  }
+  ngOnInit() {
+    this.route.params.subscribe(params => {
+      if (params['Id']) {
+        this.ClockId = +params['Id'];
+        this.GetClocksById(this.ClockId)
+      }
+    });
+  }
 
-
-    }
-    
+  GetClocksById(id: number) {
+    this.ClockServ.GetClockByID(this.ClockId).subscribe(
+      (d: any) => {
+        this.data = d.clock
+        if (this.data.formattedClockIn)
+          this.data.formattedClockIn = this.transformUTCToEgyptTime(this.data.formattedClockIn);
+        if (this.data.formattedClockOut)
+          this.data.formattedClockOut = this.transformUTCToEgyptTime(this.data.formattedClockOut);
+      },
+      (error) => {
+        console.error('Error:', error);
+        // Handle error
+      }
+    );
   }
 
   CheckValidate() {
@@ -60,9 +82,9 @@ export class AttendenceEditComponent {
       });
 
     }
-    else{
-      this.data.formattedClockIn=this.transformEgyptTimeToUTC(this.data.formattedClockIn);
-      this.data.formattedClockOut=this.transformEgyptTimeToUTC(this.data.formattedClockOut);
+    else {
+      this.data.formattedClockIn = this.transformEgyptTimeToUTC(this.data.formattedClockIn);
+      this.data.formattedClockOut = this.transformEgyptTimeToUTC(this.data.formattedClockOut);
 
       this.SaveData();
     }
@@ -70,16 +92,15 @@ export class AttendenceEditComponent {
 
 
   SaveData() {
-    this.ClockServ.UpdateUserClock(this.UserId, this.data.id, this.data.formattedClockIn, this.data.formattedClockOut).subscribe(
+    this.ClockServ.UpdateUserClock(this.data.userId, this.data.id, this.data.formattedClockIn, this.data.formattedClockOut).subscribe(
       (d: any) => {
-        this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/" + this.UserId)
+        this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/" + this.data.userId)
       },
       (error) => {
         console.error('Error:', error);
         // Handle error
       }
     );
-
   }
   Cancel() {
     this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/" + this.data.userId)
@@ -89,14 +110,13 @@ export class AttendenceEditComponent {
 
   transformUTCToEgyptTime(utcDateTime: string): string {
     // Parse the input UTC datetime string to a Date object
-    console.log()
     const [datePart, timePart] = utcDateTime.split(' ');
     const [year, month, day] = datePart.split('-').map(Number);
     const [hours, minutes] = timePart.split(':').map(Number);
-    
+
     // Create a new Date object with the UTC time
     const utcDate = new Date(Date.UTC(year, month - 1, day, hours, minutes));
-  
+
     // Convert to Egypt local time using Intl.DateTimeFormat
     const options: Intl.DateTimeFormatOptions = {
       year: 'numeric',
@@ -107,11 +127,11 @@ export class AttendenceEditComponent {
       hour12: false, // Use 24-hour format
       timeZone: 'Africa/Cairo'
     };
-  
+
     // Format the date into the desired output
     const egyptTimeFormatter = new Intl.DateTimeFormat('en-GB', options);
     const formattedDateParts = egyptTimeFormatter.formatToParts(utcDate);
-  
+
     // Construct the formatted date string in "YYYY-MM-DD HH:mm" format
     const egyptDate = formattedDateParts.reduce((acc, part) => {
       if (part.type === 'year') acc['year'] = part.value;
@@ -121,7 +141,7 @@ export class AttendenceEditComponent {
       if (part.type === 'minute') acc['minute'] = part.value;
       return acc;
     }, {} as Record<string, string>);
-  
+
     // Return formatted string
     return `${egyptDate['year']}-${egyptDate['month']}-${egyptDate['day']} ${egyptDate['hour']}:${egyptDate['minute']}`;
   }
@@ -133,17 +153,17 @@ export class AttendenceEditComponent {
     const [datePart, timePart] = egyptDateTime.split(' ');
     const [year, month, day] = datePart.split('-').map(Number);
     const [hours, minutes] = timePart.split(':').map(Number);
-  
+
     // Create a new Date object with the Egypt local time
     const egyptDate = new Date(year, month - 1, day, hours, minutes);
-  
+
     // Convert Egypt local time to UTC
     const utcYear = egyptDate.getUTCFullYear();
     const utcMonth = String(egyptDate.getUTCMonth() + 1).padStart(2, '0'); // Ensure two-digit month
     const utcDay = String(egyptDate.getUTCDate()).padStart(2, '0'); // Ensure two-digit day
     const utcHours = String(egyptDate.getUTCHours()).padStart(2, '0'); // Ensure two-digit hours
     const utcMinutes = String(egyptDate.getUTCMinutes()).padStart(2, '0'); // Ensure two-digit minutes
-  
+
     // Construct the formatted UTC date string in "YYYY-MM-DD HH:mm" format
     return `${utcYear}-${utcMonth}-${utcDay} ${utcHours}:${utcMinutes}`;
   }

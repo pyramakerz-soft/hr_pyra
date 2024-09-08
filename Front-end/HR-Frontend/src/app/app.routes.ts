@@ -40,7 +40,7 @@ export const routes: Routes = [
         {path: "HREmployeeDetails/:EmpId", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
         {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard] },
         {path: "HREmployeeDetailsEdit/:Id", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-        {path: "HREmployeeAttendanceEdit", component:AttendenceEditComponent, title:"HREmployeeAttendanceEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+        {path: "HREmployeeAttendanceEdit/:Id", component:AttendenceEditComponent, title:"HREmployeeAttendanceEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
         {path: "HRDepartment", component:HrDepartmentComponent, title:"HRDepartment", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
         {path: "HRDepartmentAdd", component:HrDepartmentAddComponent, title:"HRDepartmentAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
         {path: "HRDepartmentEdit/:id", component:HrDepartmentAddComponent, title:"HRDepartmentEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
