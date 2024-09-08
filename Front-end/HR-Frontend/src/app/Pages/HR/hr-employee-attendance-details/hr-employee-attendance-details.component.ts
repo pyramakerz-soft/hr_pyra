@@ -154,7 +154,6 @@ export class HrEmployeeAttendanceDetailsComponent {
     this.CurrentPageNumber=PgNumber
     this.UserClocksService.GetUserClocksById(this.UserID, PgNumber, this.DateString).subscribe(
       (d: any) => {
-        console.log(d)
         this.tableData = d.data.clocks;
         this.rowNumber = new Array(this.tableData.length).fill(false);
         this.PagesNumber = d.data.pagination.last_page;
@@ -165,7 +164,6 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   generatePages() {
     this.pages = [];
-    console.log("this.PagesNumber",this.PagesNumber)
     for (let i = 1; i <= this.PagesNumber; i++) {
       this.pages.push(i);
     }
@@ -174,13 +172,11 @@ export class HrEmployeeAttendanceDetailsComponent {
   getNextPage() {
     this.CurrentPageNumber++;
     this.getAllClocks(this.CurrentPageNumber);
-    console.log(this.pages)
   }
 
   getPrevPage() {
     this.CurrentPageNumber--;
     this.getAllClocks(this.CurrentPageNumber);
-    console.log(this.CurrentPageNumber)
 
   }
 

@@ -124,7 +124,8 @@ export class HrAttendanceComponent {
     if(this.selectedName){
     this.userServ.SearchByName(this.selectedName).subscribe(
       (d: any) => {
-        this.tableData = d.data[0].users;
+        // console.log(d)
+        this.tableData = d.data.users;
         this.PagesNumber=1;
         this.DisplayPagginationOrNot=false;
         this.filteredUsers=[];
@@ -172,7 +173,7 @@ export class HrAttendanceComponent {
     this.selectedName = location;
     this.userServ.SearchByName(this.selectedName).subscribe(
       (d: any) => {
-        this.tableData=d.data[0].users;
+        this.tableData=d.data.users;
         this.DisplayPagginationOrNot=false;
       },
       (error) => {
@@ -219,7 +220,6 @@ export class HrAttendanceComponent {
     const target = event.target as HTMLSelectElement;
     if (target) {
       this.SelectDepartment = target.value; 
-      console.log(this.SelectDepartment)
     }
 
   }
