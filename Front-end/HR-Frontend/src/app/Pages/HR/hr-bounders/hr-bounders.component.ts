@@ -43,7 +43,6 @@ export class HrBoundersComponent {
         this.generatePages();
       },
       (error) => {
-        console.log(error);
       }
     );
   }
@@ -113,7 +112,6 @@ export class HrBoundersComponent {
 
       },
       (error) => {
-        console.log(error);
       }
     );
   }
@@ -142,7 +140,6 @@ export class HrBoundersComponent {
         this.DisplayPagginationOrNot = false;
       },
       (error) => {
-        console.log(error);
       }
     );
 
@@ -165,7 +162,6 @@ export class HrBoundersComponent {
           this.filteredLocations = [];
         },
         (error) => {
-          console.log(error)
         }
       );
     }

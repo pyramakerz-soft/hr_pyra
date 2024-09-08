@@ -160,7 +160,6 @@ export class ClockInComponent {
             // this.resetStopwatch();
           },
           (error: HttpErrorResponse) => {
-            console.log(error)
             Swal.fire({
               text: "Failed to retrieve location. Please try again.",
               confirmButtonText: "OK",

@@ -87,7 +87,6 @@ export class HrAttendanceComponent {
         this.generatePages();
       },
       (error) => {
-        console.log(error)
       }
     );
   }
@@ -130,7 +129,6 @@ export class HrAttendanceComponent {
         this.filteredUsers=[];
       },
       (error) => {
-        console.log(error)
       }
     );
   }
@@ -146,7 +144,6 @@ export class HrAttendanceComponent {
         this.UsersNames=d.usersNames;
       },
       (error) => {
-        console.log(error)
       }
     );
   }
@@ -176,7 +173,6 @@ export class HrAttendanceComponent {
         this.DisplayPagginationOrNot=false;
       },
       (error) => {
-        console.log(error);
 
       }
     );

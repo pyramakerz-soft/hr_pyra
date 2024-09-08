@@ -92,15 +92,28 @@ export class AttendenceEditComponent {
 
 
   SaveData() {
-    this.ClockServ.UpdateUserClock(this.data.userId, this.data.id, this.data.formattedClockIn, this.data.formattedClockOut).subscribe(
-      (d: any) => {
-        this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/" + this.data.userId)
-      },
-      (error) => {
-        console.error('Error:', error);
-        // Handle error
-      }
-    );
+    if(this.data.formattedClockIn== this.data.formattedClockOut){
+      Swal.fire({
+        icon: "error",
+        title: "Clock Out and Clock In in the same Time",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#17253E",
+      });
+
+      this.GetClocksById(this.data.userId)
+
+    }else{
+      this.ClockServ.UpdateUserClock(this.data.userId, this.data.id, this.data.formattedClockIn, this.data.formattedClockOut).subscribe(
+        (d: any) => {
+          this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/" + this.data.userId)
+        },
+        (error) => {
+          console.error('Error:', error);
+          // Handle error
+        }
+      );
+    }
+  
   }
   Cancel() {
     this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/" + this.data.userId)
@@ -127,7 +140,7 @@ export class AttendenceEditComponent {
       hour12: false, // Use 24-hour format
       timeZone: 'Africa/Cairo'
     };
-
+ 
     // Format the date into the desired output
     const egyptTimeFormatter = new Intl.DateTimeFormat('en-GB', options);
     const formattedDateParts = egyptTimeFormatter.formatToParts(utcDate);
