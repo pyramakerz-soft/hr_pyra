@@ -93,9 +93,9 @@ class ClockController extends Controller
         if (!$authUser->hasRole('Hr')) {
             return $this->returnError('You are not authorized to view user clocks', 403);
         }
-    
+
         $query = ClockInOut::where('user_id', $user->id);
-    
+
         // Filter by date or month if provided
         if ($request->has('date')) {
             $date = Carbon::parse($request->get('date'))->toDateString();
@@ -111,29 +111,29 @@ class ClockController extends Controller
             $currentEnd = $now->copy()->startOfMonth()->addDays(25);
             $query->whereBetween('clock_in', [$currentStart, $currentEnd]);
         }
-    
+
         // Fetch all clocks for the current query
         $clocks = $query->orderBy('clock_in', 'desc')->get();
-    
+
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clocks Found For This User');
         }
-    
+
         if ($request->has('export')) {
             return Excel::download(new UserClocksExportById($clocks, $user->name), 'user_clocks_' . $user->name . '.xlsx');
         }
-    
+
         // Group clocks by date
         $groupedClocks = $clocks->groupBy(function ($clock) {
             return Carbon::parse($clock->clock_in)->toDateString();
         });
-    
+
         // Prepare the data with one parent clock per day and other clocks grouped under it
         $data = $groupedClocks->map(function ($dayClocks, $date) {
             $mainClock = $dayClocks->first(); // First clock of the day is treated as the main clock
-    
+
             // Other clocks in the same day, excluding the main clock
-            $otherClocks = $dayClocks->skip(1)->map(function($otherClock) {
+            $otherClocks = $dayClocks->skip(1)->map(function ($otherClock) {
                 return [
                     'id' => $otherClock->id,
                     'clockIn' => Carbon::parse($otherClock->clock_in)->format('h:iA'),
@@ -144,7 +144,7 @@ class ClockController extends Controller
                     'formattedClockOut' => $otherClock->clock_out,
                 ];
             });
-    
+
             return [
                 'id' => $mainClock->id,
                 'Day' => Carbon::parse($mainClock->clock_in)->format('l'),
@@ -158,10 +158,10 @@ class ClockController extends Controller
                 'site' => $mainClock->site,
                 'formattedClockIn' => $mainClock->clock_in,
                 'formattedClockOut' => $mainClock->clock_out,
-                'otherClocks' => $otherClocks->toArray() // Group other clocks under the main clock
+                'otherClocks' => $otherClocks->toArray(), // Group other clocks under the main clock
             ];
         })->values(); // Return the data as a collection, indexed by values
-    
+
         // Return data with pagination (if needed, though all clocks will be on one page)
         return $this->returnData("data", [
             'clocks' => $data,
@@ -171,12 +171,9 @@ class ClockController extends Controller
                 'previous_page_url' => null,
                 'last_page' => 1,
                 'total' => $data->count(),
-            ]
+            ],
         ], "Clocks Data for {$user->name}");
     }
-    
-    
-    
 
     public function clockIn(StoreClockInOutRequest $request)
     {
@@ -426,7 +423,8 @@ class ClockController extends Controller
         ]);
         return $this->returnData("clock", new ClockResource($clock), "Clock Updated Successfully for {$user->name}");
     }
-    public function clockById(ClockInOut $clock){
-        return 
+    public function clockById(ClockInOut $clock)
+    {
+        return $this->returnData("clock", new ClockResource($clock), "Clock Data");
     }
 }
