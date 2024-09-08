@@ -92,7 +92,6 @@ export class HrBoundersComponent {
         });
       }
     });
-
   }
 
   getNextPage() {
