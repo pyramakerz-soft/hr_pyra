@@ -124,7 +124,6 @@ export class HrAttendanceComponent {
     if(this.selectedName){
     this.userServ.SearchByName(this.selectedName).subscribe(
       (d: any) => {
-        // console.log(d)
         this.tableData = d.data.users;
         this.PagesNumber=1;
         this.DisplayPagginationOrNot=false;
