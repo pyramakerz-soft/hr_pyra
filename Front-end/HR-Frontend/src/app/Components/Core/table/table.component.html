@@ -62,7 +62,6 @@
 
 
 
-
                     <td>
                         <div>
                             <div
@@ -180,10 +179,23 @@
             </button>
         </div> -->
 
-        <div class="flex justify-center items-center space-x-5 md:block">
+        <!-- <div class="flex justify-center items-center space-x-5 md:block">
             <button  class="h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
                 >
                 {{ CurrentPageNumber }} / PagesNumber
+            </button>
+        </div> -->
+
+        <div class="flex justify-center items-center space-x-2 md:space-x-4">
+            <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="GetClockss(CurrentPageNumber)">
+                {{ CurrentPageNumber }}
+            </button>
+            <button  *ngIf="CurrentPageNumber+1<PagesNumber" class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="GetClockss(CurrentPageNumber+1)">
+                {{ CurrentPageNumber+1 }}
+            </button>
+            <span class="text-gray-800 text-sm md:text-base font-semibold">...</span>
+            <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="GetClockss(PagesNumber)">
+                {{ PagesNumber }}
             </button>
         </div>
 

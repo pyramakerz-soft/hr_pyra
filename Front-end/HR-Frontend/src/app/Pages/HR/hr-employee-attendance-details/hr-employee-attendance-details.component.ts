@@ -154,7 +154,10 @@ export class HrEmployeeAttendanceDetailsComponent {
     this.CurrentPageNumber=PgNumber
     this.UserClocksService.GetUserClocksById(this.UserID, PgNumber, this.DateString).subscribe(
       (d: any) => {
+        console.log(d)
         this.tableData = d.data.clocks;
+        console.log(this.tableData)
+
         this.rowNumber = new Array(this.tableData.length).fill(false);
         this.PagesNumber = d.data.pagination.last_page;
         this.generatePages();
@@ -207,9 +210,10 @@ export class HrEmployeeAttendanceDetailsComponent {
     }
   }
 
-  EditUserClock(Clock: EmployeeDashboard) {
+  EditUserClock(Clock: any) {
 
-    this.route.navigate(['HR/HREmployeeAttendanceEdit'], { state: { data: Clock, UserId: this.UserID } });
+    // console.log(Clock.id)
+    this.route.navigate(['HR/HREmployeeAttendanceEdit/'+Clock.id], { state: { data: Clock, UserId: this.UserID } });
   }
 
   ClearSearch() {
@@ -256,5 +260,9 @@ export class HrEmployeeAttendanceDetailsComponent {
         }
       }
     );
+  }
+
+  hasOtherClocks(otherClocks: { [key: number]: any }): boolean {
+    return Object.keys(otherClocks).length > 0;
   }
 }
