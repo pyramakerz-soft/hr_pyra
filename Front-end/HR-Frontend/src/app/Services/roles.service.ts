@@ -15,8 +15,7 @@ export class RolesService {
 
   constructor(public http: HttpClient , public Api:ApiService) {
     this.baseurl=Api.BaseUrl+"/roles"
-
-   }
+  }
 
   getall(): Observable<RoleModel[]> {
     const token = localStorage.getItem("token");
@@ -24,18 +23,11 @@ export class RolesService {
     return this.http.get<RoleModel[]>(this.baseurl, { headers });
   }
 
-
   getById(id: number): Observable<RoleModel[]> {
     const url = `${this.baseurl}/${id}`;
-    return this.http.get<RoleModel[]>(url);
-  }
-
-
-  deleteById(id: number): Observable<any> {
-    const url = `${this.baseurl}/${id}`;
-    return this.http.delete(url, { responseType: 'text' }).pipe(
-      catchError(this.handleError)
-    );
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<RoleModel[]>(url, { headers });
   }
  
   createRole(name: string, per: string[]): Observable<RoleModel> {
@@ -49,12 +41,23 @@ export class RolesService {
 
     return this.http.post<RoleModel>(this.baseurl, body, { headers });
   }
-  
 
-  private handleError(error: any): Observable<never> {
-    console.error('An error occurred:', error);
-    return throwError(() => new Error('Something went wrong; please try again later.'));
+  updateRole(name: string, per: string[], roleId:number) {
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+    const body = {
+      name: name,
+      permission: per
+    };
+
+    return this.http.post<any>(`${this.baseurl}/${roleId}`, body, { headers });
   }
 
-  
+  DeleteByID(id:number){
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.delete(`${this.baseurl}/${id}`, { headers, responseType: 'json' });
+  }
 }
