@@ -210,7 +210,7 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   EditUserClock(Clock: any) {
 
-    this.route.navigate(['HR/HREmployeeAttendanceEdit/'+Clock.id], { state: { data: Clock, UserId: this.UserID } });
+    this.route.navigate(['HR/HRAttendanceEmployeeEdit/'+Clock.id], { state: { data: Clock, UserId: this.UserID } });
   }
 
   ClearSearch() {
