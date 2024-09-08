@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\RoleResource;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
@@ -50,11 +49,14 @@ class RoleController extends Controller
      */
     public function show(Role $role)
     {
-        $rolePermissions = Permission::join("role_has_permissions", "role_has_permissions.permission_id", "=", "permissions.id")
-            ->where("role_has_permissions.role_id", $role->id)
-            ->get();
+        // $rolePermissions = Permission::join("role_has_permissions", "role_has_permissions.permission_id", "=", "permissions.id")
+        //     ->where("role_has_permissions.role_id", $role->id)
+        //     ->get();
 
-        return $this->returnData('rolePermissions', $rolePermissions, 'Role Permissions Data');
+        // return $this->returnData('rolePermissions', $rolePermissions, 'Role Permissions Data');
+        $role = Role::with('permissions')->where('id', $role->id)->get();
+
+        return $this->returnData('role', $role, 'Role Data');
     }
 
     /**

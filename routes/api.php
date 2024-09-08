@@ -84,5 +84,5 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('employees_workTypes_percentage', [HrController::class, 'getEmployeesWorkTypesPercentage']);
     Route::get('department_employees', [HrController::class, 'getDepartmentEmployees']);
     Route::get('employees_per_month', [HrController::class, 'employeesPerMonth']);
-
+    Route::get('clock_by_id', [ClockController::class, 'clockById']);
 });
