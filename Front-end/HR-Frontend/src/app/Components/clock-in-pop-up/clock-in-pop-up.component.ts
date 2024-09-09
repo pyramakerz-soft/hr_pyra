@@ -204,7 +204,6 @@ export class ClockInPopUpComponent {
           });
         }
         else{
-          console.log(error.error.message)
           Swal.fire({
             text: "Try In Another Time",
             confirmButtonText: "OK",
@@ -245,7 +244,6 @@ export class ClockInPopUpComponent {
             this.clockEventService.notifyClockedIn();
           },
           (error: HttpErrorResponse) => {
-            console.log(error.error.message)
             if (error.error.message.includes("You already have an existing clock-in without clocking out")){
               Swal.fire({
                 text: "You Didn't clock out from the last clock in",
@@ -272,7 +270,6 @@ export class ClockInPopUpComponent {
             this.clockEventService.notifyClockedIn();
           },
           (error: HttpErrorResponse) => {
-            console.log(error.error.message)
             if (error.error.message.includes("You already have an existing clock-in without clocking out")){
               Swal.fire({
                 text: "You Didn't clock out from the last clock in",

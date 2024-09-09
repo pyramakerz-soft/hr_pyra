@@ -37,7 +37,6 @@ export class HrEmployeeDetailsComponent {
         this.employee = d.User;
       },
       (error) => {
-        console.log(error)
       }
     );
   }

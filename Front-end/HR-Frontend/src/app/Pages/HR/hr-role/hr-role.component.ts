@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { RoleModel } from '../../../Models/role-model';
 import { RolesService } from '../../../Services/roles.service';
+import Swal from 'sweetalert2';
 
 interface data{
   role:string,
@@ -42,5 +43,25 @@ export class HrRoleComponent {
     this.router.navigateByUrl("/HR/HRRoleAdd");
   }
 
+  deleteRole(id:number){
+    Swal.fire({
+      title: 'Are you sure you want to Delete This Role?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#FF7519',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.roleService.DeleteByID(id).subscribe(result => {
+          this.GetAllRoles()
+        });
+      }
+    });
+  }
 
+  navigateToEdit(id:number){
+    this.router.navigateByUrl(`HR/HRRoleEdit/${id}`);
+  }
 }
