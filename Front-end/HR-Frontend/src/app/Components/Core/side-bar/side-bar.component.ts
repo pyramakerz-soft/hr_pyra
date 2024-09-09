@@ -32,7 +32,7 @@ export class SideBarComponent {
   }
 
   setActiveIndexByRoute(currentRoute: string): void {
-    const foundIndex = this.menuItems.findIndex(item => item.route === currentRoute);
+    const foundIndex = this.menuItems.findIndex(item => currentRoute.includes(item.route));
     if (foundIndex !== -1) {
       this.setActiveIndex(foundIndex);
     }

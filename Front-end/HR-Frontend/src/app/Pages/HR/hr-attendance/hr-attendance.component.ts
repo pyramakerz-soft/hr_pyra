@@ -74,7 +74,7 @@ export class HrAttendanceComponent {
   }
 
   NavigateToEmployeeAttendanceDetails(EmpId:number){
-    this.router.navigateByUrl("HR/HREmployeeAttendanceDetails/"+EmpId)
+    this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/"+EmpId)
   }
 
 
@@ -87,7 +87,6 @@ export class HrAttendanceComponent {
         this.generatePages();
       },
       (error) => {
-        console.log(error)
       }
     );
   }
@@ -124,14 +123,12 @@ export class HrAttendanceComponent {
     if(this.selectedName){
     this.userServ.SearchByName(this.selectedName).subscribe(
       (d: any) => {
-        // console.log(d)
         this.tableData = d.data.users;
         this.PagesNumber=1;
         this.DisplayPagginationOrNot=false;
         this.filteredUsers=[];
       },
       (error) => {
-        console.log(error)
       }
     );
   }
@@ -147,7 +144,6 @@ export class HrAttendanceComponent {
         this.UsersNames=d.usersNames;
       },
       (error) => {
-        console.log(error)
       }
     );
   }
@@ -177,7 +173,6 @@ export class HrAttendanceComponent {
         this.DisplayPagginationOrNot=false;
       },
       (error) => {
-        console.log(error);
 
       }
     );
