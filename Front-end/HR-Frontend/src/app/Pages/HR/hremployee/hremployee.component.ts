@@ -103,7 +103,7 @@ export class HREmployeeComponent {
     if (this.selectedName) {
       this.userServ.SearchByName(this.selectedName).subscribe(
         (d: any) => {
-          this.tableData = d.data[0].users;
+          this.tableData = d.data.users;
           this.PagesNumber = 1;
           this.DisplayPagginationOrNot = false;
           this.filteredUsers = [];
@@ -149,7 +149,7 @@ export class HREmployeeComponent {
     this.selectedName = location;
     this.userServ.SearchByName(this.selectedName).subscribe(
       (d: any) => {
-        this.tableData = d.data[0].users;
+        this.tableData = d.data.users;
         this.DisplayPagginationOrNot = false;
       },
       (error) => {
