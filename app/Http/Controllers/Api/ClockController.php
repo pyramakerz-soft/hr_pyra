@@ -2,116 +2,117 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exports\ClocksExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClockInOutRequest;
 use App\Http\Requests\UpdateClockInOutRequest;
-use App\Http\Resources\ClockResource;
 use App\Models\ClockInOut;
 use App\Models\User;
+use App\Services\Api\Clock\ClockService;
 use App\Traits\ClockTrait;
-use App\Traits\HelperTrait;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 
 class ClockController extends Controller
 {
-    use ResponseTrait, HelperTrait, ClockTrait;
-
+    use ResponseTrait, ClockTrait;
+    protected $clockService;
+    public function __construct(ClockService $clockService)
+    {
+        $this->clockService = $clockService;
+    }
     public function allClocks(Request $request)
     {
-        $authUser = Auth::user();
-        if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to view user clocks', 403);
-        }
 
-        $query = ClockInOut::query();
+        return $this->clockService->getAllClocks($request);
+        // $authUser = Auth::user();
+        // $this->authorizationService->authorizeHrUser($authUser);
 
-        if ($request->has('department')) {
-            $query->join('users', 'users.id', '=', 'clock_in_outs.user_id')
-                ->join('departments', 'departments.id', '=', 'users.department_id')
-                ->select('clock_in_outs.*');
-            $departmentName = $request->get('department');
-            $query->where('departments.name', 'like', '%' . $departmentName . '%');
-            // $clocks = $query->orderBy('clock_in', 'desc')->get();
-            // dd($clocks);
-        }
-        if ($request->has('date')) {
-            $date = Carbon::parse($request->get('date'))->toDateString();
-            $query->whereDate('clock_in', $date);
-            $clocks = $query->orderBy('clock_in', 'desc')->get();
-        } else if ($request->has('month')) {
+        // $query = ClockInOut::query();
 
-            $month = Carbon::parse($request->get('month'));
+        // if ($request->has('department')) {
+        //     $query->join('users', 'users.id', '=', 'clock_in_outs.user_id')
+        //         ->join('departments', 'departments.id', '=', 'users.department_id')
+        //         ->select('clock_in_outs.*');
+        //     $departmentName = $request->get('department');
+        //     $query->where('departments.name', 'like', '%' . $departmentName . '%');
+        //     // $clocks = $query->orderBy('clock_in', 'desc')->get();
+        //     // dd($clocks);
+        // }
+        // if ($request->has('date')) {
+        //     $date = Carbon::parse($request->get('date'))->toDateString();
+        //     $query->whereDate('clock_in', $date);
+        //     $clocks = $query->orderBy('clock_in', 'desc')->get();
+        // } else if ($request->has('month')) {
 
-            $startOfMonth = $month->copy()->subMonth()->startOfMonth()->addDays(25);
-            $endOfMonth = $month->copy()->startOfMonth()->addDays(25);
+        //     $month = Carbon::parse($request->get('month'));
 
-            $query->whereBetween('clock_in', [$startOfMonth, $endOfMonth]);
-            $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
-        } else {
-            // $now = Carbon::now();
+        //     $startOfMonth = $month->copy()->subMonth()->startOfMonth()->addDays(25);
+        //     $endOfMonth = $month->copy()->startOfMonth()->addDays(25);
 
-            // $currentStart = $now->copy()->subMonth()->startOfMonth()->addDays(25);
-            // $currentEnd = $now->copy()->startOfMonth()->addDays(25);
+        //     $query->whereBetween('clock_in', [$startOfMonth, $endOfMonth]);
+        //     $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+        // } else {
+        //     // $now = Carbon::now();
 
-            // Filter based on the current custom month range
-            // $query->whereBetween('clock_in', [$currentStart, $currentEnd]);
+        //     // $currentStart = $now->copy()->subMonth()->startOfMonth()->addDays(25);
+        //     // $currentEnd = $now->copy()->startOfMonth()->addDays(25);
 
-            // Paginate and sort by clock_in in descending order
-            $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
-        }
-        // dd($clocks->toArray());
-        if ($clocks->isEmpty()) {
-            return $this->returnError('No Clocks Found');
-        }
+        //     // Filter based on the current custom month range
+        //     // $query->whereBetween('clock_in', [$currentStart, $currentEnd]);
 
-        if ($request->has('export')) {
+        //     // Paginate and sort by clock_in in descending order
+        //     $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+        // }
+        // // dd($clocks->toArray());
+        // if ($clocks->isEmpty()) {
+        //     return $this->returnError('No Clocks Found');
+        // }
 
-            $clocksCollection = $clocks instanceof \Illuminate\Pagination\LengthAwarePaginator
-            ? $clocks->getCollection()
-            : $clocks;
-            return (new ClocksExport($request->get('department')))->download('all_user_clocks.xlsx');
+        // if ($request->has('export')) {
 
-        }
+        //     $clocksCollection = $clocks instanceof \Illuminate\Pagination\LengthAwarePaginator
+        //     ? $clocks->getCollection()
+        //     : $clocks;
+        //     return (new ClocksExport($request->get('department')))->download('all_user_clocks.xlsx');
 
-        $data = $this->prepareClockData($clocks);
+        // }
 
-        if (!isset($data['clocks'])) {
-            return $this->returnError('No Clocks Found');
-        }
+        // $data = $this->prepareClockData($clocks);
 
-        return $this->returnData("data", $data, "All Clocks Data");
+        // if (!isset($data['clocks'])) {
+        //     return $this->returnError('No Clocks Found');
+        // }
+
+        // return $this->returnData("data", $data, "All Clocks Data");
     }
     public function getUserClocksById(Request $request, User $user)
     {
-        $authUser = Auth::user();
-        if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to view user clocks', 403);
-        }
-        $query = ClockInOut::where('user_id', $user->id);
 
-        if ($request->has('date')) {
-            $date = Carbon::parse($request->get('date'))->toDateString();
-            $query->whereDate('clock_in', $date);
-        } else if ($request->has('month')) {
-            $month = Carbon::parse($request->get('month'));
-            $startOfMonth = $month->copy()->subMonth()->startOfMonth()->addDays(25);
-            $endOfMonth = $month->copy()->startOfMonth()->addDays(25);
-            $query->whereBetween('clock_in', [$startOfMonth, $endOfMonth]);
-        }
+        return $this->clockService->getUserClocksById($request, $user);
+        // $authUser = Auth::user();
+        // $this->authorizationService->authorizeHrUser($authUser);
 
-        $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+        // $query = ClockInOut::where('user_id', $user->id);
 
-        if ($clocks->isEmpty()) {
-            return $this->returnError('No Clocks Found For This User');
-        }
+        // if ($request->has('date')) {
+        //     $date = Carbon::parse($request->get('date'))->toDateString();
+        //     $query->whereDate('clock_in', $date);
+        // } else if ($request->has('month')) {
+        //     $month = Carbon::parse($request->get('month'));
+        //     $startOfMonth = $month->copy()->subMonth()->startOfMonth()->addDays(25);
+        //     $endOfMonth = $month->copy()->startOfMonth()->addDays(25);
+        //     $query->whereBetween('clock_in', [$startOfMonth, $endOfMonth]);
+        // }
 
-        $data = $this->prepareClockData($clocks);
+        // $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
 
-        return $this->returnData("data", $data, "Clocks Data for {$authUser->name}");
+        // if ($clocks->isEmpty()) {
+        //     return $this->returnError('No Clocks Found For This User');
+        // }
+
+        // $data = $this->prepareClockData($clocks);
+
+        // return $this->returnData("data", $data, "Clocks Data for {$authUser->name}");
         // $query = ClockInOut::where('user_id', $user->id);
 
         // // Filter by date or month if provided
@@ -191,257 +192,262 @@ class ClockController extends Controller
         //     ],
         // ], "Clocks Data for {$user->name}");
     }
+    public function showUserClocks(Request $request)
+    {
 
+        return $this->clockService->showUserClocks($request);
+        // $authUser = Auth::user();
+
+        // $query = ClockInOut::where('user_id', $authUser->id);
+
+        // if ($request->has('date')) {
+        //     $date = Carbon::parse($request->get('date'))->toDateString();
+        //     $query->whereDate('clock_in', $date);
+        // }
+        // $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+
+        // if ($clocks->isEmpty()) {
+        //     return $this->returnError('No Clocks Found For This User');
+        // }
+
+        // $data = $this->prepareClockData($clocks);
+
+        // return $this->returnData("data", $data, "Clocks Data for {$authUser->name}");
+    }
+
+    public function getClockById(ClockInOut $clock)
+    {
+        return $this->clockService->getClockById($clock);
+        // return $this->returnData("clock", new ClockResource($clock), "Clock Data");
+    }
     public function clockIn(StoreClockInOutRequest $request)
     {
-        $authUser = Auth::user();
-        $user_id = $authUser->id;
+        return $this->clockService->clockIn($request);
+        // $authUser = Auth::user();
+        // $user_id = $authUser->id;
 
-        $existingClockInWithoutClockOut = ClockInOut::where('user_id', $user_id)
-            ->whereNull('clock_out')
-            ->exists();
+        // $existingClockInWithoutClockOut = ClockInOut::where('user_id', $user_id)
+        //     ->whereNull('clock_out')
+        //     ->exists();
 
-        if ($existingClockInWithoutClockOut) {
-            return $this->returnError('You already have an existing clock-in without clocking out.');
-        }
-        $this->validate($request, [
-            'location_type' => 'required|string|exists:work_types,name',
-            'clock_in' => ['required', 'date_format:Y-m-d H:i:s'],
-        ]);
+        // if ($existingClockInWithoutClockOut) {
+        //     return $this->returnError('You already have an existing clock-in without clocking out.');
+        // }
+        // $this->validate($request, [
+        //     'location_type' => 'required|string|exists:work_types,name',
+        //     'clock_in' => ['required', 'date_format:Y-m-d H:i:s'],
+        // ]);
 
-        if ($request->location_type == "home") {
+        // if ($request->location_type == "home") {
 
-            $existingHomeClockIn = ClockInOut::where('user_id', $user_id)
-                ->whereDate('clock_in', Carbon::today())
-                ->where('location_type', "home")
-                ->whereNull('clock_out')
-                ->orderBy('clock_in', 'desc')
-                ->exists();
-            if ($existingHomeClockIn) {
-                return $this->returnError('You have already clocked in.');
-            }
+        //     $existingHomeClockIn = ClockInOut::where('user_id', $user_id)
+        //         ->whereDate('clock_in', Carbon::today())
+        //         ->where('location_type', "home")
+        //         ->whereNull('clock_out')
+        //         ->orderBy('clock_in', 'desc')
+        //         ->exists();
+        //     if ($existingHomeClockIn) {
+        //         return $this->returnError('You have already clocked in.');
+        //     }
 
-            $clockIn = Carbon::parse($request->clock_in);
-            $durationInterval = $clockIn->diffAsCarbonInterval(Carbon::now());
-            $durationFormatted = $durationInterval->format('%H:%I:%S');
-            $clock = ClockInOut::create([
-                'clock_in' => $clockIn,
-                'clock_out' => null,
-                'duration' => $durationFormatted,
-                'user_id' => $user_id,
-                'location_id' => null,
-                'location_type' => $request->location_type,
-            ]);
-            return $this->returnData("clock", $clock, "Clock In Done");
-        }
+        //     $clockIn = Carbon::parse($request->clock_in);
+        //     $durationInterval = $clockIn->diffAsCarbonInterval(Carbon::now());
+        //     $durationFormatted = $durationInterval->format('%H:%I:%S');
+        //     $clock = ClockInOut::create([
+        //         'clock_in' => $clockIn,
+        //         'clock_out' => null,
+        //         'duration' => $durationFormatted,
+        //         'user_id' => $user_id,
+        //         'location_id' => null,
+        //         'location_type' => $request->location_type,
+        //     ]);
+        //     return $this->returnData("clock", $clock, "Clock In Done");
+        // }
 
-        $this->validate($request, [
-            'latitude' => 'required',
-            'longitude' => 'required',
-        ]);
-        $latitude = $request->latitude;
-        $longitude = $request->longitude;
+        // $this->validate($request, [
+        //     'latitude' => 'required',
+        //     'longitude' => 'required',
+        // ]);
+        // $latitude = $request->latitude;
+        // $longitude = $request->longitude;
 
-        $userLocations = $authUser->user_locations()->get();
-        $closestLocation = null;
-        $shortestDistance = null;
+        // $userLocations = $authUser->user_locations()->get();
+        // $closestLocation = null;
+        // $shortestDistance = null;
 
-        foreach ($userLocations as $userLocation) {
-            $location_id = $userLocation->pivot['location_id'];
-            $userLongitude = $userLocation->longitude;
-            $userLatitude = $userLocation->latitude;
+        // foreach ($userLocations as $userLocation) {
+        //     $location_id = $userLocation->pivot['location_id'];
+        //     $userLongitude = $userLocation->longitude;
+        //     $userLatitude = $userLocation->latitude;
 
-            $distance = $this->haversineDistance($userLatitude, $userLongitude, $latitude, $longitude);
-            // dd($location_id);
-            if (is_null($shortestDistance) || $distance < $shortestDistance) {
-                $shortestDistance = $distance;
-                $closestLocation = [
-                    'location_id' => $location_id,
-                    'distance' => $distance,
-                ];
-            }
-        }
+        //     $distance = $this->haversineDistance($userLatitude, $userLongitude, $latitude, $longitude);
+        //     // dd($location_id);
+        //     if (is_null($shortestDistance) || $distance < $shortestDistance) {
+        //         $shortestDistance = $distance;
+        //         $closestLocation = [
+        //             'location_id' => $location_id,
+        //             'distance' => $distance,
+        //         ];
+        //     }
+        // }
 
-        if (is_null($closestLocation)) {
-            return $this->returnError('User is not located at any registered locations.');
-        }
+        // if (is_null($closestLocation)) {
+        //     return $this->returnError('User is not located at any registered locations.');
+        // }
 
-        $location_id = $closestLocation['location_id'];
-        $distanceBetweenUserAndLocation = $closestLocation['distance'];
-        // $now = Carbon::now()->addRealHour(3);
-        // $UserEndTime = Carbon::parse($authUser->user_detail->end_time);
+        // $location_id = $closestLocation['location_id'];
+        // $distanceBetweenUserAndLocation = $closestLocation['distance'];
+        // // $now = Carbon::now()->addRealHour(3);
+        // // $UserEndTime = Carbon::parse($authUser->user_detail->end_time);
 
-        $existingSiteClockIn = ClockInOut::where('user_id', $user_id)
-            ->where('location_id', $location_id)
-            ->whereDate('clock_in', Carbon::today())
-            ->whereNull('clock_out')
-            ->orderBy('clock_in', 'desc')
-            ->exists();
-        if ($existingSiteClockIn) {
-            return $this->returnError('You have already clocked in.');
-        }
+        // $existingSiteClockIn = ClockInOut::where('user_id', $user_id)
+        //     ->where('location_id', $location_id)
+        //     ->whereDate('clock_in', Carbon::today())
+        //     ->whereNull('clock_out')
+        //     ->orderBy('clock_in', 'desc')
+        //     ->exists();
+        // if ($existingSiteClockIn) {
+        //     return $this->returnError('You have already clocked in.');
+        // }
 
-        if ($distanceBetweenUserAndLocation < 50) {
+        // if ($distanceBetweenUserAndLocation < 50) {
 
-            $clockIn = Carbon::parse($request->clock_in);
-            $durationInterval = $clockIn->diffAsCarbonInterval(Carbon::now());
-            $durationFormatted = $durationInterval->format('%H:%I:%S');
+        //     $clockIn = Carbon::parse($request->clock_in);
+        //     $durationInterval = $clockIn->diffAsCarbonInterval(Carbon::now());
+        //     $durationFormatted = $durationInterval->format('%H:%I:%S');
 
-            $clock = ClockInOut::create([
-                'clock_in' => Carbon::parse($request->clock_in),
-                'clock_out' => null,
-                'duration' => $durationFormatted,
-                'user_id' => $user_id,
-                'location_id' => $location_id,
-                'location_type' => $request->location_type,
+        //     $clock = ClockInOut::create([
+        //         'clock_in' => Carbon::parse($request->clock_in),
+        //         'clock_out' => null,
+        //         'duration' => $durationFormatted,
+        //         'user_id' => $user_id,
+        //         'location_id' => $location_id,
+        //         'location_type' => $request->location_type,
 
-            ]);
+        //     ]);
 
-            return $this->returnData("clock", $clock, "Clock In Done");
-        } else {
-            return $this->returnError('User is not located at the correct location. lat : ' . $latitude . " / long : " . $longitude);
-        }
+        //     return $this->returnData("clock", $clock, "Clock In Done");
+        // } else {
+        //     return $this->returnError('User is not located at the correct location. lat : ' . $latitude . " / long : " . $longitude);
+        // }
     }
 
     public function clockOut(UpdateClockInOutRequest $request)
     {
-        $authUser = Auth::user();
-        $ClockauthUser = ClockInOut::where('user_id', $authUser->id)
-            ->whereNull('clock_out')
-            ->orderBy('clock_in', 'desc')
-            ->first();
-        $request->validate([
-            'clock_out' => ['required', "date_format:Y-m-d H:i:s"],
-        ]);
-        if (!$ClockauthUser) {
-            return $this->returnError('You are not clocked in.');
-        }
 
-        $clockOut = Carbon::parse($request->clock_out);
-        if ($clockOut <= Carbon::parse($ClockauthUser->clock_in)) {
-            return $this->returnError("You can't clock out before or at the same time as clock in.");
-        }
-        if ($ClockauthUser->location_type == "home") {
-            $clock_in = Carbon::parse($ClockauthUser->clock_in);
-            $clock_out = $clockOut;
-            $durationInterval = $clock_in->diffAsCarbonInterval($clockOut);
-            $durationFormatted = $durationInterval->format('%H:%I:%S');
-            $ClockauthUser->update([
-                'clock_out' => $clock_out,
-                'duration' => $durationFormatted,
-            ]);
-            return $this->returnData("clock", $ClockauthUser, "Clock Out Done");
+        return $this->clockService->clockOut($request);
+        // $authUser = Auth::user();
+        // $ClockauthUser = ClockInOut::where('user_id', $authUser->id)
+        //     ->whereNull('clock_out')
+        //     ->orderBy('clock_in', 'desc')
+        //     ->first();
+        // $request->validate([
+        //     'clock_out' => ['required', "date_format:Y-m-d H:i:s"],
+        // ]);
+        // if (!$ClockauthUser) {
+        //     return $this->returnError('You are not clocked in.');
+        // }
 
-        }
-        $user_location = $authUser->user_locations()->wherePivot('location_id', $ClockauthUser->location_id)->first();
-        if (!$user_location) {
-            return $this->returnError('User is not located at the correct location.');
-        }
+        // $clockOut = Carbon::parse($request->clock_out);
+        // if ($clockOut <= Carbon::parse($ClockauthUser->clock_in)) {
+        //     return $this->returnError("You can't clock out before or at the same time as clock in.");
+        // }
+        // if ($ClockauthUser->location_type == "home") {
+        //     $clock_in = Carbon::parse($ClockauthUser->clock_in);
+        //     $clock_out = $clockOut;
+        //     $durationInterval = $clock_in->diffAsCarbonInterval($clockOut);
+        //     $durationFormatted = $durationInterval->format('%H:%I:%S');
+        //     $ClockauthUser->update([
+        //         'clock_out' => $clock_out,
+        //         'duration' => $durationFormatted,
+        //     ]);
+        //     return $this->returnData("clock", $ClockauthUser, "Clock Out Done");
 
-        $this->validate($request, [
-            'latitude' => 'required',
-            'longitude' => 'required',
-        ]);
-        $latitude = $request->latitude;
-        $longitude = $request->longitude;
+        // }
+        // $user_location = $authUser->user_locations()->wherePivot('location_id', $ClockauthUser->location_id)->first();
+        // if (!$user_location) {
+        //     return $this->returnError('User is not located at the correct location.');
+        // }
 
-        $userLongitude = $user_location->longitude;
-        $userLatitude = $user_location->latitude;
+        // $this->validate($request, [
+        //     'latitude' => 'required',
+        //     'longitude' => 'required',
+        // ]);
+        // $latitude = $request->latitude;
+        // $longitude = $request->longitude;
 
-        $distanceBetweenUserAndLocation = $this->haversineDistance($userLatitude, $userLongitude, $latitude, $longitude);
+        // $userLongitude = $user_location->longitude;
+        // $userLatitude = $user_location->latitude;
 
-        if ($distanceBetweenUserAndLocation < 50) {
-            $clock_in = Carbon::parse($ClockauthUser->clock_in);
-            $durationInterval = $clock_in->diffAsCarbonInterval($clockOut);
-            $durationFormatted = $durationInterval->format('%H:%I:%S');
-            $ClockauthUser->update([
-                'clock_out' => $clockOut,
-                'duration' => $durationFormatted,
-            ]);
+        // $distanceBetweenUserAndLocation = $this->haversineDistance($userLatitude, $userLongitude, $latitude, $longitude);
 
-            return $this->returnData("clock", $ClockauthUser, "Clock Out Done");
-        } else {
-            return $this->returnError('User is not located at the correct location. lat : ' . $latitude . " / long : " . $longitude);
-        }
+        // if ($distanceBetweenUserAndLocation < 50) {
+        //     $clock_in = Carbon::parse($ClockauthUser->clock_in);
+        //     $durationInterval = $clock_in->diffAsCarbonInterval($clockOut);
+        //     $durationFormatted = $durationInterval->format('%H:%I:%S');
+        //     $ClockauthUser->update([
+        //         'clock_out' => $clockOut,
+        //         'duration' => $durationFormatted,
+        //     ]);
+
+        //     return $this->returnData("clock", $ClockauthUser, "Clock Out Done");
+        // } else {
+        //     return $this->returnError('User is not located at the correct location. lat : ' . $latitude . " / long : " . $longitude);
+        // }
     }
-
-    public function showUserClocks(Request $request)
-    {
-        $authUser = Auth::user();
-
-        $query = ClockInOut::where('user_id', $authUser->id);
-
-        if ($request->has('date')) {
-            $date = Carbon::parse($request->get('date'))->toDateString();
-            $query->whereDate('clock_in', $date);
-        }
-        $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
-
-        if ($clocks->isEmpty()) {
-            return $this->returnError('No Clocks Found For This User');
-        }
-
-        $data = $this->prepareClockData($clocks);
-
-        return $this->returnData("data", $data, "Clocks Data for {$authUser->name}");
-    }
-
     public function updateUserClock(Request $request, User $user, ClockInOut $clock)
     {
-        $authUser = Auth::user();
-        if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to update users', 403);
-        }
 
-        $this->validate($request, [
-            'clock_in' => ['nullable', 'date_format:Y-m-d H:i'],
-            'clock_out' => ['nullable', 'date_format:Y-m-d H:i'],
-        ]);
+        return $this->clockService->updateUserClock($request, $user, $clock);
+        //     $authUser = Auth::user();
+        //     $this->authorizationService->authorizeHrUser($authUser);
 
-        $clock = ClockInOut::where('user_id', $user->id)->where('id', $clock->id)->first();
-        if (!$clock) {
-            return $this->returnError("No clocks found for this user", 404);
-        }
+        //     $this->validate($request, [
+        //         'clock_in' => ['nullable', 'date_format:Y-m-d H:i'],
+        //         'clock_out' => ['nullable', 'date_format:Y-m-d H:i'],
+        //     ]);
 
-        $existingDate = Carbon::parse($clock->clock_in)->format('Y-m-d');
+        //     $clock = ClockInOut::where('user_id', $user->id)->where('id', $clock->id)->first();
+        //     if (!$clock) {
+        //         return $this->returnError("No clocks found for this user", 404);
+        //     }
 
-        // Adjust clock_in time if provided
-        if ($request->clock_in) {
-            $clockIn = Carbon::createFromFormat('Y-m-d H:i', $request->clock_in);
-        } else {
-            $clockIn = Carbon::parse($clock->clock_in);
-        }
+        //     $existingDate = Carbon::parse($clock->clock_in)->format('Y-m-d');
 
-        // Adjust clock_out time if provided
-        if ($request->clock_out) {
-            $clockOut = Carbon::createFromFormat('Y-m-d H:i', $request->clock_out);
-        } else {
-            $clockOut = Carbon::parse($clock->clock_out);
-        }
+        //     // Adjust clock_in time if provided
+        //     if ($request->clock_in) {
+        //         $clockIn = Carbon::createFromFormat('Y-m-d H:i', $request->clock_in);
+        //     } else {
+        //         $clockIn = Carbon::parse($clock->clock_in);
+        //     }
 
-        // Check if clock_in and clock_out are on the same day
-        if (!$clockOut->isSameDay($clockIn)) {
-            return $this->returnError("clock_in and clock_out must be on the same day", 400);
-        }
+        //     // Adjust clock_out time if provided
+        //     if ($request->clock_out) {
+        //         $clockOut = Carbon::createFromFormat('Y-m-d H:i', $request->clock_out);
+        //     } else {
+        //         $clockOut = Carbon::parse($clock->clock_out);
+        //     }
 
-        // Ensure clock_in is before clock_out
-        if ($clockOut->lessThanOrEqualTo($clockIn)) {
-            return $this->returnError("clock_out must be after clock_in", 400);
-        }
+        //     // Check if clock_in and clock_out are on the same day
+        //     if (!$clockOut->isSameDay($clockIn)) {
+        //         return $this->returnError("clock_in and clock_out must be on the same day", 400);
+        //     }
 
-        // Calculate duration
-        $durationFormatted = $clockIn->diff($clockOut)->format('%H:%I:%S');
+        //     // Ensure clock_in is before clock_out
+        //     if ($clockOut->lessThanOrEqualTo($clockIn)) {
+        //         return $this->returnError("clock_out must be after clock_in", 400);
+        //     }
 
-        // Update clock record
-        $clock->update([
-            'clock_in' => $clockIn->format('Y-m-d H:i:s'),
-            'clock_out' => $clockOut->format('Y-m-d H:i:s'),
-            'duration' => $durationFormatted,
-        ]);
-        return $this->returnData("clock", new ClockResource($clock), "Clock Updated Successfully for {$user->name}");
+        //     // Calculate duration
+        //     $durationFormatted = $clockIn->diff($clockOut)->format('%H:%I:%S');
+
+        //     // Update clock record
+        //     $clock->update([
+        //         'clock_in' => $clockIn->format('Y-m-d H:i:s'),
+        //         'clock_out' => $clockOut->format('Y-m-d H:i:s'),
+        //         'duration' => $durationFormatted,
+        //     ]);
+        //     return $this->returnData("clock", new ClockResource($clock), "Clock Updated Successfully for {$user->name}");
     }
-    public function getClockById(ClockInOut $clock)
-    {
-        return $this->returnData("clock", new ClockResource($clock), "Clock Data");
-    }
+
 }

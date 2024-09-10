@@ -24,18 +24,15 @@ class LoginResource extends JsonResource
         $getClocks = $authUser->user_clocks->filter(function ($clock) use ($today) {
             return $clock->clock_in && Carbon::parse($clock->clock_in)->toDateString() == $today;
         });
-        // dd($getClocks);
         $total_seconds = 0;
         foreach ($getClocks as $clock) {
             $clockIn = Carbon::parse($clock->clock_in);
             $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out) : Carbon::now();
-            // dd($clockOut->toArray());
 
             $duration = $clockIn->diffInSeconds($clockOut);
             $total_seconds += $duration;
         }
         $total_hours = gmdate('H:i:s', $total_seconds);
-        // dd($total_hours);
         $is_clocked_out = false;
         if (!$user_clock) {
             $is_clocked_out = true;
@@ -50,6 +47,12 @@ class LoginResource extends JsonResource
         if (count($locationTypes) > 1) {
             $work_home = true;
         }
+        $user_locations = $authUser->user_locations()->get();
+        $locations_name = $user_locations->map(function ($user_location) {
+            return [
+                'location_name' => $user_location->name,
+            ];
+        });
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -61,6 +64,7 @@ class LoginResource extends JsonResource
             'clockIn' => $clockIn,
             'total_hours' => $total_hours,
             'work_home' => $work_home,
+            'assignedLocationsUser' => $locations_name,
         ];
 
     }

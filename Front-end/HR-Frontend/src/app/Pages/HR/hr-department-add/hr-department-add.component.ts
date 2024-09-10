@@ -40,6 +40,10 @@ export class HrDepartmentAddComponent {
 
 
     this.getMnagerNames();
+    localStorage.setItem('HrEmployeeCN', "1");
+    localStorage.setItem('HrLocationsCN', "1");
+    localStorage.setItem('HrAttendaceCN', "1");
+
 
   }
   getMnagerNames() {
@@ -95,12 +99,20 @@ export class HrDepartmentAddComponent {
 
         },
         (error: any) => {
+          if (error.error.message === "The name has already been taken.") {
+            Swal.fire({   
+              text: "The name has already been taken",
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+            });
+          }else{
           Swal.fire({
             text: "Faild to create, Please Try again later",
             confirmButtonText: "OK",
             confirmButtonColor: "#FF7519",
 
           });
+        }
         }
       );
     } else {
