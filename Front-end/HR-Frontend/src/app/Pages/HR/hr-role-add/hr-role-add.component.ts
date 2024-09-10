@@ -146,12 +146,20 @@ export class HrRoleAddComponent {
             this.router.navigateByUrl("/HR/HRRole");
           },
           (error) => {
-            Swal.fire({   
-              text: "Faild to create, Please Try again later",
-              confirmButtonText: "OK",
-              confirmButtonColor: "#FF7519",
-              
-            });
+            if (error.error.message === "The name has already been taken.") {
+              Swal.fire({   
+                text: "The name has already been taken",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#FF7519",
+              });
+            }else{
+              Swal.fire({   
+                text: "Faild to create, Please Try again later",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#FF7519",
+                
+              });
+            }
           }
         );
       }
