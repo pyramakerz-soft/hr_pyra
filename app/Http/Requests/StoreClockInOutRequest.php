@@ -6,26 +6,20 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreClockInOutRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
+    public function authorize()
     {
+        // Optionally, add authorization logic if needed
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
+    public function rules()
     {
         return [
-
-            // 'user_id' => ['required', 'exists:users,id'],
-            // 'location_id' => ['required', 'exists:locations,id'],
-
+            //     'location_type' => 'required|string|exists:work_types,name',
+            //     'clock_in' => ['required', 'date_format:Y-m-d H:i:s'],
+            //     'latitude' => 'required_if:location_type,==,site|numeric',
+            //     'longitude' => 'required_if:location_type,==,site|numeric',
         ];
     }
+
 }

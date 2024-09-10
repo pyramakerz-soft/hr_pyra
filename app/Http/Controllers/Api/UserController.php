@@ -17,10 +17,10 @@ use App\Traits\UserTrait;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -41,7 +41,7 @@ class UserController extends Controller
         $authUser = Auth::user();
 
         if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to update users', 403);
+            return $this->returnError('You are not authorized to view users', 403);
         }
 
         $search = request()->get('search', null);
@@ -55,19 +55,18 @@ class UserController extends Controller
     }
     public function ManagerNames()
     {
-        $managerData = DB::table('model_has_roles')
-            ->where('role_id', 2)
-            ->get();
-
-        foreach ($managerData as $manager) {
-            $user = User::find($manager->model_id);
-            if ($user) {
-                $data[] = [
-                    'manager_id' => $user->id,
-                    'manager_name' => $user->name,
-                ];
-            }
+        $data = [];
+        $role = Role::where('name', 'Manager')->first();
+        if (!$role) {
+            return $this->returnError('Manager role not found', 404);
         }
+        $managers = User::Role('manager')->get(['id', 'name']);
+        $data = $managers->map(function ($manager) {
+            return [
+                'manager_id' => $manager->id,
+                'manager_name' => $manager->name,
+            ];
+        });
 
         return $this->returnData('managerNames', $data, 'manager names');
 
@@ -77,9 +76,8 @@ class UserController extends Controller
     {
         $data = [];
         $authUser = Auth::user();
-
         if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to create users', 403);
+            return $this->returnError('You are not authorized to create user', 403);
         }
         $user = $this->userService->createUser($request->validated());
         if (!$user) {
@@ -358,7 +356,7 @@ class UserController extends Controller
         $authUser = Auth::user();
 
         if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to Update users', 403);
+            return $this->returnError('You are not authorized to view user', 403);
         }
         $userDetail = UserDetail::where('user_id', $user->id)->first();
         return $this->returnData("User", new UserDetailResource($userDetail), "User Data");

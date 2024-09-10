@@ -25,6 +25,12 @@ export class HrRoleComponent {
 
   ngOnInit():void{
     this.GetAllRoles();
+    localStorage.setItem('HrEmployeeCN', "1");
+    localStorage.setItem('HrLocationsCN', "1");
+    localStorage.setItem('HrAttendaceCN', "1");
+    localStorage.setItem('HrAttanceDetailsCN', "1");
+
+
   }
 
   GetAllRoles():void{
@@ -64,4 +70,8 @@ export class HrRoleComponent {
   navigateToEdit(id:number){
     this.router.navigateByUrl(`HR/HRRoleEdit/${id}`);
   }
+
+
+
+
 }
