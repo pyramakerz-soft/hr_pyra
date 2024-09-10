@@ -38,6 +38,12 @@ export class HrDashboardComponent {
     const currentDate = new Date();
     this.selectedYear = currentDate.getFullYear();
     this.getDataPercentage()      
+    localStorage.setItem('HrEmployeeCN', "1");
+    localStorage.setItem('HrLocationsCN', "1");
+    localStorage.setItem('HrAttendaceCN', "1");
+    localStorage.setItem('HrAttanceDetailsCN', "1");
+
+
   }
 
   onYearChange(event: Event): void {
