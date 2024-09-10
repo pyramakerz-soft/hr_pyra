@@ -20,6 +20,13 @@
             id="autocomplete" placeholder="Add Location" class="w-full rounded-2xl p-2 md:p-4 mt-5 text-sm md:text-base">
             <span *ngIf="addressError" class="text-red-500 text-sm ml-2 font-normal">{{ addressError }}</span>
             <div id="map" class="w-full h-[25vh] md:h-[35vh] rounded-2xl mt-5"></div>
+
+            <input [(ngModel)]="StartTime" type="time"
+            placeholder="Add Start Time" class="w-full rounded-2xl p-2 md:p-4 mt-5 text-sm md:text-base">
+            <span *ngIf="addressError" class="text-red-500 text-sm ml-2 font-normal">{{ addressError }}</span>
+            <input [(ngModel)]="EndTime" type="time"
+            placeholder="Add End Time" class="w-full rounded-2xl p-2 md:p-4 mt-5 text-sm md:text-base">
+            <span *ngIf="addressError" class="text-red-500 text-sm ml-2 font-normal">{{ addressError }}</span>
         </div>
         
         <button class="bg-[#17253E] font-bold text-base md:text-lg text-white rounded-2xl py-3 px-4 md:px-7" (click)="EditAndAddLocation()">Save</button>

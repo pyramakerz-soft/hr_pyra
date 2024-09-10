@@ -88,6 +88,14 @@
                         class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
                         Site <i class="fa-solid fa-arrow-down mr-2"></i>
                     </th>
+                    <th
+                        class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
+                        Late Time <i class="fa-solid fa-arrow-down mr-2"></i>
+                    </th>
+                    <th
+                        class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
+                        Leave Time <i class="fa-solid fa-arrow-down mr-2"></i>
+                    </th>
                     <th class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap">
                         Actions
                     </th>
@@ -106,9 +114,9 @@
                     [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300">
                     <td class="py-5">
                         <i *ngIf="hasOtherClocks(row.otherClocks)" class="fa-solid fa-chevron-down ml-1"
-                           (click)="toggleOtherClocks(i)"></i>
+                            (click)="toggleOtherClocks(i)"></i>
                         {{ row.Day }}
-                      </td>
+                    </td>
 
                     <td>{{ row.Date }}</td>
 
@@ -207,6 +215,8 @@
                         </div>
                     </td>
 
+                    <td>1</td>
+                    <td>2</td>
 
 
                     <td class="py-5 px-4">
@@ -243,20 +253,31 @@
                 {{ page }}
             </button>
         </div> -->
+   
+
+
         <div class="flex justify-center items-center space-x-2 md:space-x-4">
-            <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="getAllClocks(CurrentPageNumber)">
-                {{ CurrentPageNumber }}
+            <button *ngIf="CurrentPageNumber-1>0"
+              class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
+              (click)="getAllClocks(CurrentPageNumber-1)">
+              {{ CurrentPageNumber-1 }}
             </button>
-            <button  *ngIf="CurrentPageNumber+1<PagesNumber" class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="getAllClocks(CurrentPageNumber+1)">
-                {{ CurrentPageNumber+1 }}
+            <button 
+              class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#D0D5DD]"
+              *ngIf="CurrentPageNumber<PagesNumber"
+              (click)="getAllClocks(CurrentPageNumber)">
+              {{ CurrentPageNumber }}
             </button>
-            <span class="text-gray-800 text-sm md:text-base font-semibold">...</span>
-            <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="getAllClocks(PagesNumber)">
-                {{ PagesNumber }}
+            <span *ngIf="PagesNumber>1" class="text-gray-800 text-sm md:text-base font-semibold"  >...</span>
+            <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
+            [ngClass]="{ 'bg-[#D0D5DD]': CurrentPageNumber === PagesNumber }"
+              (click)="getAllClocks(PagesNumber)">
+              {{ PagesNumber }}
             </button>
-        </div>
-        
-        
+          </div>
+      
+
+
 
         <button
             class="h-[44px] w-[92px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center"

@@ -125,19 +125,30 @@
       </button>
     </div> -->
 
-    <div class="flex justify-center items-center space-x-2 md:space-x-4">
-      <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="getAllEmployees(CurrentPageNumber)">
-          {{ CurrentPageNumber }}
-      </button>
-      <button  *ngIf="CurrentPageNumber+1<PagesNumber" class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="getAllEmployees(CurrentPageNumber+1)">
-          {{ CurrentPageNumber+1 }}
-      </button>
-      <span class="text-gray-800 text-sm md:text-base font-semibold">...</span>
-      <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="getAllEmployees(PagesNumber)">
-          {{ PagesNumber }}
-      </button>
-  </div>
 
+
+    <div class="flex justify-center items-center space-x-2 md:space-x-4">
+      <button *ngIf="CurrentPageNumber-1>0"
+        class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
+        (click)="getAllEmployees(CurrentPageNumber-1)">
+        {{ CurrentPageNumber-1 }}
+      </button>
+      <button 
+        class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#D0D5DD]"
+        *ngIf="CurrentPageNumber<PagesNumber"
+        (click)="getAllEmployees(CurrentPageNumber)">
+        {{ CurrentPageNumber }}
+      </button>
+      <span *ngIf="PagesNumber>1" class="text-gray-800 text-sm md:text-base font-semibold">...</span>
+      <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
+      [ngClass]="{ 'bg-[#D0D5DD]': CurrentPageNumber === PagesNumber }"
+        (click)="getAllEmployees(PagesNumber)">
+        {{ PagesNumber }}
+      </button>
+    </div>
+
+
+    
     <!-- Next Button -->
     <button
       class="h-[44px] w-[92px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center"

@@ -61,7 +61,13 @@ export class HrAttendanceComponent {
   tableData:UserModel[]= [];
 
   ngOnInit(){
-    this.getAllEmployees(1);
+    const savedPageNumber = localStorage.getItem('HrAttendaceCN');
+    if (savedPageNumber) {
+      this.CurrentPageNumber = parseInt(savedPageNumber, 10);
+    } else {
+      this.CurrentPageNumber = 1; // Default value if none is saved
+    }
+    this.getAllEmployees(this.CurrentPageNumber);
     this.getUsersName();
     this.GetAllDepartment()
     this.populateYears();
@@ -71,6 +77,10 @@ export class HrAttendanceComponent {
     this.selectedYear = currentDate.getFullYear();
     this.SelectDepartment="AllDepartment";
     this.DateString = this.selectedYear + "-" + this.selectedMonth
+    localStorage.setItem('HrEmployeeCN', "1");
+    localStorage.setItem('HrLocationsCN', "1");
+    localStorage.setItem('HrAttanceDetailsCN', "1");
+
   }
 
   NavigateToEmployeeAttendanceDetails(EmpId:number){
@@ -80,6 +90,7 @@ export class HrAttendanceComponent {
 
   getAllEmployees(pgNumber:number) {
     this.CurrentPageNumber = pgNumber;
+    this.saveCurrentPageNumber();
     this.userServ.getall(pgNumber).subscribe(
       (d: any) => {
         this.tableData = d.data.users;
@@ -111,11 +122,13 @@ export class HrAttendanceComponent {
 
   getNextPage() {
     this.CurrentPageNumber++;
+    this.saveCurrentPageNumber();
     this.getAllEmployees(this.CurrentPageNumber);
   }
 
   getPrevPage() {
     this.CurrentPageNumber--;
+    this.saveCurrentPageNumber();
     this.getAllEmployees(this.CurrentPageNumber);
   }
 
@@ -241,4 +254,8 @@ export class HrAttendanceComponent {
     );
   }
 
+  
+  saveCurrentPageNumber() {
+    localStorage.setItem('HrAttendaceCN', this.CurrentPageNumber.toString());
+  }
 }

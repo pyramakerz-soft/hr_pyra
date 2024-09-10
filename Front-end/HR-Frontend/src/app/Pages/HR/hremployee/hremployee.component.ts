@@ -41,8 +41,21 @@ export class HREmployeeComponent {
 
 
   ngOnInit() {
+
+    const savedPageNumber = localStorage.getItem('HrEmployeeCN');
+    if (savedPageNumber) {
+      this.CurrentPageNumber = parseInt(savedPageNumber, 10);
+    } else {
+      this.CurrentPageNumber = 1; // Default value if none is saved
+    }
     this.getAllEmployees(this.CurrentPageNumber);
     this.getUsersName()
+
+    localStorage.setItem('HrLocationsCN', "1");
+    localStorage.setItem('HrAttendaceCN', "1");
+    localStorage.setItem('HrAttanceDetailsCN', "1");
+
+
   }
 
 
@@ -70,6 +83,8 @@ export class HREmployeeComponent {
 
   getAllEmployees(PgNumber: number) {
     this.CurrentPageNumber = PgNumber;
+    this.saveCurrentPageNumber();
+
     this.userServ.getall(PgNumber).subscribe(
       (d: any) => {
         this.tableData = d.data.users;
@@ -90,12 +105,18 @@ export class HREmployeeComponent {
 
   getNextPage() {
     this.CurrentPageNumber++;
+    this.saveCurrentPageNumber();
     this.getAllEmployees(this.CurrentPageNumber);
   }
 
   getPrevPage() {
     this.CurrentPageNumber--;
+    this.saveCurrentPageNumber();
     this.getAllEmployees(this.CurrentPageNumber);
+  }
+
+  saveCurrentPageNumber() {
+    localStorage.setItem('HrEmployeeCN', this.CurrentPageNumber.toString());
   }
 
 
