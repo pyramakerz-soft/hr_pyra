@@ -25,6 +25,8 @@ class ClockSeeder extends Seeder
                 'duration' => $clockOut->diff($clockIn)->format('%H:%I:%S'), // Calculate the duration
                 'user_id' => $user_id, // Assumes a user with ID 3 exists
                 'location_id' => 1, // Assumes a location with ID 1 exists
+                'late_arrive' => "",
+                'early_leave' => "",
             ]);
 
             $clockIn = $clockIn->copy()->addDay(); // Move to the next day
