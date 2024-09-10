@@ -3,9 +3,9 @@
 namespace App\Exceptions;
 
 use App\Traits\ResponseTrait;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
@@ -89,6 +89,11 @@ class Handler extends ExceptionHandler
             return $this->returnError('There is no role by this name', Response::HTTP_BAD_REQUEST);
 
         }
+        if ($exception instanceof AuthorizationException) {
+            return $this->returnError('You are not authorized to view user clocks', Response::HTTP_FORBIDDEN);
+
+        }
+
         // if ($exception instanceof UniqueConstraintViolationException) {
 
         // }
