@@ -29,15 +29,30 @@ export class HrBoundersComponent {
   constructor(public dialog: MatDialog, public locationServ: LocationsService) { }
 
   ngOnInit() {
-    this.getAllLocations(1);
+    const savedPageNumber = localStorage.getItem('HrLocationsCN');
+    if (savedPageNumber) {
+      this.CurrentPageNumber = parseInt(savedPageNumber, 10);
+    } else {
+      this.CurrentPageNumber = 1; // Default value if none is saved
+    }
+    this.getAllLocations(this.CurrentPageNumber);
     this.getLocationsName();
+
+
+    localStorage.setItem('HrEmployeeCN', "1");
+    localStorage.setItem('HrAttendaceCN', "1");
+    localStorage.setItem('HrAttanceDetailsCN', "1");
+
+
   }
 
 
   getAllLocations(page: number) {
     this.CurrentPageNumber = page;
+    this.saveCurrentPageNumber();
     this.locationServ.getall(page).subscribe(
       (d: any) => {
+        console.log(d)
         this.tableData = d.locations.data;
         this.PagesNumber = d.locations.last_page;
         this.generatePages();
@@ -96,11 +111,13 @@ export class HrBoundersComponent {
 
   getNextPage() {
     this.CurrentPageNumber++;
+    this.saveCurrentPageNumber();
     this.getAllLocations(this.CurrentPageNumber);
   }
 
   getPrevPage() {
     this.CurrentPageNumber--;
+    this.saveCurrentPageNumber();
     this.getAllLocations(this.CurrentPageNumber);
   }
 
@@ -169,4 +186,7 @@ export class HrBoundersComponent {
     }
   }
 
+  saveCurrentPageNumber() {
+    localStorage.setItem('HrLocationsCN', this.CurrentPageNumber.toString());
+  }
 }

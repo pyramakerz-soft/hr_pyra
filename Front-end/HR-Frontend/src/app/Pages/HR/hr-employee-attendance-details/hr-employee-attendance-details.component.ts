@@ -60,6 +60,12 @@ export class HrEmployeeAttendanceDetailsComponent {
 
 
   ngOnInit() {
+    const savedPageNumber = localStorage.getItem('HrAttanceDetailsCN');
+    if (savedPageNumber) {
+      this.CurrentPageNumber = parseInt(savedPageNumber, 10);
+    } else {
+      this.CurrentPageNumber = 1; // Default value if none is saved
+    }
     this.populateYears();
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1
@@ -72,7 +78,7 @@ export class HrEmployeeAttendanceDetailsComponent {
         const id = params['Id'];
         this.UserID = id;
         if (id) {
-          this.getAllClocks(1);
+          this.getAllClocks(this.CurrentPageNumber);
           this.getEmployeeByID(id)
         } else {
           console.error('No ID found in route parameters');
@@ -152,6 +158,7 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   getAllClocks(PgNumber: number) {
     this.CurrentPageNumber=PgNumber
+    this.saveCurrentPageNumber();
     this.UserClocksService.GetUserClocksById(this.UserID, PgNumber, this.DateString).subscribe(
       (d: any) => {
         this.tableData = d.data.clocks;
@@ -172,11 +179,13 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   getNextPage() {
     this.CurrentPageNumber++;
+    this.saveCurrentPageNumber();
     this.getAllClocks(this.CurrentPageNumber);
   }
 
   getPrevPage() {
     this.CurrentPageNumber--;
+    this.saveCurrentPageNumber();
     this.getAllClocks(this.CurrentPageNumber);
 
   }
@@ -260,5 +269,9 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   hasOtherClocks(otherClocks: { [key: number]: any }): boolean {
     return Object.keys(otherClocks).length > 0;
+  }
+
+  saveCurrentPageNumber() {
+    localStorage.setItem('HrAttanceDetailsCN', this.CurrentPageNumber.toString());
   }
 }
