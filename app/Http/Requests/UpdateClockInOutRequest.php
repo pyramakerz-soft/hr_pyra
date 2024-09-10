@@ -22,7 +22,10 @@ class UpdateClockInOutRequest extends FormRequest
     public function rules(): array
     {
         return [
-
+            //     'clock_in' => ['nullable', 'date_format:Y-m-d H:i'],
+            //     'clock_out' => ['nullable', 'date_format:Y-m-d H:i'],
+            //     'latitude' => 'required_if:location_type,==,site|numeric',
+            //     'longitude' => 'required_if:location_type,==,site|numeric',
         ];
     }
 }
