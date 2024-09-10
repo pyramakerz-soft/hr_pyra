@@ -21,28 +21,34 @@ class AuthController extends Controller
     }
     public function login(LoginRequest $request)
     {
-
         $credentials = $request->only('email', 'password');
+        $email = $credentials['email']; // Keep the original case of the email
 
-        $errors = [];
-
-        $user = User::where('email', $credentials['email'])->first();
+        // Find the user with the provided email (case-sensitive comparison later)
+        $user = User::where('email', $email)->first();
 
         if (!$user) {
-            $errors['email'] = 'Wrong Email';
-        } else {
-            if (!Hash::check($credentials['password'], $user->password)) {
-                $errors['password'] = 'Wrong password';
-            }
-        }
-
-        if (!empty($errors)) {
+            // If user is not found, return an error
             return response()->json([
-                'message' => 'Validation errors occurred.',
-                'errors' => $errors,
+                'message' => 'Wrong Email',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
+        // Check if the provided email matches exactly the stored email (case-sensitive)
+        if ($user->email !== $email) {
+            return response()->json([
+                'message' => 'Wrong Email',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // Check if the password is correct
+        if (!Hash::check($credentials['password'], $user->password)) {
+            return response()->json([
+                'message' => 'Wrong Password',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // Attempt login using JWT token generation
         $token = JWTAuth::attempt($credentials);
 
         if (!$token) {
@@ -52,6 +58,7 @@ class AuthController extends Controller
         $user = auth()->user();
         $serialNumber = $request->serial_number;
 
+        // Handle serial number checking logic
         if ($user && $serialNumber) {
             if (is_null($user->serial_number)) {
                 $user->serial_number = $serialNumber;
@@ -68,6 +75,7 @@ class AuthController extends Controller
             'token' => $token,
         ], Response::HTTP_OK);
     }
+
     public function logout()
     {
         $user = auth()->user();
