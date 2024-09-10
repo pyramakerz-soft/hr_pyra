@@ -19,6 +19,11 @@ export class HrDepartmentComponent {
 
   ngOnInit() {
     this.GetAll();
+    localStorage.setItem('HrEmployeeCN', "1");
+    localStorage.setItem('HrLocationsCN', "1");
+    localStorage.setItem('HrAttendaceCN', "1");
+    localStorage.setItem('HrAttanceDetailsCN', "1");
+
   }
   GetAll() {
     this.departmentServ.getall().subscribe(

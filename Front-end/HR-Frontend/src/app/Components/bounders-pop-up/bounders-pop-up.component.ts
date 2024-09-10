@@ -28,6 +28,9 @@ export class BoundersPopUpComponent implements AfterViewInit {
   nameError: string = "";
   addressError: string = ""; 
 
+  StartTime:string=""
+  EndTime:string=""
+
   constructor(public dialogRef: MatDialogRef<BoundersPopUpComponent>, 
               public googleMapsService: ReverseGeocodingService,
               public LocationServ: LocationsService,
