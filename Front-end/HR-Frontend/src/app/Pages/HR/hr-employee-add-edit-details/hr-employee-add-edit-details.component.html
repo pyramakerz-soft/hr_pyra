@@ -90,7 +90,9 @@
                         </label>
                         <input [(ngModel)]="employee.salary" 
                         (ngModelChange)="onInputValueChange({ field: 'salary', value: $event })"
-                        type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the salary number">
+                        type="number"
+                        (input)="filterNumericInput($event)"
+                        class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the salary number">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">
@@ -139,16 +141,32 @@
                     </div>  
                 </div>
 
-                <div class="flex-1">
+                <div class="dropdown-container flex-1">
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">
                             Location
                             <span *ngIf="validationErrors['location_id']" class="text-red-500 text-sm ml-2 font-normal">{{ validationErrors['location_id'] }}</span>
                         </label>
-                        <div class="">
+                        <div>
                             <!-- Dropdown toggle -->
-                            <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl cursor-pointer" (click)="toggleDropdown()">
-                                <span *ngIf="!isDropdownOpen">Choose Location</span>
+                            <div class="flex justify-between items-center w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl cursor-pointer" 
+                            (click)="toggleDropdown($event)">
+                                <span *ngIf="employee.location_id.length == 0">
+                                   Choose Location
+                                </span>
+                                <div *ngIf="employee.location_id.length != 0" class="flex space-x-2 flex-wrap">
+                                    <div *ngFor="let locationId of employee.location_id">
+                                        <p *ngFor="let location of Locations">
+                                            @if(location.id == locationId){
+                                                <p class="p-1 rounded-lg border border-[#bebebe]">
+                                                    {{location.name}}
+                                                    <i class="fa-solid fa-xmark text-red-600 ml-3" (click)="removeFromLocations(locationId, $event)"></i>
+                                                </p>
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-angle-down"></i>
                             </div>
                     
                             <!-- Dropdown content -->
