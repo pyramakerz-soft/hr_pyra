@@ -182,9 +182,8 @@ trait ClockTrait
 
         $latitude = $request->latitude;
         $longitude = $request->longitude;
-
         $closestLocation = $this->getClosestUserLocation($authUser, $latitude, $longitude);
-
+        dd($closestLocation);
         if (!$closestLocation) {
             return $this->returnError('User is not located at any registered locations.');
         }
@@ -208,6 +207,7 @@ trait ClockTrait
     protected function getClosestUserLocation($authUser, $latitude, $longitude)
     {
         $userLocations = $authUser->user_locations()->get();
+        dd($userLocations);
         $closestLocation = null;
         $shortestDistance = null;
 

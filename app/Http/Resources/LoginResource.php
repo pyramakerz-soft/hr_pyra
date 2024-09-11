@@ -50,6 +50,7 @@ class LoginResource extends JsonResource
         $user_locations = $authUser->user_locations()->get();
         $locations_name = $user_locations->map(function ($user_location) {
             return [
+                'location_id' => $user_location->id,
                 'location_name' => $user_location->name,
             ];
         });
