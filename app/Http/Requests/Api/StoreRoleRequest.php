@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class UpdateDepartmentRequest extends FormRequest
+class StoreRoleRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,10 +21,9 @@ class UpdateDepartmentRequest extends FormRequest
      */
     public function rules(): array
     {
-        $department = $this->route('department');
         return [
-            'name' => ['nullable', 'string', Rule::unique('departments', 'name')->ignore($department->id)],
-            'manager_id' => ['nullable', 'exists:users,id'],
+            'name' => ['required', 'unique:roles,name'],
+            'permission' => ['required'],
         ];
     }
 }

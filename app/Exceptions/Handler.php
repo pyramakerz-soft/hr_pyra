@@ -90,7 +90,7 @@ class Handler extends ExceptionHandler
 
         }
         if ($exception instanceof AuthorizationException) {
-            return $this->returnError('You are not authorized to view user clocks', Response::HTTP_FORBIDDEN);
+            return $this->returnError('You are not authorized', Response::HTTP_FORBIDDEN);
 
         }
 

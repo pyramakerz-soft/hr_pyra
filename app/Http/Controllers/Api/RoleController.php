@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\StoreRoleRequest;
+use App\Http\Requests\Api\UpdateRoleRequest;
 use App\Http\Resources\Api\RoleResource;
 use App\Traits\ResponseTrait;
-use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
@@ -28,13 +29,12 @@ class RoleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreRoleRequest $request)
     {
-        // dd($request->toArray());
-        $this->validate($request, [
-            'name' => 'required|unique:roles,name',
-            'permission' => 'required',
-        ]);
+        // $this->validate($request, [
+        //     'name' => 'required|unique:roles,name',
+        //     'permission' => 'required',
+        // ]);
         $role = Role::create(['name' => $request->name]);
         $role->syncPermissions($request->input('permission'));
         if (!$role) {
@@ -49,11 +49,6 @@ class RoleController extends Controller
      */
     public function show(Role $role)
     {
-        // $rolePermissions = Permission::join("role_has_permissions", "role_has_permissions.permission_id", "=", "permissions.id")
-        //     ->where("role_has_permissions.role_id", $role->id)
-        //     ->get();
-
-        // return $this->returnData('rolePermissions', $rolePermissions, 'Role Permissions Data');
         $role = Role::with('permissions')->where('id', $role->id)->get();
 
         return $this->returnData('role', $role, 'Role Data');
@@ -62,13 +57,13 @@ class RoleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Role $role)
+    public function update(UpdateRoleRequest $request, Role $role)
     {
 
-        $this->validate($request, [
-            'name' => 'required',
-            'permission' => 'required',
-        ]);
+        // $this->validate($request, [
+        //     'name' => ['required', 'string'],
+        //     'permission' => 'required',
+        // ]);
         $role->update(['name' => $request->name]);
         $role->syncPermissions($request->input('permission'));
         if (!$role) {
