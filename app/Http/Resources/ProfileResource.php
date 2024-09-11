@@ -43,10 +43,6 @@ class ProfileResource extends JsonResource
         }
 
         $work_home = false;
-        $locationTypes = $authUser->work_types->pluck('name');
-        if (count($locationTypes) > 1) {
-            $work_home = true;
-        }
         $user_locations = $authUser->user_locations()->get();
         $locations_name = $user_locations->map(function ($user_location) {
             return [
@@ -58,6 +54,7 @@ class ProfileResource extends JsonResource
             ];
         });
 
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -68,11 +65,12 @@ class ProfileResource extends JsonResource
             'is_clocked_out' => $is_clocked_out,
             'clockIn' => $clockIn,
             'total_hours' => $total_hours,
-            'work_home' => $work_home,
             'user_start_time' => $this->user_detail->start_time,
             'user_end_time' => $this->user_detail->end_time,
 
             'assigned_locations_user' => $locations_name,
+            'assignedLocationsUser' => $locations_name,
+            'work_home' => isset($locationTypes[0]) ? $locationTypes[0] == 'home' : false,
         ];
 
     }
