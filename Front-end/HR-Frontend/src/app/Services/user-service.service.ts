@@ -30,6 +30,7 @@ export class UserServiceService {
   }
   
   createUser(emp:AddEmployee) {
+    // console.log(emp)
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
@@ -50,18 +51,20 @@ export class UserServiceService {
     formData.append('start_time', emp.start_time || '');
     formData.append('end_time', emp.end_time || '');
     formData.append('gender', emp.gender);
+    
     emp.roles.forEach((role, index) => formData.append(`roles[${index}]`, role));
     emp.location_id.forEach((id, index) => formData.append(`location_id[${index}]`, id.toString()));
     emp.work_type_id.forEach((id, index) => formData.append(`work_type_id[${index}]`, id.toString()));
 
-    return this.http.post<any>(this.baseURL + "/auth/create_user/", formData, { headers });
+    // console.log(emp.name)
+    return this.http.post<any>(this.baseURL + "/auth/create_user", formData, { headers });
   }
 
   updateUser(emp:AddEmployee, empId:number) {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     
-    let formData = new FormData();
+    let formData = new FormData();  
     if(typeof emp.image == "string"){
       formData.append('image', emp.image as string );
     } else{

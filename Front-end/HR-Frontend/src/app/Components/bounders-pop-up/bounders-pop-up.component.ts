@@ -30,6 +30,8 @@ export class BoundersPopUpComponent implements AfterViewInit {
 
   StartTime:string=""
   EndTime:string=""
+  StartTimeError:string=""
+  EndTimeError:string=""
 
   constructor(public dialogRef: MatDialogRef<BoundersPopUpComponent>, 
               public googleMapsService: ReverseGeocodingService,
@@ -42,7 +44,8 @@ export class BoundersPopUpComponent implements AfterViewInit {
       this.address = data.LocationAddress;
       this.lat=data.Lat,
       this.long=data.Long
-
+      this.StartTime=this.convertUtcToEgyptianTime(data.startTime)
+      this.EndTime=this.convertUtcToEgyptianTime(data.endTime)
     }
   }
 
@@ -125,17 +128,30 @@ export class BoundersPopUpComponent implements AfterViewInit {
     let isValid = true
     this.nameError = ""; 
     this.addressError = "";  
-    if (this.Boundname.trim() === "" && this.address.trim() === "") {
+    this.StartTimeError="";
+    this.EndTimeError="";
+
+    if (this.Boundname.trim() === "" && this.address.trim() === "" && this.StartTime.trim() === "" && this.EndTime.trim() === "" ) {
       isValid = false;
       this.nameError = '*Name Can not be empty';
       this.addressError = '*Address Can not be empty';
+      this.StartTimeError = '*StartTime Can not be empty';
+      this.EndTimeError = '*EndTime Can not be empty';
+
     } else if (this.Boundname.trim() === "") {
       isValid = false;
       this.nameError = '*Name Can not be empty';
     } else if (this.address.trim() === "") {
       isValid = false;
       this.addressError = '*Address Can not be empty';
+    } else if (this.StartTime.trim() === "") {
+      isValid = false;
+      this.StartTimeError = '*StartTime Can not be empty';
+    } else if (this.EndTime.trim() === "") {
+      isValid = false;
+      this.EndTimeError = '*EndTime Can not be empty';
     } 
+    
     return isValid
   }
 
@@ -146,11 +162,20 @@ export class BoundersPopUpComponent implements AfterViewInit {
   onAddressChange() {
     this.addressError = "" 
   }
+  onStartTimeChange() {
+    this.StartTimeError = "" 
+  }
+  onEndTimeChange() {
+    this.EndTimeError = "" 
+  }
 
-  EditAndAddLocation() {
+  async EditAndAddLocation() {
     if(this.isFormValid()){
+      this.StartTime=await this.convertEgyptianToUtcTime(this.StartTime)
+      this.EndTime=await this.convertEgyptianToUtcTime(this.EndTime)
       if (this.mode === 'edit') {
-        this.LocationServ.EditByID(this.Boundname, this.address, this.lat, this.long, this.id).subscribe(
+
+        this.LocationServ.EditByID(this.Boundname, this.address, this.lat, this.long, this.id ,this.StartTime,this.EndTime).subscribe(
           (d: any) => {
             this.dialogRef.close();
           },
@@ -158,7 +183,7 @@ export class BoundersPopUpComponent implements AfterViewInit {
           }
         );
       } else if (this.mode === 'add') {
-        this.LocationServ.CreateAddress(this.Boundname, this.address, this.lat, this.long).subscribe(
+        this.LocationServ.CreateAddress(this.Boundname, this.address, this.lat, this.long ,this.StartTime,this.EndTime).subscribe(
           (d: any) => {
             this.dialogRef.close();
           },
@@ -168,4 +193,47 @@ export class BoundersPopUpComponent implements AfterViewInit {
       }
     }
   }
+
+
+  
+  convertUtcToEgyptianTime(utcTime: string): string {
+    // Parse the input UTC time
+    const [hours, minutes, seconds] = utcTime.split(':').map(Number);
+
+    // Create a Date object for UTC time
+    const utcDate = new Date(Date.UTC(1970, 0, 1, hours, minutes, seconds));
+
+    // Convert to Egyptian time zone (UTC+3)
+    const egyptianOffset = 3; // Egypt is UTC+3
+    utcDate.setHours(utcDate.getHours() + egyptianOffset);
+
+    // Format the time in HH:mm:ss format
+    const formattedHours = String(utcDate.getUTCHours()).padStart(2, '0');
+    const formattedMinutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
+    const formattedSeconds = String(utcDate.getUTCSeconds()).padStart(2, '0');
+    
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+  }
+
+  convertEgyptianToUtcTime(egyptianTime: string): string {
+    // Parse the input Egyptian time
+    const [hours, minutes] = egyptianTime.split(':').map(Number);
+
+    // Create a Date object for Egyptian time
+    const egyptianDate = new Date(Date.UTC(1970, 0, 1, hours, minutes));
+
+    // Convert to UTC time by subtracting the Egyptian offset (UTC+3)
+    const utcOffset = -3; // UTC-3 to convert back to UTC
+    egyptianDate.setHours(egyptianDate.getHours() + utcOffset);
+
+    // Format the time in HH:mm:ss format
+    const formattedHours = String(egyptianDate.getUTCHours()).padStart(2, '0');
+    const formattedMinutes = String(egyptianDate.getUTCMinutes()).padStart(2, '0');
+    const formattedSeconds = String(egyptianDate.getUTCSeconds()).padStart(2, '0');
+    
+    return `${formattedHours}:${formattedMinutes}`;
+  }
+
+
+  
 }

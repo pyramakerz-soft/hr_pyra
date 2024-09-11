@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd  } from '@angular/router';
 import { AccountService } from '../../../Services/account.service';
 import Swal from 'sweetalert2';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-side-bar',
   standalone: true,
-  imports: [RouterLink, RouterOutlet, RouterLinkActive,CommonModule],
+  imports: [RouterLink, RouterOutlet, RouterLinkActive, CommonModule],
   templateUrl: './side-bar.component.html',
   styleUrl: './side-bar.component.css'
 })
@@ -19,9 +20,25 @@ export class SideBarComponent {
   constructor(public AccountServ:AccountService ,private router: Router){}
 
   activeIndex: number | null = 0;
+
+  private routerSubscription!: Subscription;
   
   ngOnInit(): void {
     this.setActiveIndexByRoute(this.router.url);
+
+    // Subscribe to router events
+    this.routerSubscription = this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.setActiveIndexByRoute(event.urlAfterRedirects);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Clean up subscription
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
   }
   
   setActiveIndex(index: number): void {
