@@ -25,7 +25,7 @@ class UpdateLocationRequest extends FormRequest
         $location = $this->route('location'); // Assuming the route parameter is 'location'
         // dd($location);
         return [
-            'name' => ['sometimes', 'string'],
+            'name' => ['sometimes', 'string', Rule::unique('locations', 'name')->ignore($location->id)],
             'address' => ['sometimes', 'string'],
             'latitude' => ['sometimes', 'numeric', Rule::unique('locations', 'latitude')->ignore($location->id)],
             'longitude' => ['sometimes', 'numeric', Rule::unique('locations', 'longitude')->ignore($location->id)],
