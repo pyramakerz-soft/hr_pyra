@@ -75,10 +75,10 @@ export class DonutChartComponent {
       data: {
         labels: this.labels,
         datasets: [{
-          label: 'PieChart',
+          label: 'Count',
           data: this.data,
           backgroundColor: this.colors,
-          hoverOffset: 4
+          hoverOffset: 10
         }],
       },
       options: {
@@ -92,12 +92,20 @@ export class DonutChartComponent {
         plugins:{
           legend: {
             display: false
+          },
+          tooltip: {
+            backgroundColor: '#000000', 
+            titleColor: '#fff', 
+            bodyColor: '#fff', 
+            borderColor: '#fff', 
+            borderWidth: 1, 
+            padding: 10,
           }
         }
       },
       plugins: [{
         id: 'custom-text-in-center',
-        afterDraw: (chart) => { 
+        beforeDraw: (chart) => { 
           const ctx = chart.ctx;
           const chartArea = chart.chartArea;
           const centerX = (chartArea.left + chartArea.right) / 2;
