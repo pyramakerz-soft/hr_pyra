@@ -52,8 +52,9 @@ export class HrBoundersComponent {
     this.saveCurrentPageNumber();
     this.locationServ.getall(page).subscribe(
       (d: any) => {
-        console.log(d)
         this.tableData = d.locations.data;
+        
+
         this.PagesNumber = d.locations.last_page;
         this.generatePages();
       },
@@ -69,7 +70,7 @@ export class HrBoundersComponent {
     }
   }
 
-  openDialog(lat?: string, long?: string, EditedLocationName?: string, id?: number, EditedLocationAddress?: string): void {
+  openDialog(lat?: string, long?: string, EditedLocationName?: string, id?: number, EditedLocationAddress?: string , StartTime?:string, EndTime?:string): void {
     const dialogRef = this.dialog.open(BoundersPopUpComponent, {
       data: EditedLocationName
         ? {
@@ -78,7 +79,9 @@ export class HrBoundersComponent {
           id: id,
           LocationAddress: EditedLocationAddress,
           Lat: lat,
-          Long: long
+          Long: long,
+          startTime:StartTime,
+          endTime:EndTime
         }
         : {
           mode: 'add',
@@ -189,4 +192,27 @@ export class HrBoundersComponent {
   saveCurrentPageNumber() {
     localStorage.setItem('HrLocationsCN', this.CurrentPageNumber.toString());
   }
+
+  convertUTCToEgyptLocalTime(utcTimeStr: string): string {
+    const [time, period] = utcTimeStr.split(/(AM|PM)/);
+    let [hours, minutes] = time.split(':').map(Number);
+    if (period === 'PM' && hours !== 12) {
+      hours += 12;
+    }
+    if (period === 'AM' && hours === 12) {
+      hours = 0;
+    }
+    const currentDate = new Date();
+    const utcDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate(), hours, minutes));
+    const egyptTimeZone = 'Africa/Cairo';
+    const localDate = new Date(utcDate.toLocaleString('en-US', { timeZone: egyptTimeZone }));
+    let localHours = localDate.getHours();
+    const localMinutes = localDate.getMinutes();
+    const localPeriod = localHours >= 12 ? 'PM' : 'AM';
+    localHours = localHours % 12 || 12; // Converts '0' hours to '12'
+    const formattedHours = String(localHours).padStart(2, '0');
+    const formattedMinutes = String(localMinutes).padStart(2, '0');
+    return `${formattedHours}:${formattedMinutes} ${localPeriod}`;
+  }
+
 }

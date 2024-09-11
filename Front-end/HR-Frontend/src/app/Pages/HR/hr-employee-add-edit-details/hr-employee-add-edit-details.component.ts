@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RolesService } from '../../../Services/roles.service';
 import { RoleModel } from '../../../Models/role-model';
@@ -65,8 +65,37 @@ export class HrEmployeeAddEditDetailsComponent {
     this.getLocations()
   }
 
-  toggleDropdown() {
+  toggleDropdown(event: MouseEvent) {
+    event.stopPropagation(); // Prevent the click event from bubbling up
     this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  // Close dropdown if clicked outside
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const dropdown = document.querySelector('.dropdown-container') as HTMLElement;
+
+    if (dropdown && !dropdown.contains(target)) {
+      this.isDropdownOpen = false;
+    }
+  }
+
+  // Cleanup event listener
+  ngOnDestroy() {
+    document.removeEventListener('click', this.onDocumentClick);
+  }
+
+  filterNumericInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.replace(/[^0-9.]/g, ''); // Keep only digits and dot
+  }  
+
+  removeFromLocations(locationID:number, event: MouseEvent){
+    console.log("before", this.employee.location_id)
+    event.stopPropagation();
+    this.employee.location_id = this.employee.location_id.filter(locarion_Id => locarion_Id !== locationID);
+    console.log(this.employee.location_id)
   }
   
   getEmployeeByID(id:number){
@@ -344,17 +373,23 @@ export class HrEmployeeAddEditDetailsComponent {
   }
   
   SaveEmployee() {
-
+    // console.log(this.validationErrors)
+    // console.log(this.employee)
+    // console.log(this.isFormValid())
     if (this.isFormValid()) {
       this.employee.department_id = Number(this.employee.department_id);
+      console.log(this.EmployeeId)
       if(this.EmployeeId === 0){
+        console.log('asd');
         this.userService.createUser(this.employee).subscribe(
           (result: any) => {
+            console.log(result)
             this.router.navigateByUrl("HR/HREmployee")
           },
           error => {
             if (error.error && error.error.errors) {
               this.handleServerErrors(error.error.errors as Record<keyof AddEmployee, string[]>);
+              console.log(error.error)
             }
           }
         );

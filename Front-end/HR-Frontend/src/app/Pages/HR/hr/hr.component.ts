@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SideBarComponent } from '../../../Components/Core/side-bar/side-bar.component';
 
@@ -29,5 +29,21 @@ export class HRComponent {
 
   closeMenu() {
     this.isMenuOpen = false;
+  }
+
+  // Close dropdown if clicked outside
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const dropdown = document.querySelector('.burger') as HTMLElement;
+
+    if (dropdown && !dropdown.contains(target)) {
+      this.isMenuOpen = false;
+    }
+  }
+
+  // Cleanup event listener
+  ngOnDestroy() {
+    document.removeEventListener('click', this.onDocumentClick);
   }
 }

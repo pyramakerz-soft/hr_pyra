@@ -4,7 +4,7 @@
         <div class="h-1 w-7 md:h-[6px] md:w-10 mb-1 bg-[#454950] rounded"></div>
         <div class="h-1 w-7 md:h-[6px] md:w-10 bg-[#454950] rounded"></div>
     </div>
-    <div [ngClass]="{'absolute top-12 right-0 block h-[100vh] w-full md:w-[50%]': isMenuOpen, 'hidden': !isMenuOpen}">
+    <div [ngClass]="{'burger absolute top-12 right-0 block h-[100vh] w-full md:w-[50%]': isMenuOpen, 'hidden': !isMenuOpen}">
         <app-side-bar [menuItems]="menuItems" [closeMenu]="closeMenu.bind(this)"></app-side-bar>
     </div>
 </div>
