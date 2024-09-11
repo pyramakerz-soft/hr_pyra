@@ -88,7 +88,11 @@ export class BoundersPopUpComponent implements AfterViewInit {
             }
           },
           (error) => {
-            console.error('Geocoding error: ', error);
+            Swal.fire({
+              text: "Geocoding error",
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+            })
           }
         );
       });
@@ -120,7 +124,12 @@ export class BoundersPopUpComponent implements AfterViewInit {
         }
       });
     } else {
-      console.error('Geolocation is not supported or not running in a browser.');
+      Swal.fire({
+        text: "Geolocation is not supported or not running in a browser",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#FF7519",
+      }
+      )
     }
   }
   

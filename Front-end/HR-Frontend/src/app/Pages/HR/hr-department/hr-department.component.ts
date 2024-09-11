@@ -29,9 +29,6 @@ export class HrDepartmentComponent {
     this.departmentServ.getall().subscribe(
       (d: any) => {
         this.departments = d.data.departments;
-      },
-      (error) => {
-        console.error('Error retrieving user clocks:', error);
       }
     );
   }
@@ -51,9 +48,6 @@ export class HrDepartmentComponent {
         this.departmentServ.deleteById(id).subscribe(
           (d: any) => {
             this.GetAll();
-          },
-          (error) => {
-            console.error('Error retrieving user clocks:', error);
           }
         );
 
