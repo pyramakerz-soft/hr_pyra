@@ -90,18 +90,19 @@
                         </label>
                         <input [(ngModel)]="employee.salary" 
                         (ngModelChange)="onInputValueChange({ field: 'salary', value: $event })"
-                        type="number"
+                        type="text"
                         (input)="filterNumericInput($event)"
                         class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the salary number">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">
-                            Working Hours Day
+                            Working Hours
                             <span *ngIf="validationErrors['working_hours_day']" class="text-red-500 ml-3 font-normal">{{ validationErrors['working_hours_day'] }}</span>
                         </label>
                         <input [(ngModel)]="employee.working_hours_day"
+                        (input)="filterNumericInput($event)"
                         (ngModelChange)="onInputValueChange({ field: 'working_hours_day', value: $event })"
-                        type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the working hours day">
+                        type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the daily working hours">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">
@@ -229,8 +230,9 @@
                             <span *ngIf="validationErrors['overtime_hours']" class="text-red-500 ml-3 font-normal">{{ validationErrors['overtime_hours'] }}</span>
                         </label>
                         <input [(ngModel)]="employee.overtime_hours" 
+                        (input)="filterNumericInput($event)"
                         (ngModelChange)="onInputValueChange({ field: 'overtime_hours', value: $event })"
-                        type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the over time hours">
+                        type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the over time hours">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">

@@ -108,24 +108,14 @@
     </table>
   </div>
 
-  <div class="mt-5 md:flex justify-between items-center" *ngIf="DisplayPagginationOrNot ">
+  <div class="mt-5 flex justify-between items-center" *ngIf="DisplayPagginationOrNot ">
     <!-- Previous Button -->
     <button
-      class="h-[44px] w-[119px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center"
-      [ngClass]="{'hidden': CurrentPageNumber === 1, 'opacity-50 cursor-not-allowed': CurrentPageNumber === 1}"
+      class="h-[44px] md:w-[119px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] md:gap-[8px] flex items-center"
+      [ngClass]="{'disabled': CurrentPageNumber === 1, 'opacity-50 cursor-not-allowed': CurrentPageNumber === 1}"
       [disabled]="CurrentPageNumber === 1" (click)="getPrevPage()">
-      <i class="fa-solid fa-arrow-left"></i> Previous
+      <i class="fa-solid fa-arrow-left"></i> <p class="hidden md:flex">Previous</p>
     </button>
-
-    <!-- Pagination Buttons -->
-    <!-- <div class="flex justify-center items-center space-x-5 md:block">
-      <button *ngFor="let page of pages" class="h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
-        [ngClass]="{'border border-[#D0D5DD]': page === CurrentPageNumber}" (click)="getAllEmployees(page)">
-        {{ page }}
-      </button>
-    </div> -->
-
-
 
     <div class="flex justify-center items-center space-x-2 md:space-x-4">
       <button *ngIf="CurrentPageNumber-1>0"
@@ -141,20 +131,18 @@
       </button>
       <span *ngIf="PagesNumber>1" class="text-gray-800 text-sm md:text-base font-semibold">...</span>
       <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
-      [ngClass]="{ 'bg-[#D0D5DD]': CurrentPageNumber === PagesNumber }"
+      [ngClass]="{ 'selectedPage': CurrentPageNumber === PagesNumber }"
         (click)="getAllEmployees(PagesNumber)">
         {{ PagesNumber }}
       </button>
     </div>
-
-
     
     <!-- Next Button -->
     <button
-      class="h-[44px] w-[92px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center"
-      [ngClass]="{'hidden': CurrentPageNumber === PagesNumber, 'opacity-50 cursor-not-allowed': CurrentPageNumber === PagesNumber}"
+      class="h-[44px] md:w-[92px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] md:gap-[8px] flex items-center"
+      [ngClass]="{'disabled': CurrentPageNumber === PagesNumber, 'opacity-50 cursor-not-allowed': CurrentPageNumber === PagesNumber}"
       [disabled]="CurrentPageNumber === PagesNumber" (click)="getNextPage()">
-      Next <i class="fa-solid fa-arrow-right"></i>
+      <p class="hidden md:flex">Next</p> <i class="fa-solid fa-arrow-right"></i>
     </button>
-  </div>
+  </div>  
 </div>
