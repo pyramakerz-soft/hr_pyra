@@ -200,7 +200,6 @@ export class ClockInComponent {
           }
         );
       } else {
-        console.warn('Geolocation is not supported or not running in a browser.');
         reject(new Error('Geolocation is not supported or not running in a browser.'));
       }
     });
@@ -280,11 +279,9 @@ export class ClockInComponent {
           const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
           resolve(formattedDateTime); // Resolve the promise with formatted UTC time
         } else {
-          console.error('Error fetching time zone data:');
           reject('Error fetching time zone data');
         }
       }, (error) => {
-        console.error('Subscription error:', error);
         reject('Subscription error');
       });
     });

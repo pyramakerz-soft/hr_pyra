@@ -63,11 +63,4 @@ export class DepartmentService {
 
   }
 
-  private handleError(error: any): Observable<never> {
-    console.error('An error occurred:', error);
-    return throwError(() => new Error('Something went wrong; please try again later.'));
-  }
-
-
-
 }

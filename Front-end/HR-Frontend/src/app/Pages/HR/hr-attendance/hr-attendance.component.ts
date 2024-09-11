@@ -106,9 +106,6 @@ export class HrAttendanceComponent {
     this.departmentServ.getall().subscribe(
       (d: any) => {
         this.departments = d.data.departments;
-      },
-      (error) => {
-        console.error('Error retrieving user clocks:', error);
       }
     );
   }

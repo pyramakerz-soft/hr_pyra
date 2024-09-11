@@ -81,11 +81,12 @@ export class HrEmployeeAttendanceDetailsComponent {
           this.getAllClocks(this.CurrentPageNumber);
           this.getEmployeeByID(id)
         } else {
-          console.error('No ID found in route parameters');
+          Swal.fire({
+            text: "No ID found in route parameters",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
+          })
         }
-      },
-      error: (err) => {
-        console.error('Error in route parameters:', err);
       }
     });
   }
