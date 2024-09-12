@@ -23,6 +23,10 @@ export class AttendenceEditComponent {
   ClockOutEgyptFormat: string = ""
   ClockId: number = 1;
 
+
+  FclockIn:string=""
+  Fclockout:string=""
+
   constructor(private router: Router, public ClockServ: ClockService, private route: ActivatedRoute) {}
   ngOnInit() {
     this.route.params.subscribe(params => {
@@ -66,8 +70,10 @@ export class AttendenceEditComponent {
 
     }
     else {
-      this.data.formattedClockIn = this.transformEgyptTimeToUTC(this.data.formattedClockIn);
-      this.data.formattedClockOut = this.transformEgyptTimeToUTC(this.data.formattedClockOut);
+        
+
+      this.FclockIn = this.transformEgyptTimeToUTC(this.data.formattedClockIn);
+      this.Fclockout = this.transformEgyptTimeToUTC(this.data.formattedClockOut);
 
       this.SaveData();
     }
@@ -75,7 +81,7 @@ export class AttendenceEditComponent {
 
 
   SaveData() {
-    if(this.data.formattedClockIn== this.data.formattedClockOut){
+    if(this.FclockIn== this.Fclockout){
       Swal.fire({
         icon: "error",
         title: "Clock Out and Clock In in the same Time",
@@ -86,7 +92,7 @@ export class AttendenceEditComponent {
       this.GetClocksById(this.data.userId)
 
     }else{
-      this.ClockServ.UpdateUserClock(this.data.userId, this.data.id, this.data.formattedClockIn, this.data.formattedClockOut).subscribe(
+      this.ClockServ.UpdateUserClock(this.data.userId, this.data.id, this.FclockIn, this.Fclockout).subscribe(
         (d: any) => {
           this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/" + this.data.userId)
         }
