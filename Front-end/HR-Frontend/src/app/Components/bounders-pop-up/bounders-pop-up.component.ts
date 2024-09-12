@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ReverseGeocodingService } from '../../Services/reverse-geocoding.service';
 import { LocationsService } from '../../Services/locations.service';
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 
 declare const google: any;
 
@@ -87,7 +88,11 @@ export class BoundersPopUpComponent implements AfterViewInit {
             }
           },
           (error) => {
-            console.error('Geocoding error: ', error);
+            Swal.fire({
+              text: "Geocoding error",
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+            })
           }
         );
       });
@@ -119,7 +124,12 @@ export class BoundersPopUpComponent implements AfterViewInit {
         }
       });
     } else {
-      console.error('Geolocation is not supported or not running in a browser.');
+      Swal.fire({
+        text: "Geolocation is not supported or not running in a browser",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#FF7519",
+      }
+      )
     }
   }
   
@@ -180,6 +190,20 @@ export class BoundersPopUpComponent implements AfterViewInit {
             this.dialogRef.close();
           },
           (error) => {
+            if (error.error.message === "The name has already been taken.") {
+              Swal.fire({   
+                text: "The Location name has already been taken",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#FF7519",
+              });
+            }else{
+              Swal.fire({   
+                text: "Faild to create, Please Try again later",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#FF7519",
+                
+              });
+            }
           }
         );
       } else if (this.mode === 'add') {
@@ -188,6 +212,20 @@ export class BoundersPopUpComponent implements AfterViewInit {
             this.dialogRef.close();
           },
           (error) => {
+            if (error.error.message === "The name has already been taken.") {
+              Swal.fire({   
+                text: "The Location name has already been taken",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#FF7519",
+              });
+            }else{
+              Swal.fire({   
+                text: "Faild to create, Please Try again later",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#FF7519",
+                
+              });
+            }
           }
         );
       }

@@ -106,7 +106,13 @@ export class HrBoundersComponent {
       if (result.isConfirmed) {
 
         this.locationServ.DeleteByID(id).subscribe(result => {
-          this.getAllLocations(1);
+          if(this.tableData.length==1&&this.CurrentPageNumber-1>=1){
+            this.getAllLocations(this.CurrentPageNumber-1);
+          }
+          else{
+            this.getAllLocations(this.CurrentPageNumber);
+          }
+          this.getLocationsName();
         });
       }
     });

@@ -50,9 +50,6 @@ export class TableComponent {
         this.Userclocks = d.data.clocks;
         this.rowNumber = new Array(this.Userclocks.length).fill(false);
         this.generatePages();
-      },
-      (error) => {
-        console.error('Error retrieving user clocks:', error);
       }
     );
   }
