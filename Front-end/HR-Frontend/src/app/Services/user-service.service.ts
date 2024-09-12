@@ -30,7 +30,6 @@ export class UserServiceService {
   }
   
   createUser(emp:AddEmployee) {
-    // console.log(emp)
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
@@ -56,7 +55,6 @@ export class UserServiceService {
     emp.location_id.forEach((id, index) => formData.append(`location_id[${index}]`, id.toString()));
     emp.work_type_id.forEach((id, index) => formData.append(`work_type_id[${index}]`, id.toString()));
 
-    // console.log(emp.name)
     return this.http.post<any>(this.baseURL + "/auth/create_user", formData, { headers });
   }
 
@@ -94,7 +92,10 @@ export class UserServiceService {
   updatePassword(pass:string, empId:number){
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.post<any>(this.baseURL + "/auth/update_user/" + empId, pass, { headers });
+    const body={
+      password: pass
+    }
+    return this.http.post<any>(this.baseURL + "/auth/update_password/" + empId, body, { headers });
   }
 
   SearchByName(Name:string){

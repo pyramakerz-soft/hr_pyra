@@ -114,11 +114,9 @@ export class ClockInPopUpComponent {
           const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
           resolve(formattedDateTime); // Resolve the promise with formatted UTC time
         } else {
-          console.error('Error fetching time zone data:');
           reject('Error fetching time zone data');
         }
       }, (error) => {
-        console.error('Subscription error:', error);
         reject('Subscription error');
       });
     });
@@ -317,7 +315,11 @@ export class ClockInPopUpComponent {
           }
         );
       } else {
-        console.warn('Geolocation is not supported or not running in a browser.');
+        Swal.fire({
+          text: "Geolocation is not supported or not running in a browser",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#FF7519",
+        })
         reject(new Error('Geolocation is not supported or not running in a browser.'));
       }
     });
@@ -355,7 +357,6 @@ export class ClockInPopUpComponent {
 
        
       } else {
-        console.error('Error fetching time zone data:');
         this.formattedTime = 'Error fetching time';
         this.formattedDate = 'Error fetching date';
       }

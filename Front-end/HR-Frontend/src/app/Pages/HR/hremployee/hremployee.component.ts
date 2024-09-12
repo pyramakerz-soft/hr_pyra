@@ -200,7 +200,12 @@ export class HREmployeeComponent {
       if (result.isConfirmed) {
         this.userServ.DeleteById(id).subscribe(
           (d: any) => {
-            this.getAllEmployees(1);
+            if(this.tableData.length==1&&this.CurrentPageNumber-1>=1){
+              this.getAllEmployees(this.CurrentPageNumber-1);
+            }
+            else{
+              this.getAllEmployees(this.CurrentPageNumber);
+            }
             this.getUsersName()
           },
           (error) => {

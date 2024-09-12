@@ -32,19 +32,15 @@ export class HrRoleAddComponent {
   constructor(private router: Router, private route: ActivatedRoute, public roleService:RolesService ,public PerService :PermissionsService) {}
 
   async ngOnInit() {
-    try {
-      await this.getAllpermissions();
-      
-      this.route.params.subscribe(async params => {
-        if (params['id']) {
-          this.RoleId = params['id'];
-          await this.getRoleById();
-          this.CheckTheSelectedPermissions();
-        }
-      });
-    } catch (err) {
-      console.error('Error:', err);
-    }
+    await this.getAllpermissions();
+    
+    this.route.params.subscribe(async params => {
+      if (params['id']) {
+        this.RoleId = params['id'];
+        await this.getRoleById();
+        this.CheckTheSelectedPermissions();
+      }
+    });
   }
 
   getRoleById(): Promise<void> {
@@ -55,9 +51,6 @@ export class HrRoleAddComponent {
             this.RoleName = result.role[0].name;
             this.UserByIdPermissions = result.role[0].permissions;
             resolve();
-          },
-          (error) => {
-            console.error('Error retrieving role by ID:', error);
           }
         );
       } else {
@@ -82,10 +75,6 @@ export class HrRoleAddComponent {
         (d: any) => {
           this.permissions = d.permissions;
           resolve(); 
-        },
-        (error) => {
-          console.error('Error retrieving permissions:', error);
-          reject(error); 
         }
       );
     });
@@ -132,12 +121,20 @@ export class HrRoleAddComponent {
             this.router.navigateByUrl("/HR/HRRole");
           },
           (error) => {
-            Swal.fire({   
-              text: "Faild to update, Please Try again later",
-              confirmButtonText: "OK",
-              confirmButtonColor: "#FF7519",
-              
-            });
+            if (error.error.message === "The name has already been taken.") {
+              Swal.fire({   
+                text: "The Role name has already been taken",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#FF7519",
+              });
+            }else{
+              Swal.fire({   
+                text: "Faild to create, Please Try again later",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#FF7519",
+                
+              });
+            }
           }
         );
       }else{
@@ -148,7 +145,7 @@ export class HrRoleAddComponent {
           (error) => {
             if (error.error.message === "The name has already been taken.") {
               Swal.fire({   
-                text: "The name has already been taken",
+                text: "The Role name has already been taken",
                 confirmButtonText: "OK",
                 confirmButtonColor: "#FF7519",
               });

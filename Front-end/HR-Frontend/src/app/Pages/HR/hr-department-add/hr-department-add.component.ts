@@ -50,9 +50,6 @@ export class HrDepartmentAddComponent {
     this.managerServ.getall().subscribe(
       (d: any) => {
         this.ManagerNames = d.managerNames;
-      },
-      (error) => {
-        console.error('Error :', error);
       }
     );
   }
@@ -101,7 +98,7 @@ export class HrDepartmentAddComponent {
         (error: any) => {
           if (error.error.message === "The name has already been taken.") {
             Swal.fire({   
-              text: "The name has already been taken",
+              text: "The Department name has already been taken",
               confirmButtonText: "OK",
               confirmButtonColor: "#FF7519",
             });
@@ -131,9 +128,6 @@ GetByID(id: number){
     (d: any) => {
       this.DeptName = d.department.name;
       this.nameSelected = d.department.manager_name
-    },
-    (error) => {
-      console.error('Error :', error);
     }
   );
 }
@@ -148,12 +142,20 @@ UpdateDepartment(){
 
       },
       (error: any) => {
+        if (error.error.message === "The name has already been taken.") {
+          Swal.fire({   
+            text: "The Department name has already been taken",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
+          });
+        }else{
         Swal.fire({
           text: "Faild to create, Please Try again later",
           confirmButtonText: "OK",
           confirmButtonColor: "#FF7519",
 
         });
+      }
       }
     );
   } else {
