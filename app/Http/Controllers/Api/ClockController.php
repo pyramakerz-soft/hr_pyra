@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreClockInOutRequest;
-use App\Http\Requests\UpdateClockInOutRequest;
+use App\Http\Requests\Api\ClockInRequest;
+use App\Http\Requests\Api\ClockOutRequest;
+use App\Http\Requests\Api\UpdateClockRequest;
 use App\Models\ClockInOut;
 use App\Models\User;
 use App\Services\Api\Clock\ClockService;
@@ -220,119 +221,12 @@ class ClockController extends Controller
         return $this->clockService->getClockById($clock);
         // return $this->returnData("clock", new ClockResource($clock), "Clock Data");
     }
-    public function clockIn(StoreClockInOutRequest $request)
+    public function clockIn(ClockInRequest $request)
     {
         return $this->clockService->clockIn($request);
-        // $authUser = Auth::user();
-        // $user_id = $authUser->id;
-
-        // $existingClockInWithoutClockOut = ClockInOut::where('user_id', $user_id)
-        //     ->whereNull('clock_out')
-        //     ->exists();
-
-        // if ($existingClockInWithoutClockOut) {
-        //     return $this->returnError('You already have an existing clock-in without clocking out.');
-        // }
-        // $this->validate($request, [
-        //     'location_type' => 'required|string|exists:work_types,name',
-        //     'clock_in' => ['required', 'date_format:Y-m-d H:i:s'],
-        // ]);
-
-        // if ($request->location_type == "home") {
-
-        //     $existingHomeClockIn = ClockInOut::where('user_id', $user_id)
-        //         ->whereDate('clock_in', Carbon::today())
-        //         ->where('location_type', "home")
-        //         ->whereNull('clock_out')
-        //         ->orderBy('clock_in', 'desc')
-        //         ->exists();
-        //     if ($existingHomeClockIn) {
-        //         return $this->returnError('You have already clocked in.');
-        //     }
-
-        //     $clockIn = Carbon::parse($request->clock_in);
-        //     $durationInterval = $clockIn->diffAsCarbonInterval(Carbon::now());
-        //     $durationFormatted = $durationInterval->format('%H:%I:%S');
-        //     $clock = ClockInOut::create([
-        //         'clock_in' => $clockIn,
-        //         'clock_out' => null,
-        //         'duration' => $durationFormatted,
-        //         'user_id' => $user_id,
-        //         'location_id' => null,
-        //         'location_type' => $request->location_type,
-        //     ]);
-        //     return $this->returnData("clock", $clock, "Clock In Done");
-        // }
-
-        // $this->validate($request, [
-        //     'latitude' => 'required',
-        //     'longitude' => 'required',
-        // ]);
-        // $latitude = $request->latitude;
-        // $longitude = $request->longitude;
-
-        // $userLocations = $authUser->user_locations()->get();
-        // $closestLocation = null;
-        // $shortestDistance = null;
-
-        // foreach ($userLocations as $userLocation) {
-        //     $location_id = $userLocation->pivot['location_id'];
-        //     $userLongitude = $userLocation->longitude;
-        //     $userLatitude = $userLocation->latitude;
-
-        //     $distance = $this->haversineDistance($userLatitude, $userLongitude, $latitude, $longitude);
-        //     // dd($location_id);
-        //     if (is_null($shortestDistance) || $distance < $shortestDistance) {
-        //         $shortestDistance = $distance;
-        //         $closestLocation = [
-        //             'location_id' => $location_id,
-        //             'distance' => $distance,
-        //         ];
-        //     }
-        // }
-
-        // if (is_null($closestLocation)) {
-        //     return $this->returnError('User is not located at any registered locations.');
-        // }
-
-        // $location_id = $closestLocation['location_id'];
-        // $distanceBetweenUserAndLocation = $closestLocation['distance'];
-        // // $now = Carbon::now()->addRealHour(3);
-        // // $UserEndTime = Carbon::parse($authUser->user_detail->end_time);
-
-        // $existingSiteClockIn = ClockInOut::where('user_id', $user_id)
-        //     ->where('location_id', $location_id)
-        //     ->whereDate('clock_in', Carbon::today())
-        //     ->whereNull('clock_out')
-        //     ->orderBy('clock_in', 'desc')
-        //     ->exists();
-        // if ($existingSiteClockIn) {
-        //     return $this->returnError('You have already clocked in.');
-        // }
-
-        // if ($distanceBetweenUserAndLocation < 50) {
-
-        //     $clockIn = Carbon::parse($request->clock_in);
-        //     $durationInterval = $clockIn->diffAsCarbonInterval(Carbon::now());
-        //     $durationFormatted = $durationInterval->format('%H:%I:%S');
-
-        //     $clock = ClockInOut::create([
-        //         'clock_in' => Carbon::parse($request->clock_in),
-        //         'clock_out' => null,
-        //         'duration' => $durationFormatted,
-        //         'user_id' => $user_id,
-        //         'location_id' => $location_id,
-        //         'location_type' => $request->location_type,
-
-        //     ]);
-
-        //     return $this->returnData("clock", $clock, "Clock In Done");
-        // } else {
-        //     return $this->returnError('User is not located at the correct location. lat : ' . $latitude . " / long : " . $longitude);
-        // }
     }
 
-    public function clockOut(UpdateClockInOutRequest $request)
+    public function clockOut(ClockOutRequest $request)
     {
 
         return $this->clockService->clockOut($request);
@@ -395,7 +289,7 @@ class ClockController extends Controller
         //     return $this->returnError('User is not located at the correct location. lat : ' . $latitude . " / long : " . $longitude);
         // }
     }
-    public function updateUserClock(Request $request, User $user, ClockInOut $clock)
+    public function updateUserClock(UpdateClockRequest $request, User $user, ClockInOut $clock)
     {
 
         return $this->clockService->updateUserClock($request, $user, $clock);
