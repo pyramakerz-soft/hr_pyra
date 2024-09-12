@@ -98,7 +98,7 @@ export class HrDepartmentAddComponent {
         (error: any) => {
           if (error.error.message === "The name has already been taken.") {
             Swal.fire({   
-              text: "The name has already been taken",
+              text: "The Department name has already been taken",
               confirmButtonText: "OK",
               confirmButtonColor: "#FF7519",
             });
@@ -144,7 +144,7 @@ UpdateDepartment(){
       (error: any) => {
         if (error.error.message === "The name has already been taken.") {
           Swal.fire({   
-            text: "The name has already been taken",
+            text: "The Department name has already been taken",
             confirmButtonText: "OK",
             confirmButtonColor: "#FF7519",
           });
