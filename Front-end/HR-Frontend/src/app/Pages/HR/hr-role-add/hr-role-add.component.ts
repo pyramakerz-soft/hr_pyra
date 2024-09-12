@@ -123,7 +123,7 @@ export class HrRoleAddComponent {
           (error) => {
             if (error.error.message === "The name has already been taken.") {
               Swal.fire({   
-                text: "The name has already been taken",
+                text: "The Role name has already been taken",
                 confirmButtonText: "OK",
                 confirmButtonColor: "#FF7519",
               });
@@ -145,7 +145,7 @@ export class HrRoleAddComponent {
           (error) => {
             if (error.error.message === "The name has already been taken.") {
               Swal.fire({   
-                text: "The name has already been taken",
+                text: "The Role name has already been taken",
                 confirmButtonText: "OK",
                 confirmButtonColor: "#FF7519",
               });
