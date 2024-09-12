@@ -50,9 +50,6 @@ export class HrDepartmentAddComponent {
     this.managerServ.getall().subscribe(
       (d: any) => {
         this.ManagerNames = d.managerNames;
-      },
-      (error) => {
-        console.error('Error :', error);
       }
     );
   }
@@ -131,9 +128,6 @@ GetByID(id: number){
     (d: any) => {
       this.DeptName = d.department.name;
       this.nameSelected = d.department.manager_name
-    },
-    (error) => {
-      console.error('Error :', error);
     }
   );
 }
