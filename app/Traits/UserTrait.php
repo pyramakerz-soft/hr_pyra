@@ -50,7 +50,7 @@ trait UserTrait
     {
         foreach ($locationIds as $locationId) {
             if (!$user->user_locations()->wherePivot('location_id', $locationId)->exists()) {
-                $user->user_locations()->attach($locationId);
+                $user->user_locations()->sync($locationIds);
             }
         }
     }
@@ -59,7 +59,7 @@ trait UserTrait
     {
         foreach ($workTypeIds as $workTypeId) {
             if (!$user->work_types()->wherePivot('work_type_id', $workTypeId)->exists()) {
-                $user->work_types()->attach($workTypeId);
+                $user->work_types()->sync($workTypeIds);
             }
         }
     }
@@ -81,18 +81,4 @@ trait UserTrait
         ];
     }
 
-    // private function assignAttributes(User $user, $request)
-    // {
-    //     if ($request->filled('roles')) {
-    //         $this->assignRoles($user, $request->input('roles'));
-    //     }
-
-    //     if ($request->filled('location_id')) {
-    //         $this->assignLocations($user, $request->input('location_id'));
-    //     }
-
-    //     if ($request->filled('work_type_id')) {
-    //         $this->assignWorkTypes($user, $request->input('work_type_id'));
-    //     }
-    // }
 }
