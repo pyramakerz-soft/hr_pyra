@@ -37,9 +37,6 @@ export class HrRoleComponent {
     this.roleService.getall().subscribe(
       (d: any) => {
         this.tableData = d.roles; 
-      },
-      (error) => {
-        console.error('Error retrieving user clocks:', error);
       }
     );
   }
