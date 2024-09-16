@@ -3,12 +3,20 @@
 namespace App\Exceptions;
 
 use App\Traits\ResponseTrait;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ServerException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
+use PDOException;
+use Psy\Readline\Hoa\FileException;
+use RuntimeException;
 use Spatie\Permission\Exceptions\RoleDoesNotExist;
 use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -93,10 +101,45 @@ class Handler extends ExceptionHandler
             return $this->returnError('You are not authorized', Response::HTTP_FORBIDDEN);
 
         }
+        if ($exception instanceof ServerException) {
+            return $this->returnError('Server Error', Response::HTTP_INTERNAL_SERVER_ERROR);
 
-        // if ($exception instanceof UniqueConstraintViolationException) {
+        }
+        // Guzzle ClientException (handles 4xx errors)
+        if ($exception instanceof ClientException) {
+            return $this->returnError('Client Error', Response::HTTP_BAD_REQUEST);
+        }
 
-        // }
+        // Guzzle RequestException (handles request issues like invalid requests)
+        if ($exception instanceof RequestException) {
+            return $this->returnError('Request Error', Response::HTTP_BAD_REQUEST);
+        }
+
+        // Network Issues (handles connection problems)
+        if ($exception instanceof ConnectException) {
+            return $this->returnError('Network Connection Error', Response::HTTP_BAD_GATEWAY);
+        }
+
+        // Database Query Exception
+        if ($exception instanceof QueryException) {
+            return $this->returnError('Database Error', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        // PDO Exception (database connection issues)
+        if ($exception instanceof PDOException) {
+            return $this->returnError('Database Connection Error', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        // Runtime Exceptions (generic runtime errors)
+        if ($exception instanceof RuntimeException) {
+            return $this->returnError('Runtime Error', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        // Filesystem Exception (handles file-related errors)
+        if ($exception instanceof FileException) {
+            return $this->returnError('File System Error', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
         return parent::render($request, $exception);
 
     }

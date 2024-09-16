@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\LoginRequest;
-use App\Http\Resources\LoginResource;
+use App\Http\Resources\ProfileResource;
 use App\Models\User;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Response;
@@ -90,6 +90,6 @@ class AuthController extends Controller
             return $this->returnError('No User Found');
         }
 
-        return $this->returnData("User", new LoginResource($user), "User Data");
+        return $this->returnData("User", new ProfileResource($user), "User Data");
     }
 }
