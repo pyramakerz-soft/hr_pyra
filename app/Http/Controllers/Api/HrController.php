@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\AddClockRequest;
 use App\Models\Department;
 use App\Models\User;
+use App\Models\WorkType;
 use App\Services\Api\Clock\ClockService;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
@@ -116,28 +117,28 @@ class HrController extends Controller
         // Define the end of the specified year
         $endOfYear = Carbon::create($year, 12, 31)->endOfDay();
 
-        // Filter employees based on hiring_date up to the end of the specified year
-        $employees = User::join('user_details', 'users.id', '=', 'user_details.user_id')
-            ->where('user_details.hiring_date', '<=', $endOfYear)
-            ->with('work_types')
-            ->get();
+        // Retrieve work type IDs using their names
+        $siteWorkTypeId = WorkType::where('name', 'site')->value('id');
+        $homeWorkTypeId = WorkType::where('name', 'home')->value('id');
 
-        if ($employees->isEmpty()) {
+        // Get all work types of employees hired up to the end of the specified year
+        $workTypes = User::join('user_details', 'users.id', '=', 'user_details.user_id')
+            ->where('user_details.hiring_date', '<=', $endOfYear)
+            ->join('user_work_type', 'users.id', '=', 'user_work_type.user_id')
+            ->pluck('user_work_type.work_type_id'); //Directly get the work type IDs
+
+        if ($workTypes->isEmpty()) {
             return $this->returnError("There are no employees found up to the year {$year}");
         }
 
-        foreach ($employees as $employee) {
-            foreach ($employee->work_types as $work_type) {
-                if ($work_type->pivot->work_type_id == 1) {
-                    $data['site']++;
-                } elseif ($work_type->pivot->work_type_id == 2) {
-                    $data['home']++;
-                }
-            }
-        }
+        // Count occurrences of each work type
+        $counts = $workTypes->countBy();
 
+        $data['site'] = $counts->get($siteWorkTypeId, 0);
+        $data['home'] = $counts->get($homeWorkTypeId, 0);
+
+        // Calculate percentages
         $totalWorkTypes = $data['site'] + $data['home'];
-
         $percentages = [
             'site' => $totalWorkTypes > 0 ? ($data['site'] / $totalWorkTypes) * 100 : 0,
             'home' => $totalWorkTypes > 0 ? ($data['home'] / $totalWorkTypes) * 100 : 0,
