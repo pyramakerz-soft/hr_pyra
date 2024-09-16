@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 
-class LoginResource extends JsonResource
+class ProfileResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -52,8 +52,12 @@ class LoginResource extends JsonResource
             return [
                 'location_id' => $user_location->id,
                 'location_name' => $user_location->name,
+                'location_start_time' => $user_location->start_time,
+                'location_end_time' => $user_location->end_time,
+
             ];
         });
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -65,7 +69,10 @@ class LoginResource extends JsonResource
             'clockIn' => $clockIn,
             'total_hours' => $total_hours,
             'work_home' => $work_home,
-            'assignedLocationsUser' => $locations_name,
+            'user_start_time' => $this->user_detail->start_time,
+            'user_end_time' => $this->user_detail->end_time,
+
+            'assigned_locations_user' => $locations_name,
         ];
 
     }

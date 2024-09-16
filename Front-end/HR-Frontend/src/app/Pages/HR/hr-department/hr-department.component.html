@@ -5,6 +5,7 @@
       </div>
       <button class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg"
       (click)="NavigateToAddDepartment()"
+      [disabled]="AddButton"
       >
         Add
       </button>
@@ -45,7 +46,10 @@
   
             <td class="py-5 px-4">
               <div class="px-2">
-                <button (click)="EditDepartment(row.id)">
+                <button (click)="EditDepartment(row.id)"
+                [disabled]="AddButton"
+
+                >
                   <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
                 </button>
                 <button (click)="deleteDepartment(row.id)">
