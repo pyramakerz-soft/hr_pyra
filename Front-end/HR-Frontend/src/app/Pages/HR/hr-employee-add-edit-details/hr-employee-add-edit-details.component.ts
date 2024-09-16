@@ -384,6 +384,7 @@ export class HrEmployeeAddEditDetailsComponent {
   SaveEmployee() {
     if (this.isFormValid()) {
       this.employee.department_id = Number(this.employee.department_id);
+      console.log(this.employee)
       if(this.EmployeeId === 0){
         this.userService.createUser(this.employee).subscribe(
           (result: any) => {

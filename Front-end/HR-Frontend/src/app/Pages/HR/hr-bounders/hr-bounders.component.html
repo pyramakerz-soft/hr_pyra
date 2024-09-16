@@ -33,6 +33,9 @@
       <thead class="bg-[#F9FAFB] text-sm md:text-base">
         <tr>
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+            ID <i class="fa-solid fa-arrow-down mx-2"></i>
+          </th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
             Location <i class="fa-solid fa-arrow-down mx-2"></i>
           </th>
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
@@ -49,7 +52,7 @@
       <tbody>
         <!-- No Data Row -->
         <tr *ngIf="tableData.length === 0">
-          <td colspan="3" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+          <td colspan="4" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
             No Data Found
           </td>
         </tr>
@@ -59,6 +62,7 @@
           [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}"
           class="border-t border-gray-300 text-xs md:text-sm">
 
+          <td class="py-5 px-4">{{ row.id }}</td>
           <td class="py-5 px-4">{{ row.name }}</td>
           <td class="py-5 px-4">{{ convertUTCToEgyptLocalTime(row.start_time) }}</td>
           <td class="py-5 px-4">{{ convertUTCToEgyptLocalTime(row.end_time) }}</td>
