@@ -47,15 +47,10 @@ class UpdateUserRequest extends FormRequest
                 'regex:/^[0-9]{14}$/',
                 Rule::unique('users', 'national_id')->ignore($user->id),
             ],
-            // 'email' => ['nullable', 'email'],
-            // 'password' => ['nullable', 'min:6'],
-            // 'phone' => ['nullable', 'regex:/^01[0125][0-9]{8}$/'],
-            // 'contact_phone' => ['nullable', 'regex:/^01[0125][0-9]{8}$/'],
-            // 'national_id' => ['nullable', 'string', 'regex:/^[0-9]{14}$/'],
+
             'code' => ['nullable', 'string'],
             'gender' => ['nullable', 'in:m,M,F,f'],
             'department_id' => ['nullable', 'exists:departments,id'],
-            // 'image' => ['nullable'],
             'salary' => ['nullable', 'numeric'],
             'working_hours_day' => ['nullable', 'numeric', 'min:4'],
             'overtime_hours' => ['nullable', 'numeric'],
@@ -66,7 +61,6 @@ class UpdateUserRequest extends FormRequest
             'end_time' => ['nullable'],
             'location_id' => ['nullable', 'exists:locations,id'],
             'work_type_id' => ['nullable', 'exists:work_types,id'],
-            // 'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:15360'],
         ];
     }
     public function withValidator($validator)
