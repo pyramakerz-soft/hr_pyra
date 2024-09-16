@@ -1,0 +1,14 @@
+  
+  /* Bar element */
+  .bar {
+    width: 40px; /* Fixed width for bars */
+    transition: all 0.3s ease; /* Smooth transition for height changes */
+  }
+  
+  /* Label below each bar */
+  .bar-label {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #333; /* Dark color for contrast */
+  }
+  

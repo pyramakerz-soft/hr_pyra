@@ -9,8 +9,9 @@ use App\Http\Resources\Api\UserDetailResource;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\UserDetail;
-use App\Services\Api\UserDetailService;
-use App\Services\Api\UserService;
+use App\Services\Api\AuthorizationService;
+use App\Services\Api\User\UserDetailService;
+use App\Services\Api\User\UserService;
 use App\Traits\HelperTrait;
 use App\Traits\ResponseTrait;
 use App\Traits\UserTrait;
@@ -20,19 +21,19 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
-use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
     use ResponseTrait, HelperTrait, UserTrait;
     protected $userService;
     protected $userDetailService;
+    protected $authorizationService;
 
-    public function __construct(UserService $userService, UserDetailService $userDetailService)
+    public function __construct(UserService $userService, UserDetailService $userDetailService, AuthorizationService $authorizationService)
     {
         $this->userService = $userService;
         $this->userDetailService = $userDetailService;
-
+        $this->authorizationService = $authorizationService;
         $this->middleware('auth:api')->except(['store']);
     }
 
@@ -40,9 +41,7 @@ class UserController extends Controller
     {
         $authUser = Auth::user();
 
-        if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to view users', 403);
-        }
+        $this->authorizationService->authorizeHrUser($authUser);
 
         $search = request()->get('search', null);
         $usersData = $this->userService->getAllUsers($search);
@@ -55,31 +54,22 @@ class UserController extends Controller
     }
     public function ManagerNames()
     {
-        $data = [];
-        $role = Role::where('name', 'Manager')->first();
-        if (!$role) {
-            return $this->returnError('Manager role not found', 404);
-        }
-        $managers = User::Role('manager')->get(['id', 'name']);
-        $data = $managers->map(function ($manager) {
-            return [
-                'manager_id' => $manager->id,
-                'manager_name' => $manager->name,
-            ];
-        });
-
+        $authUser = Auth::user();
+        $this->authorizationService->authorizeHrUser($authUser);
+        $data = $this->userService->getManagerNames();
         return $this->returnData('managerNames', $data, 'manager names');
 
     }
 
     public function store(RegisterRequest $request)
     {
+
         $data = [];
+
         $authUser = Auth::user();
-        if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to create user', 403);
-        }
+        $this->authorizationService->authorizeHrUser($authUser);
         $user = $this->userService->createUser($request->validated());
+
         if (!$user) {
             return $this->returnError('Failed to Store User');
         }
@@ -355,9 +345,7 @@ class UserController extends Controller
     {
         $authUser = Auth::user();
 
-        if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to view user', 403);
-        }
+        $this->authorizationService->authorizeHrUser($authUser);
         $userDetail = UserDetail::where('user_id', $user->id)->first();
         return $this->returnData("User", new UserDetailResource($userDetail), "User Data");
     }
@@ -367,10 +355,7 @@ class UserController extends Controller
         $data = [];
         $authUser = Auth::user();
 
-        if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to update users', 403);
-        }
-
+        $this->authorizationService->authorizeHrUser($authUser);
         $updatedUser = $this->userService->updateUser($user, $request->validated());
         if (!$updatedUser) {
             return $this->returnError('Failed to Update User');
@@ -411,10 +396,7 @@ class UserController extends Controller
     {
         $authUser = Auth::user();
 
-        if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to delete users', 403);
-        }
-
+        $this->authorizationService->authorizeHrUser($authUser);
         $user->delete();
         return $this->returnData("user", $user, "user deleted");
     }
