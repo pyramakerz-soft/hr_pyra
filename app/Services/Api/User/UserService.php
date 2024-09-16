@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Api;
+namespace App\Services\Api\User;
 
 use App\Http\Resources\Api\UserResource;
 use App\Models\Department;
@@ -9,6 +9,7 @@ use App\Traits\ResponseTrait;
 use App\Traits\UserTrait;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class UserService
 {
@@ -103,5 +104,22 @@ class UserService
                 'pagination' => $this->formatPagination($users),
             ];
         }
+    }
+    public function getManagerNames()
+    {
+
+        $data = [];
+        $role = Role::where('name', 'Manager')->first();
+        if (!$role) {
+            return $this->returnError('Manager role not found', 404);
+        }
+        $managers = User::Role('manager')->get(['id', 'name']);
+        $data = $managers->map(function ($manager) {
+            return [
+                'manager_id' => $manager->id,
+                'manager_name' => $manager->name,
+            ];
+        });
+        return $data;
     }
 }
