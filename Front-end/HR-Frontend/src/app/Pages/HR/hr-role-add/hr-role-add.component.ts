@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RolesService } from '../../../Services/roles.service';
 import { PermissionModel } from '../../../Models/permission-model';
@@ -28,6 +28,7 @@ export class HrRoleAddComponent {
   namesArrayError: string = ""; 
 
   RoleId:number|undefined
+  isSaving = false;
 
   constructor(private router: Router, private route: ActivatedRoute, public roleService:RolesService ,public PerService :PermissionsService) {}
 
@@ -41,6 +42,21 @@ export class HrRoleAddComponent {
         this.CheckTheSelectedPermissions();
       }
     });
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const dropdown = document.querySelector('.dropdown-container') as HTMLElement;
+
+    if (dropdown && !dropdown.contains(target)) {
+      this.isDropdownOpen = false;
+    }
+  }
+
+  // Cleanup event listener
+  ngOnDestroy() {
+    document.removeEventListener('click', this.onDocumentClick);
   }
 
   getRoleById(): Promise<void> {
@@ -115,6 +131,7 @@ export class HrRoleAddComponent {
     .filter(p => p.selected).map(permission => permission.name);
 
     if(this.isFormValid()){
+      this.isSaving = true;
       if(this.RoleId){
         this.roleService.updateRole(this.RoleName,this.namesArray, this.RoleId).subscribe(
           (d: any) => {

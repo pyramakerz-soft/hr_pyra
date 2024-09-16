@@ -23,6 +23,10 @@ export class HrRoleComponent {
   
   tableData:RoleModel[]= [];
 
+  isNavigatingToaddRole = false
+  isNavigatingToEditRole = false
+  isDeleted = false
+
   ngOnInit():void{
     this.GetAllRoles();
     localStorage.setItem('HrEmployeeCN', "1");
@@ -43,10 +47,12 @@ export class HrRoleComponent {
 
   
   NavigateToAddRole(){
+    this.isNavigatingToaddRole = true
     this.router.navigateByUrl("/HR/HRRoleAdd");
   }
 
   deleteRole(id:number){
+    this.isDeleted = true
     Swal.fire({
       title: 'Are you sure you want to Delete This Role?',
       icon: 'warning',
@@ -65,10 +71,8 @@ export class HrRoleComponent {
   }
 
   navigateToEdit(id:number){
+    this.isNavigatingToEditRole = true
     this.router.navigateByUrl(`HR/HRRoleEdit/${id}`);
   }
-
-
-
 
 }
