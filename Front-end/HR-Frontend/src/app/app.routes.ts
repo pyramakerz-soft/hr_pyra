@@ -21,33 +21,79 @@ import { HrDepartmentComponent } from './Pages/HR/hr-department/hr-department.co
 import { HrDepartmentAddComponent } from './Pages/HR/hr-department-add/hr-department-add.component';
 import { UserDataService } from './Services/Resolvers/user-data.service';
 
+// export const routes: Routes = [
+//     {path: "employee", component:EmployeeComponent, title:"Dashboard", children:[
+//         {path: "", redirectTo: "Dashboard", pathMatch: "full" },
+//         {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfEmployeeGuard] },
+//     ], canActivate:[doNotNavigateWithoutLoginGuard, navigateIfEmployeeGuard]},
+
+//     {path: "HR", component:HRComponent, title:"HR", children:[
+//         {path: "", redirectTo: "HRDashboard", pathMatch: "full"},
+//         {path: "HRDashboard", component:HrDashboardComponent, title:"HRDashBoard", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+//         {path: "HREmployee", component:HREmployeeComponent, title:"HREmployee", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+//         {path: "HRRole", component:HrRoleComponent, title:"HRRole", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+//         {path: "HRRoleAdd", component:HrRoleAddComponent, title:"HRRoleAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+//         {path: "HRRoleEdit/:id", component:HrRoleAddComponent, title:"HRRoleEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+//         {path: "HRBounders", component:HrBoundersComponent, title:"HRBounders", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+//         {path: "HRAttendance", component:HrAttendanceComponent, title:"HRAttendance", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+//         {path: "HRAttendanceEmployeeDetails/:Id", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard], resolve:{user:UserDataService}},
+//         {path: "HREmployeeDetails/:EmpId", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+//         {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard] },
+//         {path: "HREmployeeDetailsEdit/:Id", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+//         {path: "HRAttendanceEmployeeEdit/:Id", component:AttendenceEditComponent, title:"HRAttendanceEmployeeEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+//         {path: "HRDepartment", component:HrDepartmentComponent, title:"HRDepartment", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+//         {path: "HRDepartmentAdd", component:HrDepartmentAddComponent, title:"HRDepartmentAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+//         {path: "HRDepartmentEdit/:id", component:HrDepartmentAddComponent, title:"HRDepartmentEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+
+//     ], canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+
+//     { path: "Login", component:LoginComponent, title:"Login", canActivate:[doNotNavigateToLoginIfTokenExistsGuard] },
+//     { path: "", component:LoginComponent, title:"Login", canActivate:[doNotNavigateToLoginIfTokenExistsGuard] },
+//     { path: '**', redirectTo: '/' },
+// ];
 export const routes: Routes = [
-    {path: "employee", component:EmployeeComponent, title:"Dashboard", children:[
-        {path: "", redirectTo: "Dashboard", pathMatch: "full" },
-        {path: "Dashboard", component:EmployeeDashboardComponent, title:"Dashboard", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfEmployeeGuard] },
-    ], canActivate:[doNotNavigateWithoutLoginGuard, navigateIfEmployeeGuard]},
+    { 
+        path: "employee", 
+        component: EmployeeComponent, 
+        title: "Dashboard", 
+        canActivate: [doNotNavigateWithoutLoginGuard, navigateIfEmployeeGuard], 
+        children: [
+            { path: "", redirectTo: "Dashboard", pathMatch: "full" },
+            { path: "Dashboard", component: EmployeeDashboardComponent, title: "Dashboard" }
+        ]
+    },
 
-    {path: "HR", component:HRComponent, title:"HR", children:[
-        {path: "", redirectTo: "HRDashboard", pathMatch: "full"},
-        {path: "HRDashboard", component:HrDashboardComponent, title:"HRDashBoard", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-        {path: "HREmployee", component:HREmployeeComponent, title:"HREmployee", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-        {path: "HRRole", component:HrRoleComponent, title:"HRRole", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-        {path: "HRRoleAdd", component:HrRoleAddComponent, title:"HRRoleAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-        {path: "HRRoleEdit/:id", component:HrRoleAddComponent, title:"HRRoleEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-        {path: "HRBounders", component:HrBoundersComponent, title:"HRBounders", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-        {path: "HRAttendance", component:HrAttendanceComponent, title:"HRAttendance", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-        {path: "HRAttendanceEmployeeDetails/:Id", component:HrEmployeeAttendanceDetailsComponent, title:"HREmployeeAttendanceDetails", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard], resolve:{user:UserDataService}},
-        {path: "HREmployeeDetails/:EmpId", component:HrEmployeeDetailsComponent, title:"HREmployeeDetails", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-        {path: "HREmployeeDetailsAdd", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard] },
-        {path: "HREmployeeDetailsEdit/:Id", component:HrEmployeeAddEditDetailsComponent, title:"HREmployeeDetailsEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-        {path: "HRAttendanceEmployeeEdit/:Id", component:AttendenceEditComponent, title:"HRAttendanceEmployeeEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-        {path: "HRDepartment", component:HrDepartmentComponent, title:"HRDepartment", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-        {path: "HRDepartmentAdd", component:HrDepartmentAddComponent, title:"HRDepartmentAdd", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-        {path: "HRDepartmentEdit/:id", component:HrDepartmentAddComponent, title:"HRDepartmentEdit", canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
+    { 
+        path: "HR", 
+        component: HRComponent, 
+        title: "HR", 
+        canActivate: [doNotNavigateWithoutLoginGuard, navigateIfHrGuard], 
+        children: [
+            { path: "", redirectTo: "HRDashboard", pathMatch: "full" },
+            { path: "HRDashboard", component: HrDashboardComponent, title: "HRDashboard" },
+            { path: "HREmployee", component: HREmployeeComponent, title: "HREmployee" },
+            { path: "HRRole", component: HrRoleComponent, title: "HRRole" },
+            { path: "HRRoleAdd", component: HrRoleAddComponent, title: "HRRoleAdd" },
+            { path: "HRRoleEdit/:id", component: HrRoleAddComponent, title: "HRRoleEdit" },
+            { path: "HRBounders", component: HrBoundersComponent, title: "HRBounders" },
+            { path: "HRAttendance", component: HrAttendanceComponent, title: "HRAttendance" },
+            { 
+                path: "HRAttendanceEmployeeDetails/:Id", 
+                component: HrEmployeeAttendanceDetailsComponent, 
+                title: "HREmployeeAttendanceDetails", 
+                resolve: { user: UserDataService }
+            },
+            { path: "HREmployeeDetails/:EmpId", component: HrEmployeeDetailsComponent, title: "HREmployeeDetails" },
+            { path: "HREmployeeDetailsAdd", component: HrEmployeeAddEditDetailsComponent, title: "HREmployeeDetailsAdd" },
+            { path: "HREmployeeDetailsEdit/:Id", component: HrEmployeeAddEditDetailsComponent, title: "HREmployeeDetailsEdit" },
+            { path: "HRAttendanceEmployeeEdit/:Id", component: AttendenceEditComponent, title: "HRAttendanceEmployeeEdit" },
+            { path: "HRDepartment", component: HrDepartmentComponent, title: "HRDepartment" },
+            { path: "HRDepartmentAdd", component: HrDepartmentAddComponent, title: "HRDepartmentAdd" },
+            { path: "HRDepartmentEdit/:id", component: HrDepartmentAddComponent, title: "HRDepartmentEdit" }
+        ]
+    },
 
-    ], canActivate:[doNotNavigateWithoutLoginGuard, navigateIfHrGuard]},
-
-    { path: "Login", component:LoginComponent, title:"Login", canActivate:[doNotNavigateToLoginIfTokenExistsGuard] },
-    { path: "", component:LoginComponent, title:"Login", canActivate:[doNotNavigateToLoginIfTokenExistsGuard] },
-    { path: '**', redirectTo: '/' },
+    { path: "Login", component: LoginComponent, title: "Login", canActivate: [doNotNavigateToLoginIfTokenExistsGuard] },
+    { path: "", redirectTo: "Login", pathMatch: "full" },
+    { path: '**', component: PageNotFoundComponent, title: "Page Not Found" }
 ];

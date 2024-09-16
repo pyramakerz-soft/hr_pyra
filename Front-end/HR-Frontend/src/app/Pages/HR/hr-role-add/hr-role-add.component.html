@@ -3,7 +3,9 @@
         <div>
             <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Roles</p>
         </div>
-        <button class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg" (click)="save()">
+        <button class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg" 
+        (click)="save()"
+        [disabled]="isSaving">
             Save
         </button>
     </div>
@@ -26,7 +28,7 @@
                     </div>
             
                     <!-- Dropdown content -->
-                    <div *ngIf="isDropdownOpen" class=" w-full border border-[#E5E5EA] rounded-xl bg-white mt-1 max-h-60 overflow-y-auto">
+                    <div *ngIf="isDropdownOpen" class="dropdown-container w-full border border-[#E5E5EA] rounded-xl bg-white mt-1 max-h-60 overflow-y-auto">
                         @if(permissions.length !==0 ) {
                             <div *ngFor="let permission of permissions" class="p-2 hover:bg-gray-100">
                                 <input type="checkbox" id="permission{{permission.name}}" [(ngModel)]="permission.selected" class="mr-2" (input)="onArrayChange()">

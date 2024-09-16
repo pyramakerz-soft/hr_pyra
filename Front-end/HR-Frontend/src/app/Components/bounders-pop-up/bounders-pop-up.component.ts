@@ -34,6 +34,9 @@ export class BoundersPopUpComponent implements AfterViewInit {
   StartTimeError:string=""
   EndTimeError:string=""
 
+  STime:string=""
+  ETime:string=""
+
   constructor(public dialogRef: MatDialogRef<BoundersPopUpComponent>, 
               public googleMapsService: ReverseGeocodingService,
               public LocationServ: LocationsService,
@@ -181,11 +184,11 @@ export class BoundersPopUpComponent implements AfterViewInit {
 
   async EditAndAddLocation() {
     if(this.isFormValid()){
-      this.StartTime=await this.convertEgyptianToUtcTime(this.StartTime)
-      this.EndTime=await this.convertEgyptianToUtcTime(this.EndTime)
+      this.STime=await this.convertEgyptianToUtcTime(this.StartTime)
+      this.ETime=await this.convertEgyptianToUtcTime(this.EndTime)
       if (this.mode === 'edit') {
 
-        this.LocationServ.EditByID(this.Boundname, this.address, this.lat, this.long, this.id ,this.StartTime,this.EndTime).subscribe(
+        this.LocationServ.EditByID(this.Boundname, this.address, this.lat, this.long, this.id ,this.STime,this.ETime).subscribe(
           (d: any) => {
             this.dialogRef.close();
           },
@@ -207,7 +210,7 @@ export class BoundersPopUpComponent implements AfterViewInit {
           }
         );
       } else if (this.mode === 'add') {
-        this.LocationServ.CreateAddress(this.Boundname, this.address, this.lat, this.long ,this.StartTime,this.EndTime).subscribe(
+        this.LocationServ.CreateAddress(this.Boundname, this.address, this.lat, this.long ,this.STime,this.ETime).subscribe(
           (d: any) => {
             this.dialogRef.close();
           },

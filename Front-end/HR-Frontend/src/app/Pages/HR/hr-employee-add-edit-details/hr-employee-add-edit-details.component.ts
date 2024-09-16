@@ -29,6 +29,7 @@ export class HrEmployeeAddEditDetailsComponent {
   Locations: AssignLocationToUser[] = [];
   isDropdownOpen = false;
   imagePreview: string | ArrayBuffer | null = null;
+  isSaved = false
   
   employee: AddEmployee = new AddEmployee(
     null, '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], [], false
@@ -88,6 +89,7 @@ export class HrEmployeeAddEditDetailsComponent {
 
   filterNumericInput(event: Event) {
     const input = event.target as HTMLInputElement;
+<<<<<<< HEAD
     let previousValue = input.value;
 
     input.addEventListener('input', function() {
@@ -105,6 +107,16 @@ export class HrEmployeeAddEditDetailsComponent {
   removeFromLocations(locationID:number, event: MouseEvent){
     event.stopPropagation();
     this.employee.location_id = this.employee.location_id.filter(locarion_Id => locarion_Id !== locationID);
+=======
+    input.value = input.value.replace(/[^0-9.]/g, ''); // Keep only digits and dot
+  }  
+
+  removeFromLocations(locationID:number, event: MouseEvent){
+    console.log("before", this.employee.location_id)
+    event.stopPropagation();
+    this.employee.location_id = this.employee.location_id.filter(locarion_Id => locarion_Id !== locationID);
+    console.log(this.employee.location_id)
+>>>>>>> 5dc77ae (don't use)
   }
   
   getEmployeeByID(id:number){
@@ -383,15 +395,20 @@ export class HrEmployeeAddEditDetailsComponent {
   
   SaveEmployee() {
     if (this.isFormValid()) {
+      this.isSaved = true
       this.employee.department_id = Number(this.employee.department_id);
+      console.log(this.EmployeeId)
       if(this.EmployeeId === 0){
+        console.log('asd');
         this.userService.createUser(this.employee).subscribe(
           (result: any) => {
+            console.log(result)
             this.router.navigateByUrl("HR/HREmployee")
           },
           error => {
             if (error.error && error.error.errors) {
               this.handleServerErrors(error.error.errors as Record<keyof AddEmployee, string[]>);
+              console.log(error.error)
             }
           }
         );

@@ -1,0 +1,35 @@
+<div>
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-[#272D37] font-semibold text-2xl md:text-3xl mb-2">Dashboard</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="my-6">
+    <app-dashboard-hero></app-dashboard-hero>
+  </div>
+
+  <div class="flex justify-end">
+    <div class="w-[30%] md:w-[20%] lg:w-[10%] my-5">
+      <select class="p-2 border bg-[#437ff7] rounded w-full text-white" [(ngModel)]="selectedYear" (change)="onYearChange($event)">
+        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+      </select>
+    </div>
+  </div>
+  
+  <div class="flex flex-col lg:flex-row gap-y-6 lg:gap-x-4">
+    <div class="w-full lg:w-3/4">
+      <app-bar-chart [Year]="selectedYear"></app-bar-chart>
+    </div>
+  
+    <div class="w-full lg:w-1/3">
+      <app-donut-chart [Year]="selectedYear"></app-donut-chart>
+    </div>
+  </div>
+  
+  <div class="flex flex-col md:flex-row justify-center md:space-x-3 mt-6">
+    <app-card-chart [Data]="Data[0]"></app-card-chart>
+    <app-card-chart [Data]="Data[1]"></app-card-chart>
+  </div>
+  
