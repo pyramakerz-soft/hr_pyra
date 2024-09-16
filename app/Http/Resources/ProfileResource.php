@@ -54,7 +54,6 @@ class ProfileResource extends JsonResource
             ];
         });
 
-
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -69,7 +68,6 @@ class ProfileResource extends JsonResource
             'user_end_time' => $this->user_detail->end_time,
 
             'assigned_locations_user' => $locations_name,
-            'assignedLocationsUser' => $locations_name,
             'work_home' => isset($locationTypes[0]) ? $locationTypes[0] == 'home' : false,
         ];
 
