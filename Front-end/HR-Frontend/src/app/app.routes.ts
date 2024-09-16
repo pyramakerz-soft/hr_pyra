@@ -93,7 +93,7 @@ export const routes: Routes = [
         ]
     },
 
-    { path: "Login", component: LoginComponent, title: "Login", canActivate: [doNotNavigateToLoginIfTokenExistsGuard] },
+    { path: "Login", component:LoginComponent, title:"Login", canActivate:[doNotNavigateToLoginIfTokenExistsGuard] },
     { path: "", redirectTo: "Login", pathMatch: "full" },
-    { path: '**', component: PageNotFoundComponent, title: "Page Not Found" }
+    { path: '**', redirectTo: '/' },
 ];
