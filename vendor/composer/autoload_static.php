@@ -14,7 +14,6 @@ class ComposerStaticInitec5a779e39a4835be1be4bc7580a81d0
         '8825ede83f2f289127722d4e842cf7e8' => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme/bootstrap.php',
         'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
-        '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '662a729f963d39afe703c9d9b7ab4a8c' => __DIR__ . '/..' . '/symfony/polyfill-php83/bootstrap.php',
@@ -68,7 +67,6 @@ class ComposerStaticInitec5a779e39a4835be1be4bc7580a81d0
             'Symfony\\Polyfill\\Uuid\\' => 22,
             'Symfony\\Polyfill\\Php83\\' => 23,
             'Symfony\\Polyfill\\Php80\\' => 23,
-            'Symfony\\Polyfill\\Php72\\' => 23,
             'Symfony\\Polyfill\\Mbstring\\' => 26,
             'Symfony\\Polyfill\\Intl\\Normalizer\\' => 33,
             'Symfony\\Polyfill\\Intl\\Idn\\' => 26,
@@ -240,10 +238,6 @@ class ComposerStaticInitec5a779e39a4835be1be4bc7580a81d0
         'Symfony\\Polyfill\\Php80\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
-        ),
-        'Symfony\\Polyfill\\Php72\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-php72',
         ),
         'Symfony\\Polyfill\\Mbstring\\' => 
         array (
@@ -611,6 +605,7 @@ class ComposerStaticInitec5a779e39a4835be1be4bc7580a81d0
         'App\\Exports\\ClocksExport' => __DIR__ . '/../..' . '/app/Exports/ClocksExport.php',
         'App\\Exports\\UserClocksExport' => __DIR__ . '/../..' . '/app/Exports/UserClocksExport.php',
         'App\\Exports\\UserClocksExportById' => __DIR__ . '/../..' . '/app/Exports/UserClocksExportById.php',
+        'App\\Http\\Controllers\\Api\\AuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/AuthController.php',
         'App\\Http\\Controllers\\Api\\ClockController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ClockController.php',
         'App\\Http\\Controllers\\Api\\DepartmentController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/DepartmentController.php',
         'App\\Http\\Controllers\\Api\\HrController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/HrController.php',
@@ -683,8 +678,12 @@ class ComposerStaticInitec5a779e39a4835be1be4bc7580a81d0
         'App\\Providers\\BroadcastServiceProvider' => __DIR__ . '/../..' . '/app/Providers/BroadcastServiceProvider.php',
         'App\\Providers\\EventServiceProvider' => __DIR__ . '/../..' . '/app/Providers/EventServiceProvider.php',
         'App\\Providers\\RouteServiceProvider' => __DIR__ . '/../..' . '/app/Providers/RouteServiceProvider.php',
+        'App\\Services\\Api\\UserDetailService' => __DIR__ . '/../..' . '/app/Services/Api/UserDetailService.php',
+        'App\\Services\\Api\\UserService' => __DIR__ . '/../..' . '/app/Services/Api/UserService.php',
+        'App\\Traits\\ClockTrait' => __DIR__ . '/../..' . '/app/Traits/ClockTrait.php',
         'App\\Traits\\HelperTrait' => __DIR__ . '/../..' . '/app/Traits/HelperTrait.php',
         'App\\Traits\\ResponseTrait' => __DIR__ . '/../..' . '/app/Traits/ResponseTrait.php',
+        'App\\Traits\\UserTrait' => __DIR__ . '/../..' . '/app/Traits/UserTrait.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Brick\\Math\\BigDecimal' => __DIR__ . '/..' . '/brick/math/src/BigDecimal.php',
         'Brick\\Math\\BigInteger' => __DIR__ . '/..' . '/brick/math/src/BigInteger.php',
@@ -7697,7 +7696,6 @@ class ComposerStaticInitec5a779e39a4835be1be4bc7580a81d0
         'Symfony\\Polyfill\\Intl\\Idn\\Resources\\unidata\\Regex' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/Resources/unidata/Regex.php',
         'Symfony\\Polyfill\\Intl\\Normalizer\\Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Normalizer.php',
         'Symfony\\Polyfill\\Mbstring\\Mbstring' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/Mbstring.php',
-        'Symfony\\Polyfill\\Php72\\Php72' => __DIR__ . '/..' . '/symfony/polyfill-php72/Php72.php',
         'Symfony\\Polyfill\\Php80\\Php80' => __DIR__ . '/..' . '/symfony/polyfill-php80/Php80.php',
         'Symfony\\Polyfill\\Php80\\PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/PhpToken.php',
         'Symfony\\Polyfill\\Php83\\Php83' => __DIR__ . '/..' . '/symfony/polyfill-php83/Php83.php',

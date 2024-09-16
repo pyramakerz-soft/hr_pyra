@@ -59,7 +59,6 @@ class UserController extends Controller
         $role = Role::where('name', 'Manager')->first();
         if (!$role) {
             return $this->returnError('Manager role not found', 404);
-        }
         $managers = User::Role('manager')->get(['id', 'name']);
         $data = $managers->map(function ($manager) {
             return [
@@ -68,18 +67,23 @@ class UserController extends Controller
             ];
         });
 
+if($managerData->count() == 0){
+    $data[] =[];
+}
         return $this->returnData('managerNames', $data, 'manager names');
 
     }
 
     public function store(RegisterRequest $request)
     {
+        
         $data = [];
+        
         $authUser = Auth::user();
         if (!$authUser->hasRole('Hr')) {
             return $this->returnError('You are not authorized to create user', 403);
         }
-        $user = $this->userService->createUser($request->validated());
+        $user = $this->userService->createUser($request->all());
         if (!$user) {
             return $this->returnError('Failed to Store User');
         }
