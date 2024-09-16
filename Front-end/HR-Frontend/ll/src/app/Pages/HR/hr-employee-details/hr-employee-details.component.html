@@ -1,0 +1,165 @@
+<div>
+    <div class="flex justify-between mb-5 items-center">
+        <div>
+            <p class="text-[#272D37] font-semibold text-2xl md:text-3xl capitalize">{{employee.name.split(" ")[0]}}</p>
+            <p class="text-[#5F6D7E] text-xs md:text-base">{{employee.emp_type}}</p>
+        </div>
+        <button (click)="NavigateToEditEmployee(empId)"
+            class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
+            Edit
+        </button>
+    </div>
+
+    <div class="border border-[#ECECEC] rounded-lg p-4 md:p-8 shadow-md shadow-[#0000001F]">
+        <p class="font-semibold text-sm md:text-lg mb-3">Information's</p>
+   
+        <div class="mt-5">
+            <div class="flex flex-col md:flex-row">
+                <span class="flex-1 flex items-center space-x-8">
+                    <img *ngIf="!employee.image" src="../../../../assets/images/blueAvatar.png" class="rounded-full w-14 bg-blue-100">
+                    <img *ngIf="employee.image" [src]="employee.image" class="rounded-full w-14 h-14 object-cover">
+                    <div>
+                        <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Name</p>
+                        <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.name}}</p>
+                    </div>
+                </span>
+                <div class="flex-1 mt-5 md:mt-0">
+                    <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Code</p>
+                    <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.code}}</p>
+                </div>
+            </div>
+            <hr class="my-5 border border-[#E5E5EA]">
+        </div>
+
+        <div class="flex flex-col md:flex-row mt-5 flex-wrap">
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Department</p>
+                <p class="font-medium text-sm md:text-base text-[#282727]">Software</p>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Position</p>
+                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.emp_type}}</p>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA]">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Phone</p>
+                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.phone}} </p>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Contact Phone</p>
+                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.contact_phone}}</p>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA]">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Email</p>
+                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.email}}</p>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Password</p>
+                <button *ngIf="!isChange" class="bg-[#FF7519] text-white p-2 rounded-lg text-sm md:text-base" (click)="toggleChangePassword()">Change Password</button>
+                <button *ngIf="isChange" class="bg-[#FF7519] text-white p-2 rounded-lg text-sm md:text-base" (click)="UpdatePassword()">Update</button>
+                <button *ngIf="isChange" class="bg-[#17253E] text-white p-2 rounded-lg text-sm md:text-base ml-3" (click)="CancelUpdatePassword()">Cancel</button>
+                
+                <input *ngIf="isChange" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl mt-2" placeholder="Enter the password"
+                (input)="onPasswordChange()" [(ngModel)]="password">
+                <span *ngIf="PasswordError" class="text-red-500 text-sm font-normal">{{ PasswordError }}</span>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA]">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">National ID</p>
+                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.national_id}}</p>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Hiring Date</p>
+                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.hiring_date}}</p>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA]">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Salary</p>
+                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.salary}}</p>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Over time Hours</p>
+                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.overtime_hours}}</p>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA]">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Working Hours Day</p>
+                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.working_hours_day}}</p>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Gender</p>
+                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.gender == "m" ? "Male" : "Female"}}</p>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA]">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Start Time</p>
+                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.start_time}}</p>
+            </div>
+            
+            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">End Time</p>
+                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.end_time}}</p>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA]">
+            
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Role</p>
+                <div *ngFor="let role of employee.roles; let i = index" class="flex space-x-4 font-medium text-sm md:text-base text-[#282727]">
+                    <p [ngClass]="{'mb-1': i !== employee.roles.length - 1}" class="bg-slate-200 p-3 rounded-md">{{role}}</p>
+                </div>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Work Type</p>
+                <div *ngFor="let work of employee.work_type_name; let i = index" class="flex space-x-4 font-medium text-sm md:text-base text-[#282727]">
+                    <p [ngClass]="{'mb-1': i !== employee.work_type_name.length - 1}" class="bg-slate-200 p-3 rounded-md">{{work}}</p>
+                </div>
+            </div>
+
+            <hr class="my-5 w-full border border-[#E5E5EA]">
+
+            <div class="w-full md:w-1/2">
+                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Location</p>
+                <div *ngFor="let location of employee.location; let i = index" class="flex space-x-4 font-medium text-sm md:text-base text-[#282727]">
+                    <p [ngClass]="{'mb-1': i !==employee.location.length - 1}" class="bg-slate-200 p-3 rounded-md">{{location}}</p>
+                </div>
+            </div>
+        </div>
+    </div> 
+</div>

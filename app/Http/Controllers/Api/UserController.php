@@ -57,17 +57,19 @@ class UserController extends Controller
         $authUser = Auth::user();
         $this->authorizationService->authorizeHrUser($authUser);
         $data = $this->userService->getManagerNames();
-
         return $this->returnData('managerNames', $data, 'manager names');
 
     }
 
     public function store(RegisterRequest $request)
     {
+
         $data = [];
+
         $authUser = Auth::user();
         $this->authorizationService->authorizeHrUser($authUser);
         $user = $this->userService->createUser($request->validated());
+
         if (!$user) {
             return $this->returnError('Failed to Store User');
         }
