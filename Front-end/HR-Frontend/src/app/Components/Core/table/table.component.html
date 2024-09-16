@@ -54,8 +54,8 @@
                 <tr *ngFor="let row of Userclocks; let i = index"
                     [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300">
                     <td class="py-5">
-                        <i *ngIf="row.otherClocks.length > 0" class="fa-solid fa-chevron-down ml-1"
-                            (click)="toggleOtherClocks(i)"></i>
+                        <!-- <i *ngIf="row.otherClocks.length > 0" class="fa-solid fa-chevron-down ml-1"
+                            (click)="toggleOtherClocks(i)"></i> -->
                         {{ row.Day }}
                     </td>
                     <td>{{ row.Date }}</td>
@@ -70,12 +70,12 @@
                             </div>
                         </div>
 
-                        <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
+                        <!-- <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
                             <div *ngFor="let cl of row.otherClocks; let j = index"
                                 class=" text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
                                 {{ convertUTCToEgyptLocalTime(cl.clockIn)}}
                             </div>
-                        </div>
+                        </div> -->
                     </td>
 
 
@@ -94,7 +94,7 @@
                                 </div>
                             </ng-template>
                         </div>
-                        <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
+                        <!-- <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
                             <div *ngFor="let cl of row.otherClocks; let j = index">
                                 <ng-container *ngIf="cl.clockOut; else emptyClockState">
                                     <div
@@ -109,7 +109,7 @@
                                     </div>
                                 </ng-template>
                             </div>
-                        </div>
+                        </div> -->
                     </td>
 
                     <td>{{ row.totalHours }}</td>
@@ -149,13 +149,13 @@
                                 {{ row.site }}
                             </div>
                         </div>
-                        <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
+                        <!-- <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
                             <div *ngFor="let cl of row.otherClocks; let j = index"
                                 class=" text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
                                 <p *ngIf="cl.clockOut">{{cl.site}}</p>
 
                             </div>
-                        </div>
+                        </div> -->
                     </td>
 
                 </tr>

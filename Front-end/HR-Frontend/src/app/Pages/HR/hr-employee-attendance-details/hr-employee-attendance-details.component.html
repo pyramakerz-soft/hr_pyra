@@ -6,6 +6,7 @@
         </div>
         <div class="flex space-x-3 justify-between mt-3 md:mt-0">
             <button (click)="openDialog()"
+            [disabled]="AddClockInButton"
                 class="bg-[#17253E] text-white font-medium text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">Add
                 Clock In</button>
             <button (click)="ExportData()"
@@ -97,8 +98,7 @@
                 <tr *ngFor="let row of tableData; let i = index"
                     [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300">
                     <td class="py-5">
-                        <i *ngIf="hasOtherClocks(row.otherClocks)" class="fa-solid fa-chevron-down ml-1"
-                            (click)="toggleOtherClocks(i)"></i>
+
                         {{ row.Day }}
                     </td>
 
@@ -115,12 +115,12 @@
                             </div>
                         </div>
 
-                        <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
+                        <!-- <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
                             <div *ngFor="let cl of row.otherClocks; let j = index"
                                 class=" text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
                                 {{ convertUTCToEgyptLocalTime(cl.clockIn)}}
                             </div>
-                        </div>
+                        </div> -->
                     </td>
 
 
@@ -137,7 +137,7 @@
                                 </div>
                             </ng-template>
                         </div>
-                        <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
+                        <!-- <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
                             <div *ngFor="let cl of row.otherClocks; let j = index">
                                 <ng-container *ngIf="cl.clockOut; else emptyClockState">
                                     <div
@@ -152,7 +152,7 @@
                                     </div>
                                 </ng-template>
                             </div>
-                        </div>
+                        </div> -->
                     </td>
 
                     <td>{{ row.totalHours }}</td>
@@ -191,16 +191,16 @@
                                 {{ row.site }}
                             </div>
                         </div>
-                        <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
+                        <!-- <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
                             <div *ngFor="let cl of row.otherClocks; let j = index"
                                 class="  text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
                                 <p *ngIf="cl.clockOut">{{cl.site}}</p>
                             </div>
-                        </div>
+                        </div> -->
                     </td>
+                    <td>{{row.lateArrive}}</td>
+                    <td>{{row.earlyLeave}}</td>
 
-                    <td>1</td>
-                    <td>2</td>
 
 
                     <td class="py-5 px-4">
@@ -209,14 +209,14 @@
                                 <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
                             </button>
                         </div>
-                        <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
+                        <!-- <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
                             <div *ngFor="let cl of row.otherClocks; let j = index"
                                 class=" text-center w-[97px]  py-[8px]">
                                 <button (click)="EditUserClock(cl)">
                                     <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
                                 </button>
                             </div>
-                        </div>
+                        </div> -->
                     </td>
 
                 </tr>
