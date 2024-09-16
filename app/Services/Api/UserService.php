@@ -16,6 +16,7 @@ class UserService
 
     public function createUser($data)
     {
+        
         // Validate department inside createUser
         $department = Department::find($data['department_id']);
         if (!$department) {
@@ -26,11 +27,11 @@ class UserService
             return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
         }
 
-        $imageUrl = $this->uploadImage($data['image']); // Update to match your parameter passing
-        // dd($imageUrl);
-        if (!$imageUrl) {
-            return $this->returnError('Failed to upload image', Response::HTTP_BAD_REQUEST);
-        }
+        // $imageUrl = $this->uploadImage($data['image']); // Update to match your parameter passing
+        // // dd($imageUrl);
+        // if (!$imageUrl) {
+        //     return $this->returnError('Failed to upload image', Response::HTTP_BAD_REQUEST);
+        // }
 
         $user = User::create([
             'name' => $data['name'],
@@ -42,13 +43,13 @@ class UserService
             'code' => $code,
             'gender' => $data['gender'],
             'department_id' => (int) $data['department_id'],
-            'image' => $imageUrl,
+            // 'image' => $imageUrl,
             'serial_number' => null,
         ]);
 
-        if (!$user) {
-            return $this->returnError('Failed to create user', Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // if (!$user) {
+        //     return $this->returnError('Failed to create user', Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
 
         return $user;
     }

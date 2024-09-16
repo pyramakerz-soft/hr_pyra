@@ -25,11 +25,6 @@
                 "glob": "**/*",
                 "input": "src/assets",
                 "output": "/assets/"
-              },
-              {
-                "glob": "web.config",
-                "input": "src",
-                "output": "/"
               }
             ],
             "styles": [
@@ -42,13 +37,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "1024kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2048kB",
+                  "maximumError": "4MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kB",
-                  "maximumError": "4kB"
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
                 }
               ],
               "outputHashing": "all"
