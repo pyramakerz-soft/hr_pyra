@@ -256,6 +256,9 @@ export class BoundersPopUpComponent implements AfterViewInit {
     return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
   }
 
+
+
+  
   convertEgyptianToUtcTime(egyptianTime: string): string {
     // Parse the input Egyptian time
     const [hours, minutes] = egyptianTime.split(':').map(Number);

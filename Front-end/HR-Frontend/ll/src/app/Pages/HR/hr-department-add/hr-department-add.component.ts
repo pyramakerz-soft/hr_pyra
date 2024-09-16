@@ -65,7 +65,7 @@ export class HrDepartmentAddComponent {
   Save() {
     if (this.nameSelected == "" || this.DeptName == "") {
       Swal.fire({
-        text: "Faild to create, Data is Required",
+        text: "Complete all required fields.",
         confirmButtonText: "OK",
         confirmButtonColor: "#FF7519",
 

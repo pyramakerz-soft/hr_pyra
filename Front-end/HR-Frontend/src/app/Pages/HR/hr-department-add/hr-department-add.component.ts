@@ -22,6 +22,7 @@ export class HrDepartmentAddComponent {
   DeptName: string = ""
   mode: string = ""
   DeptId: number = 1;
+  
   constructor(public managerServ: ManagersService, public departmentServ: DepartmentService, private router: Router, private route: ActivatedRoute) { }
 
 
@@ -66,7 +67,7 @@ export class HrDepartmentAddComponent {
   Save() {
     if (this.nameSelected == "" || this.DeptName == "") {
       Swal.fire({
-        text: "Faild to create, Data is Required",
+        text: "Complete all required fields.",
         confirmButtonText: "OK",
         confirmButtonColor: "#FF7519",
 

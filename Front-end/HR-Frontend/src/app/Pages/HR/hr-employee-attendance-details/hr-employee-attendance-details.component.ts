@@ -168,7 +168,13 @@ export class HrEmployeeAttendanceDetailsComponent {
         this.rowNumber = new Array(this.tableData.length).fill(false);
         this.PagesNumber = d.data.pagination.last_page;
         this.generatePages();
+      },
+      (error) => {
+        this.tableData = [];
+        this.PagesNumber = 1;
+        this.DisplayPagginationOrNot = false;
       }
+
     );
   }
 
@@ -262,7 +268,7 @@ export class HrEmployeeAttendanceDetailsComponent {
 
         if (error.status == 404) {
           Swal.fire({
-            text: "There are no clock in for this User at this Date",
+            text: "No attendance records found for this date.",
             confirmButtonText: "OK",
             confirmButtonColor: "#FF7519",
           });
