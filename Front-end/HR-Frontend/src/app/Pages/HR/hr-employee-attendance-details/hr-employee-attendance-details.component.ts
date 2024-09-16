@@ -37,6 +37,7 @@ export class HrEmployeeAttendanceDetailsComponent {
   selectedMonth: string = "01";
   selectedYear: number = 0;
   DateString: string = "2019-01";
+  AddClockInButton:boolean=false;
 
   months = [
     { name: 'January', value: "01" },
@@ -233,7 +234,7 @@ export class HrEmployeeAttendanceDetailsComponent {
   }
 
   openDialog() {
-
+    this.AddClockInButton=true;
     const dialogRef = this.dialog.open(ClockInPopUpComponent, {
       data: { Name: this.employee.name, job_title: this.employee.emp_type, work_home: this.employee.work_home, isClockInFromHrToOtherUser: true, userId: this.UserID }
 
@@ -241,6 +242,8 @@ export class HrEmployeeAttendanceDetailsComponent {
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
         this.getAllClocks(1)
+        this.AddClockInButton=false;
+
       }
     });
   }
