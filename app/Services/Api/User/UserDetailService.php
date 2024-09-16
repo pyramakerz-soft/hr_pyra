@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Api;
+namespace App\Services\Api\User;
 
 use App\Models\UserDetail;
 use App\Traits\ResponseTrait;
