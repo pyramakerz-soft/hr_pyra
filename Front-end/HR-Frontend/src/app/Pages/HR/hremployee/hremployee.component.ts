@@ -39,6 +39,7 @@ export class HREmployeeComponent {
   UsersNames: string[] = [];
   filteredUsers: string[] = [];
 
+  isNavigateingToImportPopUp = false
 
   ngOnInit() {
 
@@ -64,9 +65,13 @@ export class HREmployeeComponent {
   }
 
   OpenImportPopUp() {
-    this.dialog.open(ImportEmployeeDataPopUpComponent, {
-
+    this.isNavigateingToImportPopUp = true
+    const dialogRef = this.dialog.open(ImportEmployeeDataPopUpComponent, {
     });
+    dialogRef.afterClosed().subscribe(() => {
+      this.isNavigateingToImportPopUp = false;
+    });
+
   }
 
   NavigateToAddEmployee() {
