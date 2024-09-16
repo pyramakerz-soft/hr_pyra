@@ -179,4 +179,10 @@ export class HrRoleAddComponent {
       }
     }
   }
+
+
+  cancel(){
+    this.router.navigateByUrl("/HR/HRRole");
+
+  }
 }

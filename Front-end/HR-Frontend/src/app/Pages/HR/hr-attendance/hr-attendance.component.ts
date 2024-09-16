@@ -242,8 +242,8 @@ export class HrAttendanceComponent {
       (error) => {
         if(error.status == 404){
           Swal.fire({   
-            text: "There are no clock in for this Date",
-            confirmButtonText: "OK",
+            text: "No attendance records found for this date.",
+            confirmButtonText: "OKt",
             confirmButtonColor: "#FF7519",
           });
         }

@@ -132,6 +132,11 @@ GetByID(id: number){
   );
 }
 
+cancel(){
+  this.router.navigateByUrl("/HR/HRDepartment");
+
+}
+
 UpdateDepartment(){
   const manager = this.ManagerNames.find(manager => manager.manager_name === this.nameSelected);
   if (manager) {
