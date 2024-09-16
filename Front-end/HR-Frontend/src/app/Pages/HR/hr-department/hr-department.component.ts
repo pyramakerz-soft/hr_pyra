@@ -14,7 +14,7 @@ import Swal from 'sweetalert2';
 })
 export class HrDepartmentComponent {
   departments: Department[] = []
-
+AddButton:boolean=false
   constructor(private router: Router, public departmentServ: DepartmentService) { }
 
   ngOnInit() {
@@ -57,11 +57,13 @@ export class HrDepartmentComponent {
 
 
   EditDepartment(id: number) {
+    this.AddButton=true;
     this.router.navigateByUrl("/HR/HRDepartmentEdit/" + id);
 
   }
 
   NavigateToAddDepartment() {
+    this.AddButton=true;
     this.router.navigateByUrl("/HR/HRDepartmentAdd");
   }
 

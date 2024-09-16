@@ -23,7 +23,7 @@ export class HrBoundersComponent {
   filteredLocations: string[] = [];
   selectedName: string = "";
   DisplayPagginationOrNot: boolean = true;
-
+  AddButton:boolean=false
 
 
   constructor(public dialog: MatDialog, public locationServ: LocationsService) { }
@@ -71,6 +71,7 @@ export class HrBoundersComponent {
   }
 
   openDialog(lat?: string, long?: string, EditedLocationName?: string, id?: number, EditedLocationAddress?: string , StartTime?:string, EndTime?:string): void {
+    this.AddButton=true;
     const dialogRef = this.dialog.open(BoundersPopUpComponent, {
       data: EditedLocationName
         ? {
@@ -90,6 +91,7 @@ export class HrBoundersComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       this.getAllLocations(this.CurrentPageNumber);
+      this.AddButton=false;
     });
   }
 
