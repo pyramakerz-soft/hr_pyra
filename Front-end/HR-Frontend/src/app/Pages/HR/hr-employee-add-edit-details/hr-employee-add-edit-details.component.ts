@@ -384,11 +384,11 @@ export class HrEmployeeAddEditDetailsComponent {
   
   SaveEmployee() {
     if (this.isFormValid()) {
-      this.isSaved = true
       this.employee.department_id = Number(this.employee.department_id);
       if(this.EmployeeId === 0){
         this.userService.createUser(this.employee).subscribe(
           (result: any) => {
+            this.isSaved = true
             this.router.navigateByUrl("HR/HREmployee")
           },
           error => {
