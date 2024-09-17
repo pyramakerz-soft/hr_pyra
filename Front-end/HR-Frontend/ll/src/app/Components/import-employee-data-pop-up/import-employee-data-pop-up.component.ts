@@ -36,35 +36,25 @@ interface DataObject {
   styleUrl: './import-employee-data-pop-up.component.css'
 })
 export class ImportEmployeeDataPopUpComponent {
-  @ViewChild('fileInput') fileInput: ElementRef | undefined;  
-
+  @ViewChild('fileInput') fileInput: ElementRef | undefined;
   dataObjects: DataObject[] = []
-
   file:File | undefined
-  
   constructor(public dialogRef: MatDialogRef<ImportEmployeeDataPopUpComponent>, public employeeService:EmployeeDashService){}
-  
   closeDialog(): void {
     this.dialogRef.close();
   }
-
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.file = input.files[0];
-
       const reader = new FileReader();
-
       reader.onload = (e: ProgressEvent<FileReader>) => {
         const data = new Uint8Array(reader.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: 'array' });
-
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const json: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
         const headers: string[] = json[0] as string[];
-        const rows: any[][] = json.slice(1); 
-
+        const rows: any[][] = json.slice(1);
         this.dataObjects = rows.map((row: any[]) => {
           let obj: DataObject = {};
           headers.forEach((header, index) => {
@@ -73,18 +63,15 @@ export class ImportEmployeeDataPopUpComponent {
           return obj;
         });
       };
-
       reader.readAsArrayBuffer(this.file);
     }
   }
-
-// "Failed to import users from Excel: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'khaled2@test.com' for key 'users.users_email_unique' (Connection: mysql, SQL: insert into `users` (`name`, `email`, `password`, `phone`, `contact_phone`, `national_id`, `code`, `department_id`, `gender`, `serial_number`, `updated_at`, `created_at`) values (Khaled Ahmed, khaled2@test.com, $2y$12$UsSDoBurrt2CVCsJBwuxWe1sk41nlNRqywCPteEcaRggOHd.cJJ7m, 1234567897, 1234509879, 12345678901235, SOFT-8871, 1, m, ?, 2024-09-04 09:56:53, 2024-09-04 09:56:53))"
   ImportEmployees(){
     if(this.file){
       this.employeeService.ImportEmployee(this.file).subscribe(
         (d:any)=>{
           if(this.fileInput){
-            this.fileInput.nativeElement.value = ''; 
+            this.fileInput.nativeElement.value = '';
             this.file = undefined
             this.dataObjects = []
             Swal.fire({
@@ -92,32 +79,22 @@ export class ImportEmployeeDataPopUpComponent {
               title: "Successfully Imported",
               confirmButtonText: "OK",
               confirmButtonColor: "#FF7519",
-              
             });
           }
         },
         (err) => {
-          if(err.error.message.includes("Invalid data format")){
+          console.log(err.error)
+          if(err.error.message){
             Swal.fire({
               icon: "error",
               title: "Invalid",
-              text: err.error.message, 
+              html: err.error.message.replace(/(Row \d+:)/g, '<strong>$1</strong>').replace(/\n/g, '<br>'),
               confirmButtonText: "OK",
               confirmButtonColor: "#FF7519",
-              
-            });
-          } else if(err.error.message.includes("Duplicate entry")){
-            Swal.fire({
-              icon: "error",
-              title: "Duplicate Entry",
-              html: err.error.message.replace(/\n/g, '<br>'), 
-              confirmButtonText: "OK",
-              confirmButtonColor: "#FF7519",
-              
             });
           }
           if(this.fileInput){
-            this.fileInput.nativeElement.value = ''; 
+            this.fileInput.nativeElement.value = '';
             this.file = undefined
             this.dataObjects = []
           }
@@ -129,7 +106,6 @@ export class ImportEmployeeDataPopUpComponent {
         title: "Select an Excel File",
         confirmButtonText: "OK",
         confirmButtonColor: "#FF7519",
-        
       });
     }
   }
