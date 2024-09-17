@@ -92,10 +92,8 @@ export class HrEmployeeAddEditDetailsComponent {
   }  
 
   removeFromLocations(locationID:number, event: MouseEvent){
-    console.log("before", this.employee.location_id)
     event.stopPropagation();
     this.employee.location_id = this.employee.location_id.filter(locarion_Id => locarion_Id !== locationID);
-    console.log(this.employee.location_id)
   }
   
   getEmployeeByID(id:number){
@@ -373,23 +371,16 @@ export class HrEmployeeAddEditDetailsComponent {
   }
   
   SaveEmployee() {
-    // console.log(this.validationErrors)
-    // console.log(this.employee)
-    // console.log(this.isFormValid())
     if (this.isFormValid()) {
       this.employee.department_id = Number(this.employee.department_id);
-      console.log(this.EmployeeId)
       if(this.EmployeeId === 0){
-        console.log('asd');
         this.userService.createUser(this.employee).subscribe(
           (result: any) => {
-            console.log(result)
             this.router.navigateByUrl("HR/HREmployee")
           },
           error => {
             if (error.error && error.error.errors) {
               this.handleServerErrors(error.error.errors as Record<keyof AddEmployee, string[]>);
-              console.log(error.error)
             }
           }
         );

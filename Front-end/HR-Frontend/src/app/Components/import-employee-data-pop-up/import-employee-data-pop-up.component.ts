@@ -78,7 +78,6 @@ export class ImportEmployeeDataPopUpComponent {
     }
   }
 
-// "Failed to import users from Excel: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'khaled2@test.com' for key 'users.users_email_unique' (Connection: mysql, SQL: insert into `users` (`name`, `email`, `password`, `phone`, `contact_phone`, `national_id`, `code`, `department_id`, `gender`, `serial_number`, `updated_at`, `created_at`) values (Khaled Ahmed, khaled2@test.com, $2y$12$UsSDoBurrt2CVCsJBwuxWe1sk41nlNRqywCPteEcaRggOHd.cJJ7m, 1234567897, 1234509879, 12345678901235, SOFT-8871, 1, m, ?, 2024-09-04 09:56:53, 2024-09-04 09:56:53))"
   ImportEmployees(){
     if(this.file){
       this.employeeService.ImportEmployee(this.file).subscribe(
@@ -97,20 +96,11 @@ export class ImportEmployeeDataPopUpComponent {
           }
         },
         (err) => {
-          if(err.error.message.includes("Invalid data format")){
+          if(err.error.message){
             Swal.fire({
               icon: "error",
               title: "Invalid",
-              text: err.error.message, 
-              confirmButtonText: "OK",
-              confirmButtonColor: "#FF7519",
-              
-            });
-          } else if(err.error.message.includes("Duplicate entry")){
-            Swal.fire({
-              icon: "error",
-              title: "Duplicate Entry",
-              html: err.error.message.replace(/\n/g, '<br>'), 
+              html: err.error.message.replace(/(Row \d+:)/g, '<strong>$1</strong>').replace(/\n/g, '<br>'), 
               confirmButtonText: "OK",
               confirmButtonColor: "#FF7519",
               
