@@ -83,7 +83,6 @@ export class ImportEmployeeDataPopUpComponent {
           }
         },
         (err) => {
-          console.log(err.error)
           if(err.error.message){
             Swal.fire({
               icon: "error",

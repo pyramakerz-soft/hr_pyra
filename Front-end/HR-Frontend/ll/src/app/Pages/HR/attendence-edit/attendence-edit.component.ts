@@ -42,10 +42,6 @@ export class AttendenceEditComponent {
         if (this.data.formattedClockOut)
           this.data.formattedClockOut = this.transformUTCToEgyptTime(this.data.formattedClockOut);
       },
-      (error) => {
-        console.error('Error:', error);
-        // Handle error
-      }
     );
   }
 

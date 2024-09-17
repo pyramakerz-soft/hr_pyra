@@ -30,7 +30,6 @@ export class UserServiceService {
   }
   
   createUser(emp:AddEmployee) {
-    // console.log(emp)
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
