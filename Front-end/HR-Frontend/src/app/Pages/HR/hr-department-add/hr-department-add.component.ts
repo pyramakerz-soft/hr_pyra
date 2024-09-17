@@ -23,6 +23,11 @@ export class HrDepartmentAddComponent {
   mode: string = ""
   DeptId: number = 1;
   
+
+  DeptNameError: string = ""; 
+  ManagerError: string = ""; 
+
+
   constructor(public managerServ: ManagersService, public departmentServ: DepartmentService, private router: Router, private route: ActivatedRoute) { }
 
 
@@ -66,14 +71,23 @@ export class HrDepartmentAddComponent {
 
   Save() {
     if (this.nameSelected == "" || this.DeptName == "") {
-      Swal.fire({
-        text: "Complete all required fields.",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#FF7519",
+      // Swal.fire({
+      //   text: "Complete all required fields.",
+      //   confirmButtonText: "OK",
+      //   confirmButtonColor: "#FF7519",
 
-      });
-    }
-
+      // });
+        this.DeptNameError = ""; 
+        this.ManagerError = "";  
+        if (this.DeptName == "" && this.nameSelected == "" ) {
+          this.DeptNameError = '*Department Name Can not be empty';
+          this.ManagerError = '*Choose a Manager';
+        } else if (this.DeptName == "" ) {
+          this.DeptNameError = '*Department Name Can not be empty';
+        } else if (this.nameSelected == "") {
+          this.ManagerError = '*Choose a Manager';
+        } 
+      }
     else {
       if (this.mode == "Edit") {
         this.UpdateDepartment();

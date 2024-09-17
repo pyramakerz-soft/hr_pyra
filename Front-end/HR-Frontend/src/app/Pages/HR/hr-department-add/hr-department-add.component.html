@@ -20,7 +20,7 @@
     <!-- Department Input -->
     <label for="role" class="block mb-3 font-semibold text-xs md:text-sm text-[#3A3A3C]">
       Department
-      
+      <span *ngIf="DeptNameError" class="text-red-500 text-sm ml-2 font-normal">{{ DeptNameError }}</span>
     </label>
     <input id="role" type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-4 text-xs md:text-base"
       [(ngModel)]="DeptName" placeholder="Enter Department">
@@ -28,7 +28,11 @@
 
     <!-- Manager Selection -->
     <div class="mt-4 text-xs md:text-sm">
-      <label class="font-semibold block mb-2 md:mb-3">Manager</label>
+      <label class="font-semibold block mb-2 md:mb-3">Manager
+
+        <span *ngIf="ManagerError" class="text-red-500 text-sm ml-2 font-normal">{{ ManagerError }}</span>
+
+      </label>
       <div>
         <!-- Dropdown toggle -->
         <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl cursor-pointer" (click)="toggleDropdown()">
