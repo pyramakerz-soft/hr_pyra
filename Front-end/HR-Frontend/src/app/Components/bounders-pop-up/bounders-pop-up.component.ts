@@ -237,46 +237,92 @@ export class BoundersPopUpComponent implements AfterViewInit {
 
 
   
-  convertUtcToEgyptianTime(utcTime: string): string {
-    // Parse the input UTC time
+  // convertUtcToEgyptianTime(utcTime: string): string {
+  //   // Parse the input UTC time
+  //   console.log("ugiy",utcTime)
+  //   const [hours, minutes, seconds] = utcTime.split(':').map(Number);
+
+  //   // Create a Date object for UTC time
+  //   const utcDate = new Date(Date.UTC(1970, 0, 1, hours, minutes, seconds));
+
+  //   // Convert to Egyptian time zone (UTC+3)
+  //   const egyptianOffset = 3; // Egypt is UTC+3
+  //   utcDate.setHours(utcDate.getHours() + egyptianOffset);
+
+  //   // Format the time in HH:mm:ss format
+  //   const formattedHours = String(utcDate.getUTCHours()).padStart(2, '0');
+  //   const formattedMinutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
+  //   const formattedSeconds = String(utcDate.getUTCSeconds()).padStart(2, '0');
+  //   console.log(`${formattedHours}:${formattedMinutes}:${formattedSeconds}`)
+
+  //   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+  // }
+
+
+
+  convertUtcToEgyptianTime(utcTime: string) {
+    // Parse the input UTC time (HH:mm:ss)
+
     const [hours, minutes, seconds] = utcTime.split(':').map(Number);
-
-    // Create a Date object for UTC time
-    const utcDate = new Date(Date.UTC(1970, 0, 1, hours, minutes, seconds));
-
-    // Convert to Egyptian time zone (UTC+3)
-    const egyptianOffset = 3; // Egypt is UTC+3
-    utcDate.setHours(utcDate.getHours() + egyptianOffset);
-
-    // Format the time in HH:mm:ss format
-    const formattedHours = String(utcDate.getUTCHours()).padStart(2, '0');
-    const formattedMinutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
-    const formattedSeconds = String(utcDate.getUTCSeconds()).padStart(2, '0');
-    
-    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
-  }
-
-
-
   
-  convertEgyptianToUtcTime(egyptianTime: string): string {
-    // Parse the input Egyptian time
-    const [hours, minutes] = egyptianTime.split(':').map(Number);
+    // Get the current date to set a complete UTC date with the provided time
+    const currentDate = new Date();
+    const utcDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate(), hours, minutes, seconds));
+  
+    // Convert to Egypt local time
+    const egyptTimeZone = 'Africa/Cairo';
+    const localDate = new Date(utcDate.toLocaleString('en-US', { timeZone: egyptTimeZone }));
+  
+    // Get the local time in Egypt and format it in HH:mm:ss
+    const localHours = String(localDate.getHours()).padStart(2, '0');
+    const localMinutes = String(localDate.getMinutes()).padStart(2, '0');
+    const localSeconds = String(localDate.getSeconds()).padStart(2, '0');
 
-    // Create a Date object for Egyptian time
-    const egyptianDate = new Date(Date.UTC(1970, 0, 1, hours, minutes));
-
-    // Convert to UTC time by subtracting the Egyptian offset (UTC+3)
-    const utcOffset = -3; // UTC-3 to convert back to UTC
-    egyptianDate.setHours(egyptianDate.getHours() + utcOffset);
-
-    // Format the time in HH:mm:ss format
-    const formattedHours = String(egyptianDate.getUTCHours()).padStart(2, '0');
-    const formattedMinutes = String(egyptianDate.getUTCMinutes()).padStart(2, '0');
-    const formattedSeconds = String(egyptianDate.getUTCSeconds()).padStart(2, '0');
-    
-    return `${formattedHours}:${formattedMinutes}`;
+    // Return the formatted time in HH:mm:ss
+    return `${localHours}:${localMinutes}:${localSeconds}`;
   }
+  
+
+  // convertEgyptianToUtcTime(egyptianTime: string): string {
+  //   // Parse the input Egyptian time
+  //   console.log(egyptianTime)
+  //   const [hours, minutes] = egyptianTime.split(':').map(Number);
+
+  //   // Create a Date object for Egyptian time
+  //   const egyptianDate = new Date(Date.UTC(1970, 0, 1, hours, minutes));
+
+  //   // Convert to UTC time by subtracting the Egyptian offset (UTC+3)
+  //   const utcOffset = -3; // UTC-3 to convert back to UTC
+  //   egyptianDate.setHours(egyptianDate.getHours() + utcOffset);
+
+  //   // Format the time in HH:mm:ss format
+  //   const formattedHours = String(egyptianDate.getUTCHours()).padStart(2, '0');
+  //   const formattedMinutes = String(egyptianDate.getUTCMinutes()).padStart(2, '0');
+  //   const formattedSeconds = String(egyptianDate.getUTCSeconds()).padStart(2, '0');
+    
+  //   console.log(`${formattedHours}:${formattedMinutes}`)
+  //   return `${formattedHours}:${formattedMinutes}`;
+  // }
+
+   convertEgyptianToUtcTime(egyptianTime: string): string {
+    // Parse the input Egyptian time (HH:mm)
+    const [hours, minutes] = egyptianTime.split(':').map(Number);
+  
+    // Get the current date, but use the input time (hours, minutes) as the time part
+    const currentDate = new Date();
+    const egyptianDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hours, minutes);
+  
+    // Format the Egyptian time in UTC by using the 'Africa/Cairo' timezone
+    const utcDate = new Date(egyptianDate.toLocaleString('en-US', { timeZone: 'Africa/Cairo' }));
+  
+    // Get the UTC time
+    const utcHours = String(utcDate.getUTCHours()).padStart(2, '0');
+    const utcMinutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
+  
+    // Return the formatted time in HH:mm
+    return `${utcHours}:${utcMinutes}`;
+  }
+  
 
 
   
