@@ -27,6 +27,8 @@ export class HrDepartmentAddComponent {
   DeptNameError: string = ""; 
   ManagerError: string = ""; 
 
+  SaveButton:boolean=false;
+
 
   constructor(public managerServ: ManagersService, public departmentServ: DepartmentService, private router: Router, private route: ActivatedRoute) { }
 
@@ -89,6 +91,7 @@ export class HrDepartmentAddComponent {
         } 
       }
     else {
+      this.SaveButton=true;
       if (this.mode == "Edit") {
         this.UpdateDepartment();
       }
@@ -111,6 +114,7 @@ export class HrDepartmentAddComponent {
 
         },
         (error: any) => {
+          this.SaveButton=false;
           if (error.error.message === "The name has already been taken.") {
             Swal.fire({   
               text: "The Department name has already been taken",
@@ -128,6 +132,7 @@ export class HrDepartmentAddComponent {
         }
       );
     } else {
+      this.SaveButton=false;
       Swal.fire({
         text: "No manager found with the selected name",
         confirmButtonText: "OK",
@@ -162,6 +167,7 @@ UpdateDepartment(){
 
       },
       (error: any) => {
+        this.SaveButton=false;
         if (error.error.message === "The name has already been taken.") {
           Swal.fire({   
             text: "The Department name has already been taken",
@@ -179,6 +185,7 @@ UpdateDepartment(){
       }
     );
   } else {
+    this.SaveButton=false;
     Swal.fire({
       text: "No manager found with the selected name",
       confirmButtonText: "OK",
