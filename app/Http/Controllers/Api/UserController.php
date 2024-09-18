@@ -56,6 +56,7 @@ class UserController extends Controller
     {
         $authUser = Auth::user();
         $this->authorizationService->authorizeHrUser($authUser);
+
         $data = $this->userService->getManagerNames();
         return $this->returnData('managerNames', $data, 'manager names');
 

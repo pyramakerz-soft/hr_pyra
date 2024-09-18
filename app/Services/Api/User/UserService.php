@@ -17,7 +17,7 @@ class UserService
 
     public function createUser($data)
     {
-        
+
         // Validate department inside createUser
         $department = Department::find($data['department_id']);
         if (!$department) {
@@ -27,12 +27,6 @@ class UserService
         if (!$code) {
             return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
         }
-
-        // $imageUrl = $this->uploadImage($data['image']); // Update to match your parameter passing
-        // // dd($imageUrl);
-        // if (!$imageUrl) {
-        //     return $this->returnError('Failed to upload image', Response::HTTP_BAD_REQUEST);
-        // }
 
         $user = User::create([
             'name' => $data['name'],

@@ -78,28 +78,29 @@ trait ClockTrait
         return $userLocation;
     }
 
-    protected function getOrCheckExistingClockInWithoutClockOut($user_id, $returnRecord = false)
+    protected function checkExistingClockInWithoutClockOut($user_id)
     {
         $query = ClockInOut::where('user_id', $user_id)
             ->whereNull('clock_out')
-            ->orderBy('clock_in', 'desc');
-        if ($returnRecord) {
-            return $query->first();
-        }
-        return $query->exists();
+            ->orderBy('clock_in', 'desc')
+            ->exists();
+
+        return $query;
+    }
+    protected function getExistingClockInWithoutClockOut($user_id)
+    {
+        $query = ClockInOut::where('user_id', $user_id)
+            ->whereNull('clock_out')
+            ->orderBy('clock_in', 'desc')
+            ->first();
+
+        return $query;
     }
     //Update Clock
 
     /**
      * Validate the request for updating clock-in/out times.
      */
-    // protected function validateUpdateClockRequest($request)
-    // {
-    //     $request->validate([
-    //         'clock_in' => ['nullable', 'date_format:Y-m-d H:i'],
-    //         'clock_out' => ['nullable', 'date_format:Y-m-d H:i'],
-    //     ]);
-    // }
 
     /**
      * Check if the clock entry belongs to the user.
@@ -153,40 +154,9 @@ trait ClockTrait
         return $this->returnData('clock', $clock, 'Clock-in added by HR for site.');
     }
 
-    // /**
-    //  * Update the clock entry for the user.
-    //  */
-    // protected function updateClockEntry($request, $clock, $user)
-    // {
-    //     $clockIn = $this->getClockInTime($request, $clock);
-    //     $clockOut = $this->getClockOutTime($request, $clock);
-
-    //     // Check if clock_in and clock_out are on the same day
-    //     if (!$clockOut->isSameDay($clockIn)) {
-    //         return $this->returnError("Clock-in and clock-out must be on the same day", 400);
-    //     }
-
-    //     // Ensure clock_out is after clock_in
-    //     if ($clockOut->lessThanOrEqualTo($clockIn)) {
-    //         return $this->returnError("Clock-out must be after clock-in", 400);
-    //     }
-
-    //     // Calculate the duration
-    //     if (!$clockOut) {
-    //         $durationFormatted = $clockIn->diff(Carbon::now())->format('%H:%I:%S');
-    //     }
-    //     $durationFormatted = $clockIn->diff($clockOut)->format('%H:%I:%S');
-
-    //     // Update clock record
-    //     $clock->update([
-    //         'clock_in' => $clockIn->format('Y-m-d H:i:s'),
-    //         'clock_out' => $clockOut->format('Y-m-d H:i:s'),
-    //         'duration' => $durationFormatted,
-
-    //     ]);
-
-    //     return $this->returnData("clock", new ClockResource($clock), "Clock Updated Successfully for {$user->name}");
-    // }
+    /**
+     * Update the clock entry for the user.
+     */
 
     /**
      * Get the clock-in time.

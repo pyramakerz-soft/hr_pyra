@@ -2,53 +2,104 @@
 
 namespace App\Traits;
 
+use App\Models\ClockInOut;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 
 trait ClockOutTrait
 {
-
-    protected function handleHomeClockOut($clockInOut, $clockOut)
+    protected function getClockInWithoutClockOut($user_id)
     {
-        $clockIn = Carbon::parse($clockInOut->clock_in);
+        $query = ClockInOut::where('user_id', $user_id)
+            ->whereNull('clock_out')
+            ->orderBy('clock_in', 'desc')
+            ->first();
 
-        // Check if clock-out is on the same day as clock-in
+        return $query;
+    }
+    protected function validateClockOutTime($clockIn, $clockOut)
+    {
         if (!$clockIn->isSameDay($clockOut)) {
             return $this->returnError("Clock-out must be on the same day as clock-in.");
         }
-        $user = User::findorFail($clockInOut->user_id);
-        $userEndTime = Carbon::parse($user->user_detail->end_time);
-        $early_leave = "00:00:00";
-        $late_arrive = $clockInOut->late_arrive;
-
-        if (Carbon::parse($clockOut)->lessThan($userEndTime)) {
-            $early_leave = $userEndTime->diff($clockOut)->format('%H:%I:%S');
+        if ($clockOut <= $clockIn) {
+            return $this->returnError("You can't clock out before or at the same time as clock in.");
         }
-        // Calculate duration and update clock record
-        $durationFormatted = $clockIn->diffAsCarbonInterval($clockOut)->format('%H:%I:%S');
+    }
+    protected function validateLocation($latitude, $longitude, $expectedLatitude, $expectedLongitude)
+    {
+        $distance = $this->haversineDistance($latitude, $longitude, $expectedLatitude, $expectedLongitude);
+        if ($distance > 50) {
+            return $this->returnError('User is not located at the correct location. lat: ' . $latitude . ' / long: ' . $longitude);
+        }
+    }
+    protected function calculateEarlyLeave($clockOut, $endTime)
+    {
+        $early_leave = "00:00:00";
+        if ($clockOut->lessThan($endTime)) {
+            $early_leave = $endTime->diff($clockOut)->format('%H:%I:%S');
+        }
+        return $early_leave;
+    }
 
-        $clockInOut->update([
+    protected function updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave)
+    {
+        $clock->update([
             'clock_out' => $clockOut,
             'duration' => $durationFormatted,
             'late_arrive' => $late_arrive,
             'early_leave' => $early_leave,
         ]);
+        // Hide the location relationship before returning the data
+        $clock->makeHidden(['location']);
 
-        return $this->returnData("clock", $clockInOut, "Clock Out Done");
+        return $this->returnData("clock", $clock, "Clock Out Done");
+    }
+    protected function handleHomeClockOut($clock, $clockOut)
+    {
+        //Validate ClockIn & ClockOut
+        $clockIn = Carbon::parse($clock->clock_in);
+        $error = $this->validateClockOutTime($clockIn, $clockOut);
+        if ($error) {
+            return $error;
+        }
+
+        //Prepare data for Calculate early_leave
+        $user = User::findorFail($clock->user_id);
+        $userEndTime = Carbon::parse($user->user_detail->end_time);
+
+        //calculate Early_Leave
+        $early_leave = $this->calculateEarlyLeave($clockOut, $userEndTime);
+        $late_arrive = $clock->late_arrive;
+        // Calculate duration and update clock record
+        $durationFormatted = $clockIn->diffAsCarbonInterval($clockOut)->format('%H:%I:%S');
+        return $this->updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave);
+
     }
 
-    protected function handleSiteClockOut($request, $authUser, $clockInOut, $clockOut)
+    protected function handleSiteClockOut($request, $authUser, $clock, $clockOut)
     {
+        $clock = $this->getClockInWithoutClockOut($authUser->id);
+        if (!$clock) {
+            return $this->returnError('You are not clocked in.');
+        }
+        $clockIn = Carbon::parse($clock->clock_in);
+
+        // Validate ClockIn & ClockOut
+        $error = $this->validateClockOutTime($clockIn, $clockOut);
+        if ($error) {
+            return $error;
+        }
+
         // Check if the location type is 'site'
-        if ($clockInOut->location_type !== 'site') {
+        if ($clock->location_type !== 'site') {
             return $this->returnError('Invalid location type for site clock-out.');
         }
 
-        $lastClockedInLocation = $clockInOut->location;
+        $lastClockedInLocation = $clock->location;
         $locationEndTime = Carbon::parse($lastClockedInLocation->end_time);
 
         //calculate early_leave
-
         $early_leave = "00:00:00";
         if ($clockOut->lessThan($locationEndTime)) {
             $early_leave = $locationEndTime->diff($clockOut)->format('%H:%I:%S');
@@ -68,18 +119,11 @@ trait ClockOutTrait
         }
 
         // Proceed with clock-out as the user is within the accepted range
-        $clockIn = Carbon::parse($clockInOut->clock_in);
         $durationFormatted = $clockIn->diffAsCarbonInterval($clockOut)->format('%H:%I:%S');
-        $late_arrive = $clockInOut->late_arrive;
+        $late_arrive = $clock->late_arrive;
 
-        $clockInOut->update([
-            'clock_out' => $clockOut,
-            'duration' => $durationFormatted,
-            'late_arrive' => $late_arrive,
-            'early_leave' => $early_leave,
+        return $this->updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave);
 
-        ]);
-
-        return $this->returnData("clock", $clockInOut, "Clock Out Done");
     }
+
 }
