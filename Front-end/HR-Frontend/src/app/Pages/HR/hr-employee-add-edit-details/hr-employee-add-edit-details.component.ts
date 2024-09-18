@@ -384,15 +384,17 @@ export class HrEmployeeAddEditDetailsComponent {
   
   SaveEmployee() {
     if (this.isFormValid()) {
+      this.isSaved = true
       this.employee.department_id = Number(this.employee.department_id);
       if(this.EmployeeId === 0){
         this.userService.createUser(this.employee).subscribe(
           (result: any) => {
-            this.isSaved = true
+            this.isSaved = false
             this.router.navigateByUrl("HR/HREmployee")
           },
           error => {
             if (error.error && error.error.errors) {
+              this.isSaved = false
               this.handleServerErrors(error.error.errors as Record<keyof AddEmployee, string[]>);
             }
           }
@@ -400,10 +402,12 @@ export class HrEmployeeAddEditDetailsComponent {
       } else{
         this.userService.updateUser(this.employee, this.EmployeeId).subscribe(
           (result: any) => {
+            this.isSaved = false
             this.router.navigateByUrl("HR/HREmployee")
           },
           error => {
             if (error.error && error.error.errors) {
+              this.isSaved = false
               this.handleServerErrors(error.error.errors as Record<keyof AddEmployee, string[]>);
             }
           }
