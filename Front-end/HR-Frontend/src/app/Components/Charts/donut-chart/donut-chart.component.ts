@@ -45,24 +45,39 @@ export class DonutChartComponent {
       this.chart.destroy();
     }
 
-    function lightenColor(color: string, percent: number) {
-      color = color.replace(/^#/, '');
+    function generateHarmonizedColor(baseHue: number, index: number): string {
+      const hueVariation = (index * 20) % 360;
+      const hue = (baseHue + hueVariation) % 360;
+      const saturation = 75 + (index % 3) * 5;
+      const lightness = 80 - (index % 2) * 15;
   
-      let r = parseInt(color.substring(0, 2), 16);
-      let g = parseInt(color.substring(2, 4), 16);
-      let b = parseInt(color.substring(4, 6), 16);
+      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  }
   
-      r = Math.min(255, Math.floor(r + (255 - r) * percent));
-      g = Math.min(255, Math.floor(g + (255 - g) * percent));
-      b = Math.min(255, Math.floor(b + (255 - b) * percent));
+  const baseHue = 200;
+  for (let i = 1; i <= this.data.length; i++) {
+      this.colors.push(generateHarmonizedColor(baseHue, i));
+      this.total = this.total + this.data[i - 1];
+  }
+    
+    // function lightenColor(color: string, percent: number) {
+    //   color = color.replace(/^#/, '');
   
-      return `#${[r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
-    }
+    //   let r = parseInt(color.substring(0, 2), 16);
+    //   let g = parseInt(color.substring(2, 4), 16);
+    //   let b = parseInt(color.substring(4, 6), 16);
   
-    for (let i = 1; i <= this.data.length; i++) {
-      this.colors.push(lightenColor(this.baseColor, i * 0.22)); 
-      this.total = this.total + this.data[i - 1]
-    }
+    //   r = Math.min(255, Math.floor(r + (255 - r) * percent));
+    //   g = Math.min(255, Math.floor(g + (255 - g) * percent));
+    //   b = Math.min(255, Math.floor(b + (255 - b) * percent));
+  
+    //   return `#${[r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+    // }
+  
+    // for (let i = 1; i <= this.data.length; i++) {
+    //   this.colors.push(lightenColor(this.baseColor, i * 0.22)); 
+    //   this.total = this.total + this.data[i - 1]
+    // }
 
     this.segments = this.labels.map((label: any, index: number ) => ({
       label,
@@ -135,7 +150,8 @@ export class DonutChartComponent {
       (d:any)=>{
         this.data = []
         this.labels = []
-        this.colors = [this.baseColor];
+        // this.colors = [this.baseColor];
+        this.colors = [];
         this.total = 0
 
         Object.keys(d.departmentEmployeesCounts).forEach((key) => {
