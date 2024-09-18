@@ -1,7 +1,9 @@
 <div class="w-full bg-[#dddddd5e] py-5 fixed inset-0 ">
-    <div class="bg-[#FFFFFF] p-5 md:px-10 m-auto w-[75%] max-h-[91vh] overflow-auto md:w-1/2 rounded-2xl text-[#111827] text-end">
+    <div
+        class="bg-[#FFFFFF] p-5 md:px-10 m-auto w-[75%] max-h-[91vh] overflow-auto md:w-1/2 rounded-2xl text-[#111827] text-end">
         <button (click)="closeDialog()">
-            <i class="fa-regular fa-x text-base md:text-lg bg-[#E2E1E1] border border-[#D1D1D1] w-6 md:w-8 h-6 md:h-8 rounded-md"></i>
+            <i
+                class="fa-regular fa-x text-base md:text-lg bg-[#E2E1E1] border border-[#D1D1D1] w-6 md:w-8 h-6 md:h-8 rounded-md"></i>
         </button>
 
         <div class="flex space-x-4 font-semibold text-base md:text-xl items-center">
@@ -11,26 +13,26 @@
             </p>
         </div>
 
-        <div class="rounded-2xl bg-[#F6F6F6] text-start px-4 md:px-6 py-3 md:py-4 my-4 md:my-5">    
+        <div class="rounded-2xl bg-[#F6F6F6] text-start px-4 md:px-6 py-3 md:py-4 my-4 md:my-5">
             <p class="font-semibold text-base md:text-lg text-[#1C1C1E]">Locations</p>
-            <input [(ngModel)]="Boundname" (input)="onNameChange()"
-            placeholder="Add Place Name" class="w-full rounded-2xl p-2 md:p-4 mt-5 text-sm md:text-base">
+            <input [(ngModel)]="Boundname" (input)="onNameChange()" placeholder="Add Place Name"
+                class="w-full rounded-2xl p-2 md:p-4 mt-5 text-sm md:text-base">
             <span *ngIf="nameError" class="text-red-500 text-sm ml-2 font-normal">{{ nameError }}</span>
-            <input [(ngModel)]="address" (input)="onAddressChange()"
-            id="autocomplete" placeholder="Add Location" class="w-full rounded-2xl p-2 md:p-4 mt-5 text-sm md:text-base">
+            <input [(ngModel)]="address" (input)="onAddressChange()" id="autocomplete" placeholder="Add Location"
+                class="w-full rounded-2xl p-2 md:p-4 mt-5 text-sm md:text-base">
             <span *ngIf="addressError" class="text-red-500 text-sm ml-2 font-normal">{{ addressError }}</span>
             <div id="map" class="w-full h-[25vh] md:h-[35vh] rounded-2xl mt-5"></div>
 
-            <input [(ngModel)]="StartTime" type="time" (input)="onStartTimeChange()"
-            placeholder="Add Start Time" class="w-full rounded-2xl p-2 md:p-4 mt-5 text-sm md:text-base">
+            <input [(ngModel)]="StartTime" type="time" (input)="onStartTimeChange()" placeholder="Add Start Time"
+                class="w-full rounded-2xl p-2 md:p-4 mt-5 text-sm md:text-base">
             <span *ngIf="StartTimeError" class="text-red-500 text-sm ml-2 font-normal">{{ StartTimeError }}</span>
-            <input [(ngModel)]="EndTime" type="time" (input)="onEndTimeChange()"
-            placeholder="Add End Time" class="w-full rounded-2xl p-2 md:p-4 mt-5 text-sm md:text-base">
+            <input [(ngModel)]="EndTime" type="time" (input)="onEndTimeChange()" placeholder="Add End Time"
+                class="w-full rounded-2xl p-2 md:p-4 mt-5 text-sm md:text-base">
             <span *ngIf="EndTimeError" class="text-red-500 text-sm ml-2 font-normal">{{ EndTimeError }}</span>
         </div>
-        
-        <button class="bg-[#17253E] font-bold text-base md:text-lg text-white rounded-2xl py-3 px-4 md:px-7" (click)="EditAndAddLocation()">Save</button>
+
+        <button class="bg-[#17253E] font-bold text-base md:text-lg text-white rounded-2xl py-3 px-4 md:px-7"
+            (click)="EditAndAddLocation()" [disabled]="SaveButton">Save</button>
 
     </div>
 </div>
-
