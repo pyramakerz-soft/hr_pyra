@@ -83,14 +83,12 @@ class ClockService
 
         // Handle pagination
         $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
-
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clocks Found For This User');
         }
-
         // Handle export request
         if ($request->has('export')) {
-            return $this->exportService->exportClocks($clocks, $user->department->name ?? null);
+            return $this->exportService->exportClocks($clocks, $user->department->name ?? null, $user->id);
         }
 
         // Prepare and return data
@@ -134,11 +132,6 @@ class ClockService
         $authUser = Auth::user();
         $user_id = $authUser->id;
 
-        // Check if the user has an existing clock-in without a clock-out
-        if ($this->getOrCheckExistingClockInWithoutClockOut($user_id)) {
-            return $this->returnError('You already have an existing clock-in without clocking out.');
-        }
-
         // Handle home clock-in if location_type is 'home'
         if ($request->location_type == 'home') {
             return $this->handleHomeClockIn($request, $user_id);
@@ -155,16 +148,12 @@ class ClockService
         $authUser = Auth::user();
         $user_id = $authUser->id;
 
-        $clock = $this->getOrCheckExistingClockInWithoutClockOut($user_id, true);
+        $clock = $this->getClockInWithoutClockOut($user_id);
         if (!$clock) {
             return $this->returnError('You are not clocked in.');
         }
-        // Check if clock-out is valid
-        $clockOut = Carbon::parse($request->clock_out);
-        if ($clockOut <= Carbon::parse($clock->clock_in)) {
-            return $this->returnError("You can't clock out before or at the same time as clock in.");
-        }
 
+        $clockOut = Carbon::parse($request->clock_out);
         if ($clock->location_type == "home") {
             return $this->handleHomeClockOut($clock, $clockOut);
         }
@@ -193,7 +182,7 @@ class ClockService
         $authUser = Auth::user();
         $this->authorizationService->authorizeHrUser($authUser);
         // Check if the user has an existing clock-in without a clock-out
-        if ($this->getOrCheckExistingClockInWithoutClockOut($user->id)) {
+        if ($this->checkExistingClockInWithoutClockOut($user->id)) {
             return $this->returnError('You already have an existing clock-in without clocking out.');
         }
 

@@ -42,7 +42,11 @@ class ProfileResource extends JsonResource
             $clockIn = Carbon::parse($user_clock->clock_in)->format('H:i:s');
         }
 
-        $work_home = false;
+        //Handle Work_from_home
+        $countOfUserWorkTypes = $authUser->work_types()->count();
+        $work_home = $countOfUserWorkTypes > 1 ? true : false;
+
+        //Handle UserLocations
         $user_locations = $authUser->user_locations()->get();
         $locations_name = $user_locations->map(function ($user_location) {
             return [
@@ -66,9 +70,8 @@ class ProfileResource extends JsonResource
             'total_hours' => $total_hours,
             'user_start_time' => $this->user_detail->start_time,
             'user_end_time' => $this->user_detail->end_time,
-
             'assigned_locations_user' => $locations_name,
-            'work_home' => isset($locationTypes[0]) ? $locationTypes[0] == 'home' : false,
+            'work_home' => $work_home,
         ];
 
     }

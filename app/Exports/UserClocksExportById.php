@@ -27,14 +27,7 @@ class UserClocksExportById implements FromCollection, WithHeadings, WithTitle
         return $this->clocks->map(function ($clock) {
             $clockIn = Carbon::parse($clock->clock_in)->addHours(3);
             $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out)->addHours(3) : null;
-            $now = Carbon::now()->addHours(3);
-
-            if ($clockOut) {
-                $totalHours = $clockIn->diffInHours($clockOut);
-            } else {
-                $totalHours = $clockIn->diffInHours($now);
-            }
-
+            $totalHours = $clockOut ? $clockIn->diffInHours($clockOut) : null;
             return collect([
                 'ID' => $clock->id,
                 'Day' => $clockIn->format('l'),
