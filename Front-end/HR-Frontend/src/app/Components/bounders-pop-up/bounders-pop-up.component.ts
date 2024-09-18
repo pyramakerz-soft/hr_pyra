@@ -37,6 +37,8 @@ export class BoundersPopUpComponent implements AfterViewInit {
   STime:string=""
   ETime:string=""
 
+  SaveButton:boolean=false;
+
   constructor(public dialogRef: MatDialogRef<BoundersPopUpComponent>, 
               public googleMapsService: ReverseGeocodingService,
               public LocationServ: LocationsService,
@@ -184,8 +186,11 @@ export class BoundersPopUpComponent implements AfterViewInit {
 
   async EditAndAddLocation() {
     if(this.isFormValid()){
+      this.SaveButton=true;
       this.STime=await this.convertEgyptianToUtcTime(this.StartTime)
       this.ETime=await this.convertEgyptianToUtcTime(this.EndTime)
+
+      if(this.ETime>this.STime){
       if (this.mode === 'edit') {
 
         this.LocationServ.EditByID(this.Boundname, this.address, this.lat, this.long, this.id ,this.STime,this.ETime).subscribe(
@@ -193,6 +198,8 @@ export class BoundersPopUpComponent implements AfterViewInit {
             this.dialogRef.close();
           },
           (error) => {
+            this.SaveButton=false;
+            console.log(error)
             if (error.error.message === "The name has already been taken.") {
               Swal.fire({   
                 text: "The Location name has already been taken",
@@ -215,6 +222,7 @@ export class BoundersPopUpComponent implements AfterViewInit {
             this.dialogRef.close();
           },
           (error) => {
+            this.SaveButton=false;
             if (error.error.message === "The name has already been taken.") {
               Swal.fire({   
                 text: "The Location name has already been taken",
@@ -232,6 +240,15 @@ export class BoundersPopUpComponent implements AfterViewInit {
           }
         );
       }
+    }
+    else{
+      this.SaveButton=false;
+      Swal.fire({   
+        text: "End Time Should Be After Start Time",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#FF7519",
+      });
+    }
     }
   }
 
