@@ -2,15 +2,15 @@
 
 namespace App\Traits;
 
+use App\Http\Requests\Api\AddClockRequest;
 use App\Models\ClockInOut;
 use App\Models\User;
 use App\Traits\ClockTrait;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
+
 trait ClockInTrait
 {
     use ClockTrait;
-
     protected function checkClockInWithoutClockOut($user_id)
     {
         $query = ClockInOut::where('user_id', $user_id)
@@ -19,25 +19,7 @@ trait ClockInTrait
 
         return $query;
     }
-    protected function calculateLateArrive($clockIn, $startTime)
-    {
-        // Extract the time portion only
-        $clockInTime = $clockIn->format('H:i:s');
-        $startTimeFormatted = Carbon::parse($startTime)->format('H:i:s');
-
-        // Initialize late_arrive as "00:00:00" (no late arrival by default)
-        $late_arrive = "00:00:00";
-
-        // Check if the user clocked in late (after the start time)
-        if ($clockInTime > $startTimeFormatted) {
-            // Calculate the late arrival duration and format it as H:i:s
-            $late_arrive = Carbon::createFromFormat('H:i:s', $startTimeFormatted)
-                ->diff(Carbon::createFromFormat('H:i:s', $clockInTime))
-                ->format('%H:%I:%S');
-        }
-
-        return $late_arrive;
-    }
+    
     protected function validateLocations($request, $authUser)
     {
         // Retrieve location details using location_id from the request
@@ -63,7 +45,7 @@ trait ClockInTrait
         // Return the validated location
         return $userLocation;
     }
-    protected function createHomeClockIn($request, $user_id, $clockIn, $late_arrive)
+    protected function createClockInHomeRecord($request, $user_id, $clockIn, $late_arrive)
     {
         $clock = ClockInOut::create([
             'clock_in' => $clockIn,
@@ -79,41 +61,37 @@ trait ClockInTrait
     }
     protected function handleHomeClockIn($request, $user_id)
     {
-        if ($this->checkClockInWithoutClockOut($user_id)) {
-            return $this->returnError('You have already clocked in.');
-        }
-
-        // Calculate Late_arrive
+        //1- Calculate Late_arrive
         $authUser = User::findOrFail($user_id);
         $clockIn = Carbon::parse($request->clock_in);
-        $userStartTime = $authUser->user_detail->start_time;
-
-        // Use the new calculateLateArrive method
+        $userStartTime = Carbon::parse($authUser->user_detail->start_time);
         $late_arrive = $this->calculateLateArrive($clockIn, $userStartTime);
 
         // Call createHomeClockIn method to create the clock-in record
-        return $this->createHomeClockIn($request, $user_id, $clockIn, $late_arrive);
+        return $this->createClockInHomeRecord($request, $user_id, $clockIn, $late_arrive);
     }
 
-    /**
-     * Handle clock-in for site location.
-     */
     protected function handleSiteClockIn($request, $authUser)
     {
-        if ($this->checkClockInWithoutClockOut($authUser->id)) {
-            return $this->returnError('You have already clocked in');
-        }
-
-        // Validate location
+        //1- Validate location of user and location of the site
         $userLocation = $this->validateLocations($request, $authUser);
         if ($userLocation == null) {
             return $this->returnError('Location is not assigned to the user.');
         }
-
-        // Calculate Late_arrive
+        //2- check the department_name for authenticated user
         $clockIn = Carbon::parse($request->clock_in);
-        $locationStartTime = $userLocation->start_time;
-        $late_arrive = $this->calculateLateArrive($clockIn, $locationStartTime);
+
+        if (($authUser->department->name == "Academic_school") || ($authUser->department->name == "Factory")) {
+
+            //Calculate Late_arrive by location time
+            $locationStartTime = Carbon::parse($userLocation->start_time);
+            $late_arrive = $this->calculateLateArrive($clockIn, $locationStartTime);
+        } else {
+            //Calculate Late_arrive by User time
+            $userStartTime = carbon::parse($authUser->user_detail->start_time);
+            $late_arrive = $this->calculateLateArrive($clockIn, $userStartTime);
+        }
+        //3- create ClockIn Site Record
         return $this->createClockInSiteRecord($request, $authUser, $userLocation, $clockIn, $late_arrive);
     }
 
@@ -131,5 +109,34 @@ trait ClockInTrait
         ]);
 
         return $this->returnData("clock", $clock, "Clock In Done");
+    }
+
+    //HR Clock
+    protected function handleSiteClockInByHr(AddClockRequest $request, User $user)
+    {
+
+        //1- Validate that the location_id is assigned to the user
+        $location_id = $request->location_id;
+
+        $userLocation = $user->user_locations()->where('location_id', $location_id)->first();
+
+        if (!$userLocation) {
+            return $this->returnError('The specified location is not assigned to the user.');
+        }
+
+        //2- Calculate the late_arrive
+        $clockIn = Carbon::parse($request->clock_in);
+        if ($user->department->name == "Academic_school" || $user->department->name == "Factory") {
+            //Calculate Late_arrive by location_time
+            $locationStartTime = Carbon::parse($userLocation->start_time);
+            $late_arrive = $this->calculateLateArrive($clockIn, $locationStartTime);
+        } else {
+            //Calculate Late_arrive by User time
+            $userStartTime = carbon::parse($user->user_detail->start_time);
+            $late_arrive = $this->calculateLateArrive($clockIn, $userStartTime);
+        }
+
+        // Create the clock-in record
+        return $this->createClockInSiteRecord($request, $user, $userLocation, $clockIn, $late_arrive);
     }
 }
