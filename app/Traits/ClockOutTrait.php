@@ -25,6 +25,8 @@ trait ClockOutTrait
         if ($distance > 50) {
             return $this->returnError('User is not located at the correct location. lat: ' . $latitude . ' / long: ' . $longitude);
         }
+        return null;
+
     }
 
     protected function updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave)
@@ -81,8 +83,12 @@ trait ClockOutTrait
         //3- Validate location of user and location of the site
         $latitude = $request->latitude;
         $longitude = $request->longitude;
-        $this->validateLocation($latitude, $longitude, $lastClockedInLocation->latitude, $lastClockedInLocation->longitude);
+        $validationError = $this->validateLocation($latitude, $longitude, $lastClockedInLocation->latitude, $lastClockedInLocation->longitude);
 
+        // If the validation failed, return the error
+        if ($validationError) {
+            return $validationError;
+        }
         //4- check the department_name for authenticated_user
         if (($authUser->department->name == "Academic_school") || ($authUser->department->name == "Factory")) {
             // calculate the early leave depend on location

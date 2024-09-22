@@ -160,18 +160,6 @@ trait ClockTrait
             'end_time' => Carbon::parse($user->user_detail->end_time)->format('H:i:s'),
         ];
     }
-    // protected function calculateLateArrival($clockInTime, $startTime)
-    // {
-    //     return ($clockInTime > $startTime)
-    //     ? Carbon::createFromTimeString($startTime)->diff(Carbon::createFromTimeString($clockInTime))->format('%H:%I:%S')
-    //     : '00:00:00';
-    // }
-    // protected function calculateEarlyLeave($clockOutTime, $endTime)
-    // {
-    //     return ($clockOutTime < $endTime)
-    //     ? Carbon::createFromTimeString($endTime)->diff(Carbon::createFromTimeString($clockOutTime))->format('%H:%I:%S')
-    //     : '00:00:00';
-    // }
     protected function updateClockRecord($clock, $clockIn, $clockOut, $duration, $lateArrive, $earlyLeave)
     {
         $clock->update([
