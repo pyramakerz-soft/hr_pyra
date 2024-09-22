@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Department extends Model
 {
     use HasFactory;
+    //Constant
+    public const Academic_school = 'ACADEMIC_SCHOOL';
+    public const Factory = 'FACTORY';
 
     // A department has one manager
     public function manager()

@@ -129,31 +129,37 @@ class ClockService
 
     public function clockIn(ClockInRequest $request)
     {
+        //1- Check If user already Clocked in
         $authUser = Auth::user();
         $user_id = $authUser->id;
+        if ($this->checkClockInWithoutClockOut($user_id)) {
+            return $this->returnError('You have already clocked in.');
+        }
 
-        // Handle home clock-in if location_type is 'home'
+        //2- Handle home clock-in if location_type is 'home'
         if ($request->location_type == 'home') {
             return $this->handleHomeClockIn($request, $user_id);
         }
 
-        // Handle site clock-in if location_type is 'site'
+        //3- Handle site clock-in if location_type is 'site'
         return $this->handleSiteClockIn($request, $authUser);
     }
-    /**
-     * Handle clock-out action.
-     */
+
     public function clockOut(ClockOutRequest $request)
     {
+        //1- Retrieve the clock that the user has clocked_In
         $authUser = Auth::user();
         $user_id = $authUser->id;
-
         $clock = $this->getClockInWithoutClockOut($user_id);
         if (!$clock) {
             return $this->returnError('You are not clocked in.');
         }
-
+        //2- Validate the clock time
+        $clockIn = carbon::parse($clock->clock_in);
         $clockOut = Carbon::parse($request->clock_out);
+        $this->validateClockTime($clockIn, $clockOut);
+
+        //3- Check for location_type is "site" OR "home"
         if ($clock->location_type == "home") {
             return $this->handleHomeClockOut($clock, $clockOut);
         }
@@ -161,27 +167,28 @@ class ClockService
         return $this->handleSiteClockOut($request, $authUser, $clock, $clockOut);
     }
 
-    /**
-     * Update user's clock entry.
-     */
     public function updateUserClock(UpdateClockRequest $request, User $user, ClockInOut $clock)
     {
+        //1- Check the Authority
         $authUser = Auth::user();
         $this->authorizationService->authorizeHrUser($authUser);
-        // Check if clock belongs to the user
+        //2- Check if clock belongs to the user
         $clock = ClockInOut::where('user_id', $user->id)->where('id', $clock->id)->first();
         if (!$clock) {
             return $this->returnError("No clocks found for this user", 404);
         }
 
+        //3- Update the clock
         return $this->updateClockEntry($request, $clock, $user);
     }
 
     public function AddClockByHr(AddClockRequest $request, User $user)
     {
+        //1- Check for Authority of Auth_User
         $authUser = Auth::user();
         $this->authorizationService->authorizeHrUser($authUser);
-        // Check if the user has an existing clock-in without a clock-out
+
+        //2- Check if the user has an existing clock-in without a clock-out
         if ($this->checkExistingClockInWithoutClockOut($user->id)) {
             return $this->returnError('You already have an existing clock-in without clocking out.');
         }
@@ -192,6 +199,6 @@ class ClockService
         }
 
         // Handle site clock-in if location_type is 'site'
-        return $this->handleAddSiteClockByHr($request, $user);
+        return $this->handleSiteClockInByHr($request, $user);
     }
 }

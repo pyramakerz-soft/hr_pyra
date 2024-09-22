@@ -64,6 +64,9 @@ class ProfileResource extends JsonResource
             'national_id' => $this->national_id,
             'image' => $this->image ?? null,
             'job_title' => $this->user_detail->emp_type ?? null,
+            'department_id' => $this->department->id,
+            'department_name' => $this->department->name,
+
             'role_name' => $this->getRoleName(),
             'is_clocked_out' => $is_clocked_out,
             'clockIn' => $clockIn,

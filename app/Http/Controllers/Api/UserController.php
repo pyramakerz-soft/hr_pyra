@@ -12,7 +12,6 @@ use App\Models\UserDetail;
 use App\Services\Api\AuthorizationService;
 use App\Services\Api\User\UserDetailService;
 use App\Services\Api\User\UserService;
-use App\Traits\HelperTrait;
 use App\Traits\ResponseTrait;
 use App\Traits\UserTrait;
 use Illuminate\Http\Request;
@@ -24,7 +23,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
-    use ResponseTrait, HelperTrait, UserTrait;
+    use ResponseTrait, UserTrait;
     protected $userService;
     protected $userDetailService;
     protected $authorizationService;

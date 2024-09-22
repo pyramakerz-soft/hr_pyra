@@ -13,8 +13,8 @@ class DepartmentSeeder extends Seeder
     public function run(): void
     {
         Department::create(['name' => 'Software']);
-        Department::create(['name' => 'Academic']);
-        Department::create(['name' => 'Graphic']);
+        Department::create(['name' => 'Academic_school']);
+        Department::create(['name' => 'Factory']);
         Department::factory()->count(7)->create();
     }
 }

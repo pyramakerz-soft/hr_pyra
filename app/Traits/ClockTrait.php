@@ -2,14 +2,14 @@
 
 namespace App\Traits;
 
-use App\Http\Requests\Api\AddClockRequest;
 use App\Http\Resources\ClockResource;
 use App\Models\ClockInOut;
-use App\Models\User;
+use App\Traits\HelperTrait;
 use Illuminate\Support\Carbon;
 trait ClockTrait
 {
-
+    use ClockValidator;
+    use HelperTrait;
     protected function prepareClockData($clocks)
     {
         // Ensure $clocks is paginated
@@ -96,15 +96,8 @@ trait ClockTrait
 
         return $query;
     }
+
     //Update Clock
-
-    /**
-     * Validate the request for updating clock-in/out times.
-     */
-
-    /**
-     * Check if the clock entry belongs to the user.
-     */
 
     protected function getUserClock($userId, $clockId)
     {
@@ -112,55 +105,7 @@ trait ClockTrait
             ->where('id', $clockId)
             ->first();
     }
-    //HR Clock
 
-    protected function handleAddSiteClockByHr(AddClockRequest $request, User $user)
-    {
-        // Retrieve location details using location_id from the request
-        $location_id = $request->location_id;
-
-        // Validate that the location_id is assigned to the user
-        $userLocation = $user->user_locations()->where('location_id', $location_id)->first();
-
-        if (!$userLocation) {
-            return $this->returnError('The specified location is not assigned to the user.');
-        }
-
-        // Parse the clock-in time from the request
-        $clockIn = Carbon::parse($request->clock_in);
-
-        // Get the start time for the location
-        $locationStartTime = Carbon::parse($userLocation->start_time);
-
-        $late_arrive = $clockIn->greaterThan($locationStartTime)
-        ? $locationStartTime->diff($clockIn)->format('%H:%I:%S')
-        : "00:00:00";
-
-        // Calculate the duration (clock_in to now or clock_out if provided)
-        $duration = $clockIn->diffAsCarbonInterval(Carbon::now())->format('%H:%I:%S');
-
-        // Create the clock-in record
-        $clock = ClockInOut::create([
-            'clock_in' => $clockIn,
-            'clock_out' => null,
-            'duration' => $duration,
-            'user_id' => $user->id,
-            'location_id' => $location_id,
-            'location_type' => 'site',
-            'late_arrive' => $late_arrive, // Store late_arrive
-            'early_leave' => null, // Initialize early_leave as null
-        ]);
-
-        return $this->returnData('clock', $clock, 'Clock-in added by HR for site.');
-    }
-
-    /**
-     * Update the clock entry for the user.
-     */
-
-    /**
-     * Get the clock-in time.
-     */
     protected function getClockInTime($request, $clock)
     {
         if ($request->clock_in) {
@@ -170,9 +115,6 @@ trait ClockTrait
         return Carbon::parse($clock->clock_in);
     }
 
-    /**
-     * Get the clock-out time.
-     */
     protected function getClockOutTime($request, $clock)
     {
         if ($request->clock_out) {
@@ -194,47 +136,81 @@ trait ClockTrait
 
         return $this->returnError('Unknown location type', 400);
     }
-    protected function updateSiteClock($request, $clock, $user)
+
+    // protected function calculateDuration($clockIn, $clockOut)
+    // {
+    //     return $clockOut ? $clockIn->diff($clockOut)->format('%H:%I:%S') : null;
+    // }
+    protected function isFactoryOrAcademicSchool($user)
     {
-        $clockIn = $this->getClockInTime($request, $clock);
-        $clockOut = $this->getClockOutTime($request, $clock);
-
-        // If clock_out is null, use the current time (now) for calculating the duration
-        // $clockOut = $clockOut ?? Carbon::now();
-
-        if (!$clockOut->isSameDay($clockIn)) {
-            return $this->returnError("Clock-in and clock-out must be on the same day", 400);
-        }
-
-        if ($clockOut->lessThanOrEqualTo($clockIn)) {
-            return $this->returnError("Clock-out must be after clock-in", 400);
-        }
-        // If clock_out is null, calculate duration from clock_in to now
-        $durationFormatted = $clockOut ? $clockIn->diff($clockOut)->format('%H:%I:%S') : $clockIn->diff(Carbon::now())->format('%H:%I:%S');
-
-        // Get start and end times from the user's assigned location
+        return $user->department->name === 'Factory' || $user->department->name === 'Academic_school';
+    }
+    protected function getUserLocationTimes($user)
+    {
         $userLocation = $user->user_locations()->first();
-        $startTime = Carbon::parse($userLocation->start_time)->format('H:i:s');
-        $endTime = Carbon::parse($userLocation->end_time)->format('H:i:s');
-
-        //Extract ClockIn & ClockOut Time only
-        $clockInTime = $clockIn->format('H:i:s');
-        $clockOutTime = $clockOut->format('H:i:s');
-
-        // Calculate late_arrive and early_leave based on time only
-        $late_arrive = ($clockInTime > $startTime) ? Carbon::createFromTimeString($startTime)->diff(Carbon::createFromTimeString($clockInTime))->format('%H:%I:%S') : '00:00:00';
-        $early_leave = ($clockOutTime < $endTime) ? Carbon::createFromTimeString($endTime)->diff(Carbon::createFromTimeString($clockOutTime))->format('%H:%I:%S') : '00:00:00';
-
-        // Update clock record
+        return [
+            'start_time' => Carbon::parse($userLocation->start_time)->format('H:i:s'),
+            'end_time' => Carbon::parse($userLocation->end_time)->format('H:i:s'),
+        ];
+    }
+    protected function getUserDetailTimes($user)
+    {
+        return [
+            'start_time' => Carbon::parse($user->user_detail->start_time)->format('H:i:s'),
+            'end_time' => Carbon::parse($user->user_detail->end_time)->format('H:i:s'),
+        ];
+    }
+    // protected function calculateLateArrival($clockInTime, $startTime)
+    // {
+    //     return ($clockInTime > $startTime)
+    //     ? Carbon::createFromTimeString($startTime)->diff(Carbon::createFromTimeString($clockInTime))->format('%H:%I:%S')
+    //     : '00:00:00';
+    // }
+    // protected function calculateEarlyLeave($clockOutTime, $endTime)
+    // {
+    //     return ($clockOutTime < $endTime)
+    //     ? Carbon::createFromTimeString($endTime)->diff(Carbon::createFromTimeString($clockOutTime))->format('%H:%I:%S')
+    //     : '00:00:00';
+    // }
+    protected function updateClockRecord($clock, $clockIn, $clockOut, $duration, $lateArrive, $earlyLeave)
+    {
         $clock->update([
             'clock_in' => $clockIn->format('Y-m-d H:i:s'),
             'clock_out' => $clockOut->format('Y-m-d H:i:s'),
-            'duration' => $durationFormatted,
-            'late_arrive' => $late_arrive,
-            'early_leave' => $early_leave,
+            'duration' => $duration,
+            'late_arrive' => $lateArrive,
+            'early_leave' => $earlyLeave,
         ]);
+        return $this->returnData("clock", new ClockResource($clock), "Clock Updated Successfully");
 
-        return $this->returnData("clock", new ClockResource($clock), "Clock Updated Successfully for {$user->name}");
+    }
+    protected function updateSiteClock($request, $clock, $user)
+    {
+        // Step 1: Validate the Clock In and Out times
+        $clockIn = $this->getClockInTime($request, $clock);
+        $clockOut = $this->getClockOutTime($request, $clock);
+        $this->validateClockTime($clockIn, $clockOut);
+
+        // Step 2: Calculate Duration
+        $durationFormatted = $this->calculateDuration($clockIn, $clockOut);
+
+        // Step 3: Handle clock-in and clock-out time only
+        $clockInTime = $clockIn->format('H:i:s');
+        $clockOutTime = $clockOut->format('H:i:s');
+
+        // Step 4: Determine the time boundaries based on the user's department
+        if ($this->isFactoryOrAcademicSchool($user)) {
+            $locationTimes = $this->getUserLocationTimes($user);
+        } else {
+            $locationTimes = $this->getUserDetailTimes($user);
+        }
+
+        // Step 5: Calculate Late Arrival and Early Leave
+        $lateArrive = $this->calculateLateArrive($clockInTime, $locationTimes['start_time']);
+        $earlyLeave = $this->calculateEarlyLeave($clockOutTime, $locationTimes['end_time']);
+
+        // Step 6: Update the clock record
+        return $this->updateClockRecord($clock, $clockIn, $clockOut, $durationFormatted, $lateArrive, $earlyLeave);
     }
     protected function updateHomeClock($request, $clock, $user)
     {
@@ -253,12 +229,12 @@ trait ClockTrait
 
         // Calculate the duration
         // If clock_out is null, calculate duration from clock_in to now
-        $durationFormatted = $clockOut ? $clockIn->diff($clockOut)->format('%H:%I:%S') : $clockIn->diff(Carbon::now())->format('%H:%I:%S');
+        $durationFormatted = $clockOut ? $clockIn->diff($clockOut)->format('%H:%I:%S') : null;
 
         // Get start and end times from the user's details (for home)
         $startTime = Carbon::parse($user->user_detail->start_time)->format('H:i:s');
-        // dd($startTime);
         $endTime = Carbon::parse($user->user_detail->end_time)->format('H:i:s');
+
         //Extract ClockIn & ClockOut Time only
         $clockInTime = $clockIn->format('H:i:s');
         $clockOutTime = $clockOut->format('H:i:s');
