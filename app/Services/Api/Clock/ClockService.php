@@ -140,7 +140,6 @@ class ClockService
         if ($request->location_type == 'home') {
             return $this->handleHomeClockIn($request, $user_id);
         }
-
         //3- Handle site clock-in if location_type is 'site'
         return $this->handleSiteClockIn($request, $authUser);
     }

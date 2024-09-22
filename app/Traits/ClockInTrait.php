@@ -7,6 +7,7 @@ use App\Models\ClockInOut;
 use App\Models\User;
 use App\Traits\ClockTrait;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 trait ClockInTrait
 {
@@ -19,7 +20,7 @@ trait ClockInTrait
 
         return $query;
     }
-    
+
     protected function validateLocations($request, $authUser)
     {
         // Retrieve location details using location_id from the request
@@ -36,12 +37,14 @@ trait ClockInTrait
         $longitude = $request->longitude;
 
         $distance = $this->haversineDistance($latitude, $longitude, $userLocation->latitude, $userLocation->longitude);
+        // Check if user is within an acceptable range (e.g., 50 meters)
 
         // Check if user is within an acceptable range (e.g., 50 meters)
         if ($distance > 50) {
+            // Log and return error response if user is not within the range
+            Log::info("Distance exceeds 50 meters. Returning error.");
             return $this->returnError('User is not located at the correct location. lat: ' . $latitude . ' / long: ' . $longitude);
         }
-
         // Return the validated location
         return $userLocation;
     }
@@ -53,6 +56,7 @@ trait ClockInTrait
             'duration' => null,
             'user_id' => $user_id,
             'location_type' => $request->location_type,
+            'location_id' => null,
             'late_arrive' => $late_arrive,
             'early_leave' => null,
         ]);
@@ -73,13 +77,15 @@ trait ClockInTrait
 
     protected function handleSiteClockIn($request, $authUser)
     {
-        //1- Validate location of user and location of the site
+        // 1- Validate location of user and location of the site
         $userLocation = $this->validateLocations($request, $authUser);
-        if ($userLocation == null) {
-            return $this->returnError('Location is not assigned to the user.');
+
+        if ($userLocation instanceof \Illuminate\Http\JsonResponse) {
+            return $userLocation; // Return the error response
         }
         //2- check the department_name for authenticated user
         $clockIn = Carbon::parse($request->clock_in);
+        $userLocation = $authUser->user_locations()->first();
 
         if (($authUser->department->name == "Academic_school") || ($authUser->department->name == "Factory")) {
 

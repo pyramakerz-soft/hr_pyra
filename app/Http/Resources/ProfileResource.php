@@ -57,7 +57,8 @@ class ProfileResource extends JsonResource
 
             ];
         });
-
+        //Handle Notification by location
+        $is_notify_by_location = ($this->department->name == "Academic_school" || $this->department->name == "Factory") ? true : false;
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -73,6 +74,8 @@ class ProfileResource extends JsonResource
             'total_hours' => $total_hours,
             'user_start_time' => $this->user_detail->start_time,
             'user_end_time' => $this->user_detail->end_time,
+            'is_notify_by_location' => $is_notify_by_location,
+
             'assigned_locations_user' => $locations_name,
             'work_home' => $work_home,
         ];
