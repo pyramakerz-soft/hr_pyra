@@ -171,8 +171,8 @@ class ClockService
         //1- Check the Authority
         $authUser = Auth::user();
         $this->authorizationService->authorizeHrUser($authUser);
+
         //2- Check if clock belongs to the user
-        // $clock = ClockInOut::where('user_id', $user->id)->where('id', $clock->id)->first();
         $clock = $this->getUserClock($user->id, $clock->id);
         if (!$clock) {
             return $this->returnError("No clocks found for this user", 404);
