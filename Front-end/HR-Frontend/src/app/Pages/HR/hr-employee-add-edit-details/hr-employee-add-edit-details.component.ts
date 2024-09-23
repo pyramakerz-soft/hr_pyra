@@ -386,6 +386,8 @@ export class HrEmployeeAddEditDetailsComponent {
     if (this.isFormValid()) {
       this.isSaved = true
       this.employee.department_id = Number(this.employee.department_id);
+      this.employee.start_time = this.employee.start_time ? this.convertEgyptianToUtcTime(this.employee.start_time) : null
+      this.employee.end_time = this.employee.end_time ? this.convertEgyptianToUtcTime(this.employee.end_time) : null
       if(this.EmployeeId === 0){
         this.userService.createUser(this.employee).subscribe(
           (result: any) => {
@@ -424,4 +426,15 @@ export class HrEmployeeAddEditDetailsComponent {
       }
     }
   }
+
+  convertEgyptianToUtcTime(egyptianTime: string): string {
+    const [hours, minutes] = egyptianTime.split(':').map(Number);
+    const currentDate = new Date();
+    const egyptianDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hours, minutes);
+    const utcDate = new Date(egyptianDate.toLocaleString('en-US', { timeZone: 'Africa/Cairo' }));
+    const utcHours = String(utcDate.getUTCHours()).padStart(2, '0');
+    const utcMinutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
+    return `${utcHours}:${utcMinutes}`;
+  }
+
 }
