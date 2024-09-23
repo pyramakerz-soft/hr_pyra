@@ -389,6 +389,7 @@ export class HrEmployeeAddEditDetailsComponent {
       this.employee.start_time = this.employee.start_time ? this.convertEgyptianToUtcTime(this.employee.start_time) : null
       this.employee.end_time = this.employee.end_time ? this.convertEgyptianToUtcTime(this.employee.end_time) : null
       if(this.EmployeeId === 0){
+        console.log(this.employee)
         this.userService.createUser(this.employee).subscribe(
           (result: any) => {
             this.isSaved = false
