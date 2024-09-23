@@ -1,5 +1,20 @@
 <div>
-    
+    <div class="flex justify-between mb-5 items-center">
+        <div>
+            <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Roles</p>
+        </div>
+        <div class ="flex space-x-1">
+            <button class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg" 
+            (click)="save()"
+            [disabled]="isSaving">
+                Save
+            </button>
+            <button class="font-bold text-xs md:text-sm text-[#707070] py-2 md:py-3 px-4 md:px-5 rounded-lg border border-[#9F9999]"
+            (click)="cancel()">
+            Cancel
+          </button>
+        </div>
+    </div>
 
     <div class="border border-[#ECECEC] rounded-lg p-4 md:p-8 shadow-md shadow-[#0000001F]">
         <label htmlFor="role" class="block mb-3 font-semibold text-xs md:text-sm text-[#3A3A3C]">
