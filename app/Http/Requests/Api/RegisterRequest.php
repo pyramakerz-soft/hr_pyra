@@ -35,7 +35,6 @@ class RegisterRequest extends FormRequest
             'code' => ['nullable', 'string'],
             'gender' => ['required', 'in:m,M,F,f'],
             'department_id' => ['required', 'exists:departments,id'],
-            'image' => ['nullable'],
             'salary' => ['required', 'numeric'],
             'working_hours_day' => ['required', 'numeric', 'min:4'],
             'overtime_hours' => ['required', 'numeric'],
@@ -46,7 +45,7 @@ class RegisterRequest extends FormRequest
             'end_time' => ['required', 'date_format:H:i'],
             'location_id' => ['required', 'exists:locations,id'],
             'work_type_id' => ['required', 'exists:work_types,id'],
-            'image' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:15360'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:15360'],
             'serial_number' => ['nullable', 'string'],
         ];
     }

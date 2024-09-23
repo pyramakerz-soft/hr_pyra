@@ -172,13 +172,18 @@ class ClockService
         $authUser = Auth::user();
         $this->authorizationService->authorizeHrUser($authUser);
         //2- Check if clock belongs to the user
-        $clock = ClockInOut::where('user_id', $user->id)->where('id', $clock->id)->first();
+        // $clock = ClockInOut::where('user_id', $user->id)->where('id', $clock->id)->first();
+        $clock = $this->getUserClock($user->id, $clock->id);
         if (!$clock) {
             return $this->returnError("No clocks found for this user", 404);
         }
 
         //3- Update the clock
-        return $this->updateClockEntry($request, $clock, $user);
+        if ($clock->location_type == 'home') {
+            return $this->updateHomeClock($request, $clock, $user);
+        }
+        return $this->updateSiteClock($request, $clock, $user);
+
     }
 
     public function AddClockByHr(AddClockRequest $request, User $user)
