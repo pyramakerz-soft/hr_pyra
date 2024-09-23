@@ -27,14 +27,11 @@ class UserService
         if (!$code) {
             return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
         }
-        // Check if an image is provided and valid
+        // Handle image upload
         $imageUrl = null;
-        if (isset($data['image'])) {
-            if ($data['image']->isValid()) {
-                $imageUrl = $this->uploadImage($data['image']);
-            } else {
-                return $this->returnError('Invalid image provided', Response::HTTP_BAD_REQUEST);
-            }
+        if (request()->hasFile('image')) {
+            $image = request()->file('image');
+            $imageUrl = $this->uploadImage($image);
         }
         $user = User::create([
             'name' => $data['name'],
