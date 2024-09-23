@@ -240,8 +240,6 @@ export class HrEmployeeAddEditDetailsComponent {
         this.employee.image = null;
         return; 
       }
-    }else{
-      this.validationErrors['image'] = '*Image is required.';
     }
   }
 
@@ -257,7 +255,7 @@ export class HrEmployeeAddEditDetailsComponent {
     for (const key in this.employee) {
       if (this.employee.hasOwnProperty(key)) {
         const field = key as keyof AddEmployee;
-        if (!this.employee[field] && field != "code" && field !='work_home') {
+        if (!this.employee[field] && field != "code" && field !='work_home' && field != "image") {
           if(this.EmployeeId !== 0){
             continue
           }
