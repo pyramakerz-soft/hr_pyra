@@ -58,7 +58,8 @@ class ProfileResource extends JsonResource
             ];
         });
         //Handle Notification by location
-        $is_notify_by_location = ($this->department->name == "Academic_school" || $this->department->name == "Factory") ? true : false;
+        $is_notify_by_location = ($this->department->is_location_time) ? true : false;
+
         return [
             'id' => $this->id,
             'name' => $this->name,

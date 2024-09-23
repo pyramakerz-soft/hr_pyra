@@ -12,9 +12,9 @@ class DepartmentSeeder extends Seeder
      */
     public function run(): void
     {
-        Department::create(['name' => 'Software']);
-        Department::create(['name' => 'Academic_school']);
-        Department::create(['name' => 'Factory']);
+        Department::create(['name' => 'Software', 'is_location_time' => false]);
+        Department::create(['name' => 'Academic_school', 'is_location_time' => true]);
+        Department::create(['name' => 'Factory', 'is_location_time' => true]);
         Department::factory()->count(7)->create();
     }
 }

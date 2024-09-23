@@ -25,6 +25,8 @@ class UpdateDepartmentRequest extends FormRequest
         $department = $this->route('department');
         return [
             'name' => ['nullable', 'string', Rule::unique('departments', 'name')->ignore($department->id)],
+            'is_location_time' => ['nullable', 'boolean'],
+
             'manager_id' => ['nullable', 'exists:users,id'],
         ];
     }

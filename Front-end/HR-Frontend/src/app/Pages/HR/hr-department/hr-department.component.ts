@@ -29,6 +29,7 @@ AddButton:boolean=false
     this.departmentServ.getall().subscribe(
       (d: any) => {
         this.departments = d.data.departments;
+
       }
     );
   }

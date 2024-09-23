@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 trait ClockInTrait
 {
-    use ClockTrait;
+    use ClockTrait, HelperTrait;
     protected function checkClockInWithoutClockOut($user_id)
     {
         $query = ClockInOut::where('user_id', $user_id)
@@ -86,17 +86,15 @@ trait ClockInTrait
         //2- check the department_name for authenticated user
         $clockIn = Carbon::parse($request->clock_in);
         $userLocation = $authUser->user_locations()->first();
-
-        if (($authUser->department->name == "Academic_school") || ($authUser->department->name == "Factory")) {
-
+        if ($this->isLocationTime($authUser)) {
             //Calculate Late_arrive by location time
             $locationStartTime = Carbon::parse($userLocation->start_time);
             $late_arrive = $this->calculateLateArrive($clockIn, $locationStartTime);
         } else {
-            //Calculate Late_arrive by User time
             $userStartTime = carbon::parse($authUser->user_detail->start_time);
             $late_arrive = $this->calculateLateArrive($clockIn, $userStartTime);
         }
+
         //3- create ClockIn Site Record
         return $this->createClockInSiteRecord($request, $authUser, $userLocation, $clockIn, $late_arrive);
     }
@@ -132,7 +130,7 @@ trait ClockInTrait
 
         //2- Calculate the late_arrive
         $clockIn = Carbon::parse($request->clock_in);
-        if ($user->department->name == "Academic_school" || $user->department->name == "Factory") {
+        if ($this->isLocationTime($user)) {
             //Calculate Late_arrive by location_time
             $locationStartTime = Carbon::parse($userLocation->start_time);
             $late_arrive = $this->calculateLateArrive($clockIn, $locationStartTime);

@@ -8,8 +8,6 @@ use App\Http\Requests\UpdateDepartmentRequest;
 use App\Http\Resources\Api\DepartmentResource;
 use App\Models\Department;
 use App\Traits\ResponseTrait;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
 
 class DepartmentController extends Controller
 {
@@ -19,10 +17,7 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        $authUser = Auth::user();
-        if (!$authUser->hasRole('Hr')) {
-            return $this->returnError('You are not authorized to view departments', Response::HTTP_FORBIDDEN);
-        }
+
         $departments = Department::with('manager')->get();
         if ($departments->isEmpty()) {
             return $this->returnError('No departments Found');
@@ -36,6 +31,7 @@ class DepartmentController extends Controller
     {
         $department = new Department();
         $department->name = $request->name;
+        $department->is_location_time = $request->is_location_time ?? 0;
         $department->manager_id = $request->manager_id;
 
         if ($department->save()) {
@@ -57,8 +53,10 @@ class DepartmentController extends Controller
      */
     public function update(UpdateDepartmentRequest $request, Department $department)
     {
-        $department->name = $request->name;
-        $department->manager_id = $request->manager_id;
+        $department->name = $request->name ?? $department->name;
+        $department->is_location_time = $request->is_location_time ?? $department->is_location_time;
+
+        $department->manager_id = $request->manager_id ?? $department->manager_id;
         if ($department->save()) {
             return $this->returnData("department", $department, "department updated successfully");
         }
