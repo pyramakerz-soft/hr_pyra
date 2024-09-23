@@ -34,9 +34,10 @@ export class HrEmployeeDetailsComponent {
   getEmployeeByID(id:number){
     this.userService.getUserById(id).subscribe(
       (d: any) => {
+        d.User.start_time = this.convertUTCToEgyptLocalTime(d.User.start_time)
+        d.User.end_time = this.convertUTCToEgyptLocalTime(d.User.end_time)
+
         this.employee = d.User;
-      },
-      (error) => {
       }
     );
   }
@@ -95,4 +96,27 @@ export class HrEmployeeDetailsComponent {
     this.isChange = false
     this.password = '';
   }
+
+  convertUTCToEgyptLocalTime(utcTimeStr: string): string {
+    const [time, period] = utcTimeStr.split(/(AM|PM)/);
+    let [hours, minutes] = time.split(':').map(Number);
+    if (period === 'PM' && hours !== 12) {
+      hours += 12;
+    }
+    if (period === 'AM' && hours === 12) {
+      hours = 0;
+    }
+    const currentDate = new Date();
+    const utcDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate(), hours, minutes));
+    const egyptTimeZone = 'Africa/Cairo';
+    const localDate = new Date(utcDate.toLocaleString('en-US', { timeZone: egyptTimeZone }));
+    let localHours = localDate.getHours();
+    const localMinutes = localDate.getMinutes();
+    const localPeriod = localHours >= 12 ? 'PM' : 'AM';
+    localHours = localHours % 12 || 12; // Converts '0' hours to '12'
+    const formattedHours = String(localHours).padStart(2, '0');
+    const formattedMinutes = String(localMinutes).padStart(2, '0');
+    return `${formattedHours}:${formattedMinutes} ${localPeriod}`;
+  }
+
 }
