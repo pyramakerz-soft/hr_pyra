@@ -48,7 +48,6 @@ class UserController extends Controller
         if (!$usersData) {
             return $this->returnError('No Users Found');
         }
-
         return $this->returnData("data", $usersData, "Users Data");
     }
     public function ManagerNames()

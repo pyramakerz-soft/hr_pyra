@@ -50,22 +50,12 @@ trait UserTrait
     {
         $user->user_locations()->sync($locationIds);
 
-        // foreach ($locationIds as $locationId) {
-        //     if (!$user->user_locations()->wherePivot('location_id', $locationId)->exists()) {
-        //         $user->user_locations()->sync($locationIds);
-        //     }
-        // }
     }
 
     public function assignWorkTypes($user, $workTypeIds)
     {
         $user->work_types()->sync($workTypeIds);
 
-        // foreach ($workTypeIds as $workTypeId) {
-        //     if (!$user->work_types()->wherePivot('work_type_id', $workTypeId)->exists()) {
-        //         $user->work_types()->sync($workTypeIds);
-        //     }
-        // }
     }
     public function searchUsersByNameOrCode($search)
     {

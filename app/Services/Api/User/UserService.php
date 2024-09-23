@@ -42,10 +42,6 @@ class UserService
             'serial_number' => null,
         ]);
 
-        // if (!$user) {
-        //     return $this->returnError('Failed to create user', Response::HTTP_INTERNAL_SERVER_ERROR);
-        // }
-
         return $user;
     }
 
@@ -87,7 +83,7 @@ class UserService
         if ($search) {
             $users = $this->searchUsersByNameOrCode($search);
             if ($users->isEmpty()) {
-                return null; // Handle no users found case in controller
+                return null;
             }
             return [
                 'users' => UserResource::collection($users),

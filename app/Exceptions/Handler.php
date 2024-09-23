@@ -123,6 +123,8 @@ class Handler extends ExceptionHandler
 
         // Database Query Exception
         if ($exception instanceof QueryException) {
+            \Log::error('Database Query Error: ' . $exception->getMessage());
+
             return $this->returnError('Database Error', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
