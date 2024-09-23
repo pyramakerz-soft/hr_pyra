@@ -34,13 +34,10 @@ export class HrEmployeeDetailsComponent {
   getEmployeeByID(id:number){
     this.userService.getUserById(id).subscribe(
       (d: any) => {
+        d.User.start_time = this.convertUTCToEgyptLocalTime(d.User.start_time)
+        d.User.end_time = this.convertUTCToEgyptLocalTime(d.User.end_time)
+
         this.employee = d.User;
-        if(this.employee.start_time && this.employee.end_time){
-          this.employee.start_time = this.convertUTCToEgyptLocalTime(this.employee.start_time)
-          this.employee.end_time = this.convertUTCToEgyptLocalTime(this.employee.end_time)
-        }
-      },
-      (error) => {
       }
     );
   }
