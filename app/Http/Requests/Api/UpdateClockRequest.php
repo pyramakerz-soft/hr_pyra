@@ -23,7 +23,7 @@ class UpdateClockRequest extends FormRequest
     {
         return [
             'clock_in' => ['nullable', 'date_format:Y-m-d H:i'],
-            'clock_out' => ['nullable', 'date_format:Y-m-d H:i', 'after:clock_in'],
+            'clock_out' => ['nullable', 'date_format:Y-m-d H:i'],
         ];
     }
 }

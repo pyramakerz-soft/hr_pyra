@@ -2,43 +2,52 @@
 
 namespace App\Traits;
 
+use Illuminate\Support\Carbon;
+
 trait HelperTrait
 {
+    protected function calculateLateArrive($clockIn, $startTime)
+    {
+        // Extract the time portion only
+        $clockInTime = carbon::parse($clockIn)->format('H:i:s');
+        $startTimeFormatted = Carbon::parse($startTime)->format('H:i:s');
 
-    // public function haversineDistance(float $userLatitude, float $userLongitude, float $locationLatitude, float $locationLongitude)
-    // {
-    //     $R = 6371000; // Earth's radius in metres
+        // Initialize late_arrive as "00:00:00" (no late arrival by default)
+        $late_arrive = "00:00:00";
 
-    //     $userLatitudeRad = $userLatitude * M_PI / 180; // Convert user latitude from degrees to radians
-    //     $locationLatitudeRad = $locationLatitude * M_PI / 180; // Convert location latitude from degrees to radians
+        // Check if the user clocked in late (after the start time)
+        if ($clockInTime > $startTimeFormatted) {
+            // Calculate the late arrival duration and format it as H:i:s
+            $late_arrive = Carbon::createFromFormat('H:i:s', $startTimeFormatted)
+                ->diff(Carbon::createFromFormat('H:i:s', $clockInTime))
+                ->format('%H:%I:%S');
+        }
 
-    //     $deltaLatitude = ($locationLatitude - $userLatitude) * M_PI / 180; // Difference in latitude in radians
-    //     $deltaLongitude = ($locationLongitude - $userLongitude) * M_PI / 180; // Difference in longitude in radians
+        return $late_arrive;
+    }
+    protected function calculateEarlyLeave($clockOut, $endTime)
+    {
 
-    //     $a = sin($deltaLatitude / 2) * sin($deltaLatitude / 2) +
-    //     cos($userLatitudeRad) * cos($locationLatitudeRad) *
-    //     sin($deltaLongitude / 2) * sin($deltaLongitude / 2);
+        // Extract the time portion only
+        $clockOutTime = Carbon::parse($clockOut)->format('H:i:s');
+        $endTimeFormatted = Carbon::parse($endTime)->format('H:i:s');
 
-    //     $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        // Initialize late_arrive as "00:00:00" (no late arrival by default)
+        $early_leave = "00:00:00";
 
-    //     $distance = $R * $c; // Distance in metres
-    //     return $distance;
-    // }
-    // public function uploadImage($request, $inputName = 'image', $directory = 'assets/images/Users')
-    // {
-    //     if ($request->hasFile($inputName)) {
-    //         $path = public_path($directory);
-    //         if (!file_exists($path)) {
-    //             mkdir($path, 0777, true);
-    //         }
+        // Check if the user clocked in late (after the start time)
+        if ($clockOutTime < $endTimeFormatted) {
+            // Calculate the late arrival duration and format it as H:i:s
+            $early_leave = Carbon::createFromFormat('H:i:s', $endTimeFormatted)
+                ->diff(Carbon::createFromFormat('H:i:s', $clockOutTime))
+                ->format('%H:%I:%S');
+        }
 
-    //         $newImageName = uniqid() . "-employee." . $request->file($inputName)->extension();
-    //         $request->file($inputName)->move($path, $newImageName);
+        return $early_leave;
+    }
+    protected function calculateDuration($clockIn, $clockOut)
+    {
+        return $clockOut ? Carbon::parse($clockIn)->diff(Carbon::parse($clockOut))->format('%H:%I:%S') : null;
 
-    //         return asset($directory . '/' . $newImageName);
-    //     }
-
-    //     return false;
-    // }
-
+    }
 }

@@ -22,7 +22,7 @@ class ClockInRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'location_id' => ['required_if:location_type,site', 'exists:locations,id'],
+            'location_id' => ['required_if:location_type,site', 'nullable', 'exists:locations,id'],
             'location_type' => 'required|exists:work_types,name',
             'clock_in' => 'required|date_format:Y-m-d H:i:s',
             'latitude' => 'required_if:location_type,site|numeric|between:-90,90|regex:/^\d{1,3}\.\d{1,7}$/',

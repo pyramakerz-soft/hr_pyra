@@ -57,19 +57,25 @@ class ProfileResource extends JsonResource
 
             ];
         });
-
+        //Handle Notification by location
+        $is_notify_by_location = ($this->department->name == "Academic_school" || $this->department->name == "Factory") ? true : false;
         return [
             'id' => $this->id,
             'name' => $this->name,
             'national_id' => $this->national_id,
             'image' => $this->image ?? null,
             'job_title' => $this->user_detail->emp_type ?? null,
+            'department_id' => $this->department->id,
+            'department_name' => $this->department->name,
+
             'role_name' => $this->getRoleName(),
             'is_clocked_out' => $is_clocked_out,
             'clockIn' => $clockIn,
             'total_hours' => $total_hours,
             'user_start_time' => $this->user_detail->start_time,
             'user_end_time' => $this->user_detail->end_time,
+            'is_notify_by_location' => $is_notify_by_location,
+
             'assigned_locations_user' => $locations_name,
             'work_home' => $work_home,
         ];
