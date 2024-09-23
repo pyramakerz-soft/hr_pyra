@@ -15,8 +15,8 @@ class LocationSeeder extends Seeder
         Location::create([
             'name' => "Pyramakerz",
             'address' => "Yehia Mosque, AboQeir Street Zizinya",
-            'latitude' => "31.2475701",
-            'longitude' => "29.9632017",
+            'latitude' => "31.2403970",
+            'longitude' => "29.9660127",
             'start_time' => '07:30',
             'end_time' => "15:30",
         ]);

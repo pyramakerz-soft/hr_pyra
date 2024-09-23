@@ -90,7 +90,7 @@ trait ClockOutTrait
             return $validationError;
         }
         //4- check the department_name for authenticated_user
-        if (($authUser->department->name == "Academic_school") || ($authUser->department->name == "Factory")) {
+        if ($this->isLocationTime($authUser)) {
             // calculate the early leave depend on location
             $locationEndTime = Carbon::parse($lastClockedInLocation->end_time);
             $early_leave = $this->calculateEarlyLeave($clockOut, $locationEndTime);

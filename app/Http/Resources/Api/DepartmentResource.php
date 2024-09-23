@@ -14,10 +14,11 @@ class DepartmentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-
+        $is_location_time = $this->is_location_time ? true : false;
         return [
             "id" => $this->id,
             "name" => $this->name,
+            'is_location_time' => $is_location_time,
             "manager_id" => $this->manager_id,
             'manager_name' => $this->manager ? $this->manager->name : null,
         ];

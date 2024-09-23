@@ -23,6 +23,7 @@ class StoreDepartmentRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'unique:departments,name'],
+            'is_location_time' => ['required', 'boolean'],
             'manager_id' => ['nullable', 'exists:users,id'],
         ];
     }
