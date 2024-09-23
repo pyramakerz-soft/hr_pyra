@@ -25,6 +25,9 @@
               Manager Name <i class="fa-solid fa-arrow-down mx-2"></i>
             </th>
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+              Is Location Time <i class="fa-solid fa-arrow-down mx-2"></i>
+            </th>
+            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
               Actions <i class="fa-solid fa-arrow-down mx-2"></i>
             </th>
           </tr>
@@ -47,7 +50,8 @@
             <td class="py-5 px-4">
               {{ row.manager_name }}
             </td>
-  
+            <td class="py-5 px-4">{{ row.is_location_time }}</td>
+
             <td class="py-5 px-4">
               <div class="px-2">
                 <button (click)="EditDepartment(row.id)"
