@@ -394,9 +394,17 @@ export class HrEmployeeAddEditDetailsComponent {
             this.router.navigateByUrl("HR/HREmployee")
           },
           error => {
+            console.log(error)
             if (error.error && error.error.errors) {
               this.isSaved = false
               this.handleServerErrors(error.error.errors as Record<keyof AddEmployee, string[]>);
+            }else{
+              Swal.fire({
+                icon: "error",
+                title: "Server Error, try in another time",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#FF7519",
+              })
             }
           }
         );
@@ -410,6 +418,13 @@ export class HrEmployeeAddEditDetailsComponent {
             if (error.error && error.error.errors) {
               this.isSaved = false
               this.handleServerErrors(error.error.errors as Record<keyof AddEmployee, string[]>);
+            }else{
+              Swal.fire({
+                icon: "error",
+                title: "Server Error, try in another time",
+                confirmButtonText: "OK",
+                confirmButtonColor: "#FF7519",
+              })
             }
           }
         );
