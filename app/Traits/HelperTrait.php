@@ -50,4 +50,8 @@ trait HelperTrait
         return $clockOut ? Carbon::parse($clockIn)->diff(Carbon::parse($clockOut))->format('%H:%I:%S') : null;
 
     }
+    protected function isLocationTime($authUser)
+    {
+        return $authUser->department->is_location_time ? true : false;
+    }
 }

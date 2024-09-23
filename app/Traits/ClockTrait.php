@@ -141,10 +141,10 @@ trait ClockTrait
     // {
     //     return $clockOut ? $clockIn->diff($clockOut)->format('%H:%I:%S') : null;
     // }
-    protected function isFactoryOrAcademicSchool($user)
-    {
-        return $user->department->name === 'Factory' || $user->department->name === 'Academic_school';
-    }
+    // protected function isFactoryOrAcademicSchool($user)
+    // {
+    //     return $user->department->name === 'Factory' || $user->department->name === 'Academic_school';
+    // }
     protected function getUserLocationTimes($user)
     {
         $userLocation = $user->user_locations()->first();
@@ -187,7 +187,7 @@ trait ClockTrait
         $clockOutTime = $clockOut->format('H:i:s');
 
         // Step 4: Determine the time boundaries based on the user's department
-        if ($this->isFactoryOrAcademicSchool($user)) {
+        if ($this->isLocationTime($user)) {
             $locationTimes = $this->getUserLocationTimes($user);
         } else {
             $locationTimes = $this->getUserDetailTimes($user);
@@ -202,44 +202,33 @@ trait ClockTrait
     }
     protected function updateHomeClock($request, $clock, $user)
     {
+        //1- Validate ClockIn & ClockOut
         $clockIn = $this->getClockInTime($request, $clock);
         $clockOut = $this->getClockOutTime($request, $clock);
+        $this->validateClockTime($clockIn, $clockOut);
 
-        // If clock_out is null, use the current time (now) for calculating the duration
+        //2- Calculate the duration
+        $durationFormatted = $this->calculateDuration($clockIn, $clockOut);
 
-        if (!$clockOut->isSameDay($clockIn)) {
-            return $this->returnError("Clock-in and clock-out must be on the same day", 400);
-        }
-
-        if ($clockOut->lessThanOrEqualTo($clockIn)) {
-            return $this->returnError("Clock-out must be after clock-in", 400);
-        }
-
-        // Calculate the duration
-        // If clock_out is null, calculate duration from clock_in to now
-        $durationFormatted = $clockOut ? $clockIn->diff($clockOut)->format('%H:%I:%S') : null;
-
-        // Get start and end times from the user's details (for home)
-        $startTime = Carbon::parse($user->user_detail->start_time)->format('H:i:s');
-        $endTime = Carbon::parse($user->user_detail->end_time)->format('H:i:s');
-
-        //Extract ClockIn & ClockOut Time only
+        //3- Prepare Data for Calculate Late Arrival and Early Leave
+        $userTimes = $this->getUserDetailTimes($user);
         $clockInTime = $clockIn->format('H:i:s');
         $clockOutTime = $clockOut->format('H:i:s');
 
-        // Calculate late_arrive and early_leave based on time only
-        $late_arrive = ($clockInTime > $startTime) ? Carbon::createFromTimeString($startTime)->diff(Carbon::createFromTimeString($clockInTime))->format('%H:%I:%S') : '00:00:00';
-        $early_leave = ($clockOutTime < $endTime) ? Carbon::createFromTimeString($endTime)->diff(Carbon::createFromTimeString($clockOutTime))->format('%H:%I:%S') : '00:00:00';
-        // Update clock record
-        $clock->update([
-            'clock_in' => $clockIn->format('Y-m-d H:i:s'),
-            'clock_out' => $clockOut->format('Y-m-d H:i:s'),
-            'duration' => $durationFormatted,
-            'late_arrive' => $late_arrive,
-            'early_leave' => $early_leave,
-        ]);
+        //4- Calculate late_arrive and early_leave based on time only
+        $late_arrive = $this->calculateLateArrive($clockInTime, $userTimes['start_time']);
+        $early_leave = $this->calculateEarlyLeave($clockOutTime, $userTimes['end_time']);
+        //5- Update clock record
+        return $this->updateClockRecord($clock, $clockIn, $clockOut, $durationFormatted, $late_arrive, $early_leave);
+        // $clock->update([
+        //     'clock_in' => $clockIn->format('Y-m-d H:i:s'),
+        //     'clock_out' => $clockOut->format('Y-m-d H:i:s'),
+        //     'duration' => $durationFormatted,
+        //     'late_arrive' => $late_arrive,
+        //     'early_leave' => $early_leave,
+        // ]);
 
-        return $this->returnData("clock", new ClockResource($clock), "Clock Updated Successfully for {$user->name}");
+        // return $this->returnData("clock", new ClockResource($clock), "Clock Updated Successfully for {$user->name}");
     }
 
 }

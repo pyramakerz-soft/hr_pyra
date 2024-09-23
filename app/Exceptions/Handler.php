@@ -18,6 +18,7 @@ use PDOException;
 use Psy\Readline\Hoa\FileException;
 use RuntimeException;
 use Spatie\Permission\Exceptions\RoleDoesNotExist;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -97,7 +98,7 @@ class Handler extends ExceptionHandler
             return $this->returnError('There is no role by this name', Response::HTTP_BAD_REQUEST);
 
         }
-        if ($exception instanceof AuthorizationException) {
+        if ($exception instanceof AuthorizationException || $exception instanceof UnauthorizedException) {
             return $this->returnError('You are not authorized', Response::HTTP_FORBIDDEN);
 
         }
