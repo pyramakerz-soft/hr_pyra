@@ -34,13 +34,14 @@ export class DepartmentService {
   }
 
 
-  createDepartment(name: string, managerId: number): Observable<Department> {
+  createDepartment(name: string, managerId: number ,Is_location_time :number): Observable<Department> {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
     const body = {
       name: name,
-      manager_id: managerId
+      manager_id: managerId,
+      is_location_time:Is_location_time
     };
 
     return this.http.post<Department>(this.baseurl, body, { headers });
@@ -52,11 +53,13 @@ export class DepartmentService {
     return this.http.get<Department[]>(`${this.baseurl}/${ID}`, { headers });
   }
 
-  UpdateDept(ID: number ,name:string ,managerId:number ){
+  UpdateDept(ID: number ,name:string ,managerId:number ,Is_location_time :number){
     const token = localStorage.getItem("token");
     const body = {
       name: name,
-      manager_id: managerId
+      manager_id: managerId,
+      is_location_time:Is_location_time
+
     };
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.post<Department[]>(`${this.baseurl}/${ID}`,body, { headers });

@@ -18,6 +18,7 @@ class DepartmentFactory extends Factory
     {
         return [
             'name' => fake()->name(),
+
         ];
     }
 }

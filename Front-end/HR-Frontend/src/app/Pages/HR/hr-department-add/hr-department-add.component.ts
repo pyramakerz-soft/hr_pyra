@@ -23,12 +23,15 @@ export class HrDepartmentAddComponent {
   mode: string = ""
   DeptId: number = 1;
   
+  is_location_time :boolean =true
 
   DeptNameError: string = ""; 
   ManagerError: string = ""; 
 
   SaveButton:boolean=false;
 
+  NotifyError: string = ""; 
+  is_location_timeNum :number=1;
 
   constructor(public managerServ: ManagersService, public departmentServ: DepartmentService, private router: Router, private route: ActivatedRoute) { }
 
@@ -72,7 +75,7 @@ export class HrDepartmentAddComponent {
   }
 
   Save() {
-    if (this.nameSelected == "" || this.DeptName == "") {
+    if (this.nameSelected == "" || this.DeptName == "" ) {
       // Swal.fire({
       //   text: "Complete all required fields.",
       //   confirmButtonText: "OK",
@@ -108,7 +111,12 @@ export class HrDepartmentAddComponent {
     const manager = this.ManagerNames.find(manager => manager.manager_name === this.nameSelected);
     if (manager) {
       const ManagerId = manager.manager_id;
-      this.departmentServ.createDepartment(this.DeptName, ManagerId).subscribe(
+      if (this.is_location_time){this.is_location_timeNum=1}
+      else{
+        this.is_location_timeNum=0
+      }
+
+      this.departmentServ.createDepartment(this.DeptName, ManagerId ,this.is_location_timeNum).subscribe(
         (response: any) => {
           this.router.navigateByUrl("/HR/HRDepartment");
 
@@ -147,7 +155,8 @@ GetByID(id: number){
   this.departmentServ.GetByID(id).subscribe(
     (d: any) => {
       this.DeptName = d.department.name;
-      this.nameSelected = d.department.manager_name
+      this.nameSelected = d.department.manager_name;
+      this.is_location_time=d.department.is_location_time;
     }
   );
 }
@@ -161,7 +170,11 @@ UpdateDepartment(){
   const manager = this.ManagerNames.find(manager => manager.manager_name === this.nameSelected);
   if (manager) {
     const ManagerId = manager.manager_id;
-    this.departmentServ.UpdateDept(this.DeptId, this.DeptName, ManagerId).subscribe(
+    if (this.is_location_time){this.is_location_timeNum=1}
+    else{
+      this.is_location_timeNum=0
+    }
+    this.departmentServ.UpdateDept(this.DeptId, this.DeptName, ManagerId ,this.is_location_timeNum).subscribe(
       (response: any) => {
         this.router.navigateByUrl("/HR/HRDepartment");
 
