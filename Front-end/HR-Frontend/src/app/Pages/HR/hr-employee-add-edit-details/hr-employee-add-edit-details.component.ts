@@ -111,6 +111,9 @@ export class HrEmployeeAddEditDetailsComponent {
   getEmployeeByID(id:number){
     this.userService.getUserById(id).subscribe(
       (d: any) => {
+        d.User.start_time = this.convertUTCToEgyptLocalTime(d.User.start_time)
+        d.User.end_time = this.convertUTCToEgyptLocalTime(d.User.end_time)
+
         this.employee = d.User;
         this.employee.roles = this.employee.roles || []
         if(typeof this.employee.image == "string"){
@@ -351,7 +354,7 @@ export class HrEmployeeAddEditDetailsComponent {
 
       const workingHoursDay = this.employee.working_hours_day != null ? this.employee.working_hours_day : 0; 
 
-      if (diffHours - parseFloat(workingHoursDay.toString()) > 0.01 || diffHours < 0 ) {
+      if (diffHours - parseFloat(workingHoursDay.toString()) > 0 || diffHours - parseFloat(workingHoursDay.toString()) < 0 || diffHours < 0 ) {
         this.validationErrors['start_time'] = 'Invalid Start Time.';
         this.validationErrors["end_time"] = 'Invalid End Time.';
         this.validationErrors['working_hours_day'] = 'Invalid Working hours day.';
@@ -386,15 +389,14 @@ export class HrEmployeeAddEditDetailsComponent {
       this.employee.department_id = Number(this.employee.department_id);
       this.employee.start_time = this.employee.start_time ? this.convertEgyptianToUtcTime(this.employee.start_time) : null
       this.employee.end_time = this.employee.end_time ? this.convertEgyptianToUtcTime(this.employee.end_time) : null
+      
       if(this.EmployeeId === 0){
-        console.log(this.employee)
         this.userService.createUser(this.employee).subscribe(
           (result: any) => {
             this.isSaved = false
             this.router.navigateByUrl("HR/HREmployee")
           },
           error => {
-            console.log(error)
             if (error.error && error.error.errors) {
               this.isSaved = false
               this.handleServerErrors(error.error.errors as Record<keyof AddEmployee, string[]>);
@@ -450,5 +452,31 @@ export class HrEmployeeAddEditDetailsComponent {
     const utcMinutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
     return `${utcHours}:${utcMinutes}`;
   }
+
+  convertUTCToEgyptLocalTime(utcTimeStr: string): string {
+    const [time, period] = utcTimeStr.split(/(AM|PM)/);
+    let [hours, minutes] = time.split(':').map(Number);
+    
+    if (period === 'PM' && hours !== 12) {
+        hours += 12;
+    }
+    if (period === 'AM' && hours === 12) {
+        hours = 0;
+    }
+
+    const currentDate = new Date();
+    const utcDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate(), hours, minutes));
+    const egyptTimeZone = 'Africa/Cairo';
+    const localDate = new Date(utcDate.toLocaleString('en-US', { timeZone: egyptTimeZone }));
+
+    const localHours = localDate.getHours();
+    const localMinutes = localDate.getMinutes();
+
+    const formattedHours = String(localHours).padStart(2, '0');
+    const formattedMinutes = String(localMinutes).padStart(2, '0');
+
+    return `${formattedHours}:${formattedMinutes}`;
+}
+
 
 }
