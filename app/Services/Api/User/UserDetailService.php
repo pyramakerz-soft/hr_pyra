@@ -39,20 +39,20 @@ class UserDetailService
 
     public function updateUserDetail($userDetail, $data)
     {
-        $salary = $data['salary'];
-        $working_hours_day = $data['working_hours_day'];
+        $salary = $data['salary'] ?? $userDetail->salary;
+        $working_hours_day = $data['working_hours_day'] ?? $userDetail->working_hours_day;
         $hourly_rate = $working_hours_day === null || $working_hours_day == 0 ? 0 : ($salary / 30) / $working_hours_day;
 
         $start_time = isset($data['start_time']) ? Carbon::parse($data['start_time'])->format("H:i:s") : $userDetail->start_time;
         $end_time = isset($data['end_time']) ? Carbon::parse($data['end_time'])->format("H:i:s") : $userDetail->end_time;
 
         if ($end_time <= $start_time) {
-            return null; // Or handle error as needed
+            return null;
         }
 
         $userDetail->update([
-            'salary' => $salary ?? $userDetail->salary,
-            'working_hours_day' => $working_hours_day ?? $userDetail->working_hours_day,
+            'salary' => $salary,
+            'working_hours_day' => $working_hours_day,
             'hourly_rate' => $hourly_rate,
             'overtime_hours' => $data['overtime_hours'] ?? $userDetail->overtime_hours,
             'start_time' => $start_time,

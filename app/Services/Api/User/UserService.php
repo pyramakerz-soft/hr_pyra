@@ -52,13 +52,16 @@ class UserService
 
     public function updateUser($user, $data)
     {
+        // Ensure that the department_id exists in $data before accessing it
+        $departmentId = isset($data['department_id']) ? $data['department_id'] : $user->department_id;
+
         // Validate department inside updateUser
-        $department = Department::find($data['department_id'] ?? $user->department_id);
+        $department = Department::findorFail($departmentId);
         if (!$department) {
             return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
         }
 
-        $code = $this->generateUniqueCode($data['department_id']);
+        $code = $this->generateUniqueCode($departmentId);
         $code = $code ?? $user->code;
 
         // Check if an image is provided in the request
@@ -77,7 +80,7 @@ class UserService
             'national_id' => $data['national_id'] ?? $user->national_id,
             'code' => $code,
             'gender' => $data['gender'] ?? $user->gender,
-            'department_id' => (int) $data['department_id'],
+            'department_id' => (int) $departmentId,
             'image' => $imageUrl,
         ]);
 
