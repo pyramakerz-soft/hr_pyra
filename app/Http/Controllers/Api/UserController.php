@@ -337,7 +337,7 @@ class UserController extends Controller
                 'hiring_date',
                 'roles',
                 'location_id',
-                'work_type_id',
+                'work_type_id'
             ];
 
             $errors = [];
@@ -498,6 +498,7 @@ class UserController extends Controller
             return $this->returnError('An error occurred while processing the file: ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
     /**
      * @OA\Get(
      *     path="/api/auth/get_user_by_id/{user}",
