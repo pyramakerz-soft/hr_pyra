@@ -354,10 +354,6 @@ export class HrEmployeeAddEditDetailsComponent {
 
       const workingHoursDay = this.employee.working_hours_day != null ? this.employee.working_hours_day : 0; 
 
-      console.log(workingHoursDay)
-      console.log(diffHours - parseFloat(workingHoursDay.toString()))
-      console.log(diffHours - parseFloat(workingHoursDay.toString()) > 0.01)
-      console.log(diffHours)
       if (diffHours - parseFloat(workingHoursDay.toString()) > 0 || diffHours - parseFloat(workingHoursDay.toString()) < 0 || diffHours < 0 ) {
         this.validationErrors['start_time'] = 'Invalid Start Time.';
         this.validationErrors["end_time"] = 'Invalid End Time.';
