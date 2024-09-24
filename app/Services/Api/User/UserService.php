@@ -54,7 +54,6 @@ class UserService
     {
         // Ensure that the department_id exists in $data before accessing it
         $departmentId = isset($data['department_id']) ? $data['department_id'] : $user->department_id;
-
         // Validate department inside updateUser
         $department = Department::findorFail($departmentId);
         if (!$department) {
