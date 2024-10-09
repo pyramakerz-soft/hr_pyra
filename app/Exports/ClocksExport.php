@@ -37,7 +37,6 @@ class ClocksExport implements WithMultipleSheets
 
         // Get distinct user IDs with their clocks
         $userClocks = $query->get()->groupBy('user_id');
-
         foreach ($userClocks as $userId => $clocks) {
             // Fetch user details for sheet title
             $user = $clocks->first()->user;

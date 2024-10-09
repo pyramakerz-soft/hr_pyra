@@ -1,0 +1,32 @@
+<div class="bg-[#dddddd5e] w-full fixed inset-0 ">
+    <div class="relative p-6 md:p-12 m-auto w-[85%] md:w-2/3 lg:w-1/2 top-10 rounded-2xl shadow-2xl text-[#111827] bg-white">
+        <img class="absolute right-0 top-0 w-[30%]" src="../../../assets/images/logo-orange 1.png">
+        <p class="font-semibold text-xl md:text-3xl mb-5 md:mb-8">Clock In</p>
+    
+        <div class="rounded-xl p-4 flex items-center bg-[#E5E5E580] mb-8 md:mb-12">
+            <img class="w-[25%] lg:w-[15%] aspect-square object-cover rounded-full mr-6" src="../../../assets/images/Layer 2.png">
+            <div>
+                <p class="font-semibold text-base md:text-2xl">Aya Atiya</p>
+                <p class="text-sm md:text-lg text-[#6B7280] font-medium">UI/UX Designer</p>
+            </div>
+        </div>
+    
+        <div class="flex justify-between mb-5 md:mb-8">
+            <div>
+                <p class="font-medium text-sm md:text-lg text-[#6B7280] border-t-[3px] py-2 border-[#FF7519] inline">Date</p>
+                <p class="font-semibold text-base md:text-2xl py-2">{{getCurrentDate()}}</p>
+            </div>
+            <div>
+                <p class="font-medium text-sm md:text-lg text-[#6B7280] border-t-[3px] py-2 border-[#FF7519] inline">Time</p>
+                <p class="font-semibold text-base md:text-2xl py-2">{{ getCurrentFormattedTime() }}</p>
+            </div>
+        </div>
+        <p class="font-medium text-sm md:text-lg text-[#6B7280] border-t-[3px] py-2 border-[#FF7519] inline">Location</p>
+        <p class="font-semibold text-base md:text-2xl py-2">{{locationName}}</p>
+    
+        <div class="mt-5 md:mt-8 flex justify-end">
+            <button (click)="closeDialog()" class="font-bold text-base md:text-2xl text-[#707070] py-2 md:py-4 px-5 md:px-9 rounded-2xl border border-[#9F9999] mr-5">Cancel</button>
+            <button (click)="sendLocation()" class="font-bold text-base md:text-2xl text-white py-2 md:py-4 px-5 md:px-9 rounded-2xl border border-[#FF7519] bg-[#FF7519]">Clock In</button>
+        </div>
+    </div>
+</div>

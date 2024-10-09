@@ -9,10 +9,10 @@ use App\Http\Requests\Api\UpdateClockRequest;
 use App\Http\Resources\ClockResource;
 use App\Models\ClockInOut;
 use App\Models\User;
-use App\Services\Api\AuthorizationService;
 use App\Traits\ClockInTrait;
 use App\Traits\ClockOutTrait;
 use App\Traits\ClockTrait;
+use App\Traits\HelperTrait;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -20,26 +20,20 @@ use Illuminate\Support\Facades\Auth;
 
 class ClockService
 {
-    use ResponseTrait, ClockTrait, ClockInTrait, ClockOutTrait;
-    protected $authorizationService;
+    use ResponseTrait, ClockTrait, ClockInTrait, ClockOutTrait, HelperTrait;
     protected $exportService;
     protected $filters;
 
     public function __construct(
-        AuthorizationService $authorizationService,
         ClockExportService $exportService,
         array $filters = []
     ) {
-        $this->authorizationService = $authorizationService;
         $this->exportService = $exportService;
         $this->filters = $filters;
     }
 
     public function getAllClocks(Request $request)
     {
-        //Check For Hr Role
-        $authUser = Auth::user();
-        $this->authorizationService->authorizeHrUser($authUser);
 
         $query = ClockInOut::query();
         // Apply all filters
@@ -70,9 +64,6 @@ class ClockService
 
     public function getUserClocksById(Request $request, User $user)
     {
-        // Authorize HR User
-        $authUser = Auth::user();
-        $this->authorizationService->authorizeHrUser($authUser);
 
         $query = ClockInOut::where('user_id', $user->id);
 
@@ -168,17 +159,14 @@ class ClockService
 
     public function updateUserClock(UpdateClockRequest $request, User $user, ClockInOut $clock)
     {
-        //1- Check the Authority
-        $authUser = Auth::user();
-        $this->authorizationService->authorizeHrUser($authUser);
 
-        //2- Check if clock belongs to the user
+        //1- Check if clock belongs to the user
         $clock = $this->getUserClock($user->id, $clock->id);
         if (!$clock) {
             return $this->returnError("No clocks found for this user", 404);
         }
 
-        //3- Update the clock
+        //2- Update the clock
         if ($clock->location_type == 'home') {
             return $this->updateHomeClock($request, $clock, $user);
         }
@@ -188,21 +176,18 @@ class ClockService
 
     public function AddClockByHr(AddClockRequest $request, User $user)
     {
-        //1- Check for Authority of Auth_User
-        $authUser = Auth::user();
-        $this->authorizationService->authorizeHrUser($authUser);
 
-        //2- Check if the user has an existing clock-in without a clock-out
+        //1- Check if the user has an existing clock-in without a clock-out
         if ($this->checkExistingClockInWithoutClockOut($user->id)) {
             return $this->returnError('You already have an existing clock-in without clocking out.');
         }
 
-        // Handle home clock-in if location_type is 'home'
+        //2- Handle home clock-in if location_type is 'home'
         if ($request->location_type == 'home') {
             return $this->handleHomeClockIn($request, $user->id);
         }
 
-        // Handle site clock-in if location_type is 'site'
+        //3- Handle site clock-in if location_type is 'site'
         return $this->handleSiteClockInByHr($request, $user);
     }
 }
