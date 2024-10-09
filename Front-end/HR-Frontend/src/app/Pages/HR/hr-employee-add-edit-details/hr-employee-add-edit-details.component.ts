@@ -32,7 +32,7 @@ export class HrEmployeeAddEditDetailsComponent {
   isSaved = false
   
   employee: AddEmployee = new AddEmployee(
-    null, '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], [], false
+    null, '', '', null, null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], [], false
   );
 
   regexPhone = /^(010|011|012|015)\d{8}$/;
@@ -258,7 +258,7 @@ export class HrEmployeeAddEditDetailsComponent {
     for (const key in this.employee) {
       if (this.employee.hasOwnProperty(key)) {
         const field = key as keyof AddEmployee;
-        if (!this.employee[field] && field != "code" && field !='work_home' && field != "image") {
+        if (!this.employee[field] && field != "code" && field !='work_home' && field != "image" && field != "deparment_name") {
           if(this.EmployeeId !== 0){
             continue
           }

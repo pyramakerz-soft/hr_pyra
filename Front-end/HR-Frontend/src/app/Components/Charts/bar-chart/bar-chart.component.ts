@@ -77,6 +77,9 @@ export class BarChartComponent {
               color: 'transparent', 
               width: 0  
             },
+            ticks: {
+              precision: 0
+            }
           }
         }
       }
