@@ -228,6 +228,7 @@
                         </label>
                         <input [(ngModel)]="employee.hiring_date"
                         (ngModelChange)="onInputValueChange({ field: 'hiring_date', value: $event })"
+                        name="hiring_date"
                          type="date" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Choose">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
@@ -286,3 +287,18 @@
         </div>
     </div> 
 </div>
+
+
+<script>
+    $(function() {
+      $('input[name="hiring_date"]').daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 1901,
+        maxYear: parseInt(moment().format('YYYY'),10)
+      }, function(start, end, label) {
+        var years = moment().diff(start, 'years');
+        alert("You are " + years + " years old!");
+      });
+    });
+</script>
