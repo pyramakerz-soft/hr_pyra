@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Type;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTypeRequest;
 use App\Http\Requests\UpdateTypeRequest;
+use App\Models\Type;
 
+/**
+ * @hideFromApi
+ */
 class TypeController extends Controller
 {
     /**

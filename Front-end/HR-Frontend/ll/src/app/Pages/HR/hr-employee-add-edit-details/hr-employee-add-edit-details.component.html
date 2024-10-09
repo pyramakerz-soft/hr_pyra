@@ -1,0 +1,280 @@
+<div>
+    <div class="flex justify-between mb-5 items-center">
+        <div>
+            <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Employee</p>
+        </div>
+        <button (click)="SaveEmployee()" 
+            class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
+            Save
+        </button>
+        
+    </div>
+
+    <div class="border border-[#ECECEC] rounded-lg p-4 md:p-8 shadow-md shadow-[#0000001F]">
+        <p class="font-semibold text-sm md:text-lg mb-3">Information's</p>
+   
+        <div class="mt-5">
+            <div class="flex items-center space-x-4">
+                <div class="flex justify-center md:justify-start w-full md:w-1/3">
+                    <label for="file-upload" class="cursor-pointer flex flex-col items-center bg-[#F6F6F6] rounded-xl px-6 py-3 lg:py-5">
+                        <img *ngIf="!imagePreview" src="../../../../assets/images/AddPhoto.png" class="w-1/4">
+                        <img *ngIf="imagePreview" [src]="imagePreview" class="w-1/3 object-cover">
+                        <span class="bg-[#FF7519] text-white px-4 md:px-8 py-2 lg:py-4 lg:font-semibold text-xs md:text-sm rounded-lg my-2 md:my-4 text-center">Select Image</span>
+                        <p class="font-normal text-xs md:text-sm">or drag photo here</p>
+                        <p class="font-normal text-xs md:text-sm text-[#8E8E93]">(JPEG, PNG with max size of 15 MB)</p>
+                    </label>
+                    <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)" accept="image/jpeg, image/png"  />
+                </div>
+                <span *ngIf="validationErrors['image']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['image'] }}</span>
+            </div>
+
+            <div class="text-[#3A3A3C] mt-4 flex flex-col md:flex-row md:space-x-8 space-y-3 md:space-y-0">
+                <div class="flex-1">
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Name
+                            <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name'] }}</span>
+                        </label>
+                        <input [(ngModel)]="employee.name" 
+                            (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"
+                            type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the name">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Department
+                            <span *ngIf="validationErrors['department_id']" class="text-red-500 ml-3 font-normal">{{ validationErrors['department_id'] }}</span>
+                        </label>
+                        <select [(ngModel)]="employee.department_id" 
+                        (ngModelChange)="onInputValueChange({ field: 'department_id', value: $event })"
+                        class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl overflow-y-auto">
+                            @if(departments.length !==0 ) {
+                                @for(department of departments; track $index){
+                                    <option value="{{department.id}}">{{department.name}}</option>
+                                }
+                            } @else {
+                                <option disabled selected>No Data Found</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Phone
+                            <span *ngIf="validationErrors['phone']" class="text-red-500 ml-3 font-normal">{{ validationErrors['phone'] }}</span>
+                        </label>
+                        <input [(ngModel)]="employee.phone" 
+                        (ngModelChange)="onInputValueChange({ field: 'phone', value: $event })"
+                        type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the phone">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Email
+                            <span *ngIf="validationErrors['email']" class="text-red-500 ml-3 font-normal">{{ validationErrors['email'] }}</span>
+                        </label>
+                        <input [(ngModel)]="employee.email" 
+                        (ngModelChange)="onInputValueChange({ field: 'email', value: $event })"
+                        type="email" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the email">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            National ID
+                            <span *ngIf="validationErrors['national_id']" class="text-red-500 ml-3 font-normal">{{ validationErrors['national_id'] }}</span>
+                        </label>
+                        <input [(ngModel)]="employee.national_id" 
+                        (ngModelChange)="onInputValueChange({ field: 'national_id', value: $event })"
+                        type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the national ID">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Salary
+                            <span *ngIf="validationErrors['salary']" class="text-red-500 ml-3 font-normal">{{ validationErrors['salary'] }}</span>
+                        </label>
+                        <input [(ngModel)]="employee.salary" 
+                        (ngModelChange)="onInputValueChange({ field: 'salary', value: $event })"
+                        type="number"
+                        (input)="filterNumericInput($event)"
+                        class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the salary number">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Working Hours Day
+                            <span *ngIf="validationErrors['working_hours_day']" class="text-red-500 ml-3 font-normal">{{ validationErrors['working_hours_day'] }}</span>
+                        </label>
+                        <input [(ngModel)]="employee.working_hours_day"
+                        (ngModelChange)="onInputValueChange({ field: 'working_hours_day', value: $event })"
+                        type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the working hours day">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Gender
+                            <span *ngIf="validationErrors['gender']" class="text-red-500 ml-3 font-normal">{{ validationErrors['gender'] }}</span>
+                        </label>
+                        <select [(ngModel)]="employee.gender" 
+                        (ngModelChange)="onInputValueChange({ field: 'gender', value: $event })"
+                        class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+                            <option value="" disabled selected hidden>Choose</option>
+                            <option value="m">Male</option>
+                            <option value="f">Female</option>
+                        </select>
+                    </div>
+                    <div class="text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Work Type
+                            <span *ngIf="validationErrors['work_type_id']" class="text-red-500 ml-3 font-normal">{{ validationErrors['work_type_id'] }}</span>
+                        </label>
+                        <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+                            @if(workTypes.length !==0 ) {
+                                <div *ngFor="let work of workTypes; let i = index" class="flex items-center mb-2">
+                                    <input 
+                                        type="checkbox" 
+                                        id="workType_{{work.id}}" 
+                                        [value]="work.id" 
+                                        class="mr-2"
+                                        (change)="onWorkTypeChange(work.id, $event)"
+                                        [checked]="employee.work_type_id.includes(work.id)"
+                                        >
+                                    <label for="workType_{{work.id}}" class="text-sm">{{work.name}}</label>
+                                </div>
+                            } @else {
+                                <div>No Data Found</div>
+                            }
+                        </div>
+                    </div>  
+                </div>
+
+                <div class="dropdown-container flex-1">
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Location
+                            <span *ngIf="validationErrors['location_id']" class="text-red-500 text-sm ml-2 font-normal">{{ validationErrors['location_id'] }}</span>
+                        </label>
+                        <div>
+                            <!-- Dropdown toggle -->
+                            <div class="flex justify-between items-center w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl cursor-pointer" 
+                            (click)="toggleDropdown($event)">
+                                <span *ngIf="employee.location_id.length == 0">
+                                   Choose Location
+                                </span>
+                                <div *ngIf="employee.location_id.length != 0" class="flex space-x-2 flex-wrap">
+                                    <div *ngFor="let locationId of employee.location_id">
+                                        <p *ngFor="let location of Locations">
+                                            @if(location.id == locationId){
+                                                <p class="p-1 rounded-lg border border-[#bebebe]">
+                                                    {{location.name}}
+                                                    <i class="fa-solid fa-xmark text-red-600 ml-3" (click)="removeFromLocations(locationId, $event)"></i>
+                                                </p>
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-angle-down"></i>
+                            </div>
+                    
+                            <!-- Dropdown content -->
+                            <div *ngIf="isDropdownOpen" class=" w-full border border-[#E5E5EA] rounded-xl bg-white mt-1 max-h-60 overflow-y-auto">
+                                @if(Locations.length !==0 ) {
+                                    <div *ngFor="let location of Locations" class="p-2 hover:bg-gray-100">
+                                        <input type="checkbox" 
+                                        id="location{{location.name}}" 
+                                        class="mr-2" 
+                                        [value]="location.id" 
+                                        (change)="onLocationChange(location.id, $event)"
+                                        [checked]="employee.location_id.includes(location.id)">
+                                        <label for="location{{location.name}}" class="text-xs md:text-sm">{{ location.name }}</label>
+                                    </div>
+                                }@else {
+                                    <div class="p-2">No Data Found</div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Position
+                            <span *ngIf="validationErrors['emp_type']" class="text-red-500 ml-3 font-normal">{{ validationErrors['emp_type'] }}</span>
+                        </label>
+                        <input [(ngModel)]="employee.emp_type" 
+                        (ngModelChange)="onInputValueChange({ field: 'emp_type', value: $event })"
+                        type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the position">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Contact Phone
+                            <span *ngIf="validationErrors['contact_phone']" class="text-red-500 ml-3 font-normal">{{ validationErrors['contact_phone'] }}</span>
+                        </label>
+                        <input [(ngModel)]="employee.contact_phone" 
+                        (ngModelChange)="onInputValueChange({ field: 'contact_phone', value: $event })"
+                        type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the Contact Phone">
+                    </div>
+                    <div *ngIf="EmployeeId === 0" class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Password
+                            <span *ngIf="validationErrors['password']" class="text-red-500 ml-3 font-normal">{{ validationErrors['password'] }}</span>
+                        </label>
+                        <input [(ngModel)]="employee.password" 
+                        (ngModelChange)="onInputValueChange({ field: 'password', value: $event })"
+                        type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the password">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Hiring Date
+                            <span *ngIf="validationErrors['hiring_date']" class="text-red-500 ml-3 font-normal">{{ validationErrors['hiring_date'] }}</span>
+                        </label>
+                        <input [(ngModel)]="employee.hiring_date"
+                        (ngModelChange)="onInputValueChange({ field: 'hiring_date', value: $event })"
+                         type="date" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Choose">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Over time Hours
+                            <span *ngIf="validationErrors['overtime_hours']" class="text-red-500 ml-3 font-normal">{{ validationErrors['overtime_hours'] }}</span>
+                        </label>
+                        <input [(ngModel)]="employee.overtime_hours" 
+                        (ngModelChange)="onInputValueChange({ field: 'overtime_hours', value: $event })"
+                        type="number" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the over time hours">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Start Time
+                            <span *ngIf="validationErrors['start_time']" class="text-red-500 ml-3 font-normal">{{ validationErrors['start_time'] }}</span>
+                        </label>
+                        <input [(ngModel)]="employee.start_time" 
+                        (ngModelChange)="onInputValueChange({ field: 'start_time', value: $event })"
+                        type="time" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter start time" min="0" max="24">
+                    </div>
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            End Time
+                            <span *ngIf="validationErrors['end_time']" class="text-red-500 ml-3 font-normal">{{ validationErrors['end_time'] }}</span>
+                        </label>
+                        <input [(ngModel)]="employee.end_time" 
+                        (ngModelChange)="onInputValueChange({ field: 'end_time', value: $event })"
+                        type="time" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter end time" min="0" max="24">
+                    </div>
+                    <div class="text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Role
+                            <span *ngIf="validationErrors['roles']" class="text-red-500 ml-3 font-normal">{{ validationErrors['roles'] }}</span>
+                        </label>
+                        <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+                            @if(roles.length !==0 ) {
+                                <div *ngFor="let role of roles; let i = index" class="flex items-center mb-2">
+                                    <input 
+                                        type="checkbox" 
+                                        id="role_{{role.id}}" 
+                                        [value]="role.name" 
+                                        class="mr-2"
+                                        (change)="onRoleChange(role.name, $event)"
+                                        [checked]="employee.roles.includes(role.name)"
+                                        >
+                                    <label for="role_{{role.id}}" class="text-sm">{{role.name}}</label>
+                                </div>
+                            } @else {
+                                <div>No Data Found</div>
+                            }
+                        </div>
+                    </div>                    
+                </div>
+            </div>
+        </div>
+    </div> 
+</div>

@@ -11,11 +11,11 @@ use App\Models\Location;
 use App\Models\User;
 use App\Models\UserDetail;
 use App\Models\WorkType;
-use App\Services\Api\AuthorizationService;
 use App\Services\Api\User\UserDetailService;
 use App\Services\Api\User\UserService;
 use App\Traits\ResponseTrait;
 use App\Traits\UserTrait;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -25,26 +25,66 @@ use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
+/**
+ * @OA\Schema(
+ *     schema="User",
+ *     type="object",
+ *     @OA\Property(property="id", type="integer"),
+ *     @OA\Property(property="name", type="string"),
+ *     @OA\Property(property="email", type="string"),
+ *     @OA\Property(property="password", type="string"),
+
+ *     @OA\Property(property="national_id", type="string"),
+ *     @OA\Property(property="code", type="string"),
+ *     @OA\Property(property="gender", type="string"),
+ *     @OA\Property(property="image", type="string"),
+ *     @OA\Property(property="serial_number", type="string"),
+ *     @OA\Property(property="phone", type="string"),
+ *     @OA\Property(property="contact_phone", type="string"),
+ *     @OA\Property(property="department_id", type="integer"),
+
+ * )
+ */
 class UserController extends Controller
 {
     use ResponseTrait, UserTrait;
     protected $userService;
     protected $userDetailService;
-    protected $authorizationService;
 
-    public function __construct(UserService $userService, UserDetailService $userDetailService, AuthorizationService $authorizationService)
+    public function __construct(UserService $userService, UserDetailService $userDetailService)
     {
+        $this->middleware('auth:api')->except(['store']);
+
         $this->userService = $userService;
         $this->userDetailService = $userDetailService;
-        $this->authorizationService = $authorizationService;
-        $this->middleware('auth:api')->except(['store']);
-    }
 
+        // Applying middleware for specific actions based on permissions
+        $this->middleware('permission:user-list')->only(['index', 'getAllUsersNames', 'show']);
+        $this->middleware('permission:user-create')->only(['store', 'importUsersFromExcel']);
+        $this->middleware('permission:user-edit')->only(['update', 'updatePassword']);
+        $this->middleware('permission:user-delete')->only(['destroy']);
+    }
+    /**
+     * @OA\Get(
+     *     path="/api/auth/getAllUsers",
+     *     tags={"User"},
+     *     summary="Get all users",
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="string",
+     *             example=""
+     *         ),
+     *         description="Optional search filter to find users by name or code"
+     *     ),
+     *     @OA\Response(response=200, description="List of users"),
+     *     @OA\Response(response=404, description="No users found")
+     * )
+     */
     public function index()
     {
-        $authUser = Auth::user();
-
-        $this->authorizationService->authorizeHrUser($authUser);
 
         $search = request()->get('search', null);
         $usersData = $this->userService->getAllUsers($search);
@@ -54,23 +94,127 @@ class UserController extends Controller
         }
         return $this->returnData("data", $usersData, "Users Data");
     }
+    /**
+     * @OA\Get(
+     *     path="/api/manager_names",
+     *     tags={"User"},
+     *     summary="Get names of all managers",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of manager names retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="managerNames", type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="manager_id", type="integer", description="ID of the manager"),
+     *                     @OA\Property(property="manager_name", type="string", description="Name of the manager")
+     *                 )
+     *             ),
+     *             @OA\Property(property="message", type="string", description="Success message")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No managers found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No managers found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized access")
+     *         )
+     *     )
+     * )
+     */
     public function ManagerNames()
     {
-        $authUser = Auth::user();
-        $this->authorizationService->authorizeHrUser($authUser);
-
         $data = $this->userService->getManagerNames();
         return $this->returnData('managerNames', $data, 'manager names');
 
     }
-
+    /**
+     * @OA\Post(
+     *     path="/api/auth/create_user",
+     *     tags={"User"},
+     *     summary="Create a new user",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name", "email", "password", "phone", "department_id"},
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", example="john@test.com"),
+     *             @OA\Property(property="password", type="string", example="123456"),
+     *             @OA\Property(property="phone", type="string", example="01203376559"),
+     *             @OA\Property(property="contact_phone", type="string", example="01203376669"),
+     *             @OA\Property(property="national_id", type="string", example="30201010214335"),
+     *             @OA\Property(property="gender", type="string", example="m"),
+     *             @OA\Property(property="department_id", type="integer", example=1),
+     *             @OA\Property(property="image", type="string", format="binary", description="Profile image"),
+     *             @OA\Property(property="roles", type="array", @OA\Items(type="string"), description="Roles to assign",example="employee"),
+     *             @OA\Property(property="location_id", type="array", @OA\Items(type="integer"), description="Location IDs to assign",example=1),
+     *             @OA\Property(property="work_type_id", type="array", @OA\Items(type="integer"), description="Work Type IDs to assign",example=1),
+     *             @OA\Property(property="salary", type="number", format="float", description="User salary",example="8000"),
+     *             @OA\Property(property="working_hours_day", type="number", format="float", description="Working hours per day",example=8),
+     *             @OA\Property(property="overtime_hours", type="number", format="float", description="Overtime hours worked",example=1.50),
+     *             @OA\Property(property="start_time", type="string", format="time", description="Start time of work",example="07:00"),
+     *             @OA\Property(property="end_time", type="string", format="time", description="End time of work",example="15:00"),
+     *             @OA\Property(property="emp_type", type="string", description="Job title",example="Graphic Designer"),
+     *             @OA\Property(property="hiring_date", type="string", format="date", description="Hiring date",example="2024-09-01")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="User created successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="user", type="object",
+     *                     @OA\Property(property="id", type="integer", description="User ID"),
+     *                     @OA\Property(property="name", type="string", description="User name"),
+     *                     @OA\Property(property="email", type="string", description="User email"),
+     *                     @OA\Property(property="phone", type="string", description="User phone"),
+     *                     @OA\Property(property="contact_phone", type="string", description="User contact phone"),
+     *                     @OA\Property(property="national_id", type="string", description="User national ID"),
+     *                     @OA\Property(property="gender", type="string", description="User gender"),
+     *                     @OA\Property(property="department_id", type="integer", description="Department ID"),
+     *                     @OA\Property(property="image", type="string", description="URL of user image"),
+     *                     @OA\Property(property="serial_number", type="string", description="User serial number")
+     *                 ),
+     *                 @OA\Property(property="user_detail", type="object",
+     *                     @OA\Property(property="salary", type="number", format="float", description="User salary"),
+     *                     @OA\Property(property="working_hours_day", type="number", format="float", description="Working hours per day"),
+     *                     @OA\Property(property="hourly_rate", type="number", format="float", description="User hourly rate"),
+     *                     @OA\Property(property="overtime_hourly_rate", type="number", format="float", description="Overtime hourly rate"),
+     *                     @OA\Property(property="overtime_hours", type="number", format="float", description="Overtime hours worked"),
+     *                     @OA\Property(property="start_time", type="string", format="time", description="Start time of work"),
+     *                     @OA\Property(property="end_time", type="string", format="time", description="End time of work"),
+     *                     @OA\Property(property="emp_type", type="string", description="Employment type"),
+     *                     @OA\Property(property="hiring_date", type="string", format="date", description="Hiring date")
+     *                 )
+     *             ),
+     *             @OA\Property(property="message", type="string", example="User Created")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Failed to Store User")
+     *         )
+     *     )
+     * )
+     */
     public function store(RegisterRequest $request)
     {
 
         $data = [];
 
-        $authUser = Auth::user();
-        $this->authorizationService->authorizeHrUser($authUser);
         $user = $this->userService->createUser($request->validated());
 
         if (!$user) {
@@ -92,7 +236,63 @@ class UserController extends Controller
 
         return $this->returnData("data", $data, "User Created");
     }
-
+    /**
+     * @OA\Post(
+     *     path="/api/auth/import-users-from-excel",
+     *     tags={"User"},
+     *     summary="Import users from an Excel file",
+     *     security={{"bearerAuth": {}}},
+     *     description="This endpoint allows you to import multiple users from an Excel file (.xlsx) and validate the data.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="file",
+     *                     type="file",
+     *                     description="Excel file (.xlsx) containing user data"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Users imported successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Users imported successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid file format or validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid file format. Please upload an Excel file (.xlsx).")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Data validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="End time must be later than start time for user 'John Doe'.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error during processing",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="An error occurred while processing the file: [error details]")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized")
+     *         )
+     *     )
+     * )
+     */
     public function importUsersFromExcel(Request $request)
     {
         // Validator for the file upload
@@ -298,46 +498,142 @@ class UserController extends Controller
             return $this->returnError('An error occurred while processing the file: ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
-    // Helper methods for success and error responses
-    private function returnSuccess($message, $statusCode)
-    {
-        return response()->json([
-            'result' => 'true',
-            'status' => $statusCode,
-            'message' => $message,
-            'data' => [],
-        ], $statusCode);
-    }
-
     /**
-     * Cleans the duplicate entry error message to remove technical details.
+     * @OA\Get(
+     *     path="/api/auth/get_user_by_id/{user}",
+     *     tags={"User"},
+     *     summary="Get user by ID",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="user",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the user to retrieve",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="User", type="object",
+     *                 @OA\Property(property="id", type="integer", description="User ID"),
+     *                 @OA\Property(property="name", type="string", description="User name"),
+     *                 @OA\Property(property="email", type="string", description="User email"),
+     *                 @OA\Property(property="phone", type="string", description="User phone"),
+     *                 @OA\Property(property="contact_phone", type="string", description="User contact phone"),
+     *                 @OA\Property(property="national_id", type="string", description="User national ID"),
+     *                 @OA\Property(property="gender", type="string", description="User gender"),
+     *                 @OA\Property(property="department_id", type="integer", description="Department ID"),
+     *                 @OA\Property(property="image", type="string", description="URL of user image"),
+     *                 @OA\Property(property="serial_number", type="string", description="User serial number"),
+     *             ),
+     *             @OA\Property(property="message", type="string", description="Success message")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized access")
+     *         )
+     *     )
+     * )
      */
-    private function cleanDuplicateEntryError($message)
-    {
-        if (strpos($message, 'Duplicate entry') !== false) {
-            $matches = [];
-            preg_match("/Duplicate entry '(.*?)' for key '(.*?)'/", $message, $matches);
-            return isset($matches[1], $matches[2]) ? "Duplicate entry '{$matches[1]}' for field '{$matches[2]}'" : $message;
-        }
-        return $message;
-    }
-
     public function show(User $user)
     {
-        $authUser = Auth::user();
 
-        $this->authorizationService->authorizeHrUser($authUser);
         $userDetail = UserDetail::where('user_id', $user->id)->first();
         return $this->returnData("User", new UserDetailResource($userDetail), "User Data");
     }
-
+    /**
+     * @OA\Post(
+     *     path="/api/auth/update_user/{user}",
+     *     tags={"User"},
+     *     summary="Update an existing user",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="user",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID of the user to be updated",
+     *         example=1
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={},
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", example="john@test.com"),
+     *             @OA\Property(property="phone", type="string", example="01203376559"),
+     *             @OA\Property(property="contact_phone", type="string", example="01203376669"),
+     *             @OA\Property(property="national_id", type="string", example="30201010214335"),
+     *             @OA\Property(property="gender", type="string", example="m"),
+     *             @OA\Property(property="department_id", type="integer", example=1),
+     *             @OA\Property(property="image", type="string", format="binary", description="Profile image"),
+     *             @OA\Property(property="salary", type="number", format="float", description="User salary", example=8000),
+     *             @OA\Property(property="working_hours_day", type="number", format="float", description="Working hours per day", example=8.00),
+     *             @OA\Property(property="overtime_hours", type="number", format="float", description="Overtime hours worked", example=1.50),
+     *             @OA\Property(property="start_time", type="string", format="time", description="Start time of work", example="07:00:00"),
+     *             @OA\Property(property="end_time", type="string", format="time", description="End time of work", example="15:00:00"),
+     *             @OA\Property(property="emp_type", type="string", description="Job title", example="Graphic Designer"),
+     *             @OA\Property(property="hiring_date", type="string", format="date", description="Hiring date", example="2024-09-01")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User updated successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="user", type="object",
+     *                     @OA\Property(property="id", type="integer", description="User ID"),
+     *                     @OA\Property(property="name", type="string", description="User name"),
+     *                     @OA\Property(property="email", type="string", description="User email"),
+     *                     @OA\Property(property="phone", type="string", description="User phone"),
+     *                     @OA\Property(property="contact_phone", type="string", description="User contact phone"),
+     *                     @OA\Property(property="national_id", type="string", description="User national ID"),
+     *                     @OA\Property(property="gender", type="string", description="User gender"),
+     *                     @OA\Property(property="department_id", type="integer", description="Department ID"),
+     *                     @OA\Property(property="image", type="string", description="URL of user image"),
+     *                     @OA\Property(property="serial_number", type="string", description="User serial number")
+     *                 ),
+     *                 @OA\Property(property="user_detail", type="object",
+     *                     @OA\Property(property="salary", type="number", format="float", description="User salary"),
+     *                     @OA\Property(property="working_hours_day", type="number", format="float", description="Working hours per day"),
+     *                     @OA\Property(property="hourly_rate", type="number", format="float", description="User hourly rate"),
+     *                     @OA\Property(property="overtime_hourly_rate", type="number", format="float", description="Overtime hourly rate"),
+     *                     @OA\Property(property="overtime_hours", type="number", format="float", description="Overtime hours worked"),
+     *                     @OA\Property(property="start_time", type="string", format="time", description="Start time of work"),
+     *                     @OA\Property(property="end_time", type="string", format="time", description="End time of work"),
+     *                     @OA\Property(property="emp_type", type="string", description="Employment type"),
+     *                     @OA\Property(property="hiring_date", type="string", format="date", description="Hiring date")
+     *                 )
+     *             ),
+     *             @OA\Property(property="message", type="string", example="User Updated")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Failed to Update User")
+     *         )
+     *     )
+     * )
+     */
     public function update(UpdateUserRequest $request, User $user)
     {
         $data = [];
-        $authUser = Auth::user();
 
-        $this->authorizationService->authorizeHrUser($authUser);
         $updatedUser = $this->userService->updateUser($user, $request->validated());
         if (!$updatedUser) {
             return $this->returnError('Failed to Update User');
@@ -374,16 +670,86 @@ class UserController extends Controller
         return $this->returnData("data", $data, "User Updated");
 
     }
-
+    /**
+     * @OA\Delete(
+     *     path="/api/auth/delete_user/{user}",
+     *     tags={"User"},
+     *     summary="Delete a user",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="user",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID of the user to be deleted",
+     *         example=1
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User deleted successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", description="User ID"),
+     *                 @OA\Property(property="name", type="string", description="User name"),
+     *                 @OA\Property(property="email", type="string", description="User email"),
+     *                 @OA\Property(property="phone", type="string", description="User phone"),
+     *                 @OA\Property(property="contact_phone", type="string", description="User contact phone"),
+     *                 @OA\Property(property="national_id", type="string", description="User national ID"),
+     *                 @OA\Property(property="gender", type="string", description="User gender"),
+     *                 @OA\Property(property="department_id", type="integer", description="Department ID"),
+     *                 @OA\Property(property="image", type="string", description="URL of user image")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="User deleted")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User not found")
+     *         )
+     *     )
+     * )
+     */
     public function destroy(User $user)
     {
-        $authUser = Auth::user();
-
-        $this->authorizationService->authorizeHrUser($authUser);
         $user->delete();
         return $this->returnData("user", $user, "user deleted");
     }
-
+    /**
+     * @OA\Get(
+     *     path="/api/auth/users_by_name",
+     *     tags={"User"},
+     *     summary="Get all user names",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of user names retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(type="string", description="User name")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="UsersName")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Server Error")
+     *         )
+     *     )
+     * )
+     */
     public function getAllUsersNames()
     {
         $usersByName = User::pluck('name');
@@ -399,6 +765,139 @@ class UserController extends Controller
             'password' => bcrypt($request->password) ?? $user->password,
         ]);
         return $this->returnSuccessMessage("Password Updated Successfully");
+    }
+    /**
+     * @OA\Get(
+     *     path="/api/employees_per_month",
+     *     tags={"User"},
+     *     summary="Get the employee count per month for a specific year",
+     *     security={{"bearerAuth": {}}},
+     *     description="Retrieve the number of employees hired by month for a given year. Defaults to the current year if no year is provided.",
+     *     @OA\Parameter(
+     *         name="year",
+     *         in="query",
+     *         description="The year to filter employee hiring data (defaults to the current year if not provided)",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="integer",
+     *             example=2023
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful response with the employee count per month",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="employeeCount",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="employee_count", type="integer", example=25),
+     *                     @OA\Property(property="custom_month", type="string", example="2023-Feb")
+     *                 )
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Employees count up to the year 2023")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid year provided",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid year parameter")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No employees found for the specified year",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No employees found up to the year 2023")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized")
+     *         )
+     *     )
+     * )
+     */
+    public function employeesPerMonth(Request $request)
+    {
+        // Check if 'year' is provided in the request, otherwise default to current year
+        $year = $request->has('year') ? $request->input('year') : date('Y');
+
+        // Validate the year input if provided in the request
+        if (!preg_match('/^\d{4}$/', $year)) {
+            return $this->returnError("Invalid year parameter");
+        }
+
+        // Get the current year and date
+        $currentYear = date('Y');
+        $currentDate = Carbon::now();
+
+        // Initialize the employee counts
+        $employeeCounts = collect();
+        $cumulativeCount = 0;
+
+        // Handle future years by returning 0 for all months
+        if ($year > $currentYear) {
+            for ($month = 1; $month <= 12; $month++) {
+                $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
+                $employeeCounts[$startOfMonth->format('Y-M')] = [
+                    'employee_count' => 0,
+                    'custom_month' => $startOfMonth->format('Y-M'),
+                ];
+            }
+            return $this->returnData('employeeCount', $employeeCounts->values()->all(), 'Employees count for future year ' . $year);
+        }
+
+        // Loop through each month of the year
+        for ($month = 1; $month <= 12; $month++) {
+            // Set the start and end of the month
+            $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
+            $endOfMonth = $startOfMonth->copy()->endOfMonth();
+
+            // If the month is after the current date, set the count to 0 and continue
+            if ($startOfMonth->isAfter($currentDate)) {
+                $employeeCounts[$startOfMonth->format('Y-M')] = [
+                    'employee_count' => 0,
+                    'custom_month' => $startOfMonth->format('Y-M'),
+                ];
+                continue;
+            }
+
+            $customMonth = $startOfMonth->format('Y-M');
+
+            // Count employees hired up to and including the end of the current month
+            $employeeCount = User::whereHas('user_detail', function ($query) use ($endOfMonth) {
+                $query->where('hiring_date', '<=', $endOfMonth);
+            })->count();
+
+            $cumulativeCount = $employeeCount;
+
+            $employeeCounts[$customMonth] = [
+                'employee_count' => $cumulativeCount,
+                'custom_month' => $customMonth,
+            ];
+        }
+
+        // Reset count for future months within the current year
+        if ($year == $currentYear) {
+            for ($month = $currentDate->month + 1; $month <= 12; $month++) {
+                $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
+                $employeeCounts[$startOfMonth->format('Y-M')] = [
+                    'employee_count' => 0,
+                    'custom_month' => $startOfMonth->format('Y-M'),
+                ];
+            }
+        }
+
+        // Sort the employee counts by month
+        $formattedCounts = $employeeCounts->sortBy(function ($value, $key) {
+            return Carbon::parse($key)->month;
+        });
+
+        return $this->returnData('employeeCount', $formattedCounts->values()->all(), 'Employees count up to the year ' . $year);
     }
 
 }
