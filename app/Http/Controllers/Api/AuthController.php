@@ -68,6 +68,7 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
+        
         $credentials = $request->only('email', 'password');
         $email = $credentials['email']; // Keep the original case of the email
 

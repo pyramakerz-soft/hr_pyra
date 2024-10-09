@@ -26,10 +26,10 @@ class WorkTypeController extends Controller
     use ResponseTrait;
     public function __construct()
     {
-        $this->middleware("permission:work-type-list")->only(['index', 'show']);
-        $this->middleware("permission:work-type-list")->only(['store']);
-        $this->middleware("permission:work-type-list")->only(['update']);
-        $this->middleware("permission:work-type-list")->only(['destroy']);
+        // $this->middleware("permission:work-type-list")->only(['index', 'show']);
+        // $this->middleware("permission:work-type-list")->only(['store']);
+        // $this->middleware("permission:work-type-list")->only(['update']);
+        // $this->middleware("permission:work-type-list")->only(['destroy']);
 
     }
     /**

@@ -30,10 +30,10 @@ class LocationController extends Controller
     use ResponseTrait;
     public function __construct()
     {
-        $this->middleware("permission:location-list")->only(['index', 'locationNames', 'show']);
-        $this->middleware("permission:location-create")->only(['store']);
-        $this->middleware("permission:location-edit")->only(['update']);
-        $this->middleware("permission:location-delete")->only(['destroy']);
+        // $this->middleware("permission:location-list")->only(['index', 'locationNames', 'show']);
+        // $this->middleware("permission:location-create")->only(['store']);
+        // $this->middleware("permission:location-edit")->only(['update']);
+        // $this->middleware("permission:location-delete")->only(['destroy']);
     }
 
     /**
