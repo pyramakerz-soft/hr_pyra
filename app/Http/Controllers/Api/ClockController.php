@@ -103,9 +103,9 @@ class ClockController extends Controller
     public function __construct(ClockService $clockService)
     {
         $this->clockService = $clockService;
-        $this->middleware('permission:clock-list')->only(['allClocks', 'getUserClocksById', 'getClockById']);
-        $this->middleware('permission:clock-create')->only(['hrClockIn']);
-        $this->middleware('permission:clock-edit')->only(['updateUserClock']);
+        // $this->middleware('permission:clock-list')->only(['allClocks', 'getUserClocksById', 'getClockById']);
+        // $this->middleware('permission:clock-create')->only(['hrClockIn']);
+        // $this->middleware('permission:clock-edit')->only(['updateUserClock']);
 
     }
 

@@ -32,7 +32,7 @@ class UserDetailController extends Controller
     use ResponseTrait;
     public function __construct()
     {
-        $this->middleware("permission:user-detail-list")->only(['index', 'show']);
+        // $this->middleware("permission:user-detail-list")->only(['index', 'show']);
     }
 
     /**
