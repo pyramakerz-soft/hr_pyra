@@ -31,6 +31,7 @@ class UserDetailResource extends JsonResource
         if (count($locationTypes) > 1) {
             $work_home = true;
         }
+
         return [
             "id" => $this->user->id,
             'name' => $this->user->name,
