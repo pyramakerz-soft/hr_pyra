@@ -15,60 +15,59 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            'role-list',
-            'role-create',
-            'role-edit',
-            'role-delete',
+            //User
             'user-list',
             'user-create',
             'user-edit',
             'user-delete',
-            'assign-location',
-            'user-details-list',
-            'user-details-create',
-            'user-details-edit',
-            'user-details-delete',
-            'user-vacations-list',
-            'user-vacations-create',
-            'user-vacations-edit',
-            'user-vacations-delete',
+            //Role
+            'role-list',
+            'role-create',
+            'role-edit',
+            'role-delete',
+            //Department
             'department-list',
             'department-create',
             'department-edit',
             'department-delete',
-            'user-holidays-list',
-            'user-holidays-create',
-            'user-holidays-edit',
-            'user-holidays-delete',
+            //Location
             'location-list',
             'location-create',
             'location-edit',
             'location-delete',
+            //Permission
+            'permission-list',
+            'permission-create',
+            'permission-edit',
+            'permission-delete',
+            //UserDetail
+            'user-detail-list',
+            //Clock
+            'clock-list',
+            'clock-create',
+            'clock-edit',
+            //WorkType
+            'work-type-list',
+            'work-type-create',
+            'work-type-edit',
+            'work-type-delete',
+
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
-
+        $allPermissions = Permission::all();
         $roleHr = Role::firstOrCreate(['name' => 'Hr']);
         $roleAdmin = Role::firstOrCreate(['name' => 'Manager']);
         $roleEmp = Role::firstOrCreate(['name' => 'Employee']);
-        $HrPermsissions = [
-            'role-list',
-            'role-create',
-            'role-edit',
-            'role-delete',
-            'user-create',
-            'user-edit',
-            'user-delete',
-            'user-list',
-            'assign-location',
-        ];
+
+        $HrPermsissions = $allPermissions;
         $roleHr->givePermissionTo($HrPermsissions);
         $user_hr = User::findOrFail(1);
         $user_hr->assignRole($roleHr);
 
-        $roleAdmin->givePermissionTo(Permission::all());
+        $roleAdmin->givePermissionTo($allPermissions);
         $user_admin = User::findOrFail(2);
         $user_admin->assignRole($roleAdmin);
 

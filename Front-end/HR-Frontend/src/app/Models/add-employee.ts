@@ -4,6 +4,7 @@ export class AddEmployee {
         public name: string,
         public code: string,
         public department_id: number | null,
+        public deparment_name: string | null,
         public emp_type: string, // position
         public phone: string,
         public contact_phone: string,
