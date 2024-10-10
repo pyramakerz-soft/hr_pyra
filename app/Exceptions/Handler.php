@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use PDOException;
 use Psy\Readline\Hoa\FileException;
@@ -123,7 +124,7 @@ class Handler extends ExceptionHandler
 
         // Database Query Exception
         if ($exception instanceof QueryException) {
-            \Log::error('Database Query Error: ' . $exception->getMessage());
+            Log::error('Database Query Error: ' . $exception->getMessage());
 
             return $this->returnError('Database Error', Response::HTTP_INTERNAL_SERVER_ERROR);
         }

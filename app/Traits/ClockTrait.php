@@ -12,19 +12,6 @@ trait ClockTrait
 
     //Update Clock
 
-    // protected function updateClockEntry($request, $clock, $user)
-    // {
-    //     if ($clock->location_type == 'site') {
-    //         return $this->updateSiteClock($request, $clock, $user);
-    //     }
-
-    //     if ($clock->location_type == 'home') {
-    //         return $this->updateHomeClock($request, $clock, $user);
-    //     }
-
-    //     return $this->returnError('Unknown location type', 400);
-    // }
-
     protected function updateClockRecord($clock, $clockIn, $clockOut, $duration, $lateArrive, $earlyLeave)
     {
         $clock->update([

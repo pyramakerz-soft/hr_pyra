@@ -19,8 +19,8 @@ class UserDetailService
         $start_time = $data['start_time'];
         $end_time = $data['end_time'];
 
-        if ($end_time <= $start_time) {
-            return null;
+        if (Carbon::parse($end_time)->lessThanOrEqualTo(Carbon::parse($start_time))) {
+            return $this->returnError('End time must be later than start time', 422); // Return 422 Unprocessable Entity
         }
 
         return UserDetail::create([
@@ -46,10 +46,10 @@ class UserDetailService
         $start_time = isset($data['start_time']) ? Carbon::parse($data['start_time'])->format("H:i:s") : $userDetail->start_time;
         $end_time = isset($data['end_time']) ? Carbon::parse($data['end_time'])->format("H:i:s") : $userDetail->end_time;
 
-        if ($end_time <= $start_time) {
-            return null;
+        // Use Carbon's diffInSeconds for time comparison to avoid format issues
+        if (Carbon::parse($end_time)->lessThanOrEqualTo(Carbon::parse($start_time))) {
+            return $this->returnError('End time must be later than start time', 422); // Return 422 Unprocessable Entity
         }
-
         $userDetail->update([
             'salary' => $salary,
             'working_hours_day' => $working_hours_day,

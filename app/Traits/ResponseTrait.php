@@ -6,6 +6,15 @@ use Illuminate\Http\Response;
 
 trait ResponseTrait
 {
+    private function cleanDuplicateEntryError($message)
+    {
+        if (strpos($message, 'Duplicate entry') !== false) {
+            $matches = [];
+            preg_match("/Duplicate entry '(.*?)' for key '(.*?)'/", $message, $matches);
+            return isset($matches[1], $matches[2]) ? "Duplicate entry '{$matches[1]}' for field '{$matches[2]}'" : $message;
+        }
+        return $message;
+    }
     public function returnSuccessMessage($msg = "")
     {
         return response()->json([
@@ -13,6 +22,15 @@ trait ResponseTrait
             "message" => $msg,
             "data" => (object) [],
         ], Response::HTTP_OK);
+    }
+    private function returnSuccess($message, $statusCode)
+    {
+        return response()->json([
+            'result' => 'true',
+            'status' => $statusCode,
+            'message' => $message,
+            'data' => [],
+        ], $statusCode);
     }
     public function returnError($msg, $status = Response::HTTP_NOT_FOUND)
     {
@@ -23,13 +41,13 @@ trait ResponseTrait
             'data' => (object) [],
         ], $status);
     }
-    // public function returnErrorMessage($msg)
-    // {
-    //     return response()->json([
-    //         'message' => $msg,
-    //     ], Response::HTTP_NOT_FOUND);
+    public function returnErrorMessage($msg = "")
+    {
+        return response()->json([
+            'message' => $msg,
+        ], Response::HTTP_NOT_FOUND);
 
-    // }
+    }
     public function returnData($key, $value, $msg = "")
     {
         return response()->json([

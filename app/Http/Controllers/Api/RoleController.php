@@ -6,12 +6,23 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreRoleRequest;
 use App\Http\Requests\Api\UpdateRoleRequest;
 use App\Http\Resources\Api\RoleResource;
+use App\Services\Api\AuthorizationService;
 use App\Traits\ResponseTrait;
 use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
+    protected $authorizationService;
     use ResponseTrait;
+    public function __construct(AuthorizationService $authorizationService)
+    {
+        $this->authorizationService = $authorizationService;
+        // $this->middleware("permission:role-list")->only(['index', 'show']);
+        // $this->middleware("permission:role-create")->only(['store']);
+        // $this->middleware("permission:role-edit")->only(['update']);
+        // $this->middleware("permission:role-delete")->only(['destroy']);
+
+    }
     /**
      * Display a listing of the resource.
      */
@@ -31,10 +42,7 @@ class RoleController extends Controller
      */
     public function store(StoreRoleRequest $request)
     {
-        // $this->validate($request, [
-        //     'name' => 'required|unique:roles,name',
-        //     'permission' => 'required',
-        // ]);
+
         $role = Role::create(['name' => $request->name]);
         $role->syncPermissions($request->input('permission'));
         if (!$role) {
@@ -49,6 +57,7 @@ class RoleController extends Controller
      */
     public function show(Role $role)
     {
+
         $role = Role::with('permissions')->where('id', $role->id)->get();
 
         return $this->returnData('role', $role, 'Role Data');
@@ -60,10 +69,6 @@ class RoleController extends Controller
     public function update(UpdateRoleRequest $request, Role $role)
     {
 
-        // $this->validate($request, [
-        //     'name' => ['required', 'string'],
-        //     'permission' => 'required',
-        // ]);
         $role->update(['name' => $request->name]);
         $role->syncPermissions($request->input('permission'));
         if (!$role) {
@@ -78,6 +83,7 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
+
         $role->delete();
         return $this->returnData('role', $role, 'Role deleted Successfully');
 

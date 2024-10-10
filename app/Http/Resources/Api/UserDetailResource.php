@@ -14,7 +14,6 @@ class UserDetailResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // dd($this->user->work_types->pluck('name'));
         $salary = $this->salary ?? null;
         $working_hours_day = $this->working_hours_day;
 
@@ -25,7 +24,6 @@ class UserDetailResource extends JsonResource
         }
         $start_time = $this->start_time; //07:00
         $end_time = $this->end_time; //15:00
-
         $work_home = false;
         $locationTypes = $this->user->work_types->pluck('name');
         if (count($locationTypes) > 1) {
@@ -40,10 +38,10 @@ class UserDetailResource extends JsonResource
             "phone" => $this->user->phone,
             "contact_phone" => $this->user->contact_phone,
             "gender" => $this->user->gender,
-            "department_id" => $this->user->department_id,
-            "deparment_name" => $this->user->department->name,
+            "department_id" => $this->user->department_id  ?? null,
+            "deparment_name" => $this->user->department->name ?? null,
             "roles" => $this->user->roles->pluck('name'),
-            "national_id" => $this->user->national_id,
+            "national_id" => $this->user->national_id ,
             "salary" => $salary,
             "working_hours_day" => $working_hours_day,
             "hourly_rate" => $hourly_rate,

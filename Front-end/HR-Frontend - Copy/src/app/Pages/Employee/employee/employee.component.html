@@ -1,0 +1,20 @@
+<div class="relative lg:hidden">
+    <div class="lg:hidden block cursor-pointer absolute top-10 right-10"  (click)="OpenMenu()">
+        <div class="h-1 w-7 md:h-[6px] md:w-10 mb-1 bg-[#454950] rounded"></div>
+        <div class="h-1 w-7 md:h-[6px] md:w-10 mb-1 bg-[#454950] rounded"></div>
+        <div class="h-1 w-7 md:h-[6px] md:w-10 bg-[#454950] rounded"></div>
+    </div>
+    <div [ngClass]="{'absolute top-20 right-0 block h-[100vh] w-full md:w-[50%]': isMenuOpen, 'hidden': !isMenuOpen}">
+        <app-side-bar [menuItems]="menuItems"></app-side-bar>
+    </div>
+</div>
+<div class="flex min-h-[100vh]">
+    <div class="w-1/5 hidden lg:block">
+        <app-side-bar [menuItems]="menuItems" ></app-side-bar>
+    </div>
+    
+    <div class="lg:w-4/5 w-full py-5 px-6">
+         <router-outlet></router-outlet>
+    </div>
+</div>
+

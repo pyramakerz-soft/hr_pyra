@@ -32,7 +32,7 @@ export class HrEmployeeAddEditDetailsComponent {
   isSaved = false
   
   employee: AddEmployee = new AddEmployee(
-    null, '', '', null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], [], false
+    null, '', '', null, null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], [], false
   );
 
   regexPhone = /^(010|011|012|015)\d{8}$/;
@@ -258,7 +258,7 @@ export class HrEmployeeAddEditDetailsComponent {
     for (const key in this.employee) {
       if (this.employee.hasOwnProperty(key)) {
         const field = key as keyof AddEmployee;
-        if (!this.employee[field] && field != "code" && field !='work_home' && field != "image") {
+        if (!this.employee[field] && field != "code" && field !='work_home' && field != "image" && field != "deparment_name") {
           if(this.EmployeeId !== 0){
             continue
           }
@@ -354,7 +354,7 @@ export class HrEmployeeAddEditDetailsComponent {
 
       const workingHoursDay = this.employee.working_hours_day != null ? this.employee.working_hours_day : 0; 
 
-      if (diffHours - parseFloat(workingHoursDay.toString()) > 0.01 || diffHours < 0 ) {
+      if (diffHours - parseFloat(workingHoursDay.toString()) > 0 || diffHours - parseFloat(workingHoursDay.toString()) < 0 || diffHours < 0 ) {
         this.validationErrors['start_time'] = 'Invalid Start Time.';
         this.validationErrors["end_time"] = 'Invalid End Time.';
         this.validationErrors['working_hours_day'] = 'Invalid Working hours day.';
