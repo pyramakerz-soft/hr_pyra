@@ -23,12 +23,12 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('/create_user', [UserController::class, 'store'])->name('user.store');
         Route::get('/get_user_by_id/{user}', [UserController::class, 'show'])->name('user.show');
         Route::post('update_password/{user}', [UserController::class, 'updatePassword'])->name('user.updatePassword');
-        Route::post('/import-users-from-excel', [UserController::class, 'importUsersFromExcel']);
-
+        
     });
-
+    
 });
 Route::group(['middleware' => ['auth:api', 'role:Hr']], function () {
+    Route::post('/import-users-from-excel', [UserController::class, 'importUsersFromExcel']);
 
     //User Management
     Route::get('manager_names', [UserController::class, 'ManagerNames']); //HR role
