@@ -88,7 +88,6 @@ class UserSeeder extends Seeder
             'gender' => 'F',
             'department_id' => 2,
         ]);
-        User::factory()->count(30)->create();
 
         $department = Department::findOrFail(1);
         $department->update(['manager_id' => 1]);
