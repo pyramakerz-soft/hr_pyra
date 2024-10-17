@@ -5,6 +5,7 @@ namespace App\Traits;
 use App\Models\Department;
 use App\Models\User;
 use Illuminate\Support\Str;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 trait UserTrait
 {

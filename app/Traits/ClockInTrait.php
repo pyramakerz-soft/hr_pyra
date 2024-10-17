@@ -12,12 +12,13 @@ use Illuminate\Support\Facades\Log;
 trait ClockInTrait
 {
     use ClockTrait, HelperTrait;
-    protected function checkClockInWithoutClockOut($user_id)
+    protected function checkClockInWithoutClockOut($user_id, $clock_in)
     {
+        // Check if the user has an unresolved clock-in (without clock-out) for today
         $query = ClockInOut::where('user_id', $user_id)
             ->whereNull('clock_out')
+            ->whereBetween('clock_in', [Carbon::parse($clock_in)->startOfDay(), Carbon::parse($clock_in)->endOfDay()])
             ->exists();
-
         return $query;
     }
 

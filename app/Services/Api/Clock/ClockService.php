@@ -123,15 +123,18 @@ class ClockService
         //1- Check If user already Clocked in
         $authUser = Auth::user();
         $user_id = $authUser->id;
-        if ($this->checkClockInWithoutClockOut($user_id)) {
-            return $this->returnError('You have already clocked in.');
+        $clock_in = $request->clock_in;
+        //2- Check if the user has already clocked in today
+        if ($this->checkClockInWithoutClockOut($user_id, $clock_in)) {
+            return $this->returnError('You have already clocked in today.');
         }
 
-        //2- Handle home clock-in if location_type is 'home'
+        //4- Handle home clock-in if location_type is 'home'
         if ($request->location_type == 'home') {
             return $this->handleHomeClockIn($request, $user_id);
         }
-        //3- Handle site clock-in if location_type is 'site'
+
+        //5- Handle site clock-in if location_type is 'site'
         return $this->handleSiteClockIn($request, $authUser);
     }
 
