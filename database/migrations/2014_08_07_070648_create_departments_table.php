@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
-            $table->boolean('is_location_time')->nullable()->default(0);
             $table->timestamps();
         });
     }

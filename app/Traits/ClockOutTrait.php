@@ -23,7 +23,7 @@ trait ClockOutTrait
     {
         $distance = $this->haversineDistance($latitude, $longitude, $expectedLatitude, $expectedLongitude);
         if ($distance > 50) {
-            return $this->returnError('User is not located at the correct location. lat: ' . $latitude . ' / long: ' . $longitude);
+            return $this->returnError('User is not located at the correct location.');
         }
         return null;
 
