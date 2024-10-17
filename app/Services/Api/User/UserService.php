@@ -17,7 +17,6 @@ class UserService
 
     public function createUser($data)
     {
-
         // Validate department inside createUser
         $department = Department::find($data['department_id']);
         if (!$department) {

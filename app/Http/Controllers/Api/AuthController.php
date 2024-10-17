@@ -6,16 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\LoginRequest;
 use App\Http\Resources\ProfileResource;
 use App\Models\User;
+use App\Traits\AuthTrait;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    use ResponseTrait;
+    use ResponseTrait, AuthTrait;
     public function __construct()
     {
         $this->middleware('auth:api')->except('login');
@@ -68,60 +66,25 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
-        
         $credentials = $request->only('email', 'password');
-        $email = $credentials['email']; // Keep the original case of the email
 
-        // Find the user with the provided email (case-sensitive comparison later)
-        $user = User::where('email', $email)->first();
+        // Validate user credentials
+        $user = $this->validateUser($credentials);
 
         if (!$user) {
-            // If user is not found, return an error
-            return response()->json([
-                'message' => 'Wrong Email',
-            ], Response::HTTP_UNAUTHORIZED);
+            return response()->json(['message' => 'Wrong Email or Password'], Response::HTTP_UNAUTHORIZED);
         }
 
-        // Check if the provided email matches exactly the stored email (case-sensitive)
-        if ($user->email !== $email) {
-            return response()->json([
-                'message' => 'Wrong Email',
-            ], Response::HTTP_UNAUTHORIZED);
-        }
-
-        // Check if the password is correct
-        if (!Hash::check($credentials['password'], $user->password)) {
-            return response()->json([
-                'message' => 'Wrong Password',
-            ], Response::HTTP_UNAUTHORIZED);
-        }
-
-        // Attempt login using JWT token generation
-        $token = JWTAuth::attempt($credentials);
-
-        if (!$token) {
-            return $this->returnError('You Are unauthenticated', Response::HTTP_UNAUTHORIZED);
-        }
-
-        $user = auth()->user();
         // Handle serial number checking logic
-        if ($request->serial_number) {
-            if (is_null($user->serial_number)) {
-                $request->validate([
-                    'serial_number' => [Rule::unique('users', 'serial_number')->ignore($user->id)],
-                ]);
-                $user->update(['serial_number' => $request->serial_number]);
-            } else {
-                if ($user->serial_number !== $request->serial_number) {
-                    return $this->returnError('Serial number does not match', 406);
-                }
-            }
-        }
-        return response()->json([
-            "result" => "true",
-            'token' => $token,
-        ], Response::HTTP_OK);
+        $this->validateSerialNumber($request, $user);
+
+        // Generate and refresh token if necessary
+        $token = $this->generateToken($request, $user);
+
+        //return response with token
+        return $this->respondWithToken($token);
     }
+
     /**
      * @OA\Post(
      *   path="/api/auth/logout",
@@ -196,5 +159,16 @@ class AuthController extends Controller
         }
 
         return $this->returnData("User", new ProfileResource($user), "User Data");
+    }
+    public function removeSerialNumber(User $user)
+    {
+
+        if ($user->serial_number) {
+            $user->update([
+                'serial_number' => null,
+            ]);
+            return $this->returnData('user', "", 'Serial Number of User removed Successfully');
+        }
+        return $this->returnError('No Serial Number found for this user');
     }
 }
