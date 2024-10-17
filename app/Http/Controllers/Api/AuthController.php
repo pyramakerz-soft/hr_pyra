@@ -171,12 +171,4 @@ class AuthController extends Controller
         }
         return $this->returnError('No Serial Number found for this user');
     }
-    public function checkSerialNumber(User $user)
-    {
-        $has_serial_number = false;
-        if ($user->serial_number) {
-            $has_serial_number = true;
-        }
-        return $this->returnData('has_serial_number', $has_serial_number, "");
-    }
 }

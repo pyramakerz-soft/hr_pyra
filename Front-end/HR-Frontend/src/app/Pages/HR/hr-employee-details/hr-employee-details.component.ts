@@ -38,6 +38,7 @@ export class HrEmployeeDetailsComponent {
         d.User.end_time = this.convertUTCToEgyptLocalTime(d.User.end_time)
 
         this.employee = d.User;
+        console.log(this.employee)
       }
     );
   }

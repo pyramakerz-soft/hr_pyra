@@ -716,6 +716,7 @@ class ComposerStaticInitbaa5a8fed9cd64c25297010e847209fa
         'App\\Services\\Api\\Clock\\ClockService' => __DIR__ . '/../..' . '/app/Services/Api/Clock/ClockService.php',
         'App\\Services\\Api\\User\\UserDetailService' => __DIR__ . '/../..' . '/app/Services/Api/User/UserDetailService.php',
         'App\\Services\\Api\\User\\UserService' => __DIR__ . '/../..' . '/app/Services/Api/User/UserService.php',
+        'App\\Traits\\AuthTrait' => __DIR__ . '/../..' . '/app/Traits/AuthTrait.php',
         'App\\Traits\\ClockInTrait' => __DIR__ . '/../..' . '/app/Traits/ClockInTrait.php',
         'App\\Traits\\ClockOutTrait' => __DIR__ . '/../..' . '/app/Traits/ClockOutTrait.php',
         'App\\Traits\\ClockTrait' => __DIR__ . '/../..' . '/app/Traits/ClockTrait.php',

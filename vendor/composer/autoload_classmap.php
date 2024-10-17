@@ -98,6 +98,7 @@ return array(
     'App\\Services\\Api\\Clock\\ClockService' => $baseDir . '/app/Services/Api/Clock/ClockService.php',
     'App\\Services\\Api\\User\\UserDetailService' => $baseDir . '/app/Services/Api/User/UserDetailService.php',
     'App\\Services\\Api\\User\\UserService' => $baseDir . '/app/Services/Api/User/UserService.php',
+    'App\\Traits\\AuthTrait' => $baseDir . '/app/Traits/AuthTrait.php',
     'App\\Traits\\ClockInTrait' => $baseDir . '/app/Traits/ClockInTrait.php',
     'App\\Traits\\ClockOutTrait' => $baseDir . '/app/Traits/ClockOutTrait.php',
     'App\\Traits\\ClockTrait' => $baseDir . '/app/Traits/ClockTrait.php',
