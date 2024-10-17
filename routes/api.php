@@ -16,6 +16,7 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
     Route::get('/user_by_token', [AuthController::class, 'profile'])->name('auth.profile');
     Route::post('remove_serial_number/{user}', [AuthController::class, 'removeSerialNumber'])->name('user.removeSerialNumber');
+    Route::get('check_serial_number/{user}', [AuthController::class, 'checkSerialNumber'])->name('user.checkSerialNumber');
 
     Route::group(['middleware' => 'role:Hr'], function () {
         Route::get('/users_by_name', [UserController::class, 'getAllUsersNames'])->name('user.names');
