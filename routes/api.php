@@ -15,6 +15,8 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('login', [AuthController::class, 'login'])->name('auth.login');
     Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
     Route::get('/user_by_token', [AuthController::class, 'profile'])->name('auth.profile');
+    Route::post('remove_serial_number/{user}', [AuthController::class, 'removeSerialNumber'])->name('user.removeSerialNumber');
+
     Route::group(['middleware' => 'role:Hr'], function () {
         Route::get('/users_by_name', [UserController::class, 'getAllUsersNames'])->name('user.names');
         Route::post('/update_user/{user}', [UserController::class, 'update'])->name('user.update');
@@ -23,9 +25,9 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('/create_user', [UserController::class, 'store'])->name('user.store');
         Route::get('/get_user_by_id/{user}', [UserController::class, 'show'])->name('user.show');
         Route::post('update_password/{user}', [UserController::class, 'updatePassword'])->name('user.updatePassword');
-        
+
     });
-    
+
 });
 Route::group(['middleware' => ['auth:api', 'role:Hr']], function () {
     Route::post('/import-users-from-excel', [UserController::class, 'importUsersFromExcel']);

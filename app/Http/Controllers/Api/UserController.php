@@ -16,6 +16,7 @@ use App\Services\Api\User\UserService;
 use App\Traits\ResponseTrait;
 use App\Traits\UserTrait;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +24,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
-use Symfony\Component\HttpFoundation\JsonResponse;
+
+// use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * @OA\Schema(
@@ -59,10 +61,10 @@ class UserController extends Controller
         $this->userDetailService = $userDetailService;
 
         // Applying middleware for specific actions based on permissions
-        $this->middleware('permission:user-list')->only(['index', 'getAllUsersNames', 'show']);
-        $this->middleware('permission:user-create')->only(['store', 'importUsersFromExcel']);
-        $this->middleware('permission:user-edit')->only(['update', 'updatePassword']);
-        $this->middleware('permission:user-delete')->only(['destroy']);
+        // $this->middleware('permission:user-list')->only(['index', 'getAllUsersNames', 'show']);
+        // $this->middleware('permission:user-create')->only(['store', 'importUsersFromExcel']);
+        // $this->middleware('permission:user-edit')->only(['update', 'updatePassword']);
+        // $this->middleware('permission:user-delete')->only(['destroy']);
     }
     /**
      * @OA\Get(
@@ -301,7 +303,7 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->returnError('Invalid file format. Please upload an Excel file (.xlsx).', Response::HTTP_BAD_REQUEST);
+            return $this->returnError('Invalid file format. Please upload an Excel file (.xlsx).', 400);
         }
 
         $file = $request->file('file');
@@ -311,7 +313,7 @@ class UserController extends Controller
             $users = Excel::toArray([], $file);
 
             if (empty($users) || empty($users[0])) {
-                return $this->returnError('No data found in the Excel file.', Response::HTTP_BAD_REQUEST);
+                return $this->returnError('No data found in the Excel file.', 400);
             }
 
             $sheetData = $users[0];
@@ -337,7 +339,7 @@ class UserController extends Controller
                 'hiring_date',
                 'roles',
                 'location_id',
-                'work_type_id'
+                'work_type_id',
             ];
 
             $errors = [];
@@ -351,7 +353,7 @@ class UserController extends Controller
             }
 
             if (!empty($missingHeaders)) {
-                return $this->returnError("Invalid data format: Missing headers in the Excel file. Missing: " . implode(', ', $missingHeaders), Response::HTTP_BAD_REQUEST);
+                return $this->returnError("Invalid data format: Missing headers in the Excel file. Missing: " . implode(', ', $missingHeaders), 400);
             }
 
             // Regex patterns for validation
@@ -486,16 +488,16 @@ class UserController extends Controller
 
             if (!empty($allErrors)) {
                 DB::rollBack();
-                return $this->returnError(implode("\n", $allErrors), Response::HTTP_BAD_REQUEST);
+                return $this->returnError(implode("\n", $allErrors), 400);
             }
 
             DB::commit();
 
-            return $this->returnSuccess('Users imported successfully.', Response::HTTP_OK);
+            return $this->returnSuccess('Users imported successfully.', 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->returnError('An error occurred while processing the file: ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->returnError('An error occurred while processing the file: ' . $e->getMessage(), 500);
         }
     }
 
