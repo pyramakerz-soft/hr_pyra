@@ -161,5 +161,12 @@
                 </div>
             </div>
         </div>
+
+        <div *ngIf="has_serial_number">
+            <hr class="my-5 border border-[#E5E5EA]">
+    
+            <button class="bg-red-500 text-white p-2 rounded-lg text-sm md:text-base" (click)="DeleteSerialNum()">Delete Serial Number</button>
+        </div>
+
     </div> 
 </div>
