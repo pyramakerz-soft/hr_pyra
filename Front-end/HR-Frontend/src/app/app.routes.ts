@@ -21,6 +21,7 @@ import { doNotNavigateToLoginIfTokenExistsGuard } from './Guards/do-not-navigate
 import { HrDepartmentComponent } from './Pages/HR/hr-department/hr-department.component';
 import { HrDepartmentAddComponent } from './Pages/HR/hr-department-add/hr-department-add.component';
 import { UserDataService } from './Services/Resolvers/user-data.service';
+import { HrIssuesComponent } from './Pages/HR/hr-issues/hr-issues.component';
 
 export const routes: Routes = [
     { 
@@ -60,7 +61,9 @@ export const routes: Routes = [
             { path: "HRAttendanceEmployeeEdit/:Id", component: AttendenceEditComponent, title: "HRAttendanceEmployeeEdit" },
             { path: "HRDepartment", component: HrDepartmentComponent, title: "HRDepartment" },
             { path: "HRDepartmentAdd", component: HrDepartmentAddComponent, title: "HRDepartmentAdd" },
-            { path: "HRDepartmentEdit/:id", component: HrDepartmentAddComponent, title: "HRDepartmentEdit" }
+            { path: "HRDepartmentEdit/:id", component: HrDepartmentAddComponent, title: "HRDepartmentEdit" },
+            { path: "HRIssues", component: HrIssuesComponent, title: "HRIssues" },
+
         ]
     },
 
