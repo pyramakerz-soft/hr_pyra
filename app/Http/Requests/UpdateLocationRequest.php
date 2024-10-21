@@ -31,6 +31,8 @@ class UpdateLocationRequest extends FormRequest
             'longitude' => ['sometimes', 'numeric', Rule::unique('locations', 'longitude')->ignore($location->id)],
             'start_time' => ['sometimes', 'date_format:H:i'],
             'end_time' => ['sometimes', 'date_format:H:i', 'after:start_time'],
+            'range' => ['sometimes', 'integer'],
+
         ];
     }
 }
