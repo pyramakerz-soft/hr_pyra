@@ -21,6 +21,7 @@ export class HrEmployeeDetailsComponent {
   password:string =""
   PasswordError: string = ""; 
   isChange = false;
+  has_serial_number = false;
 
   constructor(public router:Router, public activeRoute:ActivatedRoute, public userService:UserServiceService){}
 
@@ -38,6 +39,14 @@ export class HrEmployeeDetailsComponent {
         d.User.end_time = this.convertUTCToEgyptLocalTime(d.User.end_time)
 
         this.employee = d.User;
+        this.userService.checkSerialNumber(d.User.id).subscribe(
+          (d:any) => {
+            this.has_serial_number = d.has_serial_number
+          },
+          (error) => {
+            console.log(error)
+          }
+        )
       }
     );
   }
@@ -119,4 +128,26 @@ export class HrEmployeeDetailsComponent {
     return `${formattedHours}:${formattedMinutes} ${localPeriod}`;
   }
 
+  DeleteSerialNum(){
+    Swal.fire({
+      title: 'Are you sure you want to delete serial number?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#FF7519',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if(this.empId){
+        this.userService.DeleteSerialNum(this.empId).subscribe(
+          (d:any) => {
+            this.has_serial_number = false
+          },
+          (error) => {
+            console.log(error)
+          }
+        )
+      }
+    });
+  }
 }
