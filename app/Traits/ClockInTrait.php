@@ -40,8 +40,6 @@ trait ClockInTrait
 
         $distance = $this->haversineDistance($latitude, $longitude, $userLocation->latitude, $userLocation->longitude);
         // Check if user is within an acceptable range (e.g., 50 meters)
-        dd($distance);
-        // Check if user is within an acceptable range (e.g., 50 meters)
         if ($distance > $range) {
             // Log and return error response if user is not within the range
             Log::info("Distance exceeds {$range} meters. Returning error.");
