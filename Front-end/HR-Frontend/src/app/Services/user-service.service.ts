@@ -115,4 +115,16 @@ export class UserServiceService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.delete<any>(this.baseURL + "/auth/delete_user/" + id, { headers });
   }
+
+  checkSerialNumber(empId:number){
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<any>(this.baseURL + `/auth/check_serial_number/${empId}`, { headers });
+  }
+
+  DeleteSerialNum(empId:number){
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post<any>(this.baseURL + `/auth/remove_serial_number/${empId}`, {}, { headers });
+  }
 }
