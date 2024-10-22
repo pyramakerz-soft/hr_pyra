@@ -23,11 +23,13 @@ export class BoundersPopUpComponent implements AfterViewInit {
   long: number = 0;
   Boundname: string = '';
   address: string = '';
+  radius: string = '';
   map: any;
   marker: any;
 
   nameError: string = "";
   addressError: string = ""; 
+  radiusError: string = ""; 
 
   StartTime:string=""
   EndTime:string=""
@@ -49,9 +51,11 @@ export class BoundersPopUpComponent implements AfterViewInit {
       this.id = data.id;
       this.address = data.LocationAddress;
       this.lat=data.Lat,
-      this.long=data.Long
+      this.long=data.Long,
+      this.radius = data.radius
       this.StartTime=this.convertUtcToEgyptianTime(data.startTime)
       this.EndTime=this.convertUtcToEgyptianTime(data.endTime)
+      this.radius=data.range
     }
   }
 
@@ -143,13 +147,15 @@ export class BoundersPopUpComponent implements AfterViewInit {
     let isValid = true
     this.nameError = ""; 
     this.addressError = "";  
+    this.radiusError = "";  
     this.StartTimeError="";
     this.EndTimeError="";
 
-    if (this.Boundname.trim() === "" && this.address.trim() === "" && this.StartTime.trim() === "" && this.EndTime.trim() === "" ) {
+    if (this.Boundname.trim() === "" && this.address.trim() === "" && this.StartTime.trim() === "" && this.EndTime.trim() === "" && this.radius.trim() === "" ) {
       isValid = false;
       this.nameError = '*Name Can not be empty';
       this.addressError = '*Address Can not be empty';
+      this.radiusError = '*Radius Can not be empty';
       this.StartTimeError = '*StartTime Can not be empty';
       this.EndTimeError = '*EndTime Can not be empty';
 
@@ -165,8 +171,10 @@ export class BoundersPopUpComponent implements AfterViewInit {
     } else if (this.EndTime.trim() === "") {
       isValid = false;
       this.EndTimeError = '*EndTime Can not be empty';
+    } else if (this.radius.trim() === "") {
+      isValid = false;
+      this.radiusError = '*Radius Can not be empty';
     } 
-    
     return isValid
   }
 
@@ -183,6 +191,25 @@ export class BoundersPopUpComponent implements AfterViewInit {
   onEndTimeChange() {
     this.EndTimeError = "" 
   }
+  onRadiusChange() {
+    this.radiusError = "" 
+  }
+
+  filterNumericInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let previousValue = input.value;
+
+    input.addEventListener('input', function() {
+        let newValue = input.value.replace(/[^0-9.]/g, '');
+
+        if (newValue.split('.').length > 2) {
+            input.value = previousValue; 
+        } else {
+            input.value = newValue; 
+            previousValue = input.value; 
+        }
+    });
+  }
 
   async EditAndAddLocation() {
     if(this.isFormValid()){
@@ -193,13 +220,12 @@ export class BoundersPopUpComponent implements AfterViewInit {
       if(this.ETime>this.STime){
       if (this.mode === 'edit') {
 
-        this.LocationServ.EditByID(this.Boundname, this.address, this.lat, this.long, this.id ,this.STime,this.ETime).subscribe(
+        this.LocationServ.EditByID(this.Boundname, this.address, this.lat, this.long, this.id ,this.STime,this.ETime, this.radius).subscribe(
           (d: any) => {
             this.dialogRef.close();
           },
           (error) => {
             this.SaveButton=false;
-            console.log(error)
             if (error.error.message === "The name has already been taken.") {
               Swal.fire({   
                 text: "The Location name has already been taken",
@@ -217,7 +243,7 @@ export class BoundersPopUpComponent implements AfterViewInit {
           }
         );
       } else if (this.mode === 'add') {
-        this.LocationServ.CreateAddress(this.Boundname, this.address, this.lat, this.long ,this.STime,this.ETime).subscribe(
+        this.LocationServ.CreateAddress(this.Boundname, this.address, this.lat, this.long ,this.STime,this.ETime, this.radius).subscribe(
           (d: any) => {
             this.dialogRef.close();
           },
