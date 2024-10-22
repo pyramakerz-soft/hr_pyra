@@ -45,6 +45,9 @@
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
             End Time
           </th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+            Range
+          </th>
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap" *ngIf="tableData.length !== 0">
             Action
           </th>
@@ -53,7 +56,7 @@
       <tbody>
         <!-- No Data Row -->
         <tr *ngIf="tableData.length === 0">
-          <td colspan="4" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+          <td colspan="6" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
             No Data Found
           </td>
         </tr>
@@ -67,12 +70,12 @@
           <td class="py-5 px-4">{{ row.name }}</td>
           <td class="py-5 px-4">{{ convertUTCToEgyptLocalTime(row.start_time) }}</td>
           <td class="py-5 px-4">{{ convertUTCToEgyptLocalTime(row.end_time) }}</td>
-
+          <td class="py-5 px-4">{{ row.range }}</td>
           <td class="py-5 px-4">
             <div class="px-2">
               <button 
               [disabled]="AddButton"
-              (click)="openDialog(row.latitude ,row.longitude ,row.name,row.id , row.address ,row.start_time ,row.end_time)">
+              (click)="openDialog(row.latitude ,row.longitude ,row.name,row.id , row.address ,row.start_time ,row.end_time, row.range)">
                 <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
               </button>
               <i class="fa fa-trash text-[#CC161D] ml-2 w-3 md:w-4" (click)="deleteLocation(row.id)"></i>
