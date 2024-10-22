@@ -1,7 +1,7 @@
 <?php
 namespace App\Exports;
 
-use App\Http\Resources\ClockResource;
+use App\Http\Resources\Api\ClockResource;
 use Illuminate\Database\Eloquent\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
