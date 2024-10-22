@@ -6,8 +6,8 @@ use App\Http\Requests\Api\AddClockRequest;
 use App\Http\Requests\Api\ClockInRequest;
 use App\Http\Requests\Api\ClockOutRequest;
 use App\Http\Requests\Api\UpdateClockRequest;
+use App\Http\Resources\Api\ClockResource;
 use App\Http\Resources\Api\IssueResource;
-use App\Http\Resources\ClockResource;
 use App\Models\ClockInOut;
 use App\Models\User;
 use App\Traits\ClockInTrait;
@@ -196,27 +196,37 @@ class ClockService
     }
     public function getClockIssues(Request $request)
     {
-        /* @TODO
-        1- get all employee that have is_issue = true
-        2- filter these employees with month and date
-        3- return in response
-        A- date of row of clock_in that it's column is_issue = true
-        B- Name of Employee
-        C- End_time
-        D- Phone_number
-        E- Email
-         */
+
         $query = ClockInOut::where('is_issue', true)->orderBy('clock_in', 'Desc');
 
+        // Check if a date filter is provided, if not, filter by today's date
+        if (!$request->has('date')) {
+            $query->whereDate('clock_in', Carbon::yesterday());
+        }
         //Apply Filter
         foreach ($this->filters as $filter) {
             $query = $filter->apply($query, $request);
         }
-        $clocks = $query->get();
+        //Handle pagination
+        $clocks = $query->paginate(7);
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clock Issues Found');
         }
-        return $this->returnData('clockIssues', IssueResource::collection($clocks));
+        // Prepare final response with pagination removed from data
+        return $this->returnData('clockIssues', IssueResource::collectionWithPagination($clocks));
 
     }
+    public function updateClockIssues(Request $request, ClockInOut $clock)
+    {
+
+        if (!$clock->is_issue) {
+            return $this->returnError('There is no issue for this clock');
+        }
+        $clock->update([
+            'is_issue' => false,
+        ]);
+
+        return $this->returnData('clock', $clock, 'Clock Issue Updated Successfully');
+    }
+
 }

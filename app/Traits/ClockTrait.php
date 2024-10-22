@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Http\Resources\ClockResource;
+use App\Http\Resources\Api\ClockResource;
 use App\Traits\HelperTrait;
 
 trait ClockTrait

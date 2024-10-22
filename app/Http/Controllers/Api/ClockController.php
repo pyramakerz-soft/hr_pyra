@@ -13,6 +13,7 @@ use App\Services\Api\Clock\ClockService;
 use App\Traits\ClockTrait;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
+use Lcobucci\Clock\Clock;
 
 /**
  * @OA\Schema(
@@ -677,6 +678,10 @@ class ClockController extends Controller
     public function getClockIssues(Request $request)
     {
         return $this->clockService->getClockIssues($request);
+    }
+    public function updateClockIssues(Request $request, ClockInOut $clock)
+    {
+        return $this->clockService->updateClockIssues($request, $clock);
     }
 
 }

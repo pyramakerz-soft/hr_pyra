@@ -70,6 +70,8 @@ Route::group(['middleware' => ['auth:api', 'role:Hr']], function () {
     Route::post('/update_clock/user/{user}/clock/{clock}', [ClockController::class, 'updateUserClock'])->name('clocks.updateUserClock'); //HR role
     Route::post('/clock_in/user/{user}', [ClockController::class, 'hrClocKIn'])->name('hr.ClocKIn'); //HR role
     Route::get('/get_clock_issues', [ClockController::class, 'getClockIssues']);
+    Route::post('/update_clock_issue/{clock}', [ClockController::class, 'updateClockIssues']);
+
 });
 
 Route::group(['middleware' => 'auth:api'], function () {
