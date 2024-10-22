@@ -55,7 +55,7 @@ export class BoundersPopUpComponent implements AfterViewInit {
       this.radius = data.radius
       this.StartTime=this.convertUtcToEgyptianTime(data.startTime)
       this.EndTime=this.convertUtcToEgyptianTime(data.endTime)
-      this.radius=data.range
+      this.radius=String(data.range)
     }
   }
 
