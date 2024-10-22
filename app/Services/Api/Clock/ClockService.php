@@ -6,6 +6,7 @@ use App\Http\Requests\Api\AddClockRequest;
 use App\Http\Requests\Api\ClockInRequest;
 use App\Http\Requests\Api\ClockOutRequest;
 use App\Http\Requests\Api\UpdateClockRequest;
+use App\Http\Resources\Api\IssueResource;
 use App\Http\Resources\ClockResource;
 use App\Models\ClockInOut;
 use App\Models\User;
@@ -192,5 +193,30 @@ class ClockService
 
         //3- Handle site clock-in if location_type is 'site'
         return $this->handleSiteClockInByHr($request, $user);
+    }
+    public function getClockIssues(Request $request)
+    {
+        /* @TODO
+        1- get all employee that have is_issue = true
+        2- filter these employees with month and date
+        3- return in response
+        A- date of row of clock_in that it's column is_issue = true
+        B- Name of Employee
+        C- End_time
+        D- Phone_number
+        E- Email
+         */
+        $query = ClockInOut::where('is_issue', true)->orderBy('clock_in', 'Desc');
+
+        //Apply Filter
+        foreach ($this->filters as $filter) {
+            $query = $filter->apply($query, $request);
+        }
+        $clocks = $query->get();
+        if ($clocks->isEmpty()) {
+            return $this->returnError('No Clock Issues Found');
+        }
+        return $this->returnData('clockIssues', IssueResource::collection($clocks));
+
     }
 }
