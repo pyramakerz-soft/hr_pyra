@@ -29,6 +29,10 @@
             <input [(ngModel)]="EndTime" type="time" (input)="onEndTimeChange()" placeholder="Add End Time"
                 class="w-full rounded-2xl p-2 md:p-4 mt-5 text-sm md:text-base">
             <span *ngIf="EndTimeError" class="text-red-500 text-sm ml-2 font-normal">{{ EndTimeError }}</span>
+
+            <input  [(ngModel)]="radius" type="text" (input)="filterNumericInput($event)" (ngModelChange)="onRadiusChange()" placeholder="Add Location Radius"
+                class="w-full rounded-2xl p-2 md:p-4 mt-5 text-sm md:text-base">
+            <span *ngIf="radiusError" class="text-red-500 text-sm ml-2 font-normal">{{ radiusError }}</span>
         </div>
 
         <button class="bg-[#17253E] font-bold text-base md:text-lg text-white rounded-2xl py-3 px-4 md:px-7"
