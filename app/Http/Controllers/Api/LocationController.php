@@ -77,6 +77,7 @@ class LocationController extends Controller
         if ($locations->isEmpty()) {
             return $this->returnError('No locations Found');
         }
+        dd($locations);
         return $this->returnData('locations', $locations, 'Locations Data');
     }
     /**
