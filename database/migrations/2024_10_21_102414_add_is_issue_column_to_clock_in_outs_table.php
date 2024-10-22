@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('departments', function (Blueprint $table) {
-            $table->boolean('is_location_time')->nullable()->default(0);
+        Schema::table('clock_in_outs', function (Blueprint $table) {
+            $table->boolean('is_issue')->nullable()->default(false);
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('departments', function (Blueprint $table) {
-            $table->dropColumn('is_location_time');
+        Schema::table('clock_in_outs', function (Blueprint $table) {
+            $table->dropColumn('is_issue');
 
         });
     }
