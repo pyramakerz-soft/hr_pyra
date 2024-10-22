@@ -1,6 +1,5 @@
 <?php
 
-use App\Events\CheckClockOutsEvent;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClockController;
 use App\Http\Controllers\Api\DepartmentController;
@@ -70,16 +69,16 @@ Route::group(['middleware' => ['auth:api', 'role:Hr']], function () {
     Route::get('/clock_by_id/{clock}', [ClockController::class, 'getClockById']); //HR role
     Route::post('/update_clock/user/{user}/clock/{clock}', [ClockController::class, 'updateUserClock'])->name('clocks.updateUserClock'); //HR role
     Route::post('/clock_in/user/{user}', [ClockController::class, 'hrClocKIn'])->name('hr.ClocKIn'); //HR role
-
+    Route::get('/get_clock_issues', [ClockController::class, 'getClockIssues']);
 });
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/clock_in', [ClockController::class, 'clockIn'])->name('clocks.clockIn');
     Route::post('/clock_out', [ClockController::class, 'clockOut'])->name('clocks.clockOut');
     Route::get('/user_clocks', [ClockController::class, 'showUserClocks'])->name('clocks.UserClocks');
-    Route::get('/test_clock_event', function () {
-        event(new CheckClockOutsEvent());
-    });
+    // Route::get('/test_clock_event', function () {
+    //     event(new CheckClockOutsEvent());
+    // });
 
 });
 
