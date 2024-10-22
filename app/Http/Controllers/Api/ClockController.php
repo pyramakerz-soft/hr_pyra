@@ -674,5 +674,9 @@ class ClockController extends Controller
         return $this->clockService->AddClockByHr($request, $user);
 
     }
+    public function getClockIssues(Request $request)
+    {
+        return $this->clockService->getClockIssues($request);
+    }
 
 }
