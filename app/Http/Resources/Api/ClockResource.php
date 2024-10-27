@@ -1,9 +1,9 @@
 <?php
-namespace App\Http\Resources;
+namespace App\Http\Resources\Api;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Carbon;
 
 class ClockResource extends JsonResource
 {
@@ -42,6 +42,7 @@ class ClockResource extends JsonResource
             'formattedClockOut' => $formattedClockOut,
             'lateArrive' => $this->late_arrive,
             'earlyLeave' => $this->early_leave,
+            'is_issue' => $this->is_issue ? true : false,
         ];
     }
 }
