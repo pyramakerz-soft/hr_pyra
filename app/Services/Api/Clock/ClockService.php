@@ -196,24 +196,36 @@ class ClockService
     }
     public function getClockIssues(Request $request)
     {
+        if ($request->has('month')) {
+            $month = Carbon::parse($request->get('month'));
+            $startOfMonth = (clone $month)->startOfMonth()->startOfDay();
+            $endOfMonth = (clone $month)->endOfMonth()->endOfDay();
 
-        $query = ClockInOut::where('is_issue', true)->orderBy('clock_in', 'Desc');
-
-        // Check if a date filter is provided, if not, filter by today's date
-        if (!$request->has('date')) {
-            $query->whereDate('clock_in', Carbon::yesterday());
+        } else {
+            $startOfMonth = Carbon::now()->startOfMonth()->startOfDay();
+            $endOfMonth = Carbon::now()->endOfMonth()->endOfDay();
         }
-        //Apply Filter
+        $query = ClockInOut::where('is_issue', true)
+            ->whereBetween('clock_in', [$startOfMonth, $endOfMonth])
+            ->orderBy('clock_in', 'Desc');
+
+        $filtersApplied = $request->has('date');
+
         foreach ($this->filters as $filter) {
             $query = $filter->apply($query, $request);
         }
-        //Handle pagination
-        $clocks = $query->paginate(7);
+
+        if ($filtersApplied) {
+            $clocks = $query->get();
+        } else {
+            $clocks = $query->paginate(7);
+        }
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clock Issues Found');
         }
-        // Prepare final response with pagination removed from data
-        return $this->returnData('clockIssues', IssueResource::collectionWithPagination($clocks));
+        return $filtersApplied
+        ? $this->returnData('clockIssues', IssueResource::collection($clocks))
+        : $this->returnData('clockIssues', IssueResource::collectionWithPagination($clocks));
 
     }
     public function updateClockIssues(Request $request, ClockInOut $clock)
