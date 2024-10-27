@@ -199,7 +199,6 @@ export class BoundersPopUpComponent implements AfterViewInit {
           },
           (error) => {
             this.SaveButton=false;
-            console.log(error)
             if (error.error.message === "The name has already been taken.") {
               Swal.fire({   
                 text: "The Location name has already been taken",

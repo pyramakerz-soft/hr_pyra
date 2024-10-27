@@ -44,7 +44,6 @@ export class HrEmployeeDetailsComponent {
             this.has_serial_number = d.has_serial_number
           },
           (error) => {
-            console.log(error)
           }
         )
       }
@@ -144,7 +143,6 @@ export class HrEmployeeDetailsComponent {
             this.has_serial_number = false
           },
           (error) => {
-            console.log(error)
           }
         )
       }
