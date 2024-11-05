@@ -24,6 +24,7 @@ class ClockResource extends JsonResource
         }
 
         // Get location for clock in and clock out
+        $locationName = $this->location->name;
         $locationIn = $this->location_type === "site" && $this->clock_in ? $this->location->address : null;
         $locationOut = $this->location_type === "site" && $this->clock_out ? $this->location->address : null;
 
@@ -33,6 +34,7 @@ class ClockResource extends JsonResource
             'Date' => Carbon::parse($this->clock_in)->format('Y-m-d'),
             'clockIn' => $clockIn,
             'clockOut' => $clockOut,
+            'locationName' => $locationName,
             'totalHours' => $duration,
             'locationIn' => $locationIn,
             'locationOut' => $locationOut,
