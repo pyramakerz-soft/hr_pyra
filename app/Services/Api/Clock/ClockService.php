@@ -237,6 +237,15 @@ class ClockService
 
 
     }
+    public function getCountIssues()
+    {
+        $totalIssueCount = ClockInOut::where('is_issue', true)
+
+            ->count();
+
+
+        return $this->returnData('data', $totalIssueCount);
+    }
     public function updateClockIssues(Request $request, ClockInOut $clock)
     {
 
