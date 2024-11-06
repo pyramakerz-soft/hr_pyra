@@ -1,0 +1,210 @@
+<div>
+    <div class="flex items-center space-x-4">
+        <div
+            class="w-full my-5 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 space-x-2 flex items-center">
+            <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]" (click)="searchByDate()"></i>
+            <input type="date" placeholder="Enter Date..." (change)="searchByDate()"
+                class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full"
+                [(ngModel)]="SelectedDate" />
+        </div>
+        <button class="w-8 md:w-9 h-7 md:h-9 bg-[#FF7519] rounded-full p-1 md:p-2" *ngIf="isDateSelected"><i
+                class="fi fi-bs-undo text-white test-xs md:text-base" (click)="ClearSearch()"></i></button>
+    </div>
+    <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">
+        <table class="overflow-auto bg-[#FFFFFF] text-center text-[#475467] w-full">
+            <thead class="bg-[#F9FAFB]">
+                <tr>
+                    <th class="py-3 w-1/12 min-w-[120px] whitespace-nowrap">
+                        Day  
+                    </th>
+                    <th class="py-3 min-w-[120px] whitespace-nowrap">
+                        Date  
+                    </th>
+                    <th class="py-3 min-w-[120px] whitespace-nowrap">
+                        Clock In  
+                    </th>
+                    <th class="py-3 min-w-[120px] whitespace-nowrap">
+                        Clock Out  
+                    </th>
+                    <th class="py-3 min-w-[120px] whitespace-nowrap">
+                        Total Hours  
+                    </th>
+                    <th
+                        class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
+                        Location In  
+                    </th>
+                    <th
+                        class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
+                        Location Out  
+                    </th>
+                    <th class="py-3 min-w-[120px] whitespace-nowrap">
+                        Site  
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- No Data Row -->
+                <tr *ngIf="Userclocks.length === 0">
+                    <td colspan="8" class="px-4 py-2 h-[72px] text-center border-t border-gray-300">
+                        No Data Found
+                    </td>
+                </tr>
+
+                <!-- Data Rows -->
+                <tr *ngFor="let row of Userclocks; let i = index"
+                    [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300">
+                    <td class="py-5">
+                        <!-- <i *ngIf="row.otherClocks.length > 0" class="fa-solid fa-chevron-down ml-1"
+                            (click)="toggleOtherClocks(i)"></i> -->
+                        {{ row.Day }}
+                    </td>
+                    <td>{{ row.Date }}</td>
+
+
+
+                    <td>
+                        <div>
+                            <div
+                                class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] m-auto">
+                                {{ convertUTCToEgyptLocalTime(row.clockIn) }}
+                            </div>
+                        </div>
+
+                        <!-- <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
+                            <div *ngFor="let cl of row.otherClocks; let j = index"
+                                class=" text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
+                                {{ convertUTCToEgyptLocalTime(cl.clockIn)}}
+                            </div>
+                        </div> -->
+                    </td>
+
+
+
+
+                    <td>
+                        <div class="flex justify-center">
+                            <div *ngIf="row.clockOut; else emptyState"
+                                class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] m-auto">
+                                {{ convertUTCToEgyptLocalTime(row.clockOut) }}
+                            </div>
+                            <ng-template #emptyState>
+                                <div
+                                    class="w-[97px] h-[36px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[8px] flex items-center justify-center">
+                                    <div class="w-[50px] h-[1px] bg-[#475467]"></div>
+                                </div>
+                            </ng-template>
+                        </div>
+                        <!-- <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
+                            <div *ngFor="let cl of row.otherClocks; let j = index">
+                                <ng-container *ngIf="cl.clockOut; else emptyClockState">
+                                    <div
+                                        class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
+                                        {{ convertUTCToEgyptLocalTime(cl.clockOut) }}
+                                    </div>
+                                </ng-container>
+                                <ng-template #emptyClockState>
+                                    <div
+                                        class="w-[97px] h-[36px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[8px] flex items-center justify-center">
+                                        <div class="w-[50px] h-[1px] bg-[#475467]"></div>
+                                    </div>
+                                </ng-template>
+                            </div>
+                        </div> -->
+                    </td>
+
+                    <td>{{ row.totalHours }}</td>
+
+                    <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
+                        <div *ngIf="row.locationIn; else emptyLocation">
+                            <div class="truncate" title="{{ row.locationIn }}">
+                                {{ row.locationIn }}
+                            </div>
+                        </div>
+                        <ng-template #emptyLocation>
+                            <div class="flex justify-center">
+                                <div class="w-[90%] h-[1px] bg-[#475467]"></div>
+                            </div>
+                        </ng-template>
+                    </td>
+
+
+                    <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
+                        <div *ngIf="row.locationOut; else emptyLocation">
+                            <div class="truncate" title="{{ row.locationOut }}">
+                                {{ row.locationOut }}
+                            </div>
+                        </div>
+
+                        <ng-template #emptyLocation>
+                            <div class="flex justify-center">
+                                <div class="w-[90%] h-[1px] bg-[#475467]"></div>
+                            </div>
+                        </ng-template>
+                    </td>
+
+                    <td>
+                        <div>
+                            <div
+                                class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] m-auto">
+                                {{ row.site }}
+                            </div>
+                        </div>
+                        <!-- <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
+                            <div *ngFor="let cl of row.otherClocks; let j = index"
+                                class=" text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
+                                <p *ngIf="cl.clockOut">{{cl.site}}</p>
+
+                            </div>
+                        </div> -->
+                    </td>
+
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-5 md:flex justify-between items-center">
+        <!-- Previous Button -->
+        <button
+            class="h-[44px] w-[119px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center"
+            [ngClass]="{'hidden': CurrentPageNumber === 1, 'opacity-50 cursor-not-allowed': CurrentPageNumber === 1}"
+            [disabled]="CurrentPageNumber === 1" (click)="getPrevPage()">
+            <i class="fa-solid fa-arrow-left"></i> Previous
+        </button>
+
+        <!-- <div class="flex justify-center items-center space-x-5 md:block">
+            <button *ngFor="let page of pages" class="h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
+                [ngClass]="{'border border-[#D0D5DD]': page === CurrentPageNumber}" (click)="GetClockss(page)">
+                {{ page }}
+            </button>
+        </div> -->
+
+        <!-- <div class="flex justify-center items-center space-x-5 md:block">
+            <button  class="h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
+                >
+                {{ CurrentPageNumber }} / PagesNumber
+            </button>
+        </div> -->
+
+        <div class="flex justify-center items-center space-x-2 md:space-x-4">
+            <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="GetClockss(CurrentPageNumber)">
+                {{ CurrentPageNumber }}
+            </button>
+            <button  *ngIf="CurrentPageNumber+1<PagesNumber" class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="GetClockss(CurrentPageNumber+1)">
+                {{ CurrentPageNumber+1 }}
+            </button>
+            <span class="text-gray-800 text-sm md:text-base font-semibold">...</span>
+            <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]" (click)="GetClockss(PagesNumber)">
+                {{ PagesNumber }}
+            </button>
+        </div>
+
+        <!-- Next Button -->
+        <button
+            class="h-[44px] w-[92px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center"
+            [ngClass]="{'hidden': CurrentPageNumber === PagesNumber, 'opacity-50 cursor-not-allowed': CurrentPageNumber === PagesNumber}"
+            [disabled]="CurrentPageNumber === PagesNumber" (click)="getNextPage()">
+            Next <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+</div>

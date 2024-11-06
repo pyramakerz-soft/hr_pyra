@@ -1,0 +1,108 @@
+<div>
+    <div
+        class=" h-[44px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] flex items-center">
+        <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]"></i>
+        <input type="text" placeholder="Enter Keyword..."
+            class="flex-1 outline-none border-none  placeholder-[#667085] bg-transparent" />
+    </div>
+    <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">
+        <table class="lg:w-full md:table-fixed table-auto bg-[#FFFFFF] text-center text-[#475467]">
+          <thead class="bg-[#F9FAFB]">
+            <tr>
+              <th class="py-3 w-1/12 min-w-[120px] whitespace-nowrap">
+                Name  
+              </th>
+              <th class="py-3 min-w-[120px] whitespace-nowrap">
+                Code  
+              </th>
+              <th class="py-3 min-w-[120px] whitespace-nowrap">
+               Department  
+              </th>
+              <th class="py-3 min-w-[120px] whitespace-nowrap">
+                Poisition  
+              </th>
+              <th class="py-3 min-w-[120px] whitespace-nowrap">
+                Phone  
+              </th>
+              <th class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
+               Email  
+              </th>
+              <th class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
+                User Name  
+              </th>
+              <th class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- No Data Row -->
+            <tr *ngIf="tableData.length === 0">
+              <td colspan="7" class="px-4 py-2 h-[72px] text-center  border-t border-gray-300">
+                No Data Found
+              </td>
+            </tr>
+      
+            <!-- Data Rows -->
+            <tr *ngFor="let row of tableData; let i = index"
+                [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300">
+              <td class="py-5">{{ row.day }}</td>
+              <td>{{ row.date }}</td>
+
+
+              <td>
+                <div class="flex justify-center">
+                  <div class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#1B5724] py-[8px] text-[#FFFFFF]">
+                    {{ row.clockIn }}
+                  </div>
+                </div>
+              </td>
+
+              
+              <td>{{ row.date }}</td>
+
+              <td>{{ row.totalHours }}</td>
+
+              <td>{{ row.date }}</td>
+
+              <td>{{ row.date }}</td>
+
+              <td>{{ row.date }}</td>
+
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      
+    <div class="mt-5 md:flex justify-between items-center">
+        <button class="h-[44px] w-[119px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center hidden">
+            <i class="fa-solid fa-arrow-left"></i>Previous
+        </button>
+        
+        <div class="flex justify-center items-center space-x-5 md:block">
+          <button class="h-[50px] w-[50px] border border-[#D0D5DD] rounded-xl bg-[#FFFFFF] ">
+              1
+          </button>
+          <button class="h-[50px] w-[50px] border border-[#D0D5DD] rounded-xl bg-[#FFFFFF] ">
+              2
+          </button>
+          <button class="h-[50px] w-[50px] border border-[#D0D5DD] rounded-xl bg-[#FFFFFF] ">
+              3
+          </button>
+          <button class="h-[50px] w-[50px] border border-[#D0D5DD] rounded-xl bg-[#FFFFFF] ">
+              4
+          </button>
+        </div>
+
+        <button class="h-[44px] w-[92px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] gap-[8px] md:flex items-center hidden ">
+            Next<i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+</div>
+
+
+
+
+
+

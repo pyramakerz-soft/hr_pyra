@@ -1,0 +1,12 @@
+.bgLinearGradient{
+    background: linear-gradient(to right top, #2E5EB5 10%, #17253E 60%);
+}
+
+/* .owl-dots {
+    position: absolute;
+    top: 10px;  
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+} */

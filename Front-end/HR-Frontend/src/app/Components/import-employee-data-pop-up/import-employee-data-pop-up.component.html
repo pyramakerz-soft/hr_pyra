@@ -1,0 +1,146 @@
+<div class="bg-[#dddddd5e] w-full fixed inset-0 py-5">
+    <div class="relative p-5 md:px-10 m-auto w-[85%] md:w-2/3 rounded-2xl shadow-2xl text-[#111827] bg-white overflow-auto max-h-[95vh]">
+        <p class="text-lg md:text-xl lg:text-2xl font-bold">Import File</p>
+
+        <img class="absolute top-0 right-1/4 w-[25%] z-0" src="../../../assets/images/logo-orange 1.png">
+
+        <div class="relative z-10">
+            <div class="flex justify-center">
+                <label for="file-upload" class="cursor-pointer flex flex-col items-center border rounded-xl w-full md:w-1/2 md:p-7 px-12 lg:px-0 py-5 lg:py-10 my-4">
+                    <img *ngIf="!file" src="../../../assets/images/02 Add Photo.png" class="w-12">
+                    <img *ngIf="file" src="../../../assets/images/FileAttached.png" class="w-12">
+                    <span class="bg-[#0665EC] text-white py-2 lg:py-4 w-full lg:w-[45%] lg:font-semibold text-xs md:text-sm rounded-lg my-2 md:my-4 text-center">Select Files CSV</span>
+                    <p class="font-normal text-xs md:text-sm">or drag File here</p>
+                </label>
+                <input id="file-upload" type="file"
+                (change)="onFileSelected($event)"
+                class="hidden" 
+                #fileInput
+                accept=".xls, .xlsx, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+            </div>
+ 
+            <div class="my-3 overflow-x-auto rounded-2xl border border-[#EAECF0]">
+              <table class="w-full table-auto bg-[#FFFFFF] text-left text-[#475467]">
+                <thead class="bg-[#F9FAFB] text-sm md:text-base">
+                  <tr>
+                      <th class="py-3 px-4 whitespace-nowrap">
+                          Name  
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Email  
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Password  
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Phone  
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Contact Phone  
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          National ID  
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Department 
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Gender 
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Salary 
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Working Hours 
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Overtime Hours 
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Start Time 
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          End Time 
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Position 
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Hiring Date 
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Roles 
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Location Id 
+                      </th>
+                      <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
+                          Work Type Id 
+                      </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- No Data Row -->
+                  <tr *ngIf="dataObjects.length === 0">
+                    <td colspan="19" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
+                      No Data Found
+                    </td>
+                  </tr>
+            
+                  <!-- Data Rows -->
+                  <tr *ngFor="let row of dataObjects; let i = index"
+                      [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300 text-xs md:text-sm">
+                    
+                      <td class="py-5 px-4">{{ row.name }}</td>
+                      <td class="py-5 px-4">{{ row.email }}</td>
+                      <td class="py-5 px-4">{{ row.password }}</td>
+                      <td class="py-5 px-4">{{ row.phone }}</td>
+                      <td class="py-5 px-4">{{ row.contact_phone }}</td>
+                      <td class="py-5 px-4">{{ row.national_id }}</td>
+                      <td class="py-5 px-4">{{ row.department_id }}</td>
+                      <td class="py-5 px-4">{{ row.gender }}</td>
+                      <td class="py-5 px-4">{{ row.salary }}</td>
+                      <td class="py-5 px-4">{{ row.working_hours_day }}</td>
+                      <td class="py-5 px-4">{{ row.overtime_hours }}</td>
+      
+                      
+                      <td>
+                          <div class="flex justify-center">
+                            <div class="text-center w-[97px] rounded-xl border border-[#D0D5DD] bg-[#FFFFFF] py-2">
+                              {{ row.start_time }}
+                            </div>
+                          </div>
+                      </td>
+                      <td>
+                          <div class="flex justify-center">
+                            <div class="text-center w-[97px] rounded-xl border border-[#D0D5DD] bg-[#FFFFFF] py-2">
+                              {{ row.end_time }}
+                            </div>
+                          </div>
+                      </td>
+                        
+                      <td class="py-5 px-4">{{ row.emp_type }}</td>
+
+                      <td>
+                        <div class="flex justify-center">
+                          <div class="text-center w-[97px] rounded-xl border border-[#D0D5DD] bg-[#FFFFFF] py-2">
+                            {{ row.hiring_date }}
+                          </div>
+                        </div>
+                    </td>
+      
+                      <td class="py-5 px-4">{{ row.roles }}</td>
+                      <td class="py-5 px-4">{{ row.location_id }}</td>
+                      <td class="py-5 px-4">{{ row.work_type_id }}</td>
+                  </tr>
+                </tbody>
+              </table>
+          </div>
+    
+            <div class=" flex justify-center">
+                <button (click)="closeDialog()" class="font-bold text-base md:text-xl text-[#707070] py-1 md:py-2 px-4 md:px-7 rounded-xl border border-[#9F9999] mr-5">Cancel</button>
+                <button (click)="ImportEmployees()" class="font-bold text-base md:text-xl text-white py-1 md:py-2 px-4 md:px-7 rounded-xl border border-[#FF7519] bg-[#FF7519]">Upload</button>
+            </div>
+        </div>
+    </div>
+</div>
