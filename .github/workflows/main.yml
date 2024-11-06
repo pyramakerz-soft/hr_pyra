@@ -43,6 +43,7 @@ jobs:
 
               if [ -f "composer.phar" ]; then
                 php composer.phar install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+                php composer.phar update
               else
                 composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
               fi
