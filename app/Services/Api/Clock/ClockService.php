@@ -223,9 +223,18 @@ class ClockService
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clock Issues Found');
         }
-        return $filtersApplied
-        ? $this->returnData('clockIssues', IssueResource::collection($clocks))
-        : $this->returnData('clockIssues', IssueResource::collectionWithPagination($clocks));
+        $totalIssueCount = ClockInOut::where('is_issue', true)
+            ->whereBetween('clock_in', [$startOfMonth, $endOfMonth])
+            ->count();
+        $response = [
+            'clockIssues' => $filtersApplied
+                ? IssueResource::collection($clocks)
+                : IssueResource::collectionWithPagination($clocks),
+            'count' => $totalIssueCount,
+        ];
+
+        return $this->returnData('data', $response);
+
 
     }
     public function updateClockIssues(Request $request, ClockInOut $clock)
