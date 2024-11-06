@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 trait ClockInTrait
 {
-    use ClockTrait, HelperTrait;
+    use ClockTrait, HelperTrait, ResponseTrait;
     protected function checkClockInWithoutClockOut($user_id, $clock_in)
     {
         // Check if the user has an unresolved clock-in (without clock-out) for today
@@ -29,21 +29,20 @@ trait ClockInTrait
 
         // Validate that the location_id is assigned to the user
         $userLocation = $this->getUserAssignedLocationById($authUser, $location_id);
-        if (!$userLocation) {
-            return null;
+        if (is_null($userLocation)) {
+            Log::info("This Email: {$authUser->email} not assigned to this location");
+            return $this->returnError('User is not assigned to this location');
         }
-
+        $range = $userLocation->range ?? 350;
         // Validate latitude and longitude comparison with the assigned location
         $latitude = $request->latitude;
         $longitude = $request->longitude;
         $distance = $this->haversineDistance($latitude, $longitude, $userLocation->latitude, $userLocation->longitude);
         // Check if user is within an acceptable range (e.g., 50 meters)
-
-        // Check if user is within an acceptable range (e.g., 50 meters)
-        if ($distance > 50) {
+        if ($distance > $range) {
             // Log and return error response if user is not within the range
-            Log::info("Distance exceeds 50 meters. Returning error.");
-            return $this->returnError('User is not located at the correct location. lat: ' . $latitude . ' / long: ' . $longitude);
+            Log::info("Distance exceeds {$range} meters. Returning error.");
+            return $this->returnError('User is not located at the correct location.');
         }
         // Return the validated location
         return $userLocation;

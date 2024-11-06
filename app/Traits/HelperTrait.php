@@ -2,13 +2,18 @@
 
 namespace App\Traits;
 
-use App\Http\Resources\ClockResource;
+use App\Http\Resources\Api\ClockResource;
 use App\Models\ClockInOut;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 trait HelperTrait
 {
+    // protected $resource;
+    // public function __construct(IResource $resource)
+    // {
+    //     $this->resource = $resource;
+    // }
     protected function calculateLateArrive($clockIn, $startTime)
     {
         // Extract the time portion only
@@ -146,7 +151,6 @@ trait HelperTrait
             $clocksForDay = $clocksForDay->sortByDesc(function ($clock) {
                 return Carbon::parse($clock->clock_in);
             });
-            // dd($clocksForDay);
             // Process each clock of the day
             foreach ($clocksForDay as $clock) {
                 // Use ClockResource to format each clock and add it to data

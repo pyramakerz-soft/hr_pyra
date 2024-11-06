@@ -22,7 +22,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('departments', function (Blueprint $table) {
-            
+            $table->dropColumn('is_location_time');
+
         });
     }
 };

@@ -54,7 +54,6 @@ export class HrBoundersComponent {
       (d: any) => {
         this.tableData = d.locations.data;
         
-
         this.PagesNumber = d.locations.last_page;
         this.generatePages();
       },
@@ -70,7 +69,7 @@ export class HrBoundersComponent {
     }
   }
 
-  openDialog(lat?: string, long?: string, EditedLocationName?: string, id?: number, EditedLocationAddress?: string , StartTime?:string, EndTime?:string): void {
+  openDialog(lat?: string, long?: string, EditedLocationName?: string, id?: number, EditedLocationAddress?: string , StartTime?:string, EndTime?:string, Range?:string): void {
     this.AddButton=true;
     const dialogRef = this.dialog.open(BoundersPopUpComponent, {
       data: EditedLocationName
@@ -82,7 +81,8 @@ export class HrBoundersComponent {
           Lat: lat,
           Long: long,
           startTime:StartTime,
-          endTime:EndTime
+          endTime:EndTime,
+          range:Range,
         }
         : {
           mode: 'add',
