@@ -6,7 +6,8 @@ use App\Http\Requests\Api\AddClockRequest;
 use App\Http\Requests\Api\ClockInRequest;
 use App\Http\Requests\Api\ClockOutRequest;
 use App\Http\Requests\Api\UpdateClockRequest;
-use App\Http\Resources\ClockResource;
+use App\Http\Resources\Api\ClockResource;
+use App\Http\Resources\Api\IssueResource;
 use App\Models\ClockInOut;
 use App\Models\User;
 use App\Traits\ClockInTrait;
@@ -193,4 +194,69 @@ class ClockService
         //3- Handle site clock-in if location_type is 'site'
         return $this->handleSiteClockInByHr($request, $user);
     }
+    public function getClockIssues(Request $request)
+    {
+        if ($request->has('month')) {
+            $month = Carbon::parse($request->get('month'));
+            $startOfMonth = (clone $month)->startOfMonth()->startOfDay();
+            $endOfMonth = (clone $month)->endOfMonth()->endOfDay();
+
+        } else {
+            $startOfMonth = Carbon::now()->startOfMonth()->startOfDay();
+            $endOfMonth = Carbon::now()->endOfMonth()->endOfDay();
+        }
+        $query = ClockInOut::where('is_issue', true)
+            ->whereBetween('clock_in', [$startOfMonth, $endOfMonth])
+            ->orderBy('clock_in', 'Desc');
+
+        $filtersApplied = $request->has('date');
+
+        foreach ($this->filters as $filter) {
+            $query = $filter->apply($query, $request);
+        }
+
+        if ($filtersApplied) {
+            $clocks = $query->get();
+        } else {
+            $clocks = $query->paginate(7);
+        }
+        if ($clocks->isEmpty()) {
+            return $this->returnError('No Clock Issues Found');
+        }
+        $totalIssueCount = ClockInOut::where('is_issue', true)
+            ->whereBetween('clock_in', [$startOfMonth, $endOfMonth])
+            ->count();
+        $response = [
+            'clockIssues' => $filtersApplied
+                ? IssueResource::collection($clocks)
+                : IssueResource::collectionWithPagination($clocks),
+            'count' => $totalIssueCount,
+        ];
+
+        return $this->returnData('data', $response);
+
+
+    }
+    public function getCountIssues()
+    {
+        $totalIssueCount = ClockInOut::where('is_issue', true)
+
+            ->count();
+
+
+        return $this->returnData('data', $totalIssueCount);
+    }
+    public function updateClockIssues(Request $request, ClockInOut $clock)
+    {
+
+        if (!$clock->is_issue) {
+            return $this->returnError('There is no issue for this clock');
+        }
+        $clock->update([
+            'is_issue' => false,
+        ]);
+
+        return $this->returnData('clock', $clock, 'Clock Issue Updated Successfully');
+    }
+
 }

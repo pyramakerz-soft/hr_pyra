@@ -20,6 +20,7 @@ export class HRComponent {
     { label: 'Attendance ', icon: 'fi fi-rr-chart-simple', route: '/HR/HRAttendance' },
     { label: 'Locations', icon: 'fi fi-rr-chart-simple', route: '/HR/HRBounders' },
     { label: 'Department', icon: 'fi fi-rr-chart-simple', route: '/HR/HRDepartment' },
+    { label: 'Issues', icon: 'fi fi-rr-chart-simple', route: '/HR/HRIssues' },
     { label: 'Sign Out', icon: 'fi fi-bs-sign-out-alt transform rotate-180', route: '' },
   ];
 

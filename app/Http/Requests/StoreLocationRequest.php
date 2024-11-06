@@ -28,6 +28,7 @@ class StoreLocationRequest extends FormRequest
             'longitude' => ['required', 'numeric', 'unique:locations,longitude'],
             'start_time' => ['required', 'date_format:H:i'],
             'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
+            'range' => ['required', 'integer'],
         ];
     }
 }

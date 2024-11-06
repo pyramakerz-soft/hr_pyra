@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\LoginRequest;
-use App\Http\Resources\ProfileResource;
+use App\Http\Resources\Api\ProfileResource;
 use App\Models\User;
 use App\Traits\AuthTrait;
 use App\Traits\ResponseTrait;

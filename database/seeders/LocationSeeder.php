@@ -13,29 +13,24 @@ class LocationSeeder extends Seeder
     public function run(): void
     {
         Location::create([
-            'name' => "Pyramakerz",
-            'address' => "Yehia Mosque, AboQeir Street Zizinya",
+            'name' => "Alex (Zizinia)",
+            'address' => "603 أبو قير، العاقصة وباكوس، قسم أول الرمل، محافظة الإسكندرية 5450218، مصر",
             'latitude' => "31.2403970",
             'longitude' => "29.9660127",
+            'range' => 350,
             'start_time' => '07:30',
             'end_time' => "15:30",
         ]);
+
         Location::create([
-            'name' => "Maali El Salam School",
-            'address' => "Agami,Hanouvil ElSalam St",
-            'latitude' => "31.2475801",
-            'longitude' => "29.9632117",
-            'start_time' => '08:00',
-            'end_time' => "14:00",
+            'name' => "Maali Elsalam School",
+            'address' => "العجمي- الهانوفيل ش السلام",
+            'latitude' => "31.2475701",
+            'longitude' => "29.9632017",
+            'range' => 200,
+            'start_time' => '07:30',
+            'end_time' => "15:30",
         ]);
-        // Location::create([
-        //     'name' => "Pyramakerz",
-        //     'address' => "Yehia Mosque, AboQeir Street Zizinya",
-        //     'latitude' => "31.2475701",
-        //     'longitude' => "29.9632017",
-        //     'start_time' => '07:30',
-        //     'end_time' => "15:30",
-        // ]);
 
         // Location::factory()->count(19)->create();
     }
