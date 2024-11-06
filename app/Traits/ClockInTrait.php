@@ -37,7 +37,6 @@ trait ClockInTrait
         // Validate latitude and longitude comparison with the assigned location
         $latitude = $request->latitude;
         $longitude = $request->longitude;
-
         $distance = $this->haversineDistance($latitude, $longitude, $userLocation->latitude, $userLocation->longitude);
         // Check if user is within an acceptable range (e.g., 50 meters)
         if ($distance > $range) {
