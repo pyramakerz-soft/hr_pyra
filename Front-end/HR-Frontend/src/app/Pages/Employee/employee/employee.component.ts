@@ -14,8 +14,8 @@ export class EmployeeComponent {
   isMenuOpen: boolean = false;
 
   menuItems = [
-    { label: 'Dashboard', icon: 'fi fi-rr-table-rows', route: '/employee/Dashboard' },
-    { label: 'Sign Out', icon: 'fi fi-bs-sign-out-alt transform rotate-180', route: '/Login' },
+    { label: 'Dashboard', icon: 'fi fi-rr-table-rows', route: '/employee/Dashboard' , notificationCount: 0 },
+    { label: 'Sign Out', icon: 'fi fi-bs-sign-out-alt transform rotate-180', route: '/Login' , notificationCount: 0 },
   ];
 
   OpenMenu() {

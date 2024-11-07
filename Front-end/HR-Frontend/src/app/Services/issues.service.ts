@@ -13,11 +13,13 @@ export class IssuesService {
   baseurl:string = "";
   token: string = "";
   updateIssueUrl:string ="";
+  IssueCount:string="";
 
   constructor(private route: ActivatedRoute, public http: HttpClient,public Api:ApiService) {
 
     this.baseurl=Api.BaseUrl+"/get_clock_issues"
     this.updateIssueUrl=Api.BaseUrl+"/update_clock_issue"
+    this.IssueCount=Api.BaseUrl+"/get_count_issues"
 
    }
 
@@ -41,6 +43,11 @@ export class IssuesService {
     return this.http.get<Issue[]>(`${this.baseurl}?date=${date}`, { headers });
   }
   
+  GetIssueCount(){
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<number>(`${this.IssueCount}`, { headers });
+  }
   
   }
 
