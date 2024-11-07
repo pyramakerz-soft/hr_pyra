@@ -679,6 +679,10 @@ class ClockController extends Controller
     {
         return $this->clockService->getClockIssues($request);
     }
+    public function getCountIssues()
+    {
+        return $this->clockService->getCountIssues();
+    }
     public function updateClockIssues(Request $request, ClockInOut $clock)
     {
         return $this->clockService->updateClockIssues($request, $clock);
