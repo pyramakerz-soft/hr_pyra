@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SideBarComponent } from '../../../Components/Core/side-bar/side-bar.component';
+import { IssueNotificationService } from '../../../Services/issue-notification.service';
+import { IssuesService } from '../../../Services/issues.service';
 
 @Component({
   selector: 'app-hr',
@@ -12,17 +14,31 @@ import { SideBarComponent } from '../../../Components/Core/side-bar/side-bar.com
 })
 export class HRComponent {
   isMenuOpen: boolean = false;
+  count:number=0;
 
   menuItems = [
-    { label: 'Dashboard', icon: 'fi fi-rr-table-rows', route: '/HR/HRDashboard' },
-    { label: 'Employee', icon: 'fas fa-home', route: '/HR/HREmployee' },
-    { label: 'Roles', icon: 'fi fi-rs-chart-pie', route: '/HR/HRRole' },
-    { label: 'Attendance ', icon: 'fi fi-rr-chart-simple', route: '/HR/HRAttendance' },
-    { label: 'Locations', icon: 'fi fi-rr-chart-simple', route: '/HR/HRBounders' },
-    { label: 'Department', icon: 'fi fi-rr-chart-simple', route: '/HR/HRDepartment' },
-    { label: 'Issues', icon: 'fi fi-rr-chart-simple', route: '/HR/HRIssues' },
-    { label: 'Sign Out', icon: 'fi fi-bs-sign-out-alt transform rotate-180', route: '' },
+    { label: 'Dashboard', icon: 'fi fi-rr-table-rows', route: '/HR/HRDashboard', notificationCount: 0  },
+    { label: 'Employee', icon: 'fas fa-home', route: '/HR/HREmployee' , notificationCount: 0 },
+    { label: 'Roles', icon: 'fi fi-rs-chart-pie', route: '/HR/HRRole' , notificationCount: 0 },
+    { label: 'Attendance ', icon: 'fi fi-rr-chart-simple', route: '/HR/HRAttendance' , notificationCount: 0 },
+    { label: 'Locations', icon: 'fi fi-rr-chart-simple', route: '/HR/HRBounders' , notificationCount: 0 },
+    { label: 'Department', icon: 'fi fi-rr-chart-simple', route: '/HR/HRDepartment' , notificationCount: 0 },
+    { label: 'Issues', icon: 'fi fi-rr-chart-simple', route: '/HR/HRIssues', notificationCount: this.count }, 
+    { label: 'Sign Out', icon: 'fi fi-bs-sign-out-alt transform rotate-180', route: '' , notificationCount: 0 },
   ];
+
+  constructor(public router: Router, public activeRoute: ActivatedRoute,private issueNotificationService: IssueNotificationService ,public IssueServ : IssuesService) { }
+
+  ngOnInit() {
+    // Step 4: Subscribe to menuItems$ to get the latest count
+    this.issueNotificationService.menuItems$.subscribe(count => {
+      this.IssueServ.GetIssueCount().subscribe(
+        (d:any)=>{
+          this.count = d.data.count;
+        });
+    });
+  }
+
 
   OpenMenu() {
     this.isMenuOpen = !this.isMenuOpen;

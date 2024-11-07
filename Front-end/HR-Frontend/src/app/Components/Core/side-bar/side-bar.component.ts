@@ -4,6 +4,8 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd  } fr
 import { AccountService } from '../../../Services/account.service';
 import Swal from 'sweetalert2';
 import { Subscription } from 'rxjs';
+import { IssuesService } from '../../../Services/issues.service';
+import { IssueNotificationService } from '../../../Services/issue-notification.service';
 
 @Component({
   selector: 'app-side-bar',
@@ -14,10 +16,11 @@ import { Subscription } from 'rxjs';
 })
 export class SideBarComponent {
 
-  @Input() menuItems: { label: string; icon: string; route: string; }[] = [];
+  @Input() menuItems: { label: string; icon: string; route: string; notificationCount:number}[] = [];
   @Input() closeMenu!: () => void;
 
-  constructor(public AccountServ:AccountService ,private router: Router){}
+  issueCount:number=0;
+  constructor(public AccountServ:AccountService ,private router: Router ,public IssueServ : IssuesService ,private issueNotificationService: IssueNotificationService){}
 
   activeIndex: number | null = 0;
 
@@ -25,6 +28,16 @@ export class SideBarComponent {
   
   ngOnInit(): void {
     this.setActiveIndexByRoute(this.router.url);
+    this.IssueServ.GetIssueCount().subscribe(
+      (d:any)=>{
+        this.issueCount = d.data.count;
+      });
+    this.issueNotificationService.menuItems$.subscribe((count: number) => {
+      this.IssueServ.GetIssueCount().subscribe(
+        (d:any)=>{
+          this.issueCount = d.data.count;
+        });
+    });
 
     // Subscribe to router events
     this.routerSubscription = this.router.events.subscribe(event => {
