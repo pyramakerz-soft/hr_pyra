@@ -163,6 +163,7 @@ export class HrEmployeeAttendanceDetailsComponent {
     this.saveCurrentPageNumber();
     this.UserClocksService.GetUserClocksById(this.UserID, PgNumber, this.DateString).subscribe(
       (d: any) => {
+        console.log(d)
         this.tableData = d.data.clocks;
         this.rowNumber = new Array(this.tableData.length).fill(false);
         this.PagesNumber = d.data.pagination.last_page;
