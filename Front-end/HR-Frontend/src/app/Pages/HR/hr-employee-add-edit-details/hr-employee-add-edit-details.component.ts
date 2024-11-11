@@ -111,9 +111,6 @@ export class HrEmployeeAddEditDetailsComponent {
   getEmployeeByID(id:number){
     this.userService.getUserById(id).subscribe(
       (d: any) => {
-        d.User.start_time = this.convertUTCToEgyptLocalTime(d.User.start_time)
-        d.User.end_time = this.convertUTCToEgyptLocalTime(d.User.end_time)
-
         this.employee = d.User;
         this.employee.roles = this.employee.roles || []
         if(typeof this.employee.image == "string"){
@@ -387,9 +384,6 @@ export class HrEmployeeAddEditDetailsComponent {
     if (this.isFormValid()) {
       this.isSaved = true
       this.employee.department_id = Number(this.employee.department_id);
-      this.employee.start_time = this.employee.start_time ? this.convertEgyptianToUtcTime(this.employee.start_time) : null
-      this.employee.end_time = this.employee.end_time ? this.convertEgyptianToUtcTime(this.employee.end_time) : null
-      
       if(this.EmployeeId === 0){
         this.userService.createUser(this.employee).subscribe(
           (result: any) => {
@@ -442,41 +436,4 @@ export class HrEmployeeAddEditDetailsComponent {
       }
     }
   }
-
-  convertEgyptianToUtcTime(egyptianTime: string): string {
-    const [hours, minutes] = egyptianTime.split(':').map(Number);
-    const currentDate = new Date();
-    const egyptianDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hours, minutes);
-    const utcDate = new Date(egyptianDate.toLocaleString('en-US', { timeZone: 'Africa/Cairo' }));
-    const utcHours = String(utcDate.getUTCHours()).padStart(2, '0');
-    const utcMinutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
-    return `${utcHours}:${utcMinutes}`;
-  }
-
-  convertUTCToEgyptLocalTime(utcTimeStr: string): string {
-    const [time, period] = utcTimeStr.split(/(AM|PM)/);
-    let [hours, minutes] = time.split(':').map(Number);
-    
-    if (period === 'PM' && hours !== 12) {
-        hours += 12;
-    }
-    if (period === 'AM' && hours === 12) {
-        hours = 0;
-    }
-
-    const currentDate = new Date();
-    const utcDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate(), hours, minutes));
-    const egyptTimeZone = 'Africa/Cairo';
-    const localDate = new Date(utcDate.toLocaleString('en-US', { timeZone: egyptTimeZone }));
-
-    const localHours = localDate.getHours();
-    const localMinutes = localDate.getMinutes();
-
-    const formattedHours = String(localHours).padStart(2, '0');
-    const formattedMinutes = String(localMinutes).padStart(2, '0');
-
-    return `${formattedHours}:${formattedMinutes}`;
-}
-
-
 }

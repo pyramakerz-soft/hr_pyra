@@ -95,8 +95,6 @@ export class HREmployeeComponent {
         this.tableData = d.data.users;
         this.PagesNumber = d.data.pagination.last_page;
         this.generatePages();
-      },
-      (error) => {
       }
     );
   }
@@ -133,8 +131,6 @@ export class HREmployeeComponent {
           this.PagesNumber = 1;
           this.DisplayPagginationOrNot = false;
           this.filteredUsers = [];
-        },
-        (error) => {
         }
       );
     }
@@ -148,8 +144,6 @@ export class HREmployeeComponent {
     this.userServ.getAllUsersName().subscribe(
       (d: any) => {
         this.UsersNames = d.usersNames;
-      },
-      (error) => {
       }
     );
   }
@@ -178,9 +172,6 @@ export class HREmployeeComponent {
         this.tableData = d.data.users;
         this.DisplayPagginationOrNot = false;
       },
-      (error) => {
-
-      }
     );
 
   }
@@ -212,18 +203,10 @@ export class HREmployeeComponent {
               this.getAllEmployees(this.CurrentPageNumber);
             }
             this.getUsersName()
-          },
-          (error) => {
           }
         );
 
       }
     });
   }
-
-
-
-
 }
-
-
