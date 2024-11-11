@@ -24,7 +24,7 @@ class ClockResource extends JsonResource
         }
 
         // Get location for clock in and clock out
-        $locationName = $this->location->name;
+        $locationName = $this->location->name ?? null;
         $locationIn = $this->location_type === "site" && $this->clock_in ? $this->location->address : null;
         $locationOut = $this->location_type === "site" && $this->clock_out ? $this->location->address : null;
 
