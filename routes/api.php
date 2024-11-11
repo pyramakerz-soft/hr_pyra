@@ -73,6 +73,8 @@ Route::group(['middleware' => ['auth:api', 'role:Hr']], function () {
     Route::get('/get_count_issues', [ClockController::class, 'getCountIssues']);
     Route::post('/update_clock_issue/{clock}', [ClockController::class, 'updateClockIssues']);
 
+    
+
 });
 
 Route::group(['middleware' => 'auth:api'], function () {
