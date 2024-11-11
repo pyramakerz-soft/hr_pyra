@@ -1,0 +1,138 @@
+name: Sync Laravel+DotNET with Hostinger
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to the main branch
+
+  schedule:
+    - cron: '0 9 * * *'  # Daily at 9 AM UTC
+
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: false  # Disable submodule handling
+
+      - name: Install SSH Client
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Sync Files via SSH and Deploy
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          set -e  # Stop on any error
+
+          # Execute commands via SSH and collect CPU, Memory, and Disk usage
+          METRICS=$(sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no \
+            -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+              cd domains/pyramakerz-artifacts.com/public_html/hr
+
+              echo "Starting deployment at $(date)..."
+
+              git stash || true
+              git fetch origin main || exit 1
+              git reset --hard origin/main || echo "Reset failed, trying pull..."
+              git pull origin main || exit 1
+
+              if [ -f "composer.phar" ]; then
+                php composer.phar install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+                php composer.phar update
+              else
+                composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+              fi
+
+              php artisan config:cache || echo "Config cache failed"
+              php artisan route:cache || echo "Route cache failed"
+              php artisan view:cache || echo "View cache failed"
+              php artisan migrate --force || echo "Migrations failed"
+              php artisan optimize:clear || echo "Optimization failed"
+
+              # Capture metrics
+              CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}')
+              MEM=$(free -m | awk 'NR==2{printf "%.2f", $3*100/$2 }')
+              DISK=$(df -h / | awk '$NF=="/"{printf "%d", $5}')
+
+              echo "CPU=$CPU"
+              echo "MEM=$MEM"
+              echo "DISK=$DISK"
+          EOF
+          )
+
+          # Parse metrics and save to GitHub environment variables
+          echo "$METRICS"
+          echo "$METRICS" | grep "CPU=" | cut -d'=' -f2 | xargs echo "CPU=" >> $GITHUB_ENV
+          echo "$METRICS" | grep "MEM=" | cut -d'=' -f2 | xargs echo "MEM=" >> $GITHUB_ENV
+          echo "$METRICS" | grep "DISK=" | cut -d'=' -f2 | xargs echo "DISK=" >> $GITHUB_ENV
+
+      - name: Send Slack Notification
+        if: always()  # Run on both success and failure
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          CPU: ${{ env.CPU }}
+          MEM: ${{ env.MEM }}
+          DISK: ${{ env.DISK }}
+        run: |
+          STATUS=$(if [ $? -eq 0 ]; then echo '✅ Successful'; else echo '❌ Failed'; fi)
+          COLOR=$(if [ $? -eq 0 ]; then echo 'good'; else echo 'danger'; fi)
+
+          DEPLOYER="@${{ github.actor }}"
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          COMMIT_HASH="${{ github.event.head_commit.id }}"
+
+          curl -X POST -H 'Content-type: application/json' --data '{
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Health Check Report:* '"$STATUS"'"
+                }
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "section",
+                "fields": [
+                  { "type": "mrkdwn", "text": "*Environment:* Production" },
+                  { "type": "mrkdwn", "text": "*Status:* '"$STATUS"'" },
+                  { "type": "mrkdwn", "text": "*CPU Usage (%):* '"${{ env.CPU }}"'" },
+                  { "type": "mrkdwn", "text": "*Memory Usage (%):* '"${{ env.MEM }}"'" },
+                  { "type": "mrkdwn", "text": "*Disk Usage (%):* '"${{ env.DISK }}"'" }
+                ]
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "section",
+                "fields": [
+                  { "type": "mrkdwn", "text": "*Branch:* main" },
+                  { "type": "mrkdwn", "text": "*User:* '"$DEPLOYER"'" },
+                  { "type": "mrkdwn", "text": "*Commit:* '"${COMMIT_HASH:0:7}"'" },
+                  { "type": "mrkdwn", "text": "*Commit Message:* '"$COMMIT_MSG"'" }
+                ]
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "Deployment completed on: '"$(date)"'"
+                  }
+                ]
+              }
+            ],
+            "attachments": [
+              {
+                "color": "'"$COLOR"'"
+              }
+            ]
+          }' $SLACK_WEBHOOK
