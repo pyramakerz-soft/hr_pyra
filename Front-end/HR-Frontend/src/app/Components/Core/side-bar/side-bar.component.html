@@ -17,6 +17,11 @@
       >
         <i [ngClass]="item.icon"></i>
         <a class="no-underline ml-3" >{{ item.label }}</a>
+
+        <span *ngIf="item.label === 'Issues' && issueCount!=0" class="notification-badge">
+          {{ issueCount }}
+        </span>
+        
       </div>
     </nav>
 </div>
