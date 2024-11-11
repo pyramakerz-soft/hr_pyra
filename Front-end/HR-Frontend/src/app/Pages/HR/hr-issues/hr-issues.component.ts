@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { ClockService } from '../../../Services/clock.service';
+import { IssueNotificationService } from '../../../Services/issue-notification.service';
 
 @Component({
   selector: 'app-hr-issues',
@@ -28,12 +29,13 @@ export class HrIssuesComponent {
   selectedMonth: string = "01";
   selectedYear: number = 0;
   DateString: string = "2019-01";
+  count:number=0;
 
   months = [
     { name: 'January', value: "01" },
     { name: 'February', value: "02" },
     { name: 'March', value: "03" },
-    { name: 'April', value: "04" },
+    { name: 'April', value: "04" }, 
     { name: 'May', value: "05" },
     { name: 'June', value: "06" },
     { name: 'July', value: "07" },
@@ -43,7 +45,7 @@ export class HrIssuesComponent {
     { name: 'November', value: "11" },
     { name: 'December', value: "12" }
   ];
-  constructor(public router: Router, public activeRoute: ActivatedRoute, public issueService: IssuesService, public ClockServ: ClockService) { }
+  constructor(public router: Router, public activeRoute: ActivatedRoute, public issueService: IssuesService, public ClockServ: ClockService ,private issueNotificationService: IssueNotificationService) { }
   years: number[] = [];
 
   ngOnInit(): void {
@@ -70,10 +72,12 @@ export class HrIssuesComponent {
   getAllIssues(n:number) {
     this.issueService.getall(n,this.DateString).subscribe(
       (d: any) => {
+        // console.log(d)
+        // this.count=d.data.count;
+        this.sendNotification(1);
         this.PagesNumber=d.clockIssues.pagination.last_page
         this.CurrentPageNumber=n;
         this.tableData = d.clockIssues.data
-        this.PagesNumber = d.clockIssues.pagination.last_page;
         this.generatePages();
         this.DisplayPagginationOrNot = true;
 
@@ -132,44 +136,42 @@ export class HrIssuesComponent {
     );
   }
 
-  convertUtcToEgyptianTime(utcTime: any) {
-    const amPmRegex = /(\d{1,2}):(\d{2}):(\d{2})([aApP][mM])/;
-    const match = utcTime.match(amPmRegex);
-
+  convertUtcToEgyptianTime(utcTime: string): string {
+    // Regex to match 24-hour format (HH:mm:ss)
+    const timeRegex = /^(\d{2}):(\d{2}):(\d{2})$/;
+    const match = utcTime.match(timeRegex);
+  
     if (!match) {
-      throw new Error('Invalid time format');
+      throw new Error('Invalid time format. Expected format is HH:mm:ss.');
     }
-
-    let [_, hours, minutes, seconds, period] = match;
-    hours = Number(hours);
-    minutes = Number(minutes);
-    seconds = Number(seconds);
-
-    // Convert to 24-hour format
-    if (period.toLowerCase() === 'pm' && hours < 12) {
-      hours += 12;
-    } else if (period.toLowerCase() === 'am' && hours === 12) {
-      hours = 0; // Midnight case (12AM -> 00:00)
-    }
-
+  
+    // Use destructuring and convert matched groups to numbers
+    let [, hoursStr, minutesStr, secondsStr] = match;
+    const hours = Number(hoursStr);
+    const minutes = Number(minutesStr);
+    const seconds = Number(secondsStr);
+  
+    // Get the current date and set the parsed UTC time
     const currentDate = new Date();
     const utcDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate(), hours, minutes, seconds));
-
+  
     // Convert to Egypt local time
     const egyptTimeZone = 'Africa/Cairo';
     const localDate = new Date(utcDate.toLocaleString('en-US', { timeZone: egyptTimeZone }));
-
-    // Convert local time to 12-hour format and add AM/PM
+  
+    // Convert local time to 12-hour format with AM/PM
     let localHours = localDate.getHours();
     const localMinutes = String(localDate.getMinutes()).padStart(2, '0');
     const periodSuffix = localHours >= 12 ? 'PM' : 'AM';
-
+  
     // Adjust hours for 12-hour format
     localHours = localHours % 12 || 12; // Convert 0 to 12 for midnight, and 13+ to 1-12
-
+  
     // Return the formatted time in hh:mm AM/PM format
     return `${localHours}:${localMinutes} ${periodSuffix}`;
   }
+  
+  
 
   openModal(row: any) {
     this.selectedRow = { ...row };  // Copy the row data to avoid modifying the original before saving
@@ -292,6 +294,10 @@ export class HrIssuesComponent {
       this.tableData = []
       this.getAllIssues(1);
     }
+  }
+
+  sendNotification(count: number) {
+    this.issueNotificationService.updateMenuItems(count);
   }
 }
 
