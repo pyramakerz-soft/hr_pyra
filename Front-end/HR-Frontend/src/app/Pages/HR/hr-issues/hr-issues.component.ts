@@ -136,41 +136,56 @@ export class HrIssuesComponent {
     );
   }
 
-  convertUtcToEgyptianTime(utcTime: string): string {
-    // Regex to match 24-hour format (HH:mm:ss)
-    const timeRegex = /^(\d{2}):(\d{2}):(\d{2})$/;
-    const match = utcTime.match(timeRegex);
+  // convertUtcToEgyptianTime(utcTime: string): string {
+  //   // Regex to match 24-hour format (HH:mm:ss)
+  //   const timeRegex = /^(\d{2}):(\d{2}):(\d{2})$/;
+  //   const match = utcTime.match(timeRegex);
   
-    if (!match) {
-      throw new Error('Invalid time format. Expected format is HH:mm:ss.');
-    }
+  //   if (!match) {
+  //     throw new Error('Invalid time format. Expected format is HH:mm:ss.');
+  //   }
   
-    // Use destructuring and convert matched groups to numbers
-    let [, hoursStr, minutesStr, secondsStr] = match;
-    const hours = Number(hoursStr);
-    const minutes = Number(minutesStr);
-    const seconds = Number(secondsStr);
+  //   // Use destructuring and convert matched groups to numbers
+  //   let [, hoursStr, minutesStr, secondsStr] = match;
+  //   const hours = Number(hoursStr);
+  //   const minutes = Number(minutesStr);
+  //   const seconds = Number(secondsStr);
   
-    // Get the current date and set the parsed UTC time
-    const currentDate = new Date();
-    const utcDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate(), hours, minutes, seconds));
+  //   // Get the current date and set the parsed UTC time
+  //   const currentDate = new Date();
+  //   const utcDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate(), hours, minutes, seconds));
   
-    // Convert to Egypt local time
-    const egyptTimeZone = 'Africa/Cairo';
-    const localDate = new Date(utcDate.toLocaleString('en-US', { timeZone: egyptTimeZone }));
+  //   // Convert to Egypt local time
+  //   const egyptTimeZone = 'Africa/Cairo';
+  //   const localDate = new Date(utcDate.toLocaleString('en-US', { timeZone: egyptTimeZone }));
   
-    // Convert local time to 12-hour format with AM/PM
-    let localHours = localDate.getHours();
-    const localMinutes = String(localDate.getMinutes()).padStart(2, '0');
-    const periodSuffix = localHours >= 12 ? 'PM' : 'AM';
+  //   // Convert local time to 12-hour format with AM/PM
+  //   let localHours = localDate.getHours();
+  //   const localMinutes = String(localDate.getMinutes()).padStart(2, '0');
+  //   const periodSuffix = localHours >= 12 ? 'PM' : 'AM';
   
-    // Adjust hours for 12-hour format
-    localHours = localHours % 12 || 12; // Convert 0 to 12 for midnight, and 13+ to 1-12
+  //   // Adjust hours for 12-hour format
+  //   localHours = localHours % 12 || 12; // Convert 0 to 12 for midnight, and 13+ to 1-12
   
-    // Return the formatted time in hh:mm AM/PM format
-    return `${localHours}:${localMinutes} ${periodSuffix}`;
+  //   // Return the formatted time in hh:mm AM/PM format
+  //   return `${localHours}:${localMinutes} ${periodSuffix}`;
+  // }
+  
+
+  formatTime(timeString: string): string {
+    // Split the input time string by colon
+    const [hours, minutes] = timeString.split(':').map(Number);
+  
+    // Convert to 12-hour format
+    const formattedHours = hours % 12 || 12;
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    
+    // Determine AM/PM period
+    const localPeriod = hours >= 12 ? 'PM' : 'AM';
+  
+    // Return formatted time
+    return `${formattedHours}:${formattedMinutes} ${localPeriod}`;
   }
-  
   
 
   openModal(row: any) {
@@ -188,7 +203,9 @@ export class HrIssuesComponent {
 
     const newclockOut = `${dateOfIssue} ${endTime}`;
 
-    const utcClockOut = await this.transformEgyptTimeToUTC(newclockOut);
+    // console.log(newclockOut)
+    const utcClockOut = newclockOut;
+    // console.log(utcClockOu
 
 
     this.ClockServ.UpdateUserClockOut(userid, clockId, utcClockOut).subscribe(
@@ -228,31 +245,31 @@ export class HrIssuesComponent {
   }
 
 
-  transformEgyptTimeToUTC(egyptDateTime: string): string {
-    // Parse the input Egypt local datetime string to a Date object
-    const [datePart, timePart] = egyptDateTime.split(' ');
+  // transformEgyptTimeToUTC(egyptDateTime: string): string {
+  //   // Parse the input Egypt local datetime string to a Date object
+  //   const [datePart, timePart] = egyptDateTime.split(' ');
 
-    // Check if date and time parts are valid
-    if (!datePart || !timePart) {
-      throw new Error('Invalid Egypt date time format');
-    }
+  //   // Check if date and time parts are valid
+  //   if (!datePart || !timePart) {
+  //     throw new Error('Invalid Egypt date time format');
+  //   }
 
-    const [year, month, day] = datePart.split('-').map(Number);
-    const [hours, minutes] = timePart.split(':').map(Number);
+  //   const [year, month, day] = datePart.split('-').map(Number);
+  //   const [hours, minutes] = timePart.split(':').map(Number);
 
-    // Create a new Date object with the Egypt local time
-    const egyptDate = new Date(year, month - 1, day, hours, minutes);
+  //   // Create a new Date object with the Egypt local time
+  //   const egyptDate = new Date(year, month - 1, day, hours, minutes);
 
-    // Convert Egypt local time to UTC
-    const utcYear = egyptDate.getUTCFullYear();
-    const utcMonth = String(egyptDate.getUTCMonth() + 1).padStart(2, '0'); // Ensure two-digit month
-    const utcDay = String(egyptDate.getUTCDate()).padStart(2, '0'); // Ensure two-digit day
-    const utcHours = String(egyptDate.getUTCHours()).padStart(2, '0'); // Ensure two-digit hours
-    const utcMinutes = String(egyptDate.getUTCMinutes()).padStart(2, '0'); // Ensure two-digit minutes
+  //   // Convert Egypt local time to UTC
+  //   const utcYear = egyptDate.getUTCFullYear();
+  //   const utcMonth = String(egyptDate.getUTCMonth() + 1).padStart(2, '0'); // Ensure two-digit month
+  //   const utcDay = String(egyptDate.getUTCDate()).padStart(2, '0'); // Ensure two-digit day
+  //   const utcHours = String(egyptDate.getUTCHours()).padStart(2, '0'); // Ensure two-digit hours
+  //   const utcMinutes = String(egyptDate.getUTCMinutes()).padStart(2, '0'); // Ensure two-digit minutes
 
-    // Construct the formatted UTC date string in "YYYY-MM-DD HH:mm" format
-    return `${utcYear}-${utcMonth}-${utcDay} ${utcHours}:${utcMinutes}`;
-  }
+  //   // Construct the formatted UTC date string in "YYYY-MM-DD HH:mm" format
+  //   return `${utcYear}-${utcMonth}-${utcDay} ${utcHours}:${utcMinutes}`;
+  // }
 
   ClearSearch() {
     this.isDateSelected = false

@@ -53,8 +53,8 @@ export class BoundersPopUpComponent implements AfterViewInit {
       this.lat=data.Lat,
       this.long=data.Long,
       this.radius = data.radius
-      this.StartTime=this.convertUtcToEgyptianTime(data.startTime)
-      this.EndTime=this.convertUtcToEgyptianTime(data.endTime)
+      this.StartTime=data.startTime
+      this.EndTime=data.endTime
       this.radius=String(data.range)
     }
   }
@@ -214,8 +214,13 @@ export class BoundersPopUpComponent implements AfterViewInit {
   async EditAndAddLocation() {
     if(this.isFormValid()){
       this.SaveButton=true;
-      this.STime=await this.convertEgyptianToUtcTime(this.StartTime)
-      this.ETime=await this.convertEgyptianToUtcTime(this.EndTime)
+      console.log(this.StartTime)
+      this.STime=await this.formatTime(this.StartTime)
+      console.log(this.STime)
+      console.log(this.EndTime)
+      this.ETime=await this.formatTime(this.EndTime)
+      console.log(this.ETime)
+
 
       if(this.ETime>this.STime){
       if (this.mode === 'edit') {
@@ -243,6 +248,7 @@ export class BoundersPopUpComponent implements AfterViewInit {
           }
         );
       } else if (this.mode === 'add') {
+        console.log(this.lat, this.long )
         this.LocationServ.CreateAddress(this.Boundname, this.address, this.lat, this.long ,this.STime,this.ETime, this.radius).subscribe(
           (d: any) => {
             this.dialogRef.close();
@@ -303,27 +309,27 @@ export class BoundersPopUpComponent implements AfterViewInit {
 
 
 
-  convertUtcToEgyptianTime(utcTime: string) {
-    // Parse the input UTC time (HH:mm:ss)
+  // convertUtcToEgyptianTime(utcTime: string) {
+  //   // Parse the input UTC time (HH:mm:ss)
 
-    const [hours, minutes, seconds] = utcTime.split(':').map(Number);
+  //   const [hours, minutes, seconds] = utcTime.split(':').map(Number);
   
-    // Get the current date to set a complete UTC date with the provided time
-    const currentDate = new Date();
-    const utcDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate(), hours, minutes, seconds));
+  //   // Get the current date to set a complete UTC date with the provided time
+  //   const currentDate = new Date();
+  //   const utcDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate(), hours, minutes, seconds));
   
-    // Convert to Egypt local time
-    const egyptTimeZone = 'Africa/Cairo';
-    const localDate = new Date(utcDate.toLocaleString('en-US', { timeZone: egyptTimeZone }));
+  //   // Convert to Egypt local time
+  //   const egyptTimeZone = 'Africa/Cairo';
+  //   const localDate = new Date(utcDate.toLocaleString('en-US', { timeZone: egyptTimeZone }));
   
-    // Get the local time in Egypt and format it in HH:mm:ss
-    const localHours = String(localDate.getHours()).padStart(2, '0');
-    const localMinutes = String(localDate.getMinutes()).padStart(2, '0');
-    const localSeconds = String(localDate.getSeconds()).padStart(2, '0');
+  //   // Get the local time in Egypt and format it in HH:mm:ss
+  //   const localHours = String(localDate.getHours()).padStart(2, '0');
+  //   const localMinutes = String(localDate.getMinutes()).padStart(2, '0');
+  //   const localSeconds = String(localDate.getSeconds()).padStart(2, '0');
 
-    // Return the formatted time in HH:mm:ss
-    return `${localHours}:${localMinutes}:${localSeconds}`;
-  }
+  //   // Return the formatted time in HH:mm:ss
+  //   return `${localHours}:${localMinutes}:${localSeconds}`;
+  // }
   
 
   // convertEgyptianToUtcTime(egyptianTime: string): string {
@@ -347,26 +353,36 @@ export class BoundersPopUpComponent implements AfterViewInit {
   //   return `${formattedHours}:${formattedMinutes}`;
   // }
 
-   convertEgyptianToUtcTime(egyptianTime: string): string {
-    // Parse the input Egyptian time (HH:mm)
-    const [hours, minutes] = egyptianTime.split(':').map(Number);
+  //  convertEgyptianToUtcTime(egyptianTime: string): string {
+  //   // Parse the input Egyptian time (HH:mm)
+  //   const [hours, minutes] = egyptianTime.split(':').map(Number);
   
-    // Get the current date, but use the input time (hours, minutes) as the time part
-    const currentDate = new Date();
-    const egyptianDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hours, minutes);
+  //   // Get the current date, but use the input time (hours, minutes) as the time part
+  //   const currentDate = new Date();
+  //   const egyptianDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hours, minutes);
   
-    // Format the Egyptian time in UTC by using the 'Africa/Cairo' timezone
-    const utcDate = new Date(egyptianDate.toLocaleString('en-US', { timeZone: 'Africa/Cairo' }));
+  //   // Format the Egyptian time in UTC by using the 'Africa/Cairo' timezone
+  //   const utcDate = new Date(egyptianDate.toLocaleString('en-US', { timeZone: 'Africa/Cairo' }));
   
-    // Get the UTC time
-    const utcHours = String(utcDate.getUTCHours()).padStart(2, '0');
-    const utcMinutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
+  //   // Get the UTC time
+  //   const utcHours = String(utcDate.getUTCHours()).padStart(2, '0');
+  //   const utcMinutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
   
-    // Return the formatted time in HH:mm
+  //   // Return the formatted time in HH:mm
+  //   return `${utcHours}:${utcMinutes}`;
+  // }
+  
+  formatTime(timeString: string): string {
+    // Split the time string by colon
+    const [hours, minutes] = timeString.split(':').map(Number);
+  
+    // Format hours and minutes with leading zero if needed
+    const utcHours = hours.toString().padStart(2, '0');
+    const utcMinutes = minutes.toString().padStart(2, '0');
+  
+    // Return the formatted time
     return `${utcHours}:${utcMinutes}`;
   }
-  
-
 
   
 }
