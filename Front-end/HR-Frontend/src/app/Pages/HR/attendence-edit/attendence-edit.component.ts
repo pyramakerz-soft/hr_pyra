@@ -72,13 +72,9 @@ export class AttendenceEditComponent {
     else {
         
 
-      console.log(this.data.formattedClockIn)
       this.FclockIn = this.data.formattedClockIn;
-      console.log(this.FclockIn)
-      console.log(this.data.formattedClockOut)
 
       this.Fclockout = this.data.formattedClockOut;
-      console.log(this.Fclockout)
 
 
       this.SaveData();

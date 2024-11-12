@@ -214,12 +214,8 @@ export class BoundersPopUpComponent implements AfterViewInit {
   async EditAndAddLocation() {
     if(this.isFormValid()){
       this.SaveButton=true;
-      console.log(this.StartTime)
       this.STime=await this.formatTime(this.StartTime)
-      console.log(this.STime)
-      console.log(this.EndTime)
       this.ETime=await this.formatTime(this.EndTime)
-      console.log(this.ETime)
 
 
       if(this.ETime>this.STime){
@@ -248,7 +244,6 @@ export class BoundersPopUpComponent implements AfterViewInit {
           }
         );
       } else if (this.mode === 'add') {
-        console.log(this.lat, this.long )
         this.LocationServ.CreateAddress(this.Boundname, this.address, this.lat, this.long ,this.STime,this.ETime, this.radius).subscribe(
           (d: any) => {
             this.dialogRef.close();
