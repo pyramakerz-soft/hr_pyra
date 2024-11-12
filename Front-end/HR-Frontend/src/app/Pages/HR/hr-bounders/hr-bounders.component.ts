@@ -201,26 +201,20 @@ export class HrBoundersComponent {
     localStorage.setItem('HrLocationsCN', this.CurrentPageNumber.toString());
   }
 
-  convertUTCToEgyptLocalTime(utcTimeStr: string): string {
-    const [time, period] = utcTimeStr.split(/(AM|PM)/);
-    let [hours, minutes] = time.split(':').map(Number);
-    if (period === 'PM' && hours !== 12) {
-      hours += 12;
+  formatTime(timeString: string): string {
+    
+      // Split the input time string by colon
+      const [hours, minutes] = timeString.split(':').map(Number);
+    
+      // Convert to 12-hour format
+      const formattedHours = hours % 12 || 12;
+      const formattedMinutes = minutes.toString().padStart(2, '0');
+      
+      // Determine AM/PM period
+      const localPeriod = hours >= 12 ? 'PM' : 'AM';
+    
+      // Return formatted time
+      return `${formattedHours}:${formattedMinutes} ${localPeriod}`;
     }
-    if (period === 'AM' && hours === 12) {
-      hours = 0;
-    }
-    const currentDate = new Date();
-    const utcDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate(), hours, minutes));
-    const egyptTimeZone = 'Africa/Cairo';
-    const localDate = new Date(utcDate.toLocaleString('en-US', { timeZone: egyptTimeZone }));
-    let localHours = localDate.getHours();
-    const localMinutes = localDate.getMinutes();
-    const localPeriod = localHours >= 12 ? 'PM' : 'AM';
-    localHours = localHours % 12 || 12; // Converts '0' hours to '12'
-    const formattedHours = String(localHours).padStart(2, '0');
-    const formattedMinutes = String(localMinutes).padStart(2, '0');
-    return `${formattedHours}:${formattedMinutes} ${localPeriod}`;
-  }
 
 }

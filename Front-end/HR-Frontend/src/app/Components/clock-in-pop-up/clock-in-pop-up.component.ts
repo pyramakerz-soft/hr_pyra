@@ -214,25 +214,25 @@ export class ClockInPopUpComponent {
     }
   }
 
-  formatDateToUTCForHr(dateString: string): string {
-    const isoDateString: string = dateString.replace(' ', 'T');
+  // formatDateToUTCForHr(dateString: string): string {
+  //   const isoDateString: string = dateString.replace(' ', 'T');
     
-    const date: Date = new Date(isoDateString);
+  //   const date: Date = new Date(isoDateString);
     
-    const year: string = date.getUTCFullYear().toString();
-    const month: string = String(date.getUTCMonth() + 1).padStart(2, '0'); 
-    const day: string = String(date.getUTCDate()).padStart(2, '0');
-    const hours: string = String(date.getUTCHours()).padStart(2, '0');
-    const minutes: string = String(date.getUTCMinutes()).padStart(2, '0');
-    const seconds: string = String(date.getUTCSeconds()).padStart(2, '0');
+  //   const year: string = date.getUTCFullYear().toString();
+  //   const month: string = String(date.getUTCMonth() + 1).padStart(2, '0'); 
+  //   const day: string = String(date.getUTCDate()).padStart(2, '0');
+  //   const hours: string = String(date.getUTCHours()).padStart(2, '0');
+  //   const minutes: string = String(date.getUTCMinutes()).padStart(2, '0');
+  //   const seconds: string = String(date.getUTCSeconds()).padStart(2, '0');
     
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  }
+  //   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  // }
 
 
   sendLocationByHrForOthers(){
     const clockIn = this.DateClockInFromHrForOthers + " " + this.TimeClockInFromHrForOthers + ":00"
-    const UTCTime = this.formatDateToUTCForHr(clockIn)
+    const UTCTime = clockIn
     if(this.userId){
       if(this.WorkHome==false){
         this.clockService.CreateClockInByHrForOther(this.userId, this.LocationClockInFromHrForOthers, UTCTime ,"site").subscribe(

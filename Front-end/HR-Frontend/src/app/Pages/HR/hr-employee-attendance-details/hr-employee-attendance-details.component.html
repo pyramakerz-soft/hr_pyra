@@ -111,7 +111,7 @@
                         <div>
                             <div
                                 class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] m-auto">
-                                {{ convertUTCToEgyptLocalTime(row.clockIn) }}
+                                {{ row.clockIn }}
                             </div>
                         </div>
 
@@ -128,7 +128,7 @@
                         <div class="flex justify-center">
                             <div *ngIf="row.clockOut; else emptyState"
                                 class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] m-auto">
-                                {{ convertUTCToEgyptLocalTime(row.clockOut) }}
+                                {{ row.clockOut }}
                             </div>
                             <ng-template #emptyState>
                                 <div

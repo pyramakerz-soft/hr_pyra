@@ -68,8 +68,8 @@
 
           <td class="py-5 px-4">{{ row.id }}</td>
           <td class="py-5 px-4">{{ row.name }}</td>
-          <td class="py-5 px-4">{{ convertUTCToEgyptLocalTime(row.start_time) }}</td>
-          <td class="py-5 px-4">{{ convertUTCToEgyptLocalTime(row.end_time) }}</td>
+          <td class="py-5 px-4">{{ formatTime(row.start_time) }}</td>
+          <td class="py-5 px-4">{{ formatTime(row.end_time) }}</td>
           <td class="py-5 px-4">{{ row.range }}</td>
           <td class="py-5 px-4">
             <div class="px-2">
