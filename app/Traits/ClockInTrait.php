@@ -119,11 +119,11 @@ trait ClockInTrait
             'clock_out' => null,
             'duration' => null,
             'user_id' => $user_id,
-            'location_id' => null, // No specific location for floating employees
-            'location_type' => 'float', // Mark as floating type
-            'late_arrive' => null, // No late calculation
+            'location_id' => null,
+            'location_type' => 'float',
+            'late_arrive' => null,
             'early_leave' => null,
-            'is_float' => true, // Indicate that this is a floating clock-in
+            'is_float' => true,
         ]);
 
         return $this->returnData("clock", $clock, "Floating Clock In Done");
