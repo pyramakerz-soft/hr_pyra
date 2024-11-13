@@ -5,6 +5,7 @@ namespace App\Traits;
 use App\Http\Requests\Api\AddClockRequest;
 use App\Models\ClockInOut;
 use App\Models\User;
+use App\Models\UserDetail;
 use App\Traits\ClockTrait;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -90,9 +91,7 @@ trait ClockInTrait
         }
         //2- check the department_name for authenticated user
         $clockIn = Carbon::parse($request->clock_in);
-        if ($authUser->is_float) {
-            return $this->createClockInFloatRecord($request, $authUser->id, $clockIn);
-        }
+
         $userLocation = $authUser->user_locations()->first();
         if ($this->isLocationTime($authUser)) {
             //Calculate Late_arrive by location time
@@ -102,9 +101,16 @@ trait ClockInTrait
             $userStartTime = carbon::parse($authUser->user_detail->start_time);
             $late_arrive = $this->calculateLateArrive($clockIn, $userStartTime);
         }
-
+        $userId = $authUser->id;
+        $userFloat = UserDetail::where('user_id', $userId)->first();
         //3- create ClockIn Site Record
-        return $this->createClockInSiteRecord($request, $authUser, $userLocation, $clockIn, $late_arrive);
+
+        if ($userFloat->is_float) {
+
+            return $this->createClockInFloatRecord($request, $authUser->id, $clockIn);
+        } else {
+            return $this->createClockInSiteRecord($request, $authUser, $userLocation, $clockIn, $late_arrive);
+        }
     }
     protected function createClockInFloatRecord($request, $user_id, $clockIn)
     {
