@@ -66,7 +66,11 @@ trait ClockInTrait
     {
         //1- Calculate Late_arrive
         $authUser = User::findOrFail($user_id);
+
         $clockIn = Carbon::parse($request->clock_in);
+        if ($authUser->is_float) {
+            return $this->createClockInFloatRecord($request, $user_id, $clockIn);
+        }
         $userStartTime = Carbon::parse($authUser->user_detail->start_time);
         $late_arrive = $this->calculateLateArrive($clockIn, $userStartTime);
 
@@ -76,6 +80,8 @@ trait ClockInTrait
 
     protected function handleSiteClockIn($request, $authUser)
     {
+
+
         // 1- Validate location of user and location of the site
         $userLocation = $this->validateLocations($request, $authUser);
 
@@ -84,6 +90,9 @@ trait ClockInTrait
         }
         //2- check the department_name for authenticated user
         $clockIn = Carbon::parse($request->clock_in);
+        if ($authUser->is_float) {
+            return $this->createClockInFloatRecord($request, $authUser->id, $clockIn);
+        }
         $userLocation = $authUser->user_locations()->first();
         if ($this->isLocationTime($authUser)) {
             //Calculate Late_arrive by location time
@@ -96,6 +105,22 @@ trait ClockInTrait
 
         //3- create ClockIn Site Record
         return $this->createClockInSiteRecord($request, $authUser, $userLocation, $clockIn, $late_arrive);
+    }
+    protected function createClockInFloatRecord($request, $user_id, $clockIn)
+    {
+        $clock = ClockInOut::create([
+            'clock_in' => $clockIn,
+            'clock_out' => null,
+            'duration' => null,
+            'user_id' => $user_id,
+            'location_id' => null, // No specific location for floating employees
+            'location_type' => 'float', // Mark as floating type
+            'late_arrive' => null, // No late calculation
+            'early_leave' => null,
+            'is_float' => true, // Indicate that this is a floating clock-in
+        ]);
+
+        return $this->returnData("clock", $clock, "Floating Clock In Done");
     }
 
     protected function createClockInSiteRecord($request, $authUser, $userLocation, $clockIn, $late_arrive)
