@@ -34,6 +34,8 @@ class UserDetailService
             'emp_type' => $data['emp_type'],
             'hiring_date' => $data['hiring_date'],
             'user_id' => $user->id,
+            'is_float' => $data['is_float'],
+
         ]);
     }
 
