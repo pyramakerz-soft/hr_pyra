@@ -176,7 +176,7 @@ trait ClockInTrait
             $userStartTime = carbon::parse($user->user_detail->start_time);
             $late_arrive = $this->calculateLateArrive($clockIn, $userStartTime);
         }
-
+//Test Vendor Location
         // Create the clock-in recording
         return $this->createClockInSiteRecord($request, $user, $userLocation, $clockIn, $late_arrive);
     }
