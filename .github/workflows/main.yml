@@ -39,6 +39,7 @@ jobs:
               git stash || true
               git fetch origin main || exit 1
               git reset --hard origin/main || echo "Reset failed, trying pull..."
+              git update-index --assume-unchanged .env || echo ".env already ignored"
               git pull origin main || exit 1
 
               if [ -f "composer.phar" ]; then
