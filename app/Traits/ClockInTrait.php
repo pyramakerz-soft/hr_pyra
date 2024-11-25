@@ -177,7 +177,7 @@ trait ClockInTrait
             $late_arrive = $this->calculateLateArrive($clockIn, $userStartTime);
         }
 
-        // Create the clock-in recordsss
+        // Create the clock-in recording
         return $this->createClockInSiteRecord($request, $user, $userLocation, $clockIn, $late_arrive);
     }
 }
