@@ -30,9 +30,10 @@ export class HrEmployeeAddEditDetailsComponent {
   isDropdownOpen = false;
   imagePreview: string | ArrayBuffer | null = null;
   isSaved = false
+  isFloatChecked: boolean = false;
   
   employee: AddEmployee = new AddEmployee(
-    null, '', '', null, null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], [], false
+    null, '', '', null, null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], [], false, 0
   );
 
   regexPhone = /^(010|011|012|015)\d{8}$/;
@@ -113,6 +114,7 @@ export class HrEmployeeAddEditDetailsComponent {
       (d: any) => {
         this.employee = d.User;
         this.employee.roles = this.employee.roles || []
+        this.employee.is_float == 1 ? this.isFloatChecked = true : this.isFloatChecked = false 
         if(typeof this.employee.image == "string"){
           this.imagePreview = this.employee.image
         }
@@ -166,10 +168,12 @@ export class HrEmployeeAddEditDetailsComponent {
       }
     }
 
-    if (this.employee.location_id.length > 0) {
-      this.validationErrors['location_id'] = '';
-    } else {
-      this.validationErrors['location_id'] = '*Location is required.';
+    if(!this.isFloatChecked){
+      if (this.employee.location_id.length > 0) {
+        this.validationErrors['location_id'] = '';
+      } else {
+        this.validationErrors['location_id'] = '*Location is required.';
+      }
     }
   }
 
@@ -187,13 +191,24 @@ export class HrEmployeeAddEditDetailsComponent {
       }
     }
 
-    if (this.employee.work_type_id.length > 0) {
-      this.validationErrors['work_type_id'] = '';
-    } else {
-      this.validationErrors['work_type_id'] = '*Work Type is required.';
+    if(!this.isFloatChecked){
+      if (this.employee.work_type_id.length > 0) {
+        this.validationErrors['work_type_id'] = '';
+      } else {
+        this.validationErrors['work_type_id'] = '*Work Type is required.';
+      }
     }
   }
   
+  onIsFloatChange(event: Event){
+    this.isFloatChecked = !this.isFloatChecked;
+    if(this.isFloatChecked){
+      this.employee.is_float = 1
+    } else{
+      this.employee.is_float = 0
+    }
+  }
+
   onRoleChange(roleName: string, event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
 
@@ -255,12 +270,21 @@ export class HrEmployeeAddEditDetailsComponent {
     for (const key in this.employee) {
       if (this.employee.hasOwnProperty(key)) {
         const field = key as keyof AddEmployee;
-        if (!this.employee[field] && field != "code" && field !='work_home' && field != "image" && field != "deparment_name") {
+        if (!this.employee[field] && field != "code" && field !='work_home' && field != "image" && field != "deparment_name" && field != "is_float") {
           if(this.EmployeeId !== 0){
             continue
           }
-          this.validationErrors[field] = `${this.capitalizeField(field)} is required`
-          isValid = false;
+          if(field== "working_hours_day" || field=="start_time" || field=="end_time"){
+            if(!this.isFloatChecked){
+              this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+              isValid = false;
+            }else{
+              this.validationErrors[field] = '';
+            }
+          }else{
+            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+            isValid = false;
+          }
         } else {
           this.validationErrors[field] = '';
 
@@ -320,50 +344,52 @@ export class HrEmployeeAddEditDetailsComponent {
     } else {
       this.validationErrors['roles'] = '';
     }
-    
-    if(this.employee.work_type_id.length == 0){
-      this.validationErrors['work_type_id'] = '*Work Type is required.';
-      isValid = false;
-    } else {
-      this.validationErrors['work_type_id'] = '';
-    }
-    
-    if(this.employee.location_id.length == 0){
-      this.validationErrors['location_id'] = '*Location is required.';
-      isValid = false;
-    } else {
-      this.validationErrors['location_id'] = '';
-    }
 
-    if(this.employee.start_time != null && this.employee.end_time != null){
-      let [xHours, xMinutes] = this.employee.start_time.split(':').map(Number);
-      let [yHours, yMinutes] = this.employee.end_time.split(':').map(Number);
-
-      const start_timeDate = new Date();
-      const end_timeDate = new Date();
-
-      start_timeDate.setHours(xHours, xMinutes, 0, 0);
-      end_timeDate.setHours(yHours, yMinutes, 0, 0);
-
-      const diffMilliseconds = end_timeDate.getTime() - start_timeDate.getTime();
-
-      const diffHours = diffMilliseconds / (1000 * 60 * 60);
-
-      const workingHoursDay = this.employee.working_hours_day != null ? this.employee.working_hours_day : 0; 
-
-      if (diffHours - parseFloat(workingHoursDay.toString()) > 0 || diffHours - parseFloat(workingHoursDay.toString()) < 0 || diffHours < 0 ) {
-        this.validationErrors['start_time'] = 'Invalid Start Time.';
-        this.validationErrors["end_time"] = 'Invalid End Time.';
-        this.validationErrors['working_hours_day'] = 'Invalid Working hours day.';
+    if(!this.isFloatChecked){
+      if(this.employee.work_type_id.length == 0){
+        this.validationErrors['work_type_id'] = '*Work Type is required.';
         isValid = false;
-        Swal.fire({
-          icon: "error",
-          title: "Invalid Input",
-          text: "Starting Time and Ending Time not Compatible with Working hours day",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#FF7519",
-          
-        });
+      } else {
+        this.validationErrors['work_type_id'] = '';
+      }
+      
+      if(this.employee.location_id.length == 0){
+        this.validationErrors['location_id'] = '*Location is required.';
+        isValid = false;
+      } else {
+        this.validationErrors['location_id'] = '';
+      }
+
+      if(this.employee.start_time != null && this.employee.end_time != null){
+        let [xHours, xMinutes] = this.employee.start_time.split(':').map(Number);
+        let [yHours, yMinutes] = this.employee.end_time.split(':').map(Number);
+  
+        const start_timeDate = new Date();
+        const end_timeDate = new Date();
+  
+        start_timeDate.setHours(xHours, xMinutes, 0, 0);
+        end_timeDate.setHours(yHours, yMinutes, 0, 0);
+  
+        const diffMilliseconds = end_timeDate.getTime() - start_timeDate.getTime();
+  
+        const diffHours = diffMilliseconds / (1000 * 60 * 60);
+  
+        const workingHoursDay = this.employee.working_hours_day != null ? this.employee.working_hours_day : 0; 
+  
+        if (diffHours - parseFloat(workingHoursDay.toString()) > 0 || diffHours - parseFloat(workingHoursDay.toString()) < 0 || diffHours < 0 ) {
+          this.validationErrors['start_time'] = 'Invalid Start Time.';
+          this.validationErrors["end_time"] = 'Invalid End Time.';
+          this.validationErrors['working_hours_day'] = 'Invalid Working hours day.';
+          isValid = false;
+          Swal.fire({
+            icon: "error",
+            title: "Invalid Input",
+            text: "Starting Time and Ending Time not Compatible with Working hours day",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
+            
+          });
+        }
       }
     }
 

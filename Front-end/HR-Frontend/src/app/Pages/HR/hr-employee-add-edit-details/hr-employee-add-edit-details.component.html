@@ -47,6 +47,39 @@
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">
+                            Work Type
+                            <span *ngIf="validationErrors['work_type_id']" class="text-red-500 ml-3 font-normal">{{ validationErrors['work_type_id'] }}</span>
+                        </label>
+                        <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+                            @if(workTypes.length !==0 ) {
+                                <div *ngFor="let work of workTypes; let i = index" class="flex items-center mb-2">
+                                    <input 
+                                        type="checkbox" 
+                                        id="workType_{{work.id}}" 
+                                        [value]="work.id" 
+                                        class="mr-2"
+                                        (change)="onWorkTypeChange(work.id, $event)"
+                                        [checked]="employee.work_type_id.includes(work.id)"
+                                        >
+                                    <label for="workType_{{work.id}}" class="text-sm">{{work.name}}</label>
+                                </div>
+                            } @else {
+                                <div>No Data Found</div>
+                            }
+                            <div class="flex items-center">
+                                <input 
+                                    type="checkbox"
+                                    id="is_float" 
+                                    value="1" 
+                                    class="mr-2"
+                                    (change)="onIsFloatChange($event)"
+                                    [checked]="isFloatChecked">
+                                <label for="is_float" class="text-sm">Is Float</label>
+                            </div>
+                        </div>
+                    </div>  
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
                             Department
                             <span *ngIf="validationErrors['department_id']" class="text-red-500 ml-3 font-normal">{{ validationErrors['department_id'] }}</span>
                         </label>
@@ -110,7 +143,7 @@
                         (ngModelChange)="onInputValueChange({ field: 'working_hours_day', value: $event })"
                         type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the daily working hours">
                     </div>
-                    <div class="mb-4 text-xs md:text-sm">
+                    <div class="text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">
                             Gender
                             <span *ngIf="validationErrors['gender']" class="text-red-500 ml-3 font-normal">{{ validationErrors['gender'] }}</span>
@@ -123,29 +156,6 @@
                             <option value="f">Female</option>
                         </select>
                     </div>
-                    <div class="text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Work Type
-                            <span *ngIf="validationErrors['work_type_id']" class="text-red-500 ml-3 font-normal">{{ validationErrors['work_type_id'] }}</span>
-                        </label>
-                        <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
-                            @if(workTypes.length !==0 ) {
-                                <div *ngFor="let work of workTypes; let i = index" class="flex items-center mb-2">
-                                    <input 
-                                        type="checkbox" 
-                                        id="workType_{{work.id}}" 
-                                        [value]="work.id" 
-                                        class="mr-2"
-                                        (change)="onWorkTypeChange(work.id, $event)"
-                                        [checked]="employee.work_type_id.includes(work.id)"
-                                        >
-                                    <label for="workType_{{work.id}}" class="text-sm">{{work.name}}</label>
-                                </div>
-                            } @else {
-                                <div>No Data Found</div>
-                            }
-                        </div>
-                    </div>  
                 </div>
 
                 <div class="dropdown-container flex-1">
@@ -287,18 +297,3 @@
         </div>
     </div> 
 </div>
-
-
-<!-- <script>
-    $(function() {
-      $('input[name="hiring_date"]').daterangepicker({
-        singleDatePicker: true,
-        showDropdowns: true,
-        minYear: 1901,
-        maxYear: parseInt(moment().format('YYYY'),10)
-      }, function(start, end, label) {
-        var years = moment().diff(start, 'years');
-        alert("You are " + years + " years old!");
-      });
-    });
-</script> -->

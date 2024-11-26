@@ -25,7 +25,7 @@ trait ClockOutTrait
         if ($distance > 50) {
             return $this->returnError('User is not located at the correct location.');
         }
-        return null;
+        return;
 
     }
 
