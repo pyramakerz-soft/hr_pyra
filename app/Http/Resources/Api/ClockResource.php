@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Resources\Api;
 
+use App\Models\UserDetail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -27,6 +28,7 @@ class ClockResource extends JsonResource
         $locationName = $this->location->name ?? null;
         $locationIn = $this->location_type === "site" && $this->clock_in ? $this->location->address : null;
         $locationOut = $this->location_type === "site" && $this->clock_out ? $this->location->address : null;
+        // $is_float = UserDetail::where('user_id' , $this->user->id)->get('is_float');
 
         return [
             'id' => $this->id,
@@ -45,6 +47,7 @@ class ClockResource extends JsonResource
             'lateArrive' => $this->late_arrive,
             'earlyLeave' => $this->early_leave,
             'is_issue' => $this->is_issue ? true : false,
+
         ];
     }
 }

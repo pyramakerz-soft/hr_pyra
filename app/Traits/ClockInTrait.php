@@ -69,17 +69,14 @@ trait ClockInTrait
         $authUser = User::findOrFail($user_id);
 
         $clockIn = Carbon::parse($request->clock_in);
-       
+
         $userStartTime = Carbon::parse($authUser->user_detail->start_time);
         $late_arrive = $this->calculateLateArrive($clockIn, $userStartTime);
 
         // Call createHomeClockIn method to create the clock-in record
-        if ($authUser->is_float) {
-            return $this->createClockInFloatRecord($request, $user_id, $clockIn);
-        }else{
 
-            return $this->createClockInHomeRecord($request, $user_id, $clockIn, $late_arrive);
-        }
+
+        return $this->createClockInHomeRecord($request, $user_id, $clockIn, $late_arrive);
     }
 
     protected function handleSiteClockIn($request, $authUser)
@@ -108,33 +105,29 @@ trait ClockInTrait
         $userFloat = UserDetail::where('user_id', $userId)->first();
         //3- create ClockIn Site Record
 
-        if ($userFloat->is_float) {
 
-            return $this->createClockInFloatRecord($request, $authUser->id, $clockIn);
-        } else {
-            return $this->createClockInSiteRecord($request, $authUser, $userLocation, $clockIn, $late_arrive);
-        }
+        return $this->createClockInSiteRecord($request, $authUser, $userLocation, $clockIn, $late_arrive);
     }
-    
-    protected function createClockInFloatRecord($request, $user_id, $clockIn)
-    {
-        $clock = ClockInOut::create([
-            'clock_in' => $clockIn,
-            'clock_out' => null,
-            'duration' => null,
-            'user_id' => $user_id,
-            'location_id' => 1,
-            'location_type' => null,
-            'late_arrive' => null,
-            'early_leave' => null,
-            'is_float' => 1,
-        ]);
 
-        return $this->returnData("clock", $clock, "Floating Clock In Done");
+    // protected function createClockInFloatRecord($request, $user_id, $clockIn)
+    // {
+    //     $clock = ClockInOut::create([
+    //         'clock_in' => $clockIn,
+    //         'clock_out' => null,
+    //         'duration' => null,
+    //         'user_id' => $user_id,
+    //         'location_id' => 1,
+    //         'location_type' => null,
+    //         'late_arrive' => null,
+    //         'early_leave' => null,
+    //         'is_float' => 1,
+    //     ]);
+
+    //     return $this->returnData("clock", $clock, "Floating Clock In Done");
 
 
-        
-    }
+
+    // }
 
     protected function createClockInSiteRecord($request, $authUser, $userLocation, $clockIn, $late_arrive)
     {
@@ -176,8 +169,8 @@ trait ClockInTrait
             $userStartTime = carbon::parse($user->user_detail->start_time);
             $late_arrive = $this->calculateLateArrive($clockIn, $userStartTime);
         }
-
-        // Create the clock-in record
+//Test Vendor Location
+        // Create the clock-in recording
         return $this->createClockInSiteRecord($request, $user, $userLocation, $clockIn, $late_arrive);
     }
 }
