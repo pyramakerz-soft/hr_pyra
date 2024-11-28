@@ -50,7 +50,7 @@ export class UserServiceService {
     formData.append('start_time', emp.start_time || '');
     formData.append('end_time', emp.end_time || '');
     formData.append('gender', emp.gender);
-    formData.append('is_float', emp.is_float.toString());
+    // formData.append('is_float', emp.is_float.toString());
     
     emp.roles.forEach((role, index) => formData.append(`roles[${index}]`, role));
     emp.location_id.forEach((id, index) => formData.append(`location_id[${index}]`, id.toString()));
@@ -83,7 +83,7 @@ export class UserServiceService {
     formData.append('start_time', emp.start_time || '');
     formData.append('end_time', emp.end_time || '');
     formData.append('gender', emp.gender || '');
-    formData.append('is_float', emp.is_float?.toString() || '');
+    // formData.append('is_float', emp.is_float?.toString() || '');
    
     emp.roles.forEach((role, index) => formData.append(`roles[${index}]`, role));
     emp.location_id.forEach((id, index) => formData.append(`location_id[${index}]`, id.toString()));

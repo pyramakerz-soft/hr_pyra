@@ -24,6 +24,6 @@ export class AddEmployee {
         public work_type_id: number[],
         public work_type_name: string[],
         public work_home: boolean,
-        public is_float: number
+        // public is_float: number
     ) {}
 }
