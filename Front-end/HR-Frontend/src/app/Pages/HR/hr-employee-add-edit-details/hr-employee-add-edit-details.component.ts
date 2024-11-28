@@ -141,7 +141,6 @@ export class HrEmployeeAddEditDetailsComponent {
   getWorkType(){
     this.workTypeService.getall().subscribe(
       (workTypes: any) => {
-        console.log(workTypes)
         this.workTypes = workTypes.workTypes
       }
     );
