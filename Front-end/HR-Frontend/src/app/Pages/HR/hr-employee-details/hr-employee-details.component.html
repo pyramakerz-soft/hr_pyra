@@ -150,9 +150,9 @@
                 <div *ngFor="let work of employee.work_type_name; let i = index" class="flex space-x-4 font-medium text-sm md:text-base text-[#282727]">
                     <p [ngClass]="{'mb-1': i !== employee.work_type_name.length - 1}" class="bg-slate-200 p-3 rounded-md">{{work}}</p>
                 </div>
-                <div class="flex space-x-4 font-medium text-sm md:text-base text-[#282727]">
+                <!-- <div class="flex space-x-4 font-medium text-sm md:text-base text-[#282727]">
                     <p *ngIf="employee.is_float" class="mt-1 bg-slate-200 p-3 rounded-md">Float</p>
-                </div>
+                </div> -->
             </div>
 
             <hr class="my-5 w-full border border-[#E5E5EA]">

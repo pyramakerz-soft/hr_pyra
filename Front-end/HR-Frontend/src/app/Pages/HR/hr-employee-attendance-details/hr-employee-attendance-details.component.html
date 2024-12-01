@@ -198,7 +198,20 @@
                             </div>
                         </div> -->
                     </td>
-                    <td>{{row.lateArrive}}</td>
+                    <!-- <td>{{row.lateArrive}}</td> -->
+                    <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
+                        <div *ngIf="row.site=='site'||row.site=='home'; else emptylateArrive">
+                            <div class="truncate" title="{{ row.lateArrive }}">
+                                {{ row.lateArrive }}
+                            </div>
+                        </div>
+                        <ng-template #emptylateArrive>
+                            <div class="flex justify-center">
+                                <div class="w-[90%] h-[1px] bg-[#475467]"></div>
+                            </div>
+                        </ng-template>
+                    </td>
+
                     <td>{{row.earlyLeave}}</td>
 
 

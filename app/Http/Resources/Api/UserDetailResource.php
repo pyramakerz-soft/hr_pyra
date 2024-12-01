@@ -46,7 +46,7 @@ class UserDetailResource extends JsonResource
             "working_hours_day" => $working_hours_day,
             "hourly_rate" => $hourly_rate,
             "overtime_hours" => $this->overtime_hours,
-            'is_float' => $this->is_float,
+            // 'is_float' => $this->is_float,
 
             'start_time' => $start_time,
             'code' => $this->user->code,

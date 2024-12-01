@@ -29,7 +29,7 @@ export class HrEmployeeAttendanceDetailsComponent {
   DisplayPagginationOrNot: boolean = true;
   SelectedDate: string = ""
   employee: AddEmployee = new AddEmployee(
-    null, '', '', null, null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [1], [], [], [], false, 0);
+    null, '', '', null, null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [1], [], [], [], false);
 
   isDateSelected = false
   rowNumber: boolean[] = [];
@@ -156,7 +156,6 @@ export class HrEmployeeAttendanceDetailsComponent {
     )
 
   }
-
 
   getAllClocks(PgNumber: number) {
     this.CurrentPageNumber=PgNumber

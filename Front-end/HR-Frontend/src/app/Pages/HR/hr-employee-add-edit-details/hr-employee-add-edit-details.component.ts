@@ -33,7 +33,7 @@ export class HrEmployeeAddEditDetailsComponent {
   isFloatChecked: boolean = false;
   
   employee: AddEmployee = new AddEmployee(
-    null, '', '', null, null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], [], false, 0
+    null, '', '', null, null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], [], false
   );
 
   regexPhone = /^(010|011|012|015)\d{8}$/;
@@ -114,7 +114,7 @@ export class HrEmployeeAddEditDetailsComponent {
       (d: any) => {
         this.employee = d.User;
         this.employee.roles = this.employee.roles || []
-        this.employee.is_float == 1 ? this.isFloatChecked = true : this.isFloatChecked = false 
+        // this.employee.is_float == 1 ? this.isFloatChecked = true : this.isFloatChecked = false 
         if(typeof this.employee.image == "string"){
           this.imagePreview = this.employee.image
         }
@@ -200,14 +200,14 @@ export class HrEmployeeAddEditDetailsComponent {
     }
   }
   
-  onIsFloatChange(event: Event){
-    this.isFloatChecked = !this.isFloatChecked;
-    if(this.isFloatChecked){
-      this.employee.is_float = 1
-    } else{
-      this.employee.is_float = 0
-    }
-  }
+  // onIsFloatChange(event: Event){
+  //   this.isFloatChecked = !this.isFloatChecked;
+  //   if(this.isFloatChecked){
+  //     this.employee.is_float = 1
+  //   } else{
+  //     this.employee.is_float = 0
+  //   }
+  // }
 
   onRoleChange(roleName: string, event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
@@ -270,7 +270,8 @@ export class HrEmployeeAddEditDetailsComponent {
     for (const key in this.employee) {
       if (this.employee.hasOwnProperty(key)) {
         const field = key as keyof AddEmployee;
-        if (!this.employee[field] && field != "code" && field !='work_home' && field != "image" && field != "deparment_name" && field != "is_float") {
+        // && field != "is_float"
+        if (!this.employee[field] && field != "code" && field !='work_home' && field != "image" && field != "deparment_name" ) {
           if(this.EmployeeId !== 0){
             continue
           }

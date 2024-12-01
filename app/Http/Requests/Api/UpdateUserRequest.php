@@ -61,7 +61,7 @@ class UpdateUserRequest extends FormRequest
             'end_time' => ['nullable'],
             'location_id' => ['nullable', 'exists:locations,id'],
             'work_type_id' => ['nullable', 'exists:work_types,id'],
-            'is_float' => ['nullable'],
+            // 'is_float' => ['nullable'],
         ];
     }
     public function withValidator($validator)
