@@ -23,6 +23,7 @@
         </label>
         <input id="role" type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-4 text-xs md:text-base"
             placeholder="Enter Role" [(ngModel)]="RoleName"
+            maxlength="50"
             (input)="onRoleChange()">
             <div class="mt-4 text-xs md:text-sm">
                 <label class="font-semibold block mb-2 md:mb-3">Permissions</label>

@@ -15,7 +15,7 @@
 
         <div class="rounded-2xl bg-[#F6F6F6] text-start px-4 md:px-6 py-3 md:py-4 my-4 md:my-5">
             <p class="font-semibold text-base md:text-lg text-[#1C1C1E]">Locations</p>
-            <input [(ngModel)]="Boundname" (input)="onNameChange()" placeholder="Add Place Name"
+            <input [(ngModel)]="Boundname" (input)="onNameChange()" placeholder="Add Place Name" maxlength="50"
                 class="w-full rounded-2xl p-2 md:p-4 mt-5 text-sm md:text-base">
             <span *ngIf="nameError" class="text-red-500 text-sm ml-2 font-normal">{{ nameError }}</span>
             <input [(ngModel)]="address" (input)="onAddressChange()" id="autocomplete" placeholder="Add Location"

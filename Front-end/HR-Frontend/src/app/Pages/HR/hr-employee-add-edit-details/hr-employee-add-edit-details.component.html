@@ -43,7 +43,7 @@
                         </label>
                         <input [(ngModel)]="employee.name" 
                             (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"
-                            type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the name">
+                            type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the name" maxlength="50">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">
@@ -211,7 +211,7 @@
                         </label>
                         <input [(ngModel)]="employee.emp_type" 
                         (ngModelChange)="onInputValueChange({ field: 'emp_type', value: $event })"
-                        type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the position">
+                        type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the position" maxlength="50">
                     </div>
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">
