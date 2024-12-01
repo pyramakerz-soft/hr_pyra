@@ -102,6 +102,8 @@ class ProfileResource extends JsonResource
             'is_notify_by_location' => $this->isNotifyByLocation(),
             'assigned_locations_user' => $this->getAssignedLocations($authUser),
             'work_home' => $this->isWorkingFromHome($authUser),
+            'work_types' => $this->work_types->pluck('name')->toArray(), 
+
             // 'is_float' => $this->user_detail->is_float == 1 ? true : false,
 
         ];
