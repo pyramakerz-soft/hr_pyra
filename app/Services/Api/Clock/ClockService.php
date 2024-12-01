@@ -200,34 +200,50 @@ class ClockService
             $month = Carbon::parse($request->get('month'));
             $startOfMonth = (clone $month)->startOfMonth()->startOfDay();
             $endOfMonth = (clone $month)->endOfMonth()->endOfDay();
-
         } else {
             $startOfMonth = Carbon::now()->startOfMonth()->startOfDay();
             $endOfMonth = Carbon::now()->endOfMonth()->endOfDay();
         }
+    
+        // Start building the query for issues
         $query = ClockInOut::where('is_issue', true)
             ->whereBetween('clock_in', [$startOfMonth, $endOfMonth])
             ->orderBy('clock_in', 'Desc');
-
+    
+        // Check if a date filter is applied
         $filtersApplied = $request->has('date');
-
+    
+        // Apply any additional filters (if applicable)
         foreach ($this->filters as $filter) {
             $query = $filter->apply($query, $request);
         }
-
+    
+        // If a date is provided, filter by created_at
+        if ($filtersApplied && $request->has('date')) {
+            $date = Carbon::parse($request->get('date'));
+            $startOfDay = $date->startOfDay();
+            $endOfDay = $date->endOfDay();
+    
+            $query->whereBetween('created_at', [$startOfDay, $endOfDay]);
+        }
+    
+        // Fetch data either by pagination or directly based on filters
         if ($filtersApplied) {
             $clocks = $query->get();
         } else {
             $clocks = $query->paginate(7);
         }
+    
+        // Check if data exists and return the result
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clock Issues Found');
         }
+    
         return $filtersApplied
             ? $this->returnData('clockIssues', IssueResource::collection($clocks))
             : $this->returnData('clockIssues', IssueResource::collectionWithPagination($clocks));
-
     }
+    
     public function getCountIssues()
     {
         $totalIssueCount['count'] = ClockInOut::where('is_issue', true)
