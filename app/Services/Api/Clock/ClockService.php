@@ -160,6 +160,9 @@ class ClockService
         if ($clock->location_type == "home") {
             return $this->handleHomeClockOut($clock, $clockOut);
         }
+        if ($clock->location_type == "float") {
+            return $this->handleFloatClockOut($clock, $clockOut);
+        }
 
         return $this->handleSiteClockOut($request, $authUser, $clock, $clockOut);
     }

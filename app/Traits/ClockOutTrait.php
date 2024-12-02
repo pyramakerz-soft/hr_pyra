@@ -65,6 +65,29 @@ trait ClockOutTrait
         return $this->updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave);
 
     }
+    protected function handleFloatClockOut($clock, $clockOut)
+    {
+        //1- Validate ClockIn & ClockOut
+        $clockIn = Carbon::parse($clock->clock_in);
+        $error = $this->validateClockTime($clockIn, $clockOut);
+        if ($error) {
+            return $error;
+        }
+
+        //2- Prepare data for Calculate early_leave
+        $user = User::findorFail($clock->user_id);
+        $userEndTime = Carbon::parse($user->user_detail->end_time);
+
+        //3- calculate Early_Leave
+        $early_leave = $this->calculateEarlyLeave($clockOut, $userEndTime);
+        $late_arrive = $clock->late_arrive;
+        //4- Calculate duration
+        $durationFormatted = $clockIn->diffAsCarbonInterval($clockOut)->format('%H:%I:%S');
+
+        //5- update clock record
+        return $this->updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave);
+
+    }
 
     protected function handleSiteClockOut($request, $authUser, $clock, $clockOut)
     {
