@@ -134,6 +134,9 @@ class ClockService
         if ($request->location_type == 'home') {
             return $this->handleHomeClockIn($request, $user_id);
         }
+        if ($request->location_type == 'float') {
+            return $this->handleFloatClockIn($request, $user_id);
+        }
 
         //5- Handle site clock-in if location_type is 'site'
         return $this->handleSiteClockIn($request, $authUser);
@@ -156,6 +159,9 @@ class ClockService
         //3- Check for location_type is "site" OR "home"
         if ($clock->location_type == "home") {
             return $this->handleHomeClockOut($clock, $clockOut);
+        }
+        if ($clock->location_type == "float") {
+            return $this->handleFloatClockOut($clock, $clockOut);
         }
 
         return $this->handleSiteClockOut($request, $authUser, $clock, $clockOut);
@@ -223,11 +229,21 @@ class ClockService
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clock Issues Found');
         }
-        return $filtersApplied
-            ? $this->returnData('clockIssues', IssueResource::collection($clocks))
-            : $this->returnData('clockIssues', IssueResource::collectionWithPagination($clocks));
+        $totalIssueCount = ClockInOut::where('is_issue', true)
+            ->whereBetween('clock_in', [$startOfMonth, $endOfMonth])
+            ->count();
+        $response = [
+            'clockIssues' => $filtersApplied
+                ? IssueResource::collection($clocks)
+                : IssueResource::collectionWithPagination($clocks),
+            'count' => $totalIssueCount,
+        ];
+
+        return $this->returnData('data', $response);
+
 
     }
+
     public function getCountIssues()
     {
         $totalIssueCount['count'] = ClockInOut::where('is_issue', true)
