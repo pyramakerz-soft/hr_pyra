@@ -9,6 +9,8 @@ use App\Models\UserDetail;
 use App\Traits\ClockTrait;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use GuzzleHttp\Client;
+
 
 trait ClockInTrait
 {
@@ -65,6 +67,12 @@ trait ClockInTrait
     }
     protected function createClockInFloatRecord($request, $user_id, $clockIn, $late_arrive)
     {
+        $latitude = $request->latitude;
+        $longitude = $request->longitude;
+        $address = $this->getAddressFromCoordinates($latitude, $longitude);
+
+        $formatted_address = isset($address['address']['road']) ? $address['address']['road'] : 'Address not available';
+
         $clock = ClockInOut::create([
             'clock_in' => $clockIn,
             'clock_out' => null,
@@ -74,13 +82,33 @@ trait ClockInTrait
             'location_id' => null,
             'late_arrive' => $late_arrive,
             'early_leave' => null,
+            'address_clock_in' => $formatted_address
         ]);
 
         return $this->returnData("clock", $clock, "Clock In Done");
     }
+
+    protected function getAddressFromCoordinates($latitude, $longitude)
+    {
+        $client = new Client();
+        $url = "https://nominatim.openstreetmap.org/reverse?lat={$latitude}&lon={$longitude}&format=json";
+
+        try {
+            $response = $client->get($url, [
+                'headers' => [
+                    'User-Agent' => 'YourAppName/1.0',
+                ],
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (\Exception $e) {
+            \Log::error("Error fetching address: " . $e->getMessage());
+            return null;
+        }
+    }
     protected function handleFloatClockIn($request, $user_id)
     {
-        //1- Calculate Late_arrive
+
         $authUser = User::findOrFail($user_id);
 
         $clockIn = Carbon::parse($request->clock_in);

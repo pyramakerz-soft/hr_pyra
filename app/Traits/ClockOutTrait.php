@@ -29,19 +29,25 @@ trait ClockOutTrait
 
     }
 
-    protected function updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave)
+    protected function updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave, $latitudeOut, $longitudeOut)
     {
+        $addressOut = $this->getAddressFromCoordinates($latitudeOut, $longitudeOut);
+
+        $formatted_address_out = isset($addressOut['address']['road']) ? $addressOut['address']['road'] : 'Address not available';
+
         $clock->update([
             'clock_out' => $clockOut,
             'duration' => $durationFormatted,
             'late_arrive' => $late_arrive,
             'early_leave' => $early_leave,
+            'address_clock_out' => $formatted_address_out,
         ]);
-        // Hide the location relationship before returning the data
+
         $clock->makeHidden(['location']);
 
         return $this->returnData("clock", $clock, "Clock Out Done");
     }
+
     protected function handleHomeClockOut($clock, $clockOut)
     {
         //1- Validate ClockIn & ClockOut
@@ -65,27 +71,22 @@ trait ClockOutTrait
         return $this->updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave);
 
     }
-    protected function handleFloatClockOut($clock, $clockOut)
+    protected function handleFloatClockOut($clock, $clockOut, $latitudeOut, $longitudeOut)
     {
-        //1- Validate ClockIn & ClockOut
         $clockIn = Carbon::parse($clock->clock_in);
         $error = $this->validateClockTime($clockIn, $clockOut);
         if ($error) {
             return $error;
         }
 
-        //2- Prepare data for Calculate early_leave
         $user = User::findorFail($clock->user_id);
         $userEndTime = Carbon::parse($user->user_detail->end_time);
 
-        //3- calculate Early_Leave
         $early_leave = $this->calculateEarlyLeave($clockOut, $userEndTime);
         $late_arrive = $clock->late_arrive;
-        //4- Calculate duration
         $durationFormatted = $clockIn->diffAsCarbonInterval($clockOut)->format('%H:%I:%S');
 
-        //5- update clock record
-        return $this->updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave);
+        return $this->updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave, $latitudeOut, $longitudeOut);
 
     }
 

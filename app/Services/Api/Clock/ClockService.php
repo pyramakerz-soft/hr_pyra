@@ -135,6 +135,7 @@ class ClockService
             return $this->handleHomeClockIn($request, $user_id);
         }
         if ($request->location_type == 'float') {
+
             return $this->handleFloatClockIn($request, $user_id);
         }
 
@@ -144,24 +145,27 @@ class ClockService
 
     public function clockOut(ClockOutRequest $request)
     {
-        //1- Retrieve the clock that the user has clocked_In
         $authUser = Auth::user();
         $user_id = $authUser->id;
         $clock = $this->getClockInWithoutClockOut($user_id);
         if (!$clock) {
             return $this->returnError('You are not clocked in.');
         }
-        //2- Validate the clock time
         $clockIn = carbon::parse($clock->clock_in);
         $clockOut = Carbon::parse($request->clock_out);
         $this->validateClockTime($clockIn, $clockOut);
 
-        //3- Check for location_type is "site" OR "home"
         if ($clock->location_type == "home") {
             return $this->handleHomeClockOut($clock, $clockOut);
         }
         if ($clock->location_type == "float") {
-            return $this->handleFloatClockOut($clock, $clockOut);
+            $latitudeOut = $request->latitude; 
+            $longitudeOut = $request->longitude; 
+            if (!$latitudeOut || !$longitudeOut) {
+                return $this->returnError('Latitude and Longitude are required for float clock-out.');
+            }
+
+            return $this->handleFloatClockOut($clock, $clockOut, $latitudeOut, $longitudeOut);
         }
 
         return $this->handleSiteClockOut($request, $authUser, $clock, $clockOut);
