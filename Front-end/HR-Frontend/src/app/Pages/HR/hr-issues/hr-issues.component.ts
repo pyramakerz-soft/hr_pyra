@@ -74,12 +74,11 @@ export class HrIssuesComponent {
       (d: any) => {
         // this.count=d.data.count;
         this.sendNotification(1);
-        this.PagesNumber=d.clockIssues.pagination.last_page
+        this.tableData = d.data.clockIssues.data
+        this.PagesNumber=d.data.clockIssues.pagination.last_page
         this.CurrentPageNumber=n;
-        this.tableData = d.clockIssues.data
-        this.generatePages();
+        this.generatePages(); 
         this.DisplayPagginationOrNot = true;
-
       },
       (error) => {
         this.tableData = [];
