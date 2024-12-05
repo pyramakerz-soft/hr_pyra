@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Resources\Api;
 
 use App\Models\UserDetail;
@@ -40,6 +41,8 @@ class ClockResource extends JsonResource
             'totalHours' => $duration,
             'locationIn' => $locationIn,
             'locationOut' => $locationOut,
+            'address_clock_in' => $this->address_clock_in,
+            'address_clock_out' => $this->address_clock_out,
             'userId' => $this->user->id,
             'site' => $this->location_type,
             'formattedClockIn' => Carbon::parse($this->clock_in)->format('Y-m-d H:i'),
