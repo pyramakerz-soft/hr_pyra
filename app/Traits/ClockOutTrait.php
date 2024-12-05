@@ -6,6 +6,7 @@ use App\Models\ClockInOut;
 use App\Models\User;
 use App\Traits\ClockValidator;
 use Illuminate\Support\Carbon;
+
 trait ClockOutTrait
 {
     use ClockValidator, HelperTrait;
@@ -26,10 +27,9 @@ trait ClockOutTrait
             return $this->returnError('User is not located at the correct location.');
         }
         return;
-
     }
 
-    protected function updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave, $latitudeOut, $longitudeOut)
+    protected function updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave, $latitudeOut = null, $longitudeOut = null)
     {
         $addressOut = $this->getAddressFromCoordinates($latitudeOut, $longitudeOut);
 
@@ -69,7 +69,6 @@ trait ClockOutTrait
 
         //5- update clock record
         return $this->updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave);
-
     }
     protected function handleFloatClockOut($clock, $clockOut, $latitudeOut, $longitudeOut)
     {
@@ -79,7 +78,7 @@ trait ClockOutTrait
             return $error;
         }
 
-        $user = User::findorFail($clock->user_id);
+        $user = User::findOrFail($clock->user_id);
         $userEndTime = Carbon::parse($user->user_detail->end_time);
 
         $early_leave = $this->calculateEarlyLeave($clockOut, $userEndTime);
@@ -87,7 +86,6 @@ trait ClockOutTrait
         $durationFormatted = $clockIn->diffAsCarbonInterval($clockOut)->format('%H:%I:%S');
 
         return $this->updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave, $latitudeOut, $longitudeOut);
-
     }
 
     protected function handleSiteClockOut($request, $authUser, $clock, $clockOut)
@@ -130,7 +128,5 @@ trait ClockOutTrait
 
         //6- ClockOut by updating the clock model
         return $this->updateClockOutRecord($clock, $clockOut, $durationFormatted, $clock->late_arrive, $early_leave);
-
     }
-
 }
