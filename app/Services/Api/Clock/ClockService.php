@@ -159,8 +159,8 @@ class ClockService
             return $this->handleHomeClockOut($clock, $clockOut);
         }
         if ($clock->location_type == "float") {
-            $latitudeOut = $request->latitude; 
-            $longitudeOut = $request->longitude; 
+            $latitudeOut = $request->latitude;
+            $longitudeOut = $request->longitude;
             if (!$latitudeOut || !$longitudeOut) {
                 return $this->returnError('Latitude and Longitude are required for float clock-out.');
             }

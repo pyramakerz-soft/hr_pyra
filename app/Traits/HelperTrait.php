@@ -181,8 +181,8 @@ trait HelperTrait
         $deltaLongitude = ($locationLongitude - $userLongitude) * M_PI / 180; // Difference in longitude in radians
 
         $a = sin($deltaLatitude / 2) * sin($deltaLatitude / 2) +
-        cos($userLatitudeRad) * cos($locationLatitudeRad) *
-        sin($deltaLongitude / 2) * sin($deltaLongitude / 2);
+            cos($userLatitudeRad) * cos($locationLatitudeRad) *
+            sin($deltaLongitude / 2) * sin($deltaLongitude / 2);
 
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
