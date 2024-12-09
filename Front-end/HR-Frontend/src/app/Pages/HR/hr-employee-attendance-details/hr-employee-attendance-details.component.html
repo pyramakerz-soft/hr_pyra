@@ -158,30 +158,39 @@
                     <td>{{ row.totalHours }}</td>
 
                     <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
-                        <div *ngIf="row.locationIn; else emptyLocation">
+                        <div *ngIf="!row.locationIn">
+                            <div class="flex justify-center">
+                                <div class="w-[90%] h-[1px] bg-[#475467]"></div>
+                            </div>
+                        </div>
+                        <div *ngIf="row.locationIn&&row.site=='site'">
                             <div class="truncate" title="{{ row.locationIn }}">
                                 {{ row.locationName }}
                             </div>
                         </div>
-                        <ng-template #emptyLocation>
-                            <div class="flex justify-center">
-                                <div class="w-[90%] h-[1px] bg-[#475467]"></div>
+                        <div *ngIf="row.locationIn&&row.site!='site'">
+                            <div class="truncate" title="{{ row.locationIn }}">
+                                {{ row.locationIn}}
                             </div>
-                        </ng-template>
+                        </div>
                     </td>
 
                     <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
-                        <div *ngIf="row.locationOut; else emptyLocation">
+                        <div *ngIf="!row.locationOut">
+                            <div class="flex justify-center">
+                                <div class="w-[90%] h-[1px] bg-[#475467]"></div>
+                            </div>
+                        </div>
+                        <div *ngIf="row.locationOut&&row.site=='site'">
                             <div class="truncate" title="{{ row.locationOut }}">
                                 {{ row.locationName }}
                             </div>
                         </div>
-
-                        <ng-template #emptyLocation>
-                            <div class="flex justify-center">
-                                <div class="w-[90%] h-[1px] bg-[#475467]"></div>
+                        <div *ngIf="row.locationOut&&row.site!='site'">
+                            <div class="truncate" title="{{ row.locationOut }}">
+                                {{ row.locationOut}}
                             </div>
-                        </ng-template>
+                        </div>
                     </td>
 
                     <td>
