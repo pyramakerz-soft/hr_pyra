@@ -27,8 +27,18 @@ class ClockResource extends JsonResource
 
         // Get location for clock in and clock out
         $locationName = $this->location->name ?? null;
-        $locationIn = $this->location_type === "site" && $this->clock_in ? $this->location->address : null;
-        $locationOut = $this->location_type === "site" && $this->clock_out ? $this->location->address : null;
+        $locationIn = null;
+        $locationOut = null;
+
+        if ($this->location_type === 'site') {
+            $locationIn = $this->clock_in ? $this->location->address : null;
+            $locationOut = $this->clock_out ? $this->location->address : null;
+        } elseif ($this->location_type === 'float') {
+            $locationIn = $this->clock_in ? $this->address_clock_in : null;
+            $locationOut = $this->clock_out ? $this->address_clock_out : null;
+        }
+        // $locationIn = $this->location_type === "site" && $this->clock_in ? $this->location->address : null;
+        // $locationOut = $this->location_type === "site" && $this->clock_out ? $this->location->address : null;
         // $is_float = UserDetail::where('user_id' , $this->user->id)->get('is_float');
 
         return [
@@ -41,8 +51,8 @@ class ClockResource extends JsonResource
             'totalHours' => $duration,
             'locationIn' => $locationIn,
             'locationOut' => $locationOut,
-            'address_clock_in' => $this->address_clock_in,
-            'address_clock_out' => $this->address_clock_out,
+            // 'address_clock_in' => $this->address_clock_in,
+            // 'address_clock_out' => $this->address_clock_out,
             'userId' => $this->user->id,
             'site' => $this->location_type,
             'formattedClockIn' => Carbon::parse($this->clock_in)->format('Y-m-d H:i'),
