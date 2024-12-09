@@ -72,7 +72,7 @@ export class HrIssuesComponent {
   getAllIssues(n:number) {
     this.issueService.getall(n,this.DateString).subscribe(
       (d: any) => {
-        console.log(d);
+        // console.log(d);
         // this.count=d.data.count;
         this.sendNotification(1);
         this.tableData = d.data.clockIssues.data
