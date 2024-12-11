@@ -37,7 +37,7 @@ class UpdateClockOutsListener
                 ? $clock->location->end_time
                 : $clock->user->user_detail->end_time;
 
-            if ($clock->user->work_type === 'float') {
+            if ($clock->user->work_types === 'float') {
                 $workHours = $clock->user->user_detail->work_hours; 
                 $clockInTimestamp = Carbon::parse($clock->clock_in);
                 $endTimestamp = $clockInTimestamp->addHours($workHours); 
