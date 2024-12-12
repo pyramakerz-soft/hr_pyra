@@ -33,24 +33,15 @@ class UpdateClockOutsListener
         }
 
         foreach ($allClocks as $clock) {
-            $endTime = $clock->user->department->is_location_time
-                ? $clock->location->end_time
-                : $clock->user->user_detail->end_time;
-
-            if ($clock->user->work_types === 'float') {
-                $workHours = $clock->user->user_detail->work_hours; 
-                $clockInTimestamp = Carbon::parse($clock->clock_in);
-                $endTimestamp = $clockInTimestamp->addHours($workHours); 
-            } else {
-                
-                $clockInDate = Carbon::parse($clock->clock_in)->format('Y-m-d');
-                $endTimestamp = Carbon::parse($clockInDate . ' ' . $endTime);
-            }
-
+            $endTime = $clock->user->department->is_location_time ? $clock->location->end_time : $clock->user->user_detail->end_time;
+            // Get the current date and combine it with the end time to form a proper timestamp
+            $clockInDate = Carbon::parse($clock->clock_in)->format('Y-m-d');
+            $endTimestamp = Carbon::parse($clockInDate . ' ' . $endTime);
+            // Calculate duration and format it as HH:MM:SS
             $clockInTimestamp = Carbon::parse($clock->clock_in);
+
             $duration = $clockInTimestamp->diff($endTimestamp);
             $durationFormatted = sprintf('%02d:%02d:%02d', $duration->h, $duration->i, $duration->s);
-
             $clock->update([
                 'clock_out' => $endTimestamp,
                 'is_issue' => true,
