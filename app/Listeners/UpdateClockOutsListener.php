@@ -23,6 +23,7 @@ class UpdateClockOutsListener
     /**
      * Handle the event.
      */
+
     public function handle(CheckClockOutsEvent $event)
     {
         $allClocks = ClockInOut::whereNull('clock_out')->get();
@@ -49,6 +50,7 @@ class UpdateClockOutsListener
                 'duration' => $durationFormatted,
             ]);
             Log::info($clock->toArray());
+
         }
     }
 }
