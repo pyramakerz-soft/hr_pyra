@@ -21,7 +21,7 @@ export class ReverseGeocodingService {
     });
   }
   reverseGeocode(lat: number, lng: number) {
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_API_KEY`;
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
     return this.http.get(url);
   }
   
