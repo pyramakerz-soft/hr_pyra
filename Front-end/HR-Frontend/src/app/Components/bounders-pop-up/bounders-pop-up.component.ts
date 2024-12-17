@@ -15,12 +15,12 @@ declare const google: any;
   templateUrl: './bounders-pop-up.component.html',
   styleUrls: ['./bounders-pop-up.component.css']
 })
-export class BoundersPopUpComponent implements AfterViewInit {
+export class BoundersPopUpComponent {
   location: string = '';
   mode: string = 'add';
   id: number = 1;
-  lat: number = 0;
-  long: number = 0;
+  lat: string = '';
+  long: string = '';
   Boundname: string = '';
   address: string = '';
   radius: string = '';
@@ -35,11 +35,11 @@ export class BoundersPopUpComponent implements AfterViewInit {
   EndTime:string=""
   StartTimeError:string=""
   EndTimeError:string=""
+  LongError:string=""
+  LatError:string=""
 
   STime:string=""
   ETime:string=""
-
-  SaveButton:boolean=false;
 
   constructor(public dialogRef: MatDialogRef<BoundersPopUpComponent>, 
               public googleMapsService: ReverseGeocodingService,
@@ -63,84 +63,84 @@ export class BoundersPopUpComponent implements AfterViewInit {
     this.dialogRef.close();
   }
 
-  async ngAfterViewInit() {
-    await this.googleMapsService.load();
+  // async ngAfterViewInit() {
+  //   await this.googleMapsService.load();
   
-    if (typeof google !== 'undefined') {
-      const mapOptions = {
-        center: new google.maps.LatLng(this.lat || 30.0444, this.long || 31.2357), // Default to Cairo, Egypt
-        zoom: 15
-      };
+  //   if (typeof google !== 'undefined') {
+  //     const mapOptions = {
+  //       center: new google.maps.LatLng(this.lat || 30.0444, this.long || 31.2357), // Default to Cairo, Egypt
+  //       zoom: 15
+  //     };
   
-      this.map = new google.maps.Map(document.getElementById('map'), mapOptions);
+  //     this.map = new google.maps.Map(document.getElementById('map'), mapOptions);
   
-      this.marker = new google.maps.Marker({
-        position: mapOptions.center,
-        map: this.map,
-        draggable: true
-      });
+  //     this.marker = new google.maps.Marker({
+  //       position: mapOptions.center,
+  //       map: this.map,
+  //       draggable: true
+  //     });
   
-      google.maps.event.addListener(this.marker, 'dragend', () => {
-        const position = this.marker.getPosition();
-        this.lat = position.lat();
-        this.long = position.lng();
+  //     google.maps.event.addListener(this.marker, 'dragend', () => {
+  //       const position = this.marker.getPosition();
+  //       this.lat = position.lat();
+  //       this.long = position.lng();
   
-        // Reverse geocoding to get address
-        this.googleMapsService.getAddress(this.lat, this.long).then(
-          (result: any) => {
-            this.address = result.formatted_address;
+  //       // Reverse geocoding to get address
+  //       this.googleMapsService.getAddress(this.lat, this.long).then(
+  //         (result: any) => {
+  //           this.address = result.formatted_address;
             
-            // Update the autocomplete input field with the new address
-            const autocompleteInput = document.getElementById('autocomplete') as HTMLInputElement;
-            if (autocompleteInput) {
-              autocompleteInput.value = this.address || '';
-            }
-          },
-          (error) => {
-            Swal.fire({
-              text: "Geocoding error",
-              confirmButtonText: "OK",
-              confirmButtonColor: "#FF7519",
-            })
-          }
-        );
-      });
+  //           // Update the autocomplete input field with the new address
+  //           const autocompleteInput = document.getElementById('autocomplete') as HTMLInputElement;
+  //           if (autocompleteInput) {
+  //             autocompleteInput.value = this.address || '';
+  //           }
+  //         },
+  //         (error) => {
+  //           Swal.fire({
+  //             text: "Geocoding error",
+  //             confirmButtonText: "OK",
+  //             confirmButtonColor: "#FF7519",
+  //           })
+  //         }
+  //       );
+  //     });
   
-      const autocomplete = new google.maps.places.Autocomplete(
-        document.getElementById('autocomplete') as HTMLInputElement,
-        {
-          types: ['geocode'],
-          componentRestrictions: { country: 'EG' }
-        }
-      );
+  //     const autocomplete = new google.maps.places.Autocomplete(
+  //       document.getElementById('autocomplete') as HTMLInputElement,
+  //       {
+  //         types: ['geocode'],
+  //         componentRestrictions: { country: 'EG' }
+  //       }
+  //     );
   
-      autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
-        if (place.geometry && place.geometry.location) {
-          const location = place.geometry.location;
-          this.map.setCenter(location);
-          this.marker.setPosition(location);
-          this.lat = location.lat();
-          this.long = location.lng();
-          this.address = place.formatted_address;
+  //     autocomplete.addListener('place_changed', () => {
+  //       const place = autocomplete.getPlace();
+  //       if (place.geometry && place.geometry.location) {
+  //         const location = place.geometry.location;
+  //         this.map.setCenter(location);
+  //         this.marker.setPosition(location);
+  //         this.lat = location.lat();
+  //         this.long = location.lng();
+  //         this.address = place.formatted_address;
   
-          // Update the autocomplete input field with the new address
-          const autocompleteInput = document.getElementById('autocomplete') as HTMLInputElement;
-          if (autocompleteInput) {
-            autocompleteInput.value = this.address || '';
-          }
-        } else {
-        }
-      });
-    } else {
-      Swal.fire({
-        text: "Geolocation is not supported or not running in a browser",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#FF7519",
-      }
-      )
-    }
-  }
+  //         // Update the autocomplete input field with the new address
+  //         const autocompleteInput = document.getElementById('autocomplete') as HTMLInputElement;
+  //         if (autocompleteInput) {
+  //           autocompleteInput.value = this.address || '';
+  //         }
+  //       } else {
+  //       }
+  //     });
+  //   } else {
+  //     Swal.fire({
+  //       text: "Geolocation is not supported or not running in a browser",
+  //       confirmButtonText: "OK",
+  //       confirmButtonColor: "#FF7519",
+  //     }
+  //     )
+  //   }
+  // }
   
 
   isFormValid(){
@@ -150,30 +150,36 @@ export class BoundersPopUpComponent implements AfterViewInit {
     this.radiusError = "";  
     this.StartTimeError="";
     this.EndTimeError="";
+    this.LatError="";
+    this.LongError="";
 
-    if (this.Boundname.trim() === "" && this.address.trim() === "" && this.StartTime.trim() === "" && this.EndTime.trim() === "" && this.radius.trim() === "" ) {
+    if (this.Boundname.trim() === "") {
       isValid = false;
       this.nameError = '*Name Can not be empty';
-      this.addressError = '*Address Can not be empty';
-      this.radiusError = '*Radius Can not be empty';
-      this.StartTimeError = '*StartTime Can not be empty';
-      this.EndTimeError = '*EndTime Can not be empty';
-
-    } else if (this.Boundname.trim() === "") {
-      isValid = false;
-      this.nameError = '*Name Can not be empty';
-    } else if (this.address.trim() === "") {
+    } 
+    if (this.address.trim() === "") {
       isValid = false;
       this.addressError = '*Address Can not be empty';
-    } else if (this.StartTime.trim() === "") {
+    }
+    if (this.StartTime.trim() === "") {
       isValid = false;
       this.StartTimeError = '*StartTime Can not be empty';
-    } else if (this.EndTime.trim() === "") {
+    }
+    if (this.EndTime.trim() === "") {
       isValid = false;
       this.EndTimeError = '*EndTime Can not be empty';
-    } else if (this.radius.trim() === "") {
+    }
+    if (this.radius.trim() === "") {
       isValid = false;
       this.radiusError = '*Radius Can not be empty';
+    }
+    if (this.lat.trim() === "") {
+      isValid = false;
+      this.LatError = '*Latitude Can not be empty';
+    }
+    if (this.long.trim() === "") {
+      isValid = false;
+      this.LongError = '*Longitude Can not be empty';
     } 
     return isValid
   }
@@ -194,6 +200,12 @@ export class BoundersPopUpComponent implements AfterViewInit {
   onRadiusChange() {
     this.radiusError = "" 
   }
+  onLatChange() {
+    this.LatError = "" 
+  }
+  onLongChange() {
+    this.LongError = "" 
+  }
 
   filterNumericInput(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -213,20 +225,18 @@ export class BoundersPopUpComponent implements AfterViewInit {
 
   async EditAndAddLocation() {
     if(this.isFormValid()){
-      this.SaveButton=true;
       this.STime=await this.formatTime(this.StartTime)
       this.ETime=await this.formatTime(this.EndTime)
 
 
       if(this.ETime>this.STime){
-      if (this.mode === 'edit') {
+      if (this.mode === 'edit' && this.lat && this.long) {
 
-        this.LocationServ.EditByID(this.Boundname, this.address, this.lat, this.long, this.id ,this.STime,this.ETime, this.radius).subscribe(
+        this.LocationServ.EditByID(this.Boundname, this.address, Number(this.lat), Number(this.long), this.id ,this.STime,this.ETime, this.radius).subscribe(
           (d: any) => {
             this.dialogRef.close();
           },
           (error) => {
-            this.SaveButton=false;
             if (error.error.message === "The name has already been taken.") {
               Swal.fire({   
                 text: "The Location name has already been taken",
@@ -243,13 +253,12 @@ export class BoundersPopUpComponent implements AfterViewInit {
             }
           }
         );
-      } else if (this.mode === 'add') {
-        this.LocationServ.CreateAddress(this.Boundname, this.address, this.lat, this.long ,this.STime,this.ETime, this.radius).subscribe(
+      } else if (this.mode === 'add' && this.lat && this.long) {
+        this.LocationServ.CreateAddress(this.Boundname, this.address, Number(this.lat), Number(this.long) ,this.STime,this.ETime, this.radius).subscribe(
           (d: any) => {
             this.dialogRef.close();
           },
           (error) => {
-            this.SaveButton=false;
             if (error.error.message === "The name has already been taken.") {
               Swal.fire({   
                 text: "The Location name has already been taken",
@@ -269,7 +278,6 @@ export class BoundersPopUpComponent implements AfterViewInit {
       }
     }
     else{
-      this.SaveButton=false;
       Swal.fire({   
         text: "End Time Should Be After Start Time",
         confirmButtonText: "OK",
