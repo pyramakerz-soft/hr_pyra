@@ -34,11 +34,13 @@ class UpdateClockOutsListener
         }
 
         foreach ($allClocks as $clock) {
+            if($clock->location)
             $endTime = $clock->user->department->is_location_time ? $clock->location->end_time : $clock->user->user_detail->end_time;
+            else
+            $endTime = $clock->user->department->is_location_time ? $clock->user->user_detail->end_time : now();
             $clockInDate = Carbon::parse($clock->clock_in)->format('Y-m-d');
             $endTimestamp = Carbon::parse($clockInDate . ' ' . $endTime);
             $clockInTimestamp = Carbon::parse($clock->clock_in);
-
             $duration = $clockInTimestamp->diff($endTimestamp);
             $durationFormatted = sprintf('%02d:%02d:%02d', $duration->h, $duration->i, $duration->s);
             $clock->update([
@@ -48,7 +50,6 @@ class UpdateClockOutsListener
                 'duration' => $durationFormatted,
             ]);
             Log::info($clock->toArray());
-
         }
     }
 }
