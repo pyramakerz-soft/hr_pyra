@@ -37,7 +37,7 @@ class UpdateClockOutsListener
             if ($clock->location)
                 $endTime = $clock->user->department->is_location_time ? $clock->location->end_time : $clock->user->user_detail->end_time;
             else
-                $endTime = $clock->user->department->is_location_time ? $clock->user->user_detail->end_time : now();
+                $endTime = $clock->user->department->is_location_time ? $clock->user->user_detail->end_time : date('H:i:s');
             $clockInDate = Carbon::parse($clock->clock_in)->format('Y-m-d');
             $endTimestamp = Carbon::parse($clockInDate . ' ' . $endTime);
             $clockInTimestamp = Carbon::parse($clock->clock_in);
