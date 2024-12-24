@@ -50,8 +50,8 @@ export class BoundersPopUpComponent {
       this.Boundname = data.locationName;
       this.id = data.id;
       this.address = data.LocationAddress;
-      this.lat=data.Lat,
-      this.long=data.Long,
+      this.lat=String(data.Lat),
+      this.long=String(data.Long),
       this.radius = data.radius
       this.StartTime=data.startTime
       this.EndTime=data.endTime
