@@ -56,8 +56,13 @@ export class HrDashboardComponent {
 
   populateYears(): void {
     const startYear = 2019;
-    const currentYear = new Date().getFullYear(); 
-
+    let currentYear = new Date().getFullYear();
+    const today = new Date().getDate();
+    const currentMonth = new Date().getMonth() + 1;
+    // console.log(today , currentMonth)
+    if(today>25&&currentMonth==12){
+      currentYear++;
+    }
     for (let year = startYear; year <= currentYear; year++) {
       this.years.push(year);
     }
