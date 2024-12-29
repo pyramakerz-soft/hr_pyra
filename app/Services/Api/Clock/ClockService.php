@@ -230,7 +230,7 @@ class ClockService
         if ($filtersApplied) {
             $clocks = $query->get();
         } else {
-            $clocks = $query->paginate(7);
+            $clocks = $query->paginate(15);
         }
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clock Issues Found');
