@@ -206,7 +206,6 @@ class ClockService
     }
     public function getClockIssues(Request $request)
     {
-
         if ($request->has('month')) {
             $month = Carbon::parse($request->get('month'));
             $startOfMonth = (clone $month)->startOfMonth()->startOfDay();
@@ -216,7 +215,6 @@ class ClockService
             $startOfMonth = Carbon::now()->startOfMonth()->startOfDay();
             $endOfMonth = Carbon::now()->endOfMonth()->endOfDay();
         }
-
         $query = ClockInOut::where('is_issue', true)
             ->whereBetween('clock_in', [$startOfMonth, $endOfMonth])
             ->orderBy('clock_in', 'Desc');
@@ -230,7 +228,7 @@ class ClockService
         if ($filtersApplied) {
             $clocks = $query->get();
         } else {
-            $clocks = $query->paginate(30);
+            $clocks = $query->paginate(7);
         }
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clock Issues Found');
@@ -249,6 +247,7 @@ class ClockService
 
 
     }
+
     public function getCountIssues()
     {
         $totalIssueCount['count'] = ClockInOut::where('is_issue', true)
