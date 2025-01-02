@@ -271,11 +271,11 @@ export class HrEmployeeAddEditDetailsComponent {
       if (this.employee.hasOwnProperty(key)) {
         const field = key as keyof AddEmployee;
         // && field != "is_float"
-        if (!this.employee[field] && field != "code" && field !='work_home' && field != "image" && field != "deparment_name" ) {
+        if (!this.employee[field] && field != "code" && field !='work_home' && field != "image" && field != "deparment_name" && field != "working_hours_day") {
           if(this.EmployeeId !== 0){
             continue
           }
-          if(field== "working_hours_day" || field=="start_time" || field=="end_time"){
+          if(field=="start_time" || field=="end_time"){
             if(!this.isFloatChecked){
               this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
               isValid = false;
@@ -326,14 +326,14 @@ export class HrEmployeeAddEditDetailsComponent {
                 isValid = false;
               }
               break;
-            case "working_hours_day":
-              if(this.employee.working_hours_day){
-                if(this.employee.working_hours_day > 23){
-                  this.validationErrors[field] = 'Invalid working hours day.';
-                  isValid = false;
-                }
-              }
-              break;
+            // case "working_hours_day":
+            //   if(this.employee.working_hours_day){
+            //     if(this.employee.working_hours_day > 23){
+            //       this.validationErrors[field] = 'Invalid working hours day.';
+            //       isValid = false;
+            //     }
+            //   }
+            //   break;
           }
         }
       }
@@ -374,23 +374,33 @@ export class HrEmployeeAddEditDetailsComponent {
         const diffMilliseconds = end_timeDate.getTime() - start_timeDate.getTime();
   
         const diffHours = diffMilliseconds / (1000 * 60 * 60);
-  
-        const workingHoursDay = this.employee.working_hours_day != null ? this.employee.working_hours_day : 0; 
-  
-        if (diffHours - parseFloat(workingHoursDay.toString()) > 0 || diffHours - parseFloat(workingHoursDay.toString()) < 0 || diffHours < 0 ) {
-          this.validationErrors['start_time'] = 'Invalid Start Time.';
-          this.validationErrors["end_time"] = 'Invalid End Time.';
-          this.validationErrors['working_hours_day'] = 'Invalid Working hours day.';
+        if(diffHours < 4){
           isValid = false;
           Swal.fire({
-            icon: "error",
-            title: "Invalid Input",
-            text: "Starting Time and Ending Time not Compatible with Working hours day",
+            icon: "warning",
+            title: "Working Hours must be at least 4",
             confirmButtonText: "OK",
             confirmButtonColor: "#FF7519",
-            
-          });
+          })
+        }else{
+          this.employee.working_hours_day = diffHours
         }
+        const workingHoursDay = this.employee.working_hours_day != null ? this.employee.working_hours_day : 0; 
+  
+        // if (diffHours - parseFloat(workingHoursDay.toString()) > 0 || diffHours - parseFloat(workingHoursDay.toString()) < 0 || diffHours < 0 ) {
+        //   this.validationErrors['start_time'] = 'Invalid Start Time.';
+        //   this.validationErrors["end_time"] = 'Invalid End Time.';
+        //   this.validationErrors['working_hours_day'] = 'Invalid Working hours day.';
+        //   isValid = false;
+        //   Swal.fire({
+        //     icon: "error",
+        //     title: "Invalid Input",
+        //     text: "Starting Time and Ending Time not Compatible with Working hours day",
+        //     confirmButtonText: "OK",
+        //     confirmButtonColor: "#FF7519",
+            
+        //   });
+        // }
       }
     }
 

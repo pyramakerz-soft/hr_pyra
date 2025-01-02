@@ -7,8 +7,10 @@
 .notification-badge {
     background-color: #FF7519;
     color: white;
-    font-size: 0.8rem;
-    padding: 2px 5px;
-    border-radius: 50%;
+    font-size: small;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    border-radius: 100%;
     margin-left: 5px;
   }

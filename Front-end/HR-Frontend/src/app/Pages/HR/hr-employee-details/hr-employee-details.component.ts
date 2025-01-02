@@ -37,7 +37,7 @@ export class HrEmployeeDetailsComponent {
       (d: any) => {
         d.User.start_time = this.convertTimeFormate(d.User.start_time)
         d.User.end_time = this.convertTimeFormate(d.User.end_time)
-
+        d.User.working_hours_day = this.convertToTimeString(d.User.working_hours_day)
         this.employee = d.User;
         this.userService.checkSerialNumber(d.User.id).subscribe(
           (d:any) => {
@@ -46,6 +46,16 @@ export class HrEmployeeDetailsComponent {
         )
       }
     );
+  }
+
+  convertToTimeString(hours: number): string {
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+
+    const formattedHours = h.toString().padStart(2, '0');
+    const formattedMinutes = m.toString().padStart(2, '0');
+
+    return `${formattedHours}:${formattedMinutes}`;
   }
 
   NavigateToEditEmployee(empId:number|null){
