@@ -10,6 +10,7 @@ use App\Http\Resources\Api\ClockResource;
 use App\Http\Resources\Api\IssueResource;
 use App\Models\ClockInOut;
 use App\Models\User;
+use App\Models\AppVersion;
 use App\Traits\ClockInTrait;
 use App\Traits\ClockOutTrait;
 use App\Traits\ClockTrait;
@@ -120,28 +121,40 @@ class ClockService
     }
 
     public function clockIn(ClockInRequest $request)
-    {
-        //1- Check If user already Clocked in
-        $authUser = Auth::user();
-        $user_id = $authUser->id;
-        $clock_in = $request->clock_in;
-        //2- Check if the user has already clocked in today
-        if ($this->checkClockInWithoutClockOut($user_id, $clock_in)) {
-            return $this->returnError('You have already clocked in today.');
-        }
+{
+    // Get the authenticated user
+    $authUser = Auth::user();
+    $user_id = $authUser->id;
+    $clock_in = $request->clock_in;
 
-        //4- Handle home clock-in if location_type is 'home'
-        if ($request->location_type == 'home') {
-            return $this->handleHomeClockIn($request, $user_id);
-        }
-        if ($request->location_type == 'float') {
+    // Determine the latest version based on the platform (Android/iOS)
+    $platformType = $request->isAndroid ? 'android' : 'ios';
+    $latestVersion = AppVersion::where('type', $platformType)->orderBy('version', 'desc')->value('version');
 
-            return $this->handleFloatClockIn($request, $user_id);
-        }
-
-        //5- Handle site clock-in if location_type is 'site'
-        return $this->handleSiteClockIn($request, $authUser);
+    // Check if the request's version is outdated
+    if (version_compare($request->version, $latestVersion, '<')) {
+        return response()->json(['message' => 'Please update the application to the latest version.'], 406);
     }
+
+    // 1- Check If user already clocked in today
+    if ($this->checkClockInWithoutClockOut($user_id, $clock_in)) {
+        return $this->returnError('You have already clocked in today.');
+    }
+
+    // 2- Handle home clock-in if location_type is 'home'
+    if ($request->location_type == 'home') {
+        return $this->handleHomeClockIn($request, $user_id);
+    }
+
+    // 3- Handle float clock-in if location_type is 'float'
+    if ($request->location_type == 'float') {
+        return $this->handleFloatClockIn($request, $user_id);
+    }
+
+    // 4- Handle site clock-in if location_type is 'site'
+    return $this->handleSiteClockIn($request, $authUser);
+}
+
 
     public function clockOut(ClockOutRequest $request)
     {

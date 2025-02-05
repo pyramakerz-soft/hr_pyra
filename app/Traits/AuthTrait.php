@@ -22,18 +22,39 @@ trait AuthTrait
         return null; // Return null if user not found or password is incorrect
     }
     protected function validateSerialNumber(Request $request, User $user)
-    {
-        if ($request->serial_number) {
-            if (is_null($user->serial_number)) {
-                $request->validate([
-                    'serial_number' => [Rule::unique('users', 'serial_number')->ignore($user->id)],
-                ]);
-                $user->update(['serial_number' => $request->serial_number]);
-            } elseif ($user->serial_number !== $request->serial_number) {
-                throw new \Exception('Serial number does not match', 406);
+{
+    if ($request->serial_number) {
+        // Check if the serial number doesn't contain "#" (indicating an outdated version)
+        if (strpos($request->serial_number, '#') === false) {
+            throw new \Exception('Please update the app to the latest version to continue.', 406);
+        }
+
+        if (is_null($user->serial_number)) {
+            $request->validate([
+                'serial_number' => [Rule::unique('users', 'serial_number')->ignore($user->id)],
+            ]);
+            $user->update(['serial_number' => $request->serial_number]);
+        } 
+        // If user already has a serial number but it doesn't contain "#", update it
+        elseif (strpos($user->serial_number, '#') === false) {
+            $user->update(['serial_number' => $request->serial_number]);
+        } 
+        // If the user's serial number is different from the request serial number, throw an error
+        elseif ($user->serial_number !== $request->serial_number) {
+            throw new \Exception('Serial number does not match', 406);
+        }
+
+        // Handle mobile verification
+        if ($request->mob) {
+            if (is_null($user->mob)) {
+                $user->update(['mob' => $request->mob]);
+            } elseif ($user->mob !== $request->mob) {
+                throw new \Exception('Your current mobile is different from the original logged-in phone ('.$user->mob.')('.$request->mob.')', 406);
             }
         }
     }
+}
+
     protected function generateToken(Request $request, User $user)
     {
         // Attempt to generate a JWT token
