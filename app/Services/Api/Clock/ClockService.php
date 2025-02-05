@@ -19,7 +19,7 @@ use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-
+use Log;
 class ClockService
 {
     use ResponseTrait, ClockTrait, ClockInTrait, ClockOutTrait, HelperTrait;
@@ -126,14 +126,26 @@ class ClockService
     $authUser = Auth::user();
     $user_id = $authUser->id;
     $clock_in = $request->clock_in;
-
+$arr = ['type'=>'In','lat' => $request->latitude,'lng' => $request->longitude,'user' => $authUser->email];
+Log::info($arr);
+    if(!$request->version || !$request->isAndroid)
+    return response()->json(['message' => 'Please update the application to the latest version.'], 406);
     // Determine the latest version based on the platform (Android/iOS)
     $platformType = $request->isAndroid ? 'android' : 'ios';
     $latestVersion = AppVersion::where('type', $platformType)->orderBy('version', 'desc')->value('version');
 
     // Check if the request's version is outdated
-    if (version_compare($request->version, $latestVersion, '<')) {
+    if ($request->version != $latestVersion) {
         return response()->json(['message' => 'Please update the application to the latest version.'], 406);
+        // throw new \Exception('', 406);
+    }
+    
+    if ($request->mob) {
+        if (is_null($authUser->mob)) {
+            $authUser->update(['mob' => $request->mob]);
+        } elseif ($authUser->mob !== $request->mob) {
+            return response()->json(['message' => 'Your current mobile is different from the original logged-in phone ('.$authUser->mob.')('.$request->mob.')'], 406);
+        }
     }
 
     // 1- Check If user already clocked in today
@@ -161,13 +173,16 @@ class ClockService
         $authUser = Auth::user();
         $user_id = $authUser->id;
         $clock = $this->getClockInWithoutClockOut($user_id);
+        $arr = ['type'=>'Out','lat' => $request->latitude,'lng' => $request->longitude,'user' => $authUser->email];
+Log::info($arr);
         if (!$clock) {
             return $this->returnError('You are not clocked in.');
         }
         $clockIn = carbon::parse($clock->clock_in);
         $clockOut = Carbon::parse($request->clock_out);
         $this->validateClockTime($clockIn, $clockOut);
-
+        
+        
         if ($clock->location_type == "home") {
             return $this->handleHomeClockOut($clock, $clockOut);
         }

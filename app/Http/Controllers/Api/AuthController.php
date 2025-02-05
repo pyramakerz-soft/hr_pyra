@@ -10,6 +10,7 @@ use App\Traits\AuthTrait;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Log;
 
 class AuthController extends Controller
 {
@@ -70,11 +71,19 @@ class AuthController extends Controller
 
         // Validate user credentials
         $user = $this->validateUser($credentials);
-
+        // Log::info(['Status' => 'Fail','type' => 'Login',$credentials]);
         if (!$user) {
+        Log::info(['Status' => 'Fail','type' => 'Login','creds' => $credentials]);
             return response()->json(['message' => 'Wrong Email or Password'], Response::HTTP_UNAUTHORIZED);
         }
-
+        Log::info(['Status' => 'Success','type' => 'Login','creds' => $credentials]);
+        if ($request->mob) {
+            if (is_null($user->mob)) {
+                $user->update(['mob' => $request->mob]);
+            } elseif ($user->mob !== $request->mob) {
+                throw new \Exception('Your current mobile is different from the original logged-in phone ('.$authUser->mob.')('.$request->mob.')', 406);
+            }
+        }
         // Handle serial number checking logic
         $this->validateSerialNumber($request, $user);
 

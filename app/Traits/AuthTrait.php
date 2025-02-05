@@ -45,13 +45,7 @@ trait AuthTrait
         }
 
         // Handle mobile verification
-        if ($request->mob) {
-            if (is_null($user->mob)) {
-                $user->update(['mob' => $request->mob]);
-            } elseif ($user->mob !== $request->mob) {
-                throw new \Exception('Your current mobile is different from the original logged-in phone ('.$user->mob.')('.$request->mob.')', 406);
-            }
-        }
+        
     }
 }
 

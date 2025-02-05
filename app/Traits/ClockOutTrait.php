@@ -127,6 +127,6 @@ trait ClockOutTrait
         $durationFormatted = $this->calculateDuration($clockIn, $clockOut);
 
         //6- ClockOut by updating the clock model
-        return $this->updateClockOutRecord($clock, $clockOut, $durationFormatted, $clock->late_arrive, $early_leave);
+        return $this->updateClockOutRecord($clock, $clockOut, $durationFormatted, $clock->late_arrive, $early_leave,$latitude,$longitude);
     }
 }
