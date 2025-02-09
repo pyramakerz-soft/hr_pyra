@@ -52,6 +52,10 @@ trait ClockInTrait
     }
     protected function createClockInHomeRecord($request, $user_id, $clockIn, $late_arrive)
     {
+        $latitude = $request->latitude;
+        $longitude = $request->longitude;
+        $address = $this->getAddressFromCoordinates($latitude, $longitude);
+        $formatted_address = isset($address['address']['road']) ? $address['address']['road'] : 'Address not available';
         $clock = ClockInOut::create([
             'clock_in' => $clockIn,
             'clock_out' => null,
@@ -61,6 +65,7 @@ trait ClockInTrait
             'location_id' => null,
             'late_arrive' => $late_arrive,
             'early_leave' => null,
+            'address_clock_in' => $formatted_address
         ]);
 
         return $this->returnData("clock", $clock, "Clock In Done");
@@ -186,6 +191,12 @@ trait ClockInTrait
 
     protected function createClockInSiteRecord($request, $authUser, $userLocation, $clockIn, $late_arrive)
     {
+        
+        $latitude = $request->latitude;
+        $longitude = $request->longitude;
+        $address = $this->getAddressFromCoordinates($latitude, $longitude);
+        $formatted_address = isset($address['address']['road']) ? $address['address']['road'] : 'Address not available';
+        
         $clock = ClockInOut::create([
             'clock_in' => $clockIn,
             'clock_out' => null,
@@ -195,6 +206,7 @@ trait ClockInTrait
             'location_type' => $request->location_type,
             'late_arrive' => $late_arrive,
             'early_leave' => null,
+            'address_clock_in' => $formatted_address
         ]);
 
         return $this->returnData("clock", $clock, "Clock In Done");

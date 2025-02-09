@@ -127,11 +127,11 @@ class ClockService
     $user_id = $authUser->id;
     $clock_in = $request->clock_in;
 
+    $arr = ['type'=>'In','version'=> $request->version,'lat' => $request->latitude,'lng' => $request->longitude,'user' => $authUser->email];
+Log::info($arr);
     if(!$request->version)
     return response()->json(['message' => 'Please update the application to the latest version.'], 406);
     
-    $arr = ['type'=>'In','version'=> $request->version,'lat' => $request->latitude,'lng' => $request->longitude,'user' => $authUser->email];
-Log::info($arr);
     // Determine the latest version based on the platform (Android/iOS)
     $platformType = $request->isAndroid ? 'android' : 'ios';
     $latestVersion = AppVersion::where('type', $platformType)->orderBy('version', 'desc')->value('version');
