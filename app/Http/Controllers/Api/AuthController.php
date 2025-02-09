@@ -76,7 +76,7 @@ class AuthController extends Controller
         Log::info(['Status' => 'Fail','type' => 'Login','creds' => $credentials]);
             return response()->json(['message' => 'Wrong Email or Password'], Response::HTTP_UNAUTHORIZED);
         }
-        Log::info(['Status' => 'Success','type' => 'Login','creds' => $credentials]);
+        Log::info(['Status' => 'Success','mob'=>$request->mob,'type' => 'Login','creds' => $credentials,'all_reqs' => $request->all()]);
         if ($request->mob) {
             if (is_null($user->mob)) {
                 $user->update(['mob' => $request->mob]);
