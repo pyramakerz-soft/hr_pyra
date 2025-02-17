@@ -18,6 +18,7 @@ use App\Traits\HelperTrait;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Log;
 class ClockService
@@ -128,8 +129,8 @@ class ClockService
     $clock_in = $request->clock_in;
 
     $arr = ['type'=>'In','version'=> $request->version,'lat' => $request->latitude,'lng' => $request->longitude,'user' => $authUser->email];
-Log::info($arr);
-    if(!$request->version)
+\Log::info($arr);
+    if(!$request->version  && ! App::environment('local'))
     return response()->json(['message' => 'Please update the application to the latest version.'], 406);
     
     // Determine the latest version based on the platform (Android/iOS)
@@ -137,7 +138,7 @@ Log::info($arr);
     $latestVersion = AppVersion::where('type', $platformType)->orderBy('version', 'desc')->value('version');
 
     // Check if the request's version is outdated
-    if ($request->version != $latestVersion) {
+    if ($request->version != $latestVersion   &&  ! App::environment('local')) {
         return response()->json(['message' => 'Please update the application to the latest version.'], 406);
         // throw new \Exception('', 406);
     }

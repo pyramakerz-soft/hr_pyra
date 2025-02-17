@@ -6,10 +6,11 @@ use App\Models\ClockInOut;
 use App\Models\User;
 use App\Traits\ClockValidator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 trait ClockOutTrait
 {
-    use ClockValidator, HelperTrait;
+    use ClockValidator, HelperTrait,LocationHelperTrait;
     protected function getClockInWithoutClockOut($user_id)
     {
         $query = ClockInOut::where('user_id', $user_id)
@@ -20,15 +21,7 @@ trait ClockOutTrait
         return $query;
     }
 
-    protected function validateLocation($latitude, $longitude, $expectedLatitude, $expectedLongitude)
-    {
-        $distance = $this->haversineDistance($latitude, $longitude, $expectedLatitude, $expectedLongitude);
-        if ($distance > 50) {
-            return $this->returnError('User is not located at the correct location.');
-        }
-        return;
-    }
-
+ 
     protected function updateClockOutRecord($clock, $clockOut, $durationFormatted, $late_arrive, $early_leave, $latitudeOut = null, $longitudeOut = null)
     {
         $addressOut = $this->getAddressFromCoordinates($latitudeOut, $longitudeOut);
@@ -105,12 +98,12 @@ trait ClockOutTrait
         //3- Validate location of user and location of the site
         $latitude = $request->latitude;
         $longitude = $request->longitude;
-        $validationError = $this->validateLocation($latitude, $longitude, $lastClockedInLocation->latitude, $lastClockedInLocation->longitude);
+          // 1- Validate location of user and location of the site
+          $userLocation = $this->validateLocations($request, $authUser);
 
-        // If the validation failed, return the error
-        if ($validationError) {
-            return $validationError;
-        }
+          if ($userLocation instanceof \Illuminate\Http\JsonResponse) {
+              return $userLocation; // Return the error response
+          }
         //4- check the department_name for authenticated_user
         if ($this->isLocationTime($authUser)) {
             // calculate the early leave depend on location
