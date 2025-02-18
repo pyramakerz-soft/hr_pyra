@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\ClockInOut;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
@@ -12,38 +13,41 @@ class ClocksExport implements WithMultipleSheets
 
     protected $department;
     protected $userId;
+    protected $clocks;
 
-    public function __construct($department = null, $userId = null)
-    {
+    public function __construct($clocks, $department = null, $userId = null)
+    {      
+        $this->clocks = $clocks;
         $this->department = $department;
         $this->userId = $userId;
-
     }
+
     public function sheets(): array
     {
         $sheets = [];
 
-        // Build query to get all clocks with filtering based on department
-        $query = ClockInOut::with('user')
-            ->join('users', 'users.id', '=', 'clock_in_outs.user_id')
-            ->join('departments', 'departments.id', '=', 'users.department_id')
-            ->select('clock_in_outs.*')
-            ->when($this->department, function ($q) {
-                $q->where('departments.name', 'like', '%' . $this->department . '%');
-            })
-            ->when($this->userId, function ($q) {
-                $q->where('users.id', $this->userId);
-            });
+        $clocksCollection = $this->clocks;
 
-        // Get distinct user IDs with their clocks
-        $userClocks = $query->get()->groupBy('user_id');
+        Log::info('Clocks: ', $clocksCollection->toArray());
+
+        if ($clocksCollection->isEmpty()) {
+            Log::error('No clocks found for export.');
+            abort(400, 'No clocks found for export.'); 
+        }
+
+        $userClocks = $clocksCollection->groupBy('user_id');
+
+
         foreach ($userClocks as $userId => $clocks) {
-            // Fetch user details for sheet title
-            $user = $clocks->first()->user;
-            $userName = $user->name ?? 'Unknown';
+            $user = $clocks->first()->user; 
+            $userName = $user->name ?? 'Unknown';  
 
-            // Add sheet for each unique user (should only be one user due to filtering)
             $sheets[] = new UserClocksExportById($clocks, $userName);
+        }
+
+        if (count($sheets) === 0) {
+            Log::warning('No sheets were created because user clocks were empty or not properly grouped.');
+            abort(400, 'No sheets were created because user clocks were empty or not properly grouped.');
         }
 
         return $sheets;

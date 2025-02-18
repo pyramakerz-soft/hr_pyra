@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log as FacadesLog;
 use Log;
 class ClockService
 {
@@ -44,6 +45,34 @@ class ClockService
             $query = $filter->apply($query, $request);
         }
 
+if ($request->has('month')) {
+    $monthYear = $request->get('month'); 
+
+    if (preg_match('/^\d{4}-\d{2}$/', $monthYear)) {
+        list($year, $month) = explode('-', $monthYear);
+
+        $query->whereYear('clock_in', $year)
+              ->whereMonth('clock_in', $month);
+
+        $clocks = $query->get();  
+        
+   
+    } else {
+        return $this->returnError('Invalid Month Format. Expected YYYY-MM.');
+    }
+}
+
+    // Handle export request
+    if ($request->has('export')) {
+        $clocksForExport = $query->orderBy('clock_in', 'desc')->get();  // Using `get()` instead of `paginate()` for export
+        // Log the number of clocks to be exported (for debugging)
+        FacadesLog::info(["clocks_count" => $clocksForExport->count()]);
+        
+        // Fetch all clocks without pagination for export
+
+        // Proceed with export
+        return $this->exportService->exportClocks($clocksForExport, $request->get('department'));
+    }
         // Handle pagination
         $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
 
@@ -51,11 +80,8 @@ class ClockService
             return $this->returnError('No Clocks Found');
         }
 
-        // Handle export request
-        if ($request->has('export')) {
-            return $this->exportService->exportClocks($clocks, $request->get('department'));
-        }
-
+     
+  
         // Prepare and return data
         $data = $this->prepareClockData($clocks);
         if (!isset($data['clocks'])) {

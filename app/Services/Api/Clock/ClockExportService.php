@@ -7,6 +7,6 @@ class ClockExportService
 {
     public function exportClocks($clocks, $department, $userId = null)
     {
-        return (new ClocksExport($department, $userId))->download('all_user_clocks.xlsx');
+        return (new ClocksExport($clocks,$department, $userId))->download('all_user_clocks.xlsx');
     }
 }
