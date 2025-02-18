@@ -5,241 +5,6 @@
         "version": "1.0.0"
     },
     "paths": {
-        "/api/auth/login": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Login to the application",
-                "operationId": "dd51a484b7fa0f97c7680fdbde14cf5f",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "hr@test.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "123456"
-                                    },
-                                    "serial_number": {
-                                        "type": "string",
-                                        "example": ""
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful login",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "result": {
-                                            "type": "string",
-                                            "example": "true"
-                                        },
-                                        "token": {
-                                            "type": "string",
-                                            "example": "jwt_token"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Wrong Email"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "406": {
-                        "description": "Serial number does not match",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Serial number does not match"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "An error occurred"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/auth/logout": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Logout from the application",
-                "operationId": "df9bdc6c7a6d9f20b983526b2ec0f698",
-                "responses": {
-                    "200": {
-                        "description": "Successfully logged out",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "result": {
-                                            "type": "string",
-                                            "example": "true"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You are logged out"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/auth/user_by_token": {
-            "get": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Get the authenticated user's profile",
-                "operationId": "01effeef744a490bfe3b2b050830dcc4",
-                "responses": {
-                    "200": {
-                        "description": "User profile data",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "user": {
-                                            "type": "object"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User Data"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "No User Found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You are not authenticated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Server Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "An error occurred"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/all_clocks": {
             "get": {
                 "tags": [
@@ -4064,6 +3829,498 @@
                     }
                 ]
             }
+        },
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login to the application",
+                "operationId": "4792d88bfaf2b1bca3ff19daafa8c1dc",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "hr@test.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "123456"
+                                    },
+                                    "serial_number": {
+                                        "type": "string",
+                                        "example": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful login",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "result": {
+                                            "type": "string",
+                                            "example": "true"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "jwt_token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Wrong Email"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "406": {
+                        "description": "Serial number does not match",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Serial number does not match"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An error occurred"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout from the application",
+                "operationId": "8607a7e1c6e3282dddb1a670f67f8acb",
+                "responses": {
+                    "200": {
+                        "description": "Successfully logged out",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "result": {
+                                            "type": "string",
+                                            "example": "true"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You are logged out"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/user_by_token": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get the authenticated user's profile",
+                "operationId": "0c97475f6dc09e3fb3a90733bc667222",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer Token (Example: 'Bearer {your_token}')",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User profile data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "result": {
+                                            "type": "string",
+                                            "example": "true"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User Data"
+                                        },
+                                        "User": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 367
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Zyad Mohamed"
+                                                },
+                                                "national_id": {
+                                                    "type": "string",
+                                                    "example": "30206040200853"
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "job_title": {
+                                                    "type": "string",
+                                                    "example": "Flutter developer"
+                                                },
+                                                "department_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "department_name": {
+                                                    "type": "string",
+                                                    "example": "Software"
+                                                },
+                                                "role_name": {
+                                                    "type": "string",
+                                                    "example": "Employee"
+                                                },
+                                                "is_clocked_out": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "clockIn": {
+                                                    "type": "string",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "total_hours": {
+                                                    "type": "string",
+                                                    "example": "00:00:00"
+                                                },
+                                                "user_start_time": {
+                                                    "type": "string",
+                                                    "format": "time",
+                                                    "example": "07:00:00"
+                                                },
+                                                "user_end_time": {
+                                                    "type": "string",
+                                                    "format": "time",
+                                                    "example": "15:00:00"
+                                                },
+                                                "is_notify_by_location": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "assigned_locations_user": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "location_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "location_name": {
+                                                                "type": "string",
+                                                                "example": "Pyramakerz.Alex"
+                                                            },
+                                                            "location_start_time": {
+                                                                "type": "string",
+                                                                "format": "time",
+                                                                "example": "07:00:00"
+                                                            },
+                                                            "location_end_time": {
+                                                                "type": "string",
+                                                                "format": "time",
+                                                                "example": "15:00:00"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "work_home": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "work_types": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "site"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No User Found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You are not authenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An error occurred"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/remove-serial/{user_id}": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Remove Serial Number from User",
+                "operationId": "da0056d3ef93fd50da9b573cdddd7484",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "User ID whose serial number needs to be removed",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Serial Number removed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "type": "string",
+                                            "example": ""
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Serial Number of User removed Successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User has no serial number",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No Serial Number found for this user"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/check_serial_number/{user_id}": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Check if User has a Serial Number",
+                "operationId": "72ec37f3e89300b108c01487eb363166",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "User ID to check serial number",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Serial Number Status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "has_serial_number": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -4376,10 +4633,6 @@
     ],
     "tags": [
         {
-            "name": "Auth",
-            "description": "Auth"
-        },
-        {
             "name": "Clock",
             "description": "Clock"
         },
@@ -4402,6 +4655,10 @@
         {
             "name": "WorkType",
             "description": "WorkType"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
         }
     ]
 }

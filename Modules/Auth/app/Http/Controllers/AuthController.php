@@ -1,8 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+
 use App\Http\Requests\Api\LoginRequest;
 use App\Http\Resources\Api\ProfileResource;
 use App\Models\User;
@@ -73,15 +76,15 @@ class AuthController extends Controller
         $user = $this->validateUser($credentials);
         // Log::info(['Status' => 'Fail','type' => 'Login',$credentials]);
         if (!$user) {
-        Log::info(['Status' => 'Fail','type' => 'Login','creds' => $credentials]);
+            Log::info(['Status' => 'Fail', 'type' => 'Login', 'creds' => $credentials]);
             return response()->json(['message' => 'Wrong Email or Password'], Response::HTTP_UNAUTHORIZED);
         }
-        Log::info(['Status' => 'Success','mob'=>$request->mob,'type' => 'Login','creds' => $credentials,'all_reqs' => $request->all()]);
+        Log::info(['Status' => 'Success', 'mob' => $request->mob, 'type' => 'Login', 'creds' => $credentials, 'all_reqs' => $request->all()]);
         if ($request->mob) {
             if (is_null($user->mob)) {
                 $user->update(['mob' => $request->mob]);
             } elseif ($user->mob !== $request->mob) {
-                throw new \Exception('Your current mobile is different from the original logged-in phone ('.$authUser->mob.')('.$request->mob.')', 406);
+                throw new \Exception('Your current mobile is different from the original logged-in phone (' . $authUser->mob . ')(' . $request->mob . ')', 406);
             }
         }
         // Handle serial number checking logic
@@ -128,12 +131,55 @@ class AuthController extends Controller
      *   path="/api/auth/user_by_token",
      *   summary="Get the authenticated user's profile",
      *   tags={"Auth"},
+     *   security={{"bearerAuth": {}}}, 
+     *   @OA\Parameter(
+     *     name="Authorization",
+     *     in="header",
+     *     required=true,
+     *     description="Bearer Token (Example: 'Bearer {your_token}')",
+     *     @OA\Schema(type="string")
+     *   ),
      *   @OA\Response(
      *     response=200,
      *     description="User profile data",
      *     @OA\JsonContent(
-     *       @OA\Property(property="user", type="object"),
-     *       @OA\Property(property="message", type="string", example="User Data")
+     *       @OA\Property(property="result", type="string", example="true"),
+     *       @OA\Property(property="message", type="string", example="User Data"),
+     *       @OA\Property(
+     *         property="User",
+     *         type="object",
+     *         @OA\Property(property="id", type="integer", example=367),
+     *         @OA\Property(property="name", type="string", example="Zyad Mohamed"),
+     *         @OA\Property(property="national_id", type="string", example="30206040200853"),
+     *         @OA\Property(property="image", type="string", nullable=true, example=null),
+     *         @OA\Property(property="job_title", type="string", example="Flutter developer"),
+     *         @OA\Property(property="department_id", type="integer", example=1),
+     *         @OA\Property(property="department_name", type="string", example="Software"),
+     *         @OA\Property(property="role_name", type="string", example="Employee"),
+     *         @OA\Property(property="is_clocked_out", type="boolean", example=true),
+     *         @OA\Property(property="clockIn", type="string", nullable=true, example=null),
+     *         @OA\Property(property="total_hours", type="string", example="00:00:00"),
+     *         @OA\Property(property="user_start_time", type="string", format="time", example="07:00:00"),
+     *         @OA\Property(property="user_end_time", type="string", format="time", example="15:00:00"),
+     *         @OA\Property(property="is_notify_by_location", type="boolean", example=false),
+     *         @OA\Property(
+     *           property="assigned_locations_user",
+     *           type="array",
+     *           @OA\Items(
+     *             type="object",
+     *             @OA\Property(property="location_id", type="integer", example=1),
+     *             @OA\Property(property="location_name", type="string", example="Pyramakerz.Alex"),
+     *             @OA\Property(property="location_start_time", type="string", format="time", example="07:00:00"),
+     *             @OA\Property(property="location_end_time", type="string", format="time", example="15:00:00")
+     *           )
+     *         ),
+     *         @OA\Property(property="work_home", type="boolean", example=true),
+     *         @OA\Property(
+     *           property="work_types",
+     *           type="array",
+     *           @OA\Items(type="string", example="site")
+     *         )
+     *       )
      *     )
      *   ),
      *   @OA\Response(
@@ -159,6 +205,8 @@ class AuthController extends Controller
      *   )
      * )
      */
+
+
     public function profile()
     {
         $authUser = Auth::user();
@@ -169,6 +217,45 @@ class AuthController extends Controller
 
         return $this->returnData("User", new ProfileResource($user), "User Data");
     }
+
+    /**
+     * @OA\Post(
+     *   path="/api/auth/remove-serial/{user_id}",
+     *   summary="Remove Serial Number from User",
+     *   tags={"Auth"},
+     *   security={{"bearerAuth": {}}},
+     *   @OA\Parameter(
+     *     name="user_id",
+     *     in="path",
+     *     required=true,
+     *     description="User ID whose serial number needs to be removed",
+     *     @OA\Schema(type="integer")
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Serial Number removed successfully",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="user", type="string", example=""),
+     *       @OA\Property(property="message", type="string", example="Serial Number of User removed Successfully")
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=404,
+     *     description="User has no serial number",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="No Serial Number found for this user")
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=401,
+     *     description="Unauthorized",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Unauthorized")
+     *     )
+     *   )
+     * )
+     */
+
     public function removeSerialNumber(User $user)
     {
 
@@ -180,6 +267,37 @@ class AuthController extends Controller
         }
         return $this->returnError('No Serial Number found for this user');
     }
+
+    /**
+     * @OA\Get(
+     *   path="/api/auth/check_serial_number/{user_id}",
+     *   summary="Check if User has a Serial Number",
+     *   tags={"Auth"},
+     *   security={{"bearerAuth": {}}},
+     *   @OA\Parameter(
+     *     name="user_id",
+     *     in="path",
+     *     required=true,
+     *     description="User ID to check serial number",
+     *     @OA\Schema(type="integer")
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Serial Number Status",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="has_serial_number", type="boolean", example=true)
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=401,
+     *     description="Unauthorized",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Unauthorized")
+     *     )
+     *   )
+     * )
+     */
+
     public function checkSerialNumber(User $user)
     {
         $has_serial_number = false;

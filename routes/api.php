@@ -12,12 +12,7 @@ use App\Http\Controllers\Api\WorkTypeController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'auth'], function () {
-    Route::post('login', [AuthController::class, 'login'])->name('auth.login');
-    Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
-    Route::get('/user_by_token', [AuthController::class, 'profile'])->name('auth.profile');
-    Route::post('remove_serial_number/{user}', [AuthController::class, 'removeSerialNumber'])->name('user.removeSerialNumber');
-    Route::get('check_serial_number/{user}', [AuthController::class, 'checkSerialNumber'])->name('user.checkSerialNumber');
-
+  
     Route::group(['middleware' => 'role:Hr'], function () {
         Route::get('/users_by_name', [UserController::class, 'getAllUsersNames'])->name('user.names');
         Route::post('/update_user/{user}', [UserController::class, 'update'])->name('user.update');

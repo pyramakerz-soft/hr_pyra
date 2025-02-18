@@ -75,7 +75,7 @@ class ProfileResource extends JsonResource
         foreach ($getClocks as $clock) {
             $clockIn = Carbon::parse($clock->clock_in);
             $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out) : Carbon::now();
-            $duration = $clockIn->diffInSeconds($clockOut);
+            $duration = (int)$clockIn->diffInSeconds($clockOut);
             $total_seconds += $duration;
         }
 
