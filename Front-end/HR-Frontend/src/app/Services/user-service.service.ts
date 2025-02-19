@@ -98,13 +98,13 @@ export class UserServiceService {
     const body={
       password: pass
     }
-    return this.http.post<any>(this.baseURL + "/auth/update_password/" + empId, body, { headers });
+    return this.http.post<any>(this.baseURL + "/users/update_password/" + empId, body, { headers });
   }
 
   SearchByName(Name:string){
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<UserModel[]>(this.baseURL + `/auth/getAllUsers?search=${Name}`, { headers });
+    return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers?search=${Name}`, { headers });
   }
 
   getAllUsersName(){
@@ -116,7 +116,7 @@ export class UserServiceService {
   DeleteById(id:number): Observable<AddEmployee> {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.delete<any>(this.baseURL + "/auth/delete_user/" + id, { headers });
+    return this.http.delete<any>(this.baseURL + "/users/delete_user/" + id, { headers });
   }
 
   checkSerialNumber(empId:number){
