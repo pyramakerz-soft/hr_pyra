@@ -1,4 +1,5 @@
 {
     "Auth": true,
-    "Users": true
+    "Users": true,
+    "Location": true
 }

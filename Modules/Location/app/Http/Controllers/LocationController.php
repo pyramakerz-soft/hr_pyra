@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace Modules\Location\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreLocationRequest;
-use App\Http\Requests\UpdateLocationRequest;
-use App\Models\Location;
-use App\Models\User;
 use App\Traits\ResponseTrait;
+use Modules\Location\Http\Requests\Api\StoreLocationRequest;
+use Modules\Location\Http\Requests\Api\UpdateLocationRequest;
+use Modules\Location\Models\Location;
+use Modules\Users\Models\User;
 
 /**
  * @OA\Schema(
@@ -30,10 +30,7 @@ class LocationController extends Controller
     use ResponseTrait;
     public function __construct()
     {
-        // $this->middleware("permission:location-list")->only(['index', 'locationNames', 'show']);
-        // $this->middleware("permission:location-create")->only(['store']);
-        // $this->middleware("permission:location-edit")->only(['update']);
-        // $this->middleware("permission:location-delete")->only(['destroy']);
+
     }
 
     /**
@@ -119,7 +116,9 @@ class LocationController extends Controller
      *       @OA\Property(property="latitude", type="number", format="float", example=31.2403970),
      *       @OA\Property(property="longitude", type="number", format="float", example=-29.9660127),
      *       @OA\Property(property="start_time", type="string", format="time", example="07:00"),
-     *       @OA\Property(property="end_time", type="string", format="time", example="15:00")
+     *       @OA\Property(property="end_time", type="string", format="time", example="15:00"),
+     *       @OA\Property(property="range", type="number", format="int", example=250),
+
      *     )
      *   ),
      *   @OA\Response(

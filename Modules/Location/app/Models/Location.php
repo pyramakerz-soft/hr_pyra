@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace Modules\Location\Models;
 
+use App\Models\ClockInOut;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Users\Models\User;
 
 class Location extends Model
 {

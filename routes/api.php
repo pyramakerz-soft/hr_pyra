@@ -25,12 +25,6 @@ Route::group(['middleware' => ['auth:api', 'role:Hr']], function () {
     Route::apiResource('departments', DepartmentController::class)->except('update'); //HR role
     Route::get('department_employees', [DepartmentController::class, 'getDepartmentEmployees']); //HR role
 
-    //Location Management
-    Route::post('/locations/{location}', [LocationController::class, 'update'])->name('locations.update'); //HR role
-    Route::get('location_names', [LocationController::class, 'locationNames']); //HR role
-    Route::apiResource('locations', LocationController::class)->except('update'); //HR role
-    Route::get('users/{user}/locations', [LocationController::class, 'getLocationAssignedToUser'])->name('users.userLocation'); //HR role
-
     //Role and Permission Management
     Route::post('/roles/{role}', [RoleController::class, 'update'])->name('roles.update'); //HR role
     Route::post('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update'); //HR role
