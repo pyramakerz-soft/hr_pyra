@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 
-use App\Http\Resources\Api\ProfileResource;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +14,7 @@ use Log;
 use Modules\Auth\Http\Requests\Api\LoginRequest;
 use Modules\Auth\Traits\AuthTrait;
 use Modules\Users\Models\User;
+use Modules\Users\Resources\ProfileResource;
 
 class AuthController extends Controller
 {

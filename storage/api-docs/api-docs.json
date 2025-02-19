@@ -591,6 +591,11 @@
                                         "type": "string",
                                         "format": "time",
                                         "example": "15:00"
+                                    },
+                                    "range": {
+                                        "type": "number",
+                                        "format": "int",
+                                        "example": 250
                                     }
                                 },
                                 "type": "object"
@@ -976,6 +981,509 @@
                                         "message": {
                                             "type": "string",
                                             "example": "An error occurred while retrieving user locations."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/departments": {
+            "get": {
+                "tags": [
+                    "Department"
+                ],
+                "summary": "Get a list of departments",
+                "operationId": "ba6ff37ca920ca8d4191056cf03bd44a",
+                "responses": {
+                    "200": {
+                        "description": "A list of departments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "departments": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Department"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No departments found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No departments found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Department"
+                ],
+                "summary": "Create a new department",
+                "operationId": "778d71e50923471bfa4db5f871e0ee13",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "HR Department"
+                                    },
+                                    "is_location_time": {
+                                        "type": "integer",
+                                        "example": 0
+                                    },
+                                    "manager_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Department created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "department stored successfully"
+                                        },
+                                        "department": {
+                                            "$ref": "#/components/schemas/Department"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid input data"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/departments/{department}": {
+            "get": {
+                "tags": [
+                    "Department"
+                ],
+                "summary": "Get a department by ID",
+                "operationId": "1c973977fe221d5a03248a86bad12a60",
+                "parameters": [
+                    {
+                        "name": "department",
+                        "in": "path",
+                        "description": "Department ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Department data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "department": {
+                                            "$ref": "#/components/schemas/Department"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Department not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Department not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Department"
+                ],
+                "summary": "Update a department",
+                "operationId": "18c00cfd5d42d803fb1b2f67cdb3c499",
+                "parameters": [
+                    {
+                        "name": "department",
+                        "in": "path",
+                        "description": "Department ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated Department Name"
+                                    },
+                                    "is_location_time": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "manager_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Department updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "department updated successfully"
+                                        },
+                                        "department": {
+                                            "$ref": "#/components/schemas/Department"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Department not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Department not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Department"
+                ],
+                "summary": "Delete a department",
+                "operationId": "010e25a0b1a4b2c7ed5133ac68aba399",
+                "parameters": [
+                    {
+                        "name": "department",
+                        "in": "path",
+                        "description": "Department ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Department deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "department deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Department not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Department not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/department_employees": {
+            "get": {
+                "tags": [
+                    "Department"
+                ],
+                "summary": "Get the count of employees per department for a specific year",
+                "description": "Retrieve the number of employees in each department up to a given year, or the current year if no year is provided.",
+                "operationId": "52175fa3c0a9ba8f0978d0f334724e87",
+                "parameters": [
+                    {
+                        "name": "year",
+                        "in": "query",
+                        "description": "The year to filter employee hiring date (defaults to the current year if not provided)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2024
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response with employee count per department",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "departmentEmployeesCounts": {
+                                            "type": "object",
+                                            "example": {
+                                                "software": 15,
+                                                "academic": 10,
+                                                "graphic": 20
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Count of Employee Departments for the year 2023"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid year provided",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid year provided"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No employees found for the given year",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "There are no employees found up to the year 2025"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
                                         }
                                     },
                                     "type": "object"
@@ -2227,6 +2735,467 @@
                 ]
             }
         },
+        "/api/work_types": {
+            "get": {
+                "tags": [
+                    "WorkType"
+                ],
+                "summary": "Get a list of work types",
+                "operationId": "1a850d5dc1bf686180b0129ff34105ec",
+                "responses": {
+                    "200": {
+                        "description": "List of work types",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WorkType"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No work types found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No WorkTypes Found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "WorkType"
+                ],
+                "summary": "Create a new work type",
+                "operationId": "33ffca29cd9623cf7dc6ed1b04c267df",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Remote"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Work type created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkType"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation Error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/work_types/{workType}": {
+            "get": {
+                "tags": [
+                    "WorkType"
+                ],
+                "summary": "Get a specific work type",
+                "operationId": "dd3e1d3dcab67ace7c201211380dfdda",
+                "parameters": [
+                    {
+                        "name": "workType",
+                        "in": "path",
+                        "description": "ID of the work type",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Work type details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkType"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Work type not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Work Type Not Found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "WorkType"
+                ],
+                "summary": "Update an existing work type",
+                "operationId": "a735bff9bc50616d397fecbf9902cfe5",
+                "parameters": [
+                    {
+                        "name": "workType",
+                        "in": "path",
+                        "description": "ID of the work type",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Hybrid"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Work type updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkType"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation Error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Work type not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Work Type Not Found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "WorkType"
+                ],
+                "summary": "Delete a work type",
+                "operationId": "dbcc290c9eb432153310735ce89a5a3f",
+                "parameters": [
+                    {
+                        "name": "workType",
+                        "in": "path",
+                        "description": "ID of the work type",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Work type deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkType"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Work type not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Work Type Not Found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/employees_workTypes_percentage": {
+            "get": {
+                "tags": [
+                    "WorkType"
+                ],
+                "summary": "Get the percentage of employees by work type (site/home) for a specific year",
+                "description": "Retrieve the percentage of employees assigned to site or home work types for a given year. Defaults to the current year if no year is provided.",
+                "operationId": "e0cea6e38254ba4b98fa77d34b2c8c51",
+                "parameters": [
+                    {
+                        "name": "year",
+                        "in": "query",
+                        "description": "The year to filter employee work type data (defaults to the current year if not provided)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2024
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response with the percentage of employees by work type",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "userWorkTypes": {
+                                            "properties": {
+                                                "site": {
+                                                    "type": "number",
+                                                    "example": 60.5
+                                                },
+                                                "home": {
+                                                    "type": "number",
+                                                    "example": 39.5
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Percentage of employee work types up to the year 2023"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid year provided",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid year provided"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No employees found for the specified year",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "There are no employees found up to the year 2023"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/workTypes": {
+            "get": {
+                "tags": [
+                    "WorkType"
+                ],
+                "summary": "Get the work types assigned to each user",
+                "description": "Retrieve the work types assigned to each user.",
+                "operationId": "761ca988b2ba595521fa9fdf19eff736",
+                "responses": {
+                    "200": {
+                        "description": "Successful response with user work type data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user_work_types": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "user_work_type": {
+                                                        "type": "object",
+                                                        "example": {
+                                                            "user_id": 1,
+                                                            "work_type_id": 2
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User WorkType Data"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/all_clocks": {
             "get": {
                 "tags": [
@@ -3357,970 +4326,6 @@
                     }
                 }
             }
-        },
-        "/api/departments": {
-            "get": {
-                "tags": [
-                    "Department"
-                ],
-                "summary": "Get a list of departments",
-                "operationId": "e8478e3a557995e1da564073521762f6",
-                "responses": {
-                    "200": {
-                        "description": "A list of departments",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "departments": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Department"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "No departments found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "No departments found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Department"
-                ],
-                "summary": "Create a new department",
-                "operationId": "9a3a8ebf7326b72fd181c15603cdd21e",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "HR Department"
-                                    },
-                                    "is_location_time": {
-                                        "type": "integer",
-                                        "example": 0
-                                    },
-                                    "manager_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Department created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "department stored successfully"
-                                        },
-                                        "department": {
-                                            "$ref": "#/components/schemas/Department"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid input data"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/departments/{department}": {
-            "get": {
-                "tags": [
-                    "Department"
-                ],
-                "summary": "Get a department by ID",
-                "operationId": "6455234c0c02bb51866fc1cee8736649",
-                "parameters": [
-                    {
-                        "name": "department",
-                        "in": "path",
-                        "description": "Department ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Department data",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "department": {
-                                            "$ref": "#/components/schemas/Department"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Department not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Department not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Department"
-                ],
-                "summary": "Update a department",
-                "operationId": "3a5bd15b8089cf7523bedb0ab29e0a2e",
-                "parameters": [
-                    {
-                        "name": "department",
-                        "in": "path",
-                        "description": "Department ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Updated Department Name"
-                                    },
-                                    "is_location_time": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "manager_id": {
-                                        "type": "integer",
-                                        "example": 2
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Department updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "department updated successfully"
-                                        },
-                                        "department": {
-                                            "$ref": "#/components/schemas/Department"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Department not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Department not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Department"
-                ],
-                "summary": "Delete a department",
-                "operationId": "31b1591b7f2d3bb59934504ea6019f48",
-                "parameters": [
-                    {
-                        "name": "department",
-                        "in": "path",
-                        "description": "Department ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Department deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "department deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Department not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Department not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/department_employees": {
-            "get": {
-                "tags": [
-                    "Department"
-                ],
-                "summary": "Get the count of employees per department for a specific year",
-                "description": "Retrieve the number of employees in each department up to a given year, or the current year if no year is provided.",
-                "operationId": "f38644e3d8491f64fb7776bcb262d0fc",
-                "parameters": [
-                    {
-                        "name": "year",
-                        "in": "query",
-                        "description": "The year to filter employee hiring date (defaults to the current year if not provided)",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "example": 2024
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response with employee count per department",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "departmentEmployeesCounts": {
-                                            "type": "object",
-                                            "example": {
-                                                "software": 15,
-                                                "academic": 10,
-                                                "graphic": 20
-                                            }
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Count of Employee Departments for the year 2023"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid year provided",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid year provided"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "No employees found for the given year",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "There are no employees found up to the year 2025"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/work_types": {
-            "get": {
-                "tags": [
-                    "WorkType"
-                ],
-                "summary": "Get a list of work types",
-                "operationId": "e22311875c13f81c41293f8684969ba8",
-                "responses": {
-                    "200": {
-                        "description": "List of work types",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/WorkType"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "No work types found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "No WorkTypes Found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "WorkType"
-                ],
-                "summary": "Create a new work type",
-                "operationId": "6bed1826f68310a661b0899d4ef6e96e",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Remote"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Work type created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/WorkType"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Validation Error"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/work_types/{workType}": {
-            "get": {
-                "tags": [
-                    "WorkType"
-                ],
-                "summary": "Get a specific work type",
-                "operationId": "853767fe539e2cf8cfbab246d687e680",
-                "parameters": [
-                    {
-                        "name": "workType",
-                        "in": "path",
-                        "description": "ID of the work type",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Work type details",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/WorkType"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Work type not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Work Type Not Found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "WorkType"
-                ],
-                "summary": "Update an existing work type",
-                "operationId": "26a06bab80d5aede74a2ffa43a79a19f",
-                "parameters": [
-                    {
-                        "name": "workType",
-                        "in": "path",
-                        "description": "ID of the work type",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": false,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Hybrid"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Work type updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/WorkType"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Validation Error"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Work type not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Work Type Not Found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "WorkType"
-                ],
-                "summary": "Delete a work type",
-                "operationId": "1017715c037f965cbdf0b2270a584f61",
-                "parameters": [
-                    {
-                        "name": "workType",
-                        "in": "path",
-                        "description": "ID of the work type",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Work type deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/WorkType"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Work type not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Work Type Not Found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/employees_workTypes_percentage": {
-            "get": {
-                "tags": [
-                    "WorkType"
-                ],
-                "summary": "Get the percentage of employees by work type (site/home) for a specific year",
-                "description": "Retrieve the percentage of employees assigned to site or home work types for a given year. Defaults to the current year if no year is provided.",
-                "operationId": "cdb27177863e07745182a44305e00f8b",
-                "parameters": [
-                    {
-                        "name": "year",
-                        "in": "query",
-                        "description": "The year to filter employee work type data (defaults to the current year if not provided)",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "example": 2024
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response with the percentage of employees by work type",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "userWorkTypes": {
-                                            "properties": {
-                                                "site": {
-                                                    "type": "number",
-                                                    "example": 60.5
-                                                },
-                                                "home": {
-                                                    "type": "number",
-                                                    "example": 39.5
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Percentage of employee work types up to the year 2023"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid year provided",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid year provided"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "No employees found for the specified year",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "There are no employees found up to the year 2023"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/users/workTypes": {
-            "get": {
-                "tags": [
-                    "WorkType"
-                ],
-                "summary": "Get the work types assigned to each user",
-                "description": "Retrieve the work types assigned to each user.",
-                "operationId": "66c17fdbff69bcf3342e5c8e7a24a93b",
-                "responses": {
-                    "200": {
-                        "description": "Successful response with user work type data",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "user_work_types": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "user_work_type": {
-                                                        "type": "object",
-                                                        "example": {
-                                                            "user_id": 1,
-                                                            "work_type_id": 2
-                                                        }
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User WorkType Data"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
         }
     },
     "components": {
@@ -4376,6 +4381,27 @@
                         "type": "string",
                         "format": "date-time",
                         "example": "2024-10-01T12:30:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Department": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "HR Department"
+                    },
+                    "is_location_time": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "manager_id": {
+                        "type": "integer",
+                        "example": 2
                     }
                 },
                 "type": "object"
@@ -4459,6 +4485,32 @@
                 },
                 "type": "object"
             },
+            "WorkType": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Home"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-10-01T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-10-01T12:30:00Z"
+                    }
+                },
+                "type": "object"
+            },
             "ClockInOut": {
                 "title": "Clock In and Out Schema",
                 "description": "Schema for clock-in and clock-out records.",
@@ -4527,53 +4579,6 @@
                     }
                 },
                 "type": "object"
-            },
-            "Department": {
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "name": {
-                        "type": "string",
-                        "example": "HR Department"
-                    },
-                    "is_location_time": {
-                        "type": "boolean",
-                        "example": true
-                    },
-                    "manager_id": {
-                        "type": "integer",
-                        "example": 2
-                    }
-                },
-                "type": "object"
-            },
-            "WorkType": {
-                "required": [
-                    "name"
-                ],
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "name": {
-                        "type": "string",
-                        "example": "Home"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2024-10-01T12:00:00Z"
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2024-10-01T12:30:00Z"
-                    }
-                },
-                "type": "object"
             }
         },
         "securitySchemes": {
@@ -4600,20 +4605,20 @@
             "description": "Location"
         },
         {
-            "name": "User",
-            "description": "User"
-        },
-        {
-            "name": "Clock",
-            "description": "Clock"
-        },
-        {
             "name": "Department",
             "description": "Department"
         },
         {
+            "name": "User",
+            "description": "User"
+        },
+        {
             "name": "WorkType",
             "description": "WorkType"
+        },
+        {
+            "name": "Clock",
+            "description": "Clock"
         }
     ]
 }

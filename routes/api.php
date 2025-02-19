@@ -14,22 +14,6 @@ use Illuminate\Support\Facades\Route;
 Route::group(['middleware' => ['auth:api', 'role:Hr']], function () {
 
 
-    //WorkType Management
-    Route::post('/work_types/{workType}', [WorkTypeController::class, 'update'])->name('work_types.update'); //HR role
-    Route::apiResource('work_types', WorkTypeController::class)->except('update'); //HR role
-    Route::get('employees_workTypes_percentage', [WorkTypeController::class, 'getEmployeesWorkTypesPercentage']); //HR role
-    Route::get('users/workTypes', [WorkTypeController::class, 'getWorkTypeAssignedToUser'])->name('users.usersWorkTypes'); //HR role
-
-    //Department Management
-    Route::post('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update'); //HR role
-    Route::apiResource('departments', DepartmentController::class)->except('update'); //HR role
-    Route::get('department_employees', [DepartmentController::class, 'getDepartmentEmployees']); //HR role
-
-    //Role and Permission Management
-    Route::post('/roles/{role}', [RoleController::class, 'update'])->name('roles.update'); //HR role
-    Route::post('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update'); //HR role
-    Route::apiResource('roles', RoleController::class)->except('update'); //HR role
-    Route::apiResource('permissions', PermissionController::class)->except('update'); //HR role
 
     //Clocks Management
 

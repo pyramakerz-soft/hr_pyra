@@ -1,15 +1,10 @@
 <?php
 
-/*
-eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE3Mzk5MjQ0MjAsImV4cCI6MjA1NTI4NDQyMCwibmJmIjoxNzM5OTI0NDIwLCJqdGkiOiJPTlRTc04xOFBqZm5xRHAxIiwic3ViIjoiMSIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.k5GTwBzyP3rQW8shdyVLG6l0N8A-kqxji2hoBld8rb0
-*/
 
 namespace Modules\Users\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Department;
-use App\Models\Location;
-use App\Models\WorkType;
+
 use App\Services\Api\User\UserDetailService;
 use App\Services\Api\User\UserService;
 use App\Traits\ResponseTrait;
@@ -23,10 +18,13 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
+use Modules\Location\Models\Location;
 use Modules\Users\Http\Requests\Api\RegisterRequest;
 use Modules\Users\Http\Requests\Api\UpdateUserRequest;
+use Modules\Users\Models\Department;
 use Modules\Users\Models\User;
 use Modules\Users\Models\UserDetail;
+use Modules\Users\Models\WorkType;
 use Modules\Users\Resources\UserDetailResource;
 use Modules\Users\Resources\UserResource;
 use Modules\Users\Traits\UserTrait;

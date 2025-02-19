@@ -1,7 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Users\Http\Controllers\DepartmentController;
+use Modules\Users\Http\Controllers\PermissionController;
+use Modules\Users\Http\Controllers\RoleController;
 use Modules\Users\Http\Controllers\UsersController;
+use Modules\Users\Http\Controllers\WorkTypeController;
 
 /*
  *--------------------------------------------------------------------------
@@ -14,9 +18,10 @@ use Modules\Users\Http\Controllers\UsersController;
  *
 */
 
-Route::group(['prefix' => 'users'], function () {
-  
-    Route::group(['middleware' => 'role:Hr'], function () {
+Route::group(['middleware' => 'role:Hr'], function () {
+
+    Route::group(['prefix' => 'users'], function () {
+
         Route::get('/users_by_name', [UsersController::class, 'getAllUsersNames'])->name('user.names');
         Route::post('/update_user/{user}', [UsersController::class, 'update'])->name('user.update');
         Route::get('/getAllUsers', [UsersController::class, 'index'])->name('users.all');
@@ -33,10 +38,33 @@ Route::group(['prefix' => 'users'], function () {
 
 
 
-            Route::get('user_details', [UsersController::class, 'allUserDetails']); // Get all user details
-            Route::get('user_details/{userDetail}', [UsersController::class, 'showUserDetails']); // Get a specific user detail
+        Route::get('user_details', [UsersController::class, 'allUserDetails']); // Get all user details
+        Route::get('user_details/{userDetail}', [UsersController::class, 'showUserDetails']); // Get a specific user detail
+
 
 
     });
+
+
+
+
+    //WorkType Management
+    Route::post('/work_types/{workType}', [WorkTypeController::class, 'update'])->name('work_types.update'); //HR role
+    Route::apiResource('work_types', WorkTypeController::class)->except('update'); //HR role
+    Route::get('employees_workTypes_percentage', [WorkTypeController::class, 'getEmployeesWorkTypesPercentage']); //HR role
+    Route::get('users/workTypes', [WorkTypeController::class, 'getWorkTypeAssignedToUser'])->name('users.usersWorkTypes'); //HR role
+
+    //Department Management
+    Route::post('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update'); //HR role
+    Route::apiResource('departments', DepartmentController::class)->except('update'); //HR role
+    Route::get('department_employees', [DepartmentController::class, 'getDepartmentEmployees']); //HR role
+
+    //Role and Permission Management
+    Route::post('/roles/{role}', [RoleController::class, 'update'])->name('roles.update'); //HR role
+    Route::post('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update'); //HR role
+    Route::apiResource('roles', RoleController::class)->except('update'); //HR role
+    Route::apiResource('permissions', PermissionController::class)->except('update'); //HR role
+
+
 
 });
