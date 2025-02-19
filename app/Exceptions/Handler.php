@@ -126,7 +126,7 @@ class Handler extends ExceptionHandler
         if ($exception instanceof QueryException) {
             Log::error('Database Query Error: ' . $exception->getMessage());
 
-            return $this->returnError('Database Error', Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->returnError('Database Error'.$exception->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         // PDO Exception (database connection issues)

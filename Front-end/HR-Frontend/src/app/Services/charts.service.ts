@@ -19,7 +19,7 @@ export class ChartsService {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    return this.http.get(`${this.baseUrl}/employees_per_month?year=${Year}`, { headers, responseType: 'json' });
+    return this.http.get(`${this.baseUrl}/users/employees_per_month?year=${Year}`, { headers, responseType: 'json' });
   }
   
   getEmployeesWorkTypesprecentage(Year:Number){

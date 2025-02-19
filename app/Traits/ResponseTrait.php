@@ -56,7 +56,7 @@ trait ResponseTrait
             $key => $value,
         ], Response::HTTP_OK);
     }
-    public function returnValidationError($code = 'E0001', $validator)
+    public function returnValidationError($code, $validator)
     {
         return $this->returnError($code, $validator->errors()->first());
     }

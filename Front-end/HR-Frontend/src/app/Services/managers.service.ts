@@ -11,7 +11,7 @@ export class ManagersService {
   baseurl =""; 
 
   constructor(public http: HttpClient , public Api:ApiService) { 
-    this.baseurl=Api.BaseUrl+"/manager_names"
+    this.baseurl=Api.BaseUrl+"/users/manager_names"
 
   }
 

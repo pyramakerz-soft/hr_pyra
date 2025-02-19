@@ -40,6 +40,6 @@ export class EmployeeDashService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<any>(`${this.baseUrl}/import-users-from-excel`, formData, { headers });
+    return this.http.post<any>(`${this.baseUrl}/users/import-users-from-excel`, formData, { headers });
   }
 }

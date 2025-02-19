@@ -11,26 +11,8 @@ use App\Http\Controllers\Api\UserDetailController;
 use App\Http\Controllers\Api\WorkTypeController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'auth'], function () {
-  
-    Route::group(['middleware' => 'role:Hr'], function () {
-        Route::get('/users_by_name', [UserController::class, 'getAllUsersNames'])->name('user.names');
-        Route::post('/update_user/{user}', [UserController::class, 'update'])->name('user.update');
-        Route::get('/getAllUsers', [UserController::class, 'index'])->name('users.all');
-        Route::delete('/delete_user/{user}', [UserController::class, 'destroy'])->name('user.delete');
-        Route::post('/create_user', [UserController::class, 'store'])->name('user.store');
-        Route::get('/get_user_by_id/{user}', [UserController::class, 'show'])->name('user.show');
-        Route::post('update_password/{user}', [UserController::class, 'updatePassword'])->name('user.updatePassword');
-
-    });
-
-});
 Route::group(['middleware' => ['auth:api', 'role:Hr']], function () {
-    Route::post('/import-users-from-excel', [UserController::class, 'importUsersFromExcel']);
 
-    //User Management
-    Route::get('manager_names', [UserController::class, 'ManagerNames']); //HR role
-    Route::get('employees_per_month', [UserController::class, 'employeesPerMonth']); //HR role
     Route::apiResource('user_details', UserDetailController::class)->only(['index', 'show']); //HR role
 
     //WorkType Management

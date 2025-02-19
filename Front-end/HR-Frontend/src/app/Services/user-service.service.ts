@@ -20,13 +20,13 @@ export class UserServiceService {
   getall(pageNumber:number): Observable<UserModel[]> {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<UserModel[]>(this.baseURL + `/auth/getAllUsers?page=${pageNumber}`, { headers });
+    return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers?page=${pageNumber}`, { headers });
   }
 
   getUserById(id:number): Observable<AddEmployee> {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<AddEmployee>(this.baseURL + "/auth/get_user_by_id/" + id, { headers });
+    return this.http.get<AddEmployee>(this.baseURL + "/users/get_user_by_id/" + id, { headers });
   }
   
   createUser(emp:AddEmployee) {
@@ -56,7 +56,7 @@ export class UserServiceService {
     emp.location_id.forEach((id, index) => formData.append(`location_id[${index}]`, id.toString()));
     emp.work_type_id.forEach((id, index) => formData.append(`work_type_id[${index}]`, id.toString()));
 
-    return this.http.post<any>(this.baseURL + "/auth/create_user", formData, { headers });
+    return this.http.post<any>(this.baseURL + "/users/create_user", formData, { headers });
   }
 
   updateUser(emp:AddEmployee, empId:number) {
@@ -89,7 +89,7 @@ export class UserServiceService {
     emp.location_id.forEach((id, index) => formData.append(`location_id[${index}]`, id.toString()));
     emp.work_type_id.forEach((id, index) => formData.append(`work_type_id[${index}]`, id.toString()));
 
-    return this.http.post<any>(this.baseURL + "/auth/update_user/" + empId, formData, { headers });
+    return this.http.post<any>(this.baseURL + "/users/update_user/" + empId, formData, { headers });
   }
   
   updatePassword(pass:string, empId:number){
@@ -110,7 +110,7 @@ export class UserServiceService {
   getAllUsersName(){
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<UserModel[]>(this.baseURL + `/auth/users_by_name`, { headers });
+    return this.http.get<UserModel[]>(this.baseURL + `/users/users_by_name`, { headers });
   }
 
   DeleteById(id:number): Observable<AddEmployee> {

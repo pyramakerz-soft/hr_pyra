@@ -2133,1143 +2133,6 @@
                 ]
             }
         },
-        "/api/auth/getAllUsers": {
-            "get": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get all users",
-                "operationId": "69d06b7ed7c718bc2aa529b7ae90db67",
-                "parameters": [
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "Optional search filter to find users by name or code",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "example": ""
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "List of users"
-                    },
-                    "404": {
-                        "description": "No users found"
-                    }
-                }
-            }
-        },
-        "/api/manager_names": {
-            "get": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get names of all managers",
-                "operationId": "6966b63eddd1cd5ec3d4e1aa9955cd2e",
-                "responses": {
-                    "200": {
-                        "description": "List of manager names retrieved successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "managerNames": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "manager_id": {
-                                                        "description": "ID of the manager",
-                                                        "type": "integer"
-                                                    },
-                                                    "manager_name": {
-                                                        "description": "Name of the manager",
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "message": {
-                                            "description": "Success message",
-                                            "type": "string"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "No managers found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "No managers found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized access"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/auth/create_user": {
-            "post": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Create a new user",
-                "operationId": "bbc6897def0bdb1c36f09718ccfe0ede",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "name",
-                                    "email",
-                                    "password",
-                                    "phone",
-                                    "department_id"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "John Doe"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "example": "john@test.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "example": "123456"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "01203376559"
-                                    },
-                                    "contact_phone": {
-                                        "type": "string",
-                                        "example": "01203376669"
-                                    },
-                                    "national_id": {
-                                        "type": "string",
-                                        "example": "30201010214335"
-                                    },
-                                    "gender": {
-                                        "type": "string",
-                                        "example": "m"
-                                    },
-                                    "department_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "image": {
-                                        "description": "Profile image",
-                                        "type": "string",
-                                        "format": "binary"
-                                    },
-                                    "roles": {
-                                        "description": "Roles to assign",
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "example": "employee"
-                                    },
-                                    "location_id": {
-                                        "description": "Location IDs to assign",
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        },
-                                        "example": 1
-                                    },
-                                    "work_type_id": {
-                                        "description": "Work Type IDs to assign",
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        },
-                                        "example": 1
-                                    },
-                                    "salary": {
-                                        "description": "User salary",
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": "8000"
-                                    },
-                                    "working_hours_day": {
-                                        "description": "Working hours per day",
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 8
-                                    },
-                                    "overtime_hours": {
-                                        "description": "Overtime hours worked",
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 1.5
-                                    },
-                                    "start_time": {
-                                        "description": "Start time of work",
-                                        "type": "string",
-                                        "format": "time",
-                                        "example": "07:00"
-                                    },
-                                    "end_time": {
-                                        "description": "End time of work",
-                                        "type": "string",
-                                        "format": "time",
-                                        "example": "15:00"
-                                    },
-                                    "emp_type": {
-                                        "description": "Job title",
-                                        "type": "string",
-                                        "example": "Graphic Designer"
-                                    },
-                                    "hiring_date": {
-                                        "description": "Hiring date",
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2024-09-01"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "User created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "properties": {
-                                                "user": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "description": "User ID",
-                                                            "type": "integer"
-                                                        },
-                                                        "name": {
-                                                            "description": "User name",
-                                                            "type": "string"
-                                                        },
-                                                        "email": {
-                                                            "description": "User email",
-                                                            "type": "string"
-                                                        },
-                                                        "phone": {
-                                                            "description": "User phone",
-                                                            "type": "string"
-                                                        },
-                                                        "contact_phone": {
-                                                            "description": "User contact phone",
-                                                            "type": "string"
-                                                        },
-                                                        "national_id": {
-                                                            "description": "User national ID",
-                                                            "type": "string"
-                                                        },
-                                                        "gender": {
-                                                            "description": "User gender",
-                                                            "type": "string"
-                                                        },
-                                                        "department_id": {
-                                                            "description": "Department ID",
-                                                            "type": "integer"
-                                                        },
-                                                        "image": {
-                                                            "description": "URL of user image",
-                                                            "type": "string"
-                                                        },
-                                                        "serial_number": {
-                                                            "description": "User serial number",
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                },
-                                                "user_detail": {
-                                                    "properties": {
-                                                        "salary": {
-                                                            "description": "User salary",
-                                                            "type": "number",
-                                                            "format": "float"
-                                                        },
-                                                        "working_hours_day": {
-                                                            "description": "Working hours per day",
-                                                            "type": "number",
-                                                            "format": "float"
-                                                        },
-                                                        "hourly_rate": {
-                                                            "description": "User hourly rate",
-                                                            "type": "number",
-                                                            "format": "float"
-                                                        },
-                                                        "overtime_hourly_rate": {
-                                                            "description": "Overtime hourly rate",
-                                                            "type": "number",
-                                                            "format": "float"
-                                                        },
-                                                        "overtime_hours": {
-                                                            "description": "Overtime hours worked",
-                                                            "type": "number",
-                                                            "format": "float"
-                                                        },
-                                                        "start_time": {
-                                                            "description": "Start time of work",
-                                                            "type": "string",
-                                                            "format": "time"
-                                                        },
-                                                        "end_time": {
-                                                            "description": "End time of work",
-                                                            "type": "string",
-                                                            "format": "time"
-                                                        },
-                                                        "emp_type": {
-                                                            "description": "Employment type",
-                                                            "type": "string"
-                                                        },
-                                                        "hiring_date": {
-                                                            "description": "Hiring date",
-                                                            "type": "string",
-                                                            "format": "date"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User Created"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Failed to Store User"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/auth/import-users-from-excel": {
-            "post": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Import users from an Excel file",
-                "description": "This endpoint allows you to import multiple users from an Excel file (.xlsx) and validate the data.",
-                "operationId": "ceb7a403a13cb7679414a9f05af92279",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "multipart/form-data": {
-                            "schema": {
-                                "properties": {
-                                    "file": {
-                                        "description": "Excel file (.xlsx) containing user data",
-                                        "type": "file"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Users imported successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Users imported successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid file format or validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid file format. Please upload an Excel file (.xlsx)."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Data validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "End time must be later than start time for user 'John Doe'."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Server error during processing",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "An error occurred while processing the file: [error details]"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/auth/get_user_by_id/{user}": {
-            "get": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get user by ID",
-                "operationId": "057eb3d441930b84c4612b402dfbf2ab",
-                "parameters": [
-                    {
-                        "name": "user",
-                        "in": "path",
-                        "description": "ID of the user to retrieve",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User retrieved successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "User": {
-                                            "properties": {
-                                                "id": {
-                                                    "description": "User ID",
-                                                    "type": "integer"
-                                                },
-                                                "name": {
-                                                    "description": "User name",
-                                                    "type": "string"
-                                                },
-                                                "email": {
-                                                    "description": "User email",
-                                                    "type": "string"
-                                                },
-                                                "phone": {
-                                                    "description": "User phone",
-                                                    "type": "string"
-                                                },
-                                                "contact_phone": {
-                                                    "description": "User contact phone",
-                                                    "type": "string"
-                                                },
-                                                "national_id": {
-                                                    "description": "User national ID",
-                                                    "type": "string"
-                                                },
-                                                "gender": {
-                                                    "description": "User gender",
-                                                    "type": "string"
-                                                },
-                                                "department_id": {
-                                                    "description": "Department ID",
-                                                    "type": "integer"
-                                                },
-                                                "image": {
-                                                    "description": "URL of user image",
-                                                    "type": "string"
-                                                },
-                                                "serial_number": {
-                                                    "description": "User serial number",
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "message": {
-                                            "description": "Success message",
-                                            "type": "string"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized access"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/auth/update_user/{user}": {
-            "post": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Update an existing user",
-                "operationId": "89f38f1fa121702213abd3759d2a8507",
-                "parameters": [
-                    {
-                        "name": "user",
-                        "in": "path",
-                        "description": "ID of the user to be updated",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "example": 1
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [],
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "John Doe"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "example": "john@test.com"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "01203376559"
-                                    },
-                                    "contact_phone": {
-                                        "type": "string",
-                                        "example": "01203376669"
-                                    },
-                                    "national_id": {
-                                        "type": "string",
-                                        "example": "30201010214335"
-                                    },
-                                    "gender": {
-                                        "type": "string",
-                                        "example": "m"
-                                    },
-                                    "department_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "image": {
-                                        "description": "Profile image",
-                                        "type": "string",
-                                        "format": "binary"
-                                    },
-                                    "salary": {
-                                        "description": "User salary",
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 8000
-                                    },
-                                    "working_hours_day": {
-                                        "description": "Working hours per day",
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 8
-                                    },
-                                    "overtime_hours": {
-                                        "description": "Overtime hours worked",
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 1.5
-                                    },
-                                    "start_time": {
-                                        "description": "Start time of work",
-                                        "type": "string",
-                                        "format": "time",
-                                        "example": "07:00:00"
-                                    },
-                                    "end_time": {
-                                        "description": "End time of work",
-                                        "type": "string",
-                                        "format": "time",
-                                        "example": "15:00:00"
-                                    },
-                                    "emp_type": {
-                                        "description": "Job title",
-                                        "type": "string",
-                                        "example": "Graphic Designer"
-                                    },
-                                    "hiring_date": {
-                                        "description": "Hiring date",
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2024-09-01"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "User updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "properties": {
-                                                "user": {
-                                                    "properties": {
-                                                        "id": {
-                                                            "description": "User ID",
-                                                            "type": "integer"
-                                                        },
-                                                        "name": {
-                                                            "description": "User name",
-                                                            "type": "string"
-                                                        },
-                                                        "email": {
-                                                            "description": "User email",
-                                                            "type": "string"
-                                                        },
-                                                        "phone": {
-                                                            "description": "User phone",
-                                                            "type": "string"
-                                                        },
-                                                        "contact_phone": {
-                                                            "description": "User contact phone",
-                                                            "type": "string"
-                                                        },
-                                                        "national_id": {
-                                                            "description": "User national ID",
-                                                            "type": "string"
-                                                        },
-                                                        "gender": {
-                                                            "description": "User gender",
-                                                            "type": "string"
-                                                        },
-                                                        "department_id": {
-                                                            "description": "Department ID",
-                                                            "type": "integer"
-                                                        },
-                                                        "image": {
-                                                            "description": "URL of user image",
-                                                            "type": "string"
-                                                        },
-                                                        "serial_number": {
-                                                            "description": "User serial number",
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                },
-                                                "user_detail": {
-                                                    "properties": {
-                                                        "salary": {
-                                                            "description": "User salary",
-                                                            "type": "number",
-                                                            "format": "float"
-                                                        },
-                                                        "working_hours_day": {
-                                                            "description": "Working hours per day",
-                                                            "type": "number",
-                                                            "format": "float"
-                                                        },
-                                                        "hourly_rate": {
-                                                            "description": "User hourly rate",
-                                                            "type": "number",
-                                                            "format": "float"
-                                                        },
-                                                        "overtime_hourly_rate": {
-                                                            "description": "Overtime hourly rate",
-                                                            "type": "number",
-                                                            "format": "float"
-                                                        },
-                                                        "overtime_hours": {
-                                                            "description": "Overtime hours worked",
-                                                            "type": "number",
-                                                            "format": "float"
-                                                        },
-                                                        "start_time": {
-                                                            "description": "Start time of work",
-                                                            "type": "string",
-                                                            "format": "time"
-                                                        },
-                                                        "end_time": {
-                                                            "description": "End time of work",
-                                                            "type": "string",
-                                                            "format": "time"
-                                                        },
-                                                        "emp_type": {
-                                                            "description": "Employment type",
-                                                            "type": "string"
-                                                        },
-                                                        "hiring_date": {
-                                                            "description": "Hiring date",
-                                                            "type": "string",
-                                                            "format": "date"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User Updated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Failed to Update User"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/auth/delete_user/{user}": {
-            "delete": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Delete a user",
-                "operationId": "2621a3fc0deb1ab72c7c136625e86732",
-                "parameters": [
-                    {
-                        "name": "user",
-                        "in": "path",
-                        "description": "ID of the user to be deleted",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "example": 1
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "description": "User ID",
-                                                    "type": "integer"
-                                                },
-                                                "name": {
-                                                    "description": "User name",
-                                                    "type": "string"
-                                                },
-                                                "email": {
-                                                    "description": "User email",
-                                                    "type": "string"
-                                                },
-                                                "phone": {
-                                                    "description": "User phone",
-                                                    "type": "string"
-                                                },
-                                                "contact_phone": {
-                                                    "description": "User contact phone",
-                                                    "type": "string"
-                                                },
-                                                "national_id": {
-                                                    "description": "User national ID",
-                                                    "type": "string"
-                                                },
-                                                "gender": {
-                                                    "description": "User gender",
-                                                    "type": "string"
-                                                },
-                                                "department_id": {
-                                                    "description": "Department ID",
-                                                    "type": "integer"
-                                                },
-                                                "image": {
-                                                    "description": "URL of user image",
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User deleted"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/auth/users_by_name": {
-            "get": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get all user names",
-                "operationId": "6adb8c86b59b8cf43142ebf3f9177372",
-                "responses": {
-                    "200": {
-                        "description": "List of user names retrieved successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "description": "User name",
-                                                "type": "string"
-                                            }
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "UsersName"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Server Error"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/employees_per_month": {
-            "get": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get the employee count per month for a specific year",
-                "description": "Retrieve the number of employees hired by month for a given year. Defaults to the current year if no year is provided.",
-                "operationId": "f4f2904f65ff23161b19db8d6232b096",
-                "parameters": [
-                    {
-                        "name": "year",
-                        "in": "query",
-                        "description": "The year to filter employee hiring data (defaults to the current year if not provided)",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "example": 2023
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response with the employee count per month",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "employeeCount": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "employee_count": {
-                                                        "type": "integer",
-                                                        "example": 25
-                                                    },
-                                                    "custom_month": {
-                                                        "type": "string",
-                                                        "example": "2023-Feb"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Employees count up to the year 2023"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid year provided",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid year parameter"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "No employees found for the specified year",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "No employees found up to the year 2023"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
         "/api/user_details": {
             "get": {
                 "tags": [
@@ -4321,6 +3184,1143 @@
                     }
                 ]
             }
+        },
+        "/api/users/getAllUsers": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get all users",
+                "operationId": "e3aee7aad85dfcbffe336b8738fb3df5",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Optional search filter to find users by name or code",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": ""
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of users"
+                    },
+                    "404": {
+                        "description": "No users found"
+                    }
+                }
+            }
+        },
+        "/api/users/manager_names": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get names of all managers",
+                "operationId": "d4c7e96260f294abf75305b9280f19c7",
+                "responses": {
+                    "200": {
+                        "description": "List of manager names retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "managerNames": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "manager_id": {
+                                                        "description": "ID of the manager",
+                                                        "type": "integer"
+                                                    },
+                                                    "manager_name": {
+                                                        "description": "Name of the manager",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "message": {
+                                            "description": "Success message",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No managers found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No managers found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized access"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/create_user": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Create a new user",
+                "operationId": "f52325f3a1c3df143bf3eedf4c74c371",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "phone",
+                                    "department_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "john@test.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "01203376559"
+                                    },
+                                    "contact_phone": {
+                                        "type": "string",
+                                        "example": "01203376669"
+                                    },
+                                    "national_id": {
+                                        "type": "string",
+                                        "example": "30201010214335"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "example": "m"
+                                    },
+                                    "department_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "image": {
+                                        "description": "Profile image",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "roles": {
+                                        "description": "Roles to assign",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": "employee"
+                                    },
+                                    "location_id": {
+                                        "description": "Location IDs to assign",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": 1
+                                    },
+                                    "work_type_id": {
+                                        "description": "Work Type IDs to assign",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": 1
+                                    },
+                                    "salary": {
+                                        "description": "User salary",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": "8000"
+                                    },
+                                    "working_hours_day": {
+                                        "description": "Working hours per day",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 8
+                                    },
+                                    "overtime_hours": {
+                                        "description": "Overtime hours worked",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1.5
+                                    },
+                                    "start_time": {
+                                        "description": "Start time of work",
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "07:00"
+                                    },
+                                    "end_time": {
+                                        "description": "End time of work",
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "15:00"
+                                    },
+                                    "emp_type": {
+                                        "description": "Job title",
+                                        "type": "string",
+                                        "example": "Graphic Designer"
+                                    },
+                                    "hiring_date": {
+                                        "description": "Hiring date",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-09-01"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "description": "User ID",
+                                                            "type": "integer"
+                                                        },
+                                                        "name": {
+                                                            "description": "User name",
+                                                            "type": "string"
+                                                        },
+                                                        "email": {
+                                                            "description": "User email",
+                                                            "type": "string"
+                                                        },
+                                                        "phone": {
+                                                            "description": "User phone",
+                                                            "type": "string"
+                                                        },
+                                                        "contact_phone": {
+                                                            "description": "User contact phone",
+                                                            "type": "string"
+                                                        },
+                                                        "national_id": {
+                                                            "description": "User national ID",
+                                                            "type": "string"
+                                                        },
+                                                        "gender": {
+                                                            "description": "User gender",
+                                                            "type": "string"
+                                                        },
+                                                        "department_id": {
+                                                            "description": "Department ID",
+                                                            "type": "integer"
+                                                        },
+                                                        "image": {
+                                                            "description": "URL of user image",
+                                                            "type": "string"
+                                                        },
+                                                        "serial_number": {
+                                                            "description": "User serial number",
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "user_detail": {
+                                                    "properties": {
+                                                        "salary": {
+                                                            "description": "User salary",
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        },
+                                                        "working_hours_day": {
+                                                            "description": "Working hours per day",
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        },
+                                                        "hourly_rate": {
+                                                            "description": "User hourly rate",
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        },
+                                                        "overtime_hourly_rate": {
+                                                            "description": "Overtime hourly rate",
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        },
+                                                        "overtime_hours": {
+                                                            "description": "Overtime hours worked",
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        },
+                                                        "start_time": {
+                                                            "description": "Start time of work",
+                                                            "type": "string",
+                                                            "format": "time"
+                                                        },
+                                                        "end_time": {
+                                                            "description": "End time of work",
+                                                            "type": "string",
+                                                            "format": "time"
+                                                        },
+                                                        "emp_type": {
+                                                            "description": "Employment type",
+                                                            "type": "string"
+                                                        },
+                                                        "hiring_date": {
+                                                            "description": "Hiring date",
+                                                            "type": "string",
+                                                            "format": "date"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User Created"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to Store User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/get_user_by_id/{user}": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get user by ID",
+                "operationId": "a7deb4222e737d65e292fd5320cc79c1",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID of the user to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "User": {
+                                            "properties": {
+                                                "id": {
+                                                    "description": "User ID",
+                                                    "type": "integer"
+                                                },
+                                                "name": {
+                                                    "description": "User name",
+                                                    "type": "string"
+                                                },
+                                                "email": {
+                                                    "description": "User email",
+                                                    "type": "string"
+                                                },
+                                                "phone": {
+                                                    "description": "User phone",
+                                                    "type": "string"
+                                                },
+                                                "contact_phone": {
+                                                    "description": "User contact phone",
+                                                    "type": "string"
+                                                },
+                                                "national_id": {
+                                                    "description": "User national ID",
+                                                    "type": "string"
+                                                },
+                                                "gender": {
+                                                    "description": "User gender",
+                                                    "type": "string"
+                                                },
+                                                "department_id": {
+                                                    "description": "Department ID",
+                                                    "type": "integer"
+                                                },
+                                                "image": {
+                                                    "description": "URL of user image",
+                                                    "type": "string"
+                                                },
+                                                "serial_number": {
+                                                    "description": "User serial number",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "description": "Success message",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized access"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/update_user/{user}": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update an existing user",
+                "operationId": "1a9f7bdc9212febd2bc327657c4ad6e1",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID of the user to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "john@test.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "01203376559"
+                                    },
+                                    "contact_phone": {
+                                        "type": "string",
+                                        "example": "01203376669"
+                                    },
+                                    "national_id": {
+                                        "type": "string",
+                                        "example": "30201010214335"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "example": "m"
+                                    },
+                                    "department_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "image": {
+                                        "description": "Profile image",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "salary": {
+                                        "description": "User salary",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 8000
+                                    },
+                                    "working_hours_day": {
+                                        "description": "Working hours per day",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 8
+                                    },
+                                    "overtime_hours": {
+                                        "description": "Overtime hours worked",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1.5
+                                    },
+                                    "start_time": {
+                                        "description": "Start time of work",
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "07:00:00"
+                                    },
+                                    "end_time": {
+                                        "description": "End time of work",
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "15:00:00"
+                                    },
+                                    "emp_type": {
+                                        "description": "Job title",
+                                        "type": "string",
+                                        "example": "Graphic Designer"
+                                    },
+                                    "hiring_date": {
+                                        "description": "Hiring date",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-09-01"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "description": "User ID",
+                                                            "type": "integer"
+                                                        },
+                                                        "name": {
+                                                            "description": "User name",
+                                                            "type": "string"
+                                                        },
+                                                        "email": {
+                                                            "description": "User email",
+                                                            "type": "string"
+                                                        },
+                                                        "phone": {
+                                                            "description": "User phone",
+                                                            "type": "string"
+                                                        },
+                                                        "contact_phone": {
+                                                            "description": "User contact phone",
+                                                            "type": "string"
+                                                        },
+                                                        "national_id": {
+                                                            "description": "User national ID",
+                                                            "type": "string"
+                                                        },
+                                                        "gender": {
+                                                            "description": "User gender",
+                                                            "type": "string"
+                                                        },
+                                                        "department_id": {
+                                                            "description": "Department ID",
+                                                            "type": "integer"
+                                                        },
+                                                        "image": {
+                                                            "description": "URL of user image",
+                                                            "type": "string"
+                                                        },
+                                                        "serial_number": {
+                                                            "description": "User serial number",
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "user_detail": {
+                                                    "properties": {
+                                                        "salary": {
+                                                            "description": "User salary",
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        },
+                                                        "working_hours_day": {
+                                                            "description": "Working hours per day",
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        },
+                                                        "hourly_rate": {
+                                                            "description": "User hourly rate",
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        },
+                                                        "overtime_hourly_rate": {
+                                                            "description": "Overtime hourly rate",
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        },
+                                                        "overtime_hours": {
+                                                            "description": "Overtime hours worked",
+                                                            "type": "number",
+                                                            "format": "float"
+                                                        },
+                                                        "start_time": {
+                                                            "description": "Start time of work",
+                                                            "type": "string",
+                                                            "format": "time"
+                                                        },
+                                                        "end_time": {
+                                                            "description": "End time of work",
+                                                            "type": "string",
+                                                            "format": "time"
+                                                        },
+                                                        "emp_type": {
+                                                            "description": "Employment type",
+                                                            "type": "string"
+                                                        },
+                                                        "hiring_date": {
+                                                            "description": "Hiring date",
+                                                            "type": "string",
+                                                            "format": "date"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User Updated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to Update User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/delete_user/{user}": {
+            "delete": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete a user",
+                "operationId": "63dc01849cbe80b8af89c9a748edf179",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID of the user to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "description": "User ID",
+                                                    "type": "integer"
+                                                },
+                                                "name": {
+                                                    "description": "User name",
+                                                    "type": "string"
+                                                },
+                                                "email": {
+                                                    "description": "User email",
+                                                    "type": "string"
+                                                },
+                                                "phone": {
+                                                    "description": "User phone",
+                                                    "type": "string"
+                                                },
+                                                "contact_phone": {
+                                                    "description": "User contact phone",
+                                                    "type": "string"
+                                                },
+                                                "national_id": {
+                                                    "description": "User national ID",
+                                                    "type": "string"
+                                                },
+                                                "gender": {
+                                                    "description": "User gender",
+                                                    "type": "string"
+                                                },
+                                                "department_id": {
+                                                    "description": "Department ID",
+                                                    "type": "integer"
+                                                },
+                                                "image": {
+                                                    "description": "URL of user image",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User deleted"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/users_by_name": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get all user names",
+                "operationId": "056a5998ae965260ff71fe5658d7f282",
+                "responses": {
+                    "200": {
+                        "description": "List of user names retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "description": "User name",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "UsersName"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Server Error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/employees_per_month": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get the employee count per month for a specific year",
+                "description": "Retrieve the number of employees hired by month for a given year. Defaults to the current year if no year is provided.",
+                "operationId": "3d682a47c4d7bf60ea9f05f8541d188c",
+                "parameters": [
+                    {
+                        "name": "year",
+                        "in": "query",
+                        "description": "The year to filter employee hiring data (defaults to the current year if not provided)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2023
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response with the employee count per month",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "employeeCount": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "employee_count": {
+                                                        "type": "integer",
+                                                        "example": 25
+                                                    },
+                                                    "custom_month": {
+                                                        "type": "string",
+                                                        "example": "2023-Feb"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Employees count up to the year 2023"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid year provided",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid year parameter"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No employees found for the specified year",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No employees found up to the year 2023"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/import-users-from-excel": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Import users from an Excel file",
+                "description": "This endpoint allows you to import multiple users from an Excel file (.xlsx) and validate the data.",
+                "operationId": "c242283672ba37d5d2177cc2377709d4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "file": {
+                                        "description": "Excel file (.xlsx) containing user data",
+                                        "type": "file"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Users imported successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Users imported successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid file format or validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid file format. Please upload an Excel file (.xlsx)."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "End time must be later than start time for user 'John Doe'."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error during processing",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An error occurred while processing the file: [error details]"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -4470,47 +4470,6 @@
                 },
                 "type": "object"
             },
-            "User": {
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "email": {
-                        "type": "string"
-                    },
-                    "password": {
-                        "type": "string"
-                    },
-                    "national_id": {
-                        "type": "string"
-                    },
-                    "code": {
-                        "type": "string"
-                    },
-                    "gender": {
-                        "type": "string"
-                    },
-                    "image": {
-                        "type": "string"
-                    },
-                    "serial_number": {
-                        "type": "string"
-                    },
-                    "phone": {
-                        "type": "string"
-                    },
-                    "contact_phone": {
-                        "type": "string"
-                    },
-                    "department_id": {
-                        "type": "integer"
-                    }
-                },
-                "type": "object"
-            },
             "UserDetail": {
                 "required": [
                     "salary",
@@ -4615,6 +4574,47 @@
                     }
                 },
                 "type": "object"
+            },
+            "User": {
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    },
+                    "national_id": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "gender": {
+                        "type": "string"
+                    },
+                    "image": {
+                        "type": "string"
+                    },
+                    "serial_number": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string"
+                    },
+                    "contact_phone": {
+                        "type": "string"
+                    },
+                    "department_id": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -4645,10 +4645,6 @@
             "description": "Location"
         },
         {
-            "name": "User",
-            "description": "User"
-        },
-        {
             "name": "UserDetail",
             "description": "UserDetail"
         },
@@ -4659,6 +4655,10 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "User",
+            "description": "User"
         }
     ]
 }
