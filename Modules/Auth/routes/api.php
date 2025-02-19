@@ -15,9 +15,10 @@ use Modules\Auth\Http\Controllers\AuthController;
 */
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', [AuthController::class, 'login'])->name('auth.login');
-    Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
-    Route::get('/user_by_token', [AuthController::class, 'profile'])->name('auth.profile');
-    Route::post('remove_serial_number/{user}', [AuthController::class, 'removeSerialNumber'])->name('user.removeSerialNumber');
-    Route::get('check_serial_number/{user}', [AuthController::class, 'checkSerialNumber'])->name('user.checkSerialNumber');
 
+    // Apply `auth:api` middleware to all routes except `login`
+        Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
+        Route::get('/user_by_token', [AuthController::class, 'profile'])->name('auth.profile');
+        Route::post('/remove_serial_number/{user}', [AuthController::class, 'removeSerialNumber'])->name('user.removeSerialNumber');
+        Route::get('/check_serial_number/{user}', [AuthController::class, 'checkSerialNumber'])->name('user.checkSerialNumber');
 });

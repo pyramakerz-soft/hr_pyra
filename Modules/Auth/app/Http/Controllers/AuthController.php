@@ -6,22 +6,20 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 
-use App\Http\Requests\Api\LoginRequest;
 use App\Http\Resources\Api\ProfileResource;
-use App\Models\User;
-use App\Traits\AuthTrait;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log as FacadesLog;
 use Log;
+use Modules\Auth\Http\Requests\Api\LoginRequest;
+use Modules\Auth\Traits\AuthTrait;
+use Modules\Users\Models\User;
 
 class AuthController extends Controller
 {
     use ResponseTrait, AuthTrait;
-    public function __construct()
-    {
-        $this->middleware('auth:api')->except('login');
-    }
+    public function __construct() {}
 
     /**
      * @OA\Post(
@@ -76,15 +74,15 @@ class AuthController extends Controller
         $user = $this->validateUser($credentials);
         // Log::info(['Status' => 'Fail','type' => 'Login',$credentials]);
         if (!$user) {
-            Log::info(['Status' => 'Fail', 'type' => 'Login', 'creds' => $credentials]);
+            FacadesLog::info(['Status' => 'Fail', 'type' => 'Login', 'creds' => $credentials]);
             return response()->json(['message' => 'Wrong Email or Password'], Response::HTTP_UNAUTHORIZED);
         }
-        Log::info(['Status' => 'Success', 'mob' => $request->mob, 'type' => 'Login', 'creds' => $credentials, 'all_reqs' => $request->all()]);
+        FacadesLog::info(['Status' => 'Success', 'mob' => $request->mob, 'type' => 'Login', 'creds' => $credentials, 'all_reqs' => $request->all()]);
         if ($request->mob) {
             if (is_null($user->mob)) {
                 $user->update(['mob' => $request->mob]);
             } elseif ($user->mob !== $request->mob) {
-                throw new \Exception('Your current mobile is different from the original logged-in phone (' . $authUser->mob . ')(' . $request->mob . ')', 406);
+                throw new \Exception('Your current mobile is different from the original logged-in phone (' . $user->mob . ')(' . $request->mob . ')', 406);
             }
         }
         // Handle serial number checking logic
@@ -214,13 +212,15 @@ class AuthController extends Controller
         if (!$user) {
             return $this->returnError('No User Found');
         }
+        // $user = User::find(1); // Replace with your actual user ID
+        // dd($user->roles);
 
         return $this->returnData("User", new ProfileResource($user), "User Data");
     }
 
     /**
      * @OA\Post(
-     *   path="/api/auth/remove-serial/{user_id}",
+     *   path="/api/auth/remove_serial_number/{user_id}",
      *   summary="Remove Serial Number from User",
      *   tags={"Auth"},
      *   security={{"bearerAuth": {}}},
@@ -256,17 +256,25 @@ class AuthController extends Controller
      * )
      */
 
-    public function removeSerialNumber(User $user)
+    public function removeSerialNumber($id)
     {
+        // Find the user manually to handle cases where the user does not exist
+        $user = User::find($id);
+
+        if (!$user) {
+            return $this->returnError('User not found', 404);
+        }
 
         if ($user->serial_number) {
             $user->update([
                 'serial_number' => null,
             ]);
-            return $this->returnData('user', "", 'Serial Number of User removed Successfully');
+            return $this->returnData('user', $user, 'Serial Number of User removed Successfully');
         }
+
         return $this->returnError('No Serial Number found for this user');
     }
+
 
     /**
      * @OA\Get(

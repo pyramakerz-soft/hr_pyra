@@ -61,9 +61,10 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $exception)
     {
+        
 
         if ($exception instanceof ModelNotFoundException) {
-            return $this->returnError('Not Found');
+            return $this->returnError($exception->getMessage());
         }
         if ($exception instanceof NotFoundHttpException) {
             return $this->returnError('Link Not Found');

@@ -1,9 +1,9 @@
 <?php
 
-namespace Database\Seeders;
+namespace Modules\Users\Database\Seeders;
 
-use App\Models\UserDetail;
 use Illuminate\Database\Seeder;
+use Modules\Users\Models\UserDetail;
 
 class UserDetailSeeder extends Seeder
 {

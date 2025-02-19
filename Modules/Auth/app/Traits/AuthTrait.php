@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Traits;
+namespace Modules\Auth\Traits;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Modules\Users\Models\User;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 trait AuthTrait

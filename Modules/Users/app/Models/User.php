@@ -1,8 +1,17 @@
 <?php
 
-namespace App\Models;
+namespace Modules\Users\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Models\ClockInOut;
+use App\Models\Department;
+use App\Models\Location;
+use App\Models\OverTimeInOut;
+use App\Models\Request;
+use App\Models\UserHoliday;
+use App\Models\UserVacation;
+use App\Models\WorkType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;

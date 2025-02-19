@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Traits;
+namespace Modules\Users\Traits;
 
 use App\Models\Department;
-use App\Models\User;
 use Illuminate\Support\Str;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use Modules\Users\Models\User;
 
 trait UserTrait
 {

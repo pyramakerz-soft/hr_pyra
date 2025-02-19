@@ -15,5 +15,5 @@ use Modules\Auth\Http\Controllers\AuthController;
 */
 
 Route::group([], function () {
-    Route::resource('auth', AuthController::class)->names('auth');
+    // Route::resource('auth', AuthController::class)->names('auth');
 });

@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['auth:api', 'role:Hr']], function () {
 
-    Route::apiResource('user_details', UserDetailController::class)->only(['index', 'show']); //HR role
 
     //WorkType Management
     Route::post('/work_types/{workType}', [WorkTypeController::class, 'update'])->name('work_types.update'); //HR role

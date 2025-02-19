@@ -31,6 +31,12 @@ Route::group(['prefix' => 'users'], function () {
         Route::get('/manager_names', [UsersController::class, 'ManagerNames']); //HR role
         Route::get('/employees_per_month', [UsersController::class, 'employeesPerMonth']); //HR role
 
+
+
+            Route::get('user_details', [UsersController::class, 'allUserDetails']); // Get all user details
+            Route::get('user_details/{userDetail}', [UsersController::class, 'showUserDetails']); // Get a specific user detail
+
+
     });
 
 });
