@@ -1,0 +1,11 @@
+{
+    "name": "Clocks",
+    "alias": "clocks",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Clocks\\Providers\\ClocksServiceProvider"
+    ],
+    "files": []
+}

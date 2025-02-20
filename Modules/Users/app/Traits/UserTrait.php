@@ -2,8 +2,8 @@
 
 namespace Modules\Users\Traits;
 
-use App\Models\Department;
 use Illuminate\Support\Str;
+use Modules\Users\Models\Department;
 use Modules\Users\Models\User;
 
 trait UserTrait

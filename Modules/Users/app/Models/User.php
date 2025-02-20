@@ -4,12 +4,12 @@ namespace Modules\Users\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Models\ClockInOut;
-use App\Models\OverTimeInOut;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Modules\Clocks\Models\ClockInOut;
+use Modules\Clocks\Models\OverTimeInOut;
 use Modules\Location\Models\Location;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;

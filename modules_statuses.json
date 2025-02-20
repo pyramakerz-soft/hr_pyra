@@ -1,5 +1,6 @@
 {
     "Auth": true,
     "Users": true,
-    "Location": true
+    "Location": true,
+    "Clocks": true
 }

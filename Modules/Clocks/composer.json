@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/clocks",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Clocks\\": "app/",
+            "Modules\\Clocks\\Database\\Factories\\": "database/factories/",
+            "Modules\\Clocks\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Clocks\\Tests\\": "tests/"
+        }
+    }
+}
