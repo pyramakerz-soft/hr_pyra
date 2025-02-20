@@ -31,6 +31,11 @@ export class HrAttendanceComponent {
   UsersNames:string[]=[];
   filteredUsers: string[] = [];
 
+  loading: boolean = false; 
+  errorMessage: string = '';
+  isLoading: boolean = false; // Track loading state
+
+
 
   selectedMonth: string = "01";
   selectedYear: number = 0;
@@ -234,9 +239,11 @@ export class HrAttendanceComponent {
 
   }
 
-  ExportData(){
+ ExportData() {
+   this.isLoading = true; // Show spinner
     this.UserClocksService.ExportAllUserDataById(this.DateString, this.SelectDepartment).subscribe(
       (result: Blob) => {
+        this.isLoading = false; // Hide spinner
         const url = window.URL.createObjectURL(result);
         const a = document.createElement('a');
         a.href = url;
@@ -244,17 +251,20 @@ export class HrAttendanceComponent {
         a.click();
         window.URL.revokeObjectURL(url);
       },
-      (error) => {
-        if(error.status == 404){
-          Swal.fire({   
-            text: "No attendance records found for this date.",
-            confirmButtonText: "OK",
-            confirmButtonColor: "#FF7519",
-          });
-        }
+    (error) => {
+      this.loading = false; // Hide loading spinner
+      if (error.status === 404) {
+        Swal.fire({   
+          text: "No attendance records found for this date.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#FF7519",
+        });
+      } else {
+        this.errorMessage = "An error occurred while exporting data. Please try again.";
       }
-    );
-  }
+    }
+  );
+}
 
   
   saveCurrentPageNumber() {

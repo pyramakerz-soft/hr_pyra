@@ -89,6 +89,13 @@ export class ClockService {
     return this.http.get(`${this.baseUrl}/all_clocks?month=${date}&department=${department}&export=true`, { headers, responseType: 'blob' });  
   }
 
+   downloadAllUsersExcel(): Observable<Blob> {//new
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get(`${this.baseUrl}/users/getAllUsers?export=true`, { headers, responseType: 'blob' });
+  }
+
+
   GetClockByID(id:number){
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);

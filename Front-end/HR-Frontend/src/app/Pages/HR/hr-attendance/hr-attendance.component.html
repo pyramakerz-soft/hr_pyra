@@ -4,11 +4,12 @@
       <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Attendance</p>
     </div>
     <div class="flex justify-end">
-      <button (click)="ExportData()"
-        class="border border-[#FF7519] text-[#FF7519] font-medium text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
-        Export
+      <button (click)="ExportData()" [disabled]="isLoading" class="export-button">
+        <div *ngIf="isLoading" class="spinner"></div>
+        <span *ngIf="!isLoading">Export</span>
       </button>
     </div>
+
   </div>
 
   <div class="flex items-center justify-end mb-4 space-x-3 text-sm md:text-base">

@@ -1,3 +1,45 @@
 .selectedPage{
     background-color: #D0D5DD;
 }
+.spinner {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid #FF7519;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Export Button Styling */
+.export-button {
+  border: 2px solid #FF7519;
+  color: #FF7519;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Hover Effect */
+.export-button:hover {
+  background-color: #FF7519;
+  color: white;
+}
+
+/* Disabled State */
+.export-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+

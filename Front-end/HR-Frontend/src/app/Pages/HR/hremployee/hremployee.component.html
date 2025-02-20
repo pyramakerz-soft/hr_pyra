@@ -3,10 +3,13 @@
     <div>
       <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Employee</p>
     </div>
-    <div class="flex space-x-6 items-center justify-between md:justify-normal">
-      <a href="../../../../assets/links/ImportEmployeeTemplate.xlsx" 
-      class="border border-[#17253E] text-[#17253E] font-medium text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg"
-      download>Download Excel Template</a>
+<div class="flex space-x-6 items-center justify-between md:justify-normal">
+
+      <button (click)="downloadExcelTemplate()" [disabled]="isLoading" class="export-button">
+        <div *ngIf="isLoading" class="spinner"></div>
+        <span *ngIf="!isLoading">Download Excel Template</span>
+      </button>
+
       <button (click)="OpenImportPopUp()"
       [disabled]="isNavigateingToImportPopUp"
         class="border border-[#FF7519] text-[#FF7519] font-medium text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">

@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { UserModel } from '../../../Models/user-model';
 import { UserServiceService } from '../../../Services/user-service.service';
 import Swal from 'sweetalert2';
+import { ClockService } from '../../../Services/clock.service';
 
 interface data {
   Name: string,
@@ -27,7 +28,8 @@ interface data {
   styleUrl: './hremployee.component.css'
 })
 export class HREmployeeComponent {
-  constructor(public dialog: MatDialog, private router: Router, public userServ: UserServiceService) { }
+
+  constructor(public dialog: MatDialog, private router: Router, public userServ: UserServiceService , private clockService: ClockService) { }
 
   tableData: UserModel[] = [];
   isMenuOpen: boolean = false;
@@ -38,6 +40,7 @@ export class HREmployeeComponent {
   DisplayPagginationOrNot: boolean = true;
   UsersNames: string[] = [];
   filteredUsers: string[] = [];
+  isLoading: boolean = false; // Add isLoading state
 
   isNavigateingToImportPopUp = false
 
@@ -59,6 +62,38 @@ export class HREmployeeComponent {
 
   }
 
+   downloadExcelTemplate() {
+    this.isLoading = true; // Show spinner
+    this.clockService.downloadAllUsersExcel().subscribe(
+      (blob: Blob) => {
+        this.isLoading = false; // Hide spinner
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'all_users.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      (error) => {
+        this.isLoading = false; // Hide spinner on error
+        if (error.status === 404) {
+          Swal.fire({
+            text: "No user records found.",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
+          });
+        } else {
+          Swal.fire({
+            text: "An error occurred while downloading the Excel file. Please try again.",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
+          });
+        }
+      }
+    );
+  }
 
   OpenMenu() {
     this.isMenuOpen = !this.isMenuOpen;
