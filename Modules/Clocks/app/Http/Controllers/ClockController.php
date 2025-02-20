@@ -357,32 +357,39 @@ class ClockController extends Controller
      * )
      */
 
-    public function getUserClocksById(Request $request, User $user)
-    {
-
-        $query = ClockInOut::where('user_id', $user->id);
-    // Apply filters
-    foreach ($this->filters as $filter) {
-        $query = $filter->apply($query, $request);
-    }
-
-        // Handle pagination
-        $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
-        if ($clocks->isEmpty()) {
-            return $this->returnError('No Clocks Found For This User');
-        }
-        // Handle export request
-        if ($request->has('export')) {
-
-
-            return ( new clocksExport($clocks, null, $user->id))
-                ->download('all_user_clocks.xlsx');
-        }
-
-        // Prepare and return data
-        $data = $this->prepareClockData($clocks);
-        return $this->returnData("data", $data, "Clocks Data for {$user->name}");
-    }
+     public function getUserClocksById(Request $request, User $user)
+     {
+         // Start the query for the clocks
+         $query = ClockInOut::where('user_id', $user->id);
+     
+         // Apply filters if any
+         foreach ($this->filters as $filter) {
+             $query = $filter->apply($query, $request);
+         }
+     
+         // If there's an export request, we want to get all data (not paginated)
+         if ($request->has('export')) {
+             // Get all data without pagination (this ensures all clocks are exported)
+             $clocks = $query->orderBy('clock_in', 'desc')->get(); 
+     Log::info(  $clocks->count());
+             // Return the export file with all data
+             return (new ClocksExport($clocks, null, $user->id))
+                 ->download('all_user_clocks.xlsx');
+         }
+     
+         // Otherwise, handle pagination
+         $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+     
+         // If no clocks are found, return an error message
+         if ($clocks->isEmpty()) {
+             return $this->returnError('No Clocks Found For This User');
+         }
+     
+         // Prepare and return paginated data
+         $data = $this->prepareClockData($clocks);
+         return $this->returnData("data", $data, "Clocks Data for {$user->name}");
+     }
+     
     /**
      * @OA\Get(
      *     path="/api/user_clocks",
@@ -399,7 +406,7 @@ class ClockController extends Controller
      *         description="Optional filters to apply to the clock records (e.g., date range, location)",
      *         @OA\Schema(type="string")
      *     ),
-     
+     * 
      *     @OA\Parameter(
      *         name="export",
      *         in="query",

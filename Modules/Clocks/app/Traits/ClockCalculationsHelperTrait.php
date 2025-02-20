@@ -284,8 +284,7 @@ trait ClockCalculationsHelperTrait
     {
     
         if (!$clockIn->isSameDay($clockOut)) {
-            Log::info($clockOut);
-            Log::info($clockIn);
+
 
             throw ValidationException::withMessages(['error' => 'Clock-out must be on the same day as clock-in.']);
         }

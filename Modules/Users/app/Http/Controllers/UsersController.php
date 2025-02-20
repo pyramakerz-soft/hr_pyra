@@ -19,8 +19,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Location\Models\Location;
-use Modules\Users\Http\Requests\Api\RegisterRequest;
-use Modules\Users\Http\Requests\Api\UpdateUserRequest;
+use Modules\Users\Exports\UsersExport;
+use Modules\Users\Http\Requests\Api\User\StoreUserRequest;
+use Modules\Users\Http\Requests\Api\User\UpdateUserRequest;
 use Modules\Users\Models\Department;
 use Modules\Users\Models\User;
 use Modules\Users\Models\UserDetail;
@@ -99,16 +100,37 @@ class UsersController extends Controller
      *         ),
      *         description="Optional search filter to find users by name or code"
      *     ),
+     * 
+     * 
+     *         @OA\Parameter(
+     *         name="export",
+     *         in="query",
+     *         description="Flag to export the clock records",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="boolean",
+     *             example=""
+     *         )
+     *     ),
      *     @OA\Response(response=200, description="List of users"),
      *     @OA\Response(response=404, description="No users found")
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
 
         $search = request()->get('search', null);
         $usersData = null;
 
+              // Handle export request
+              if ($request->has('export')) {
+                $users = User::all();
+              
+    
+                // Proceed with export
+                return (new UsersExport($users ))
+                    ->download('all_user_clocks.xlsx');
+            }else
 
         if ($search) {
             $users = $this->searchUsersByNameOrCode($search);
@@ -125,6 +147,8 @@ class UsersController extends Controller
                 'pagination' => $this->formatPagination($users),
             ];
         }
+
+        
 
         if (!$usersData) {
             return $this->returnError('No Users Found');
@@ -261,7 +285,7 @@ class UsersController extends Controller
      *     )
      * )
      */
-    public function store(RegisterRequest $request)
+    public function store(StoreUserRequest $request)
     {
 
         $request->validated();

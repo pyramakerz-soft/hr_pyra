@@ -2646,6 +2646,16 @@
                             "type": "string",
                             "example": ""
                         }
+                    },
+                    {
+                        "name": "export",
+                        "in": "query",
+                        "description": "Flag to export the clock records",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": ""
+                        }
                     }
                 ],
                 "responses": {

@@ -2,54 +2,143 @@
 
 namespace Modules\Clocks\Exports;
 
-use App\Models\ClockInOut;
-use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\Exportable;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class ClocksExport implements WithMultipleSheets
+class ClocksExport implements FromCollection, WithHeadings, WithStyles, WithColumnFormatting
 {
     use Exportable;
 
+    protected $clocks;
     protected $department;
     protected $userId;
-    protected $clocks;
 
     public function __construct($clocks, $department = null, $userId = null)
-    {      
+    {
         $this->clocks = $clocks;
         $this->department = $department;
         $this->userId = $userId;
     }
 
-    public function sheets(): array
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    public function collection()
     {
-        $sheets = [];
+        return $this->clocks->map(function ($clock) {
+            // Convert clock_in and clock_out to Egypt Time (UTC+2)
+            $clockIn = Carbon::parse($clock->clock_in)->setTimezone('Africa/Cairo');
+            $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out)->setTimezone('Africa/Cairo') : null;
+            
+            // Calculate total hours
+            $totalHours = $clockOut ? $clockIn->diffInHours($clockOut) : null;
+    
+            return collect([
+                'Code' => $clock->user->code,
+                'Name' => $clock->user->name,
+                'Department' => $clock->user->department ? $clock->user->department->name : 'N/A',
+                'Date' => $clockIn->format('Y-m-d'),
+                'Clock_In' => $clockIn->format('h:iA'),  // Formatted as 12-hour time (AM/PM)
+                'Clock_Out' => $clockOut ? $clockOut->format('h:iA') : null, // Same format for Clock Out
+                'Location_In' =>
+                    $clock->location_type == "home" ? "home" :
+                    ($clock->location_type == "site" && $clock->clock_in ? $clock->location->name : null),
+                'Location_Out' =>
+                    $clock->location_type == "home" ? "home" :
+                    ($clock->location_type == "site" && $clock->clock_out ? $clock->location->name : null),
+            ]);
+        });
+    }
+    
 
-        $clocksCollection = $this->clocks;
+    /**
+     * Define the headings for the Excel file.
+     *
+     * @return array
+     */
+    public function headings(): array
+    {
+        return [
+            'Code',
+            'Name',
+            'Department',
+            'Date',
+            'Clock_In',
+            'Clock_Out',
+            'Location_In',
+            'Location_Out',
+        ];
+    }
 
-        Log::info('Clocks: ', $clocksCollection->toArray());
+    /**
+     * Define the title for the Excel sheet.
+     *
+     * @return string
+     */
+    public function title(): string
+    {
+        return 'Employee Clock In/Out Data';
+    }
 
-        if ($clocksCollection->isEmpty()) {
-            Log::error('No clocks found for export.');
-            abort(400, 'No clocks found for export.'); 
-        }
+    /**
+     * Apply styles and formatting to the Excel sheet.
+     *
+     * @param Worksheet $sheet
+     */
+    public function styles(Worksheet $sheet)
+    {
+        // Apply bold, white font color, and blue background to headers
+        $sheet->getStyle('A1:H1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'], // White font color
+                'size' => 14, // Increase font size for header
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '4F81BD'], // Blue background
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ]
+        ]);
+    
+        // Set column widths for better readability
+        $sheet->getColumnDimension('A')->setWidth(30); // ID
+        $sheet->getColumnDimension('B')->setWidth(30); // Name
+        $sheet->getColumnDimension('C')->setWidth(30); // Department
+        $sheet->getColumnDimension('D')->setWidth(30); // Date
+        $sheet->getColumnDimension('E')->setWidth(30); // Clock_In
+        $sheet->getColumnDimension('F')->setWidth(30); // Clock_Out
+        $sheet->getColumnDimension('G')->setWidth(30); // Location_In
+        $sheet->getColumnDimension('H')->setWidth(30); // Location_Out
+    
+        // Set row height for the header row (Row 1)
+        $sheet->getRowDimension(1)->setRowHeight(40); // Adjust the row height of the header row
+    
+        // Apply autofilter to all columns
+        $sheet->setAutoFilter('A1:H1');
+    }
+    
 
-        $userClocks = $clocksCollection->groupBy('user_id');
-
-
-        foreach ($userClocks as $userId => $clocks) {
-            $user = $clocks->first()->user; 
-            $userName = $user->name ?? 'Unknown';  
-
-            $sheets[] = new UserClocksExportById($clocks, $userName);
-        }
-
-        if (count($sheets) === 0) {
-            Log::warning('No sheets were created because user clocks were empty or not properly grouped.');
-            abort(400, 'No sheets were created because user clocks were empty or not properly grouped.');
-        }
-
-        return $sheets;
+    /**
+     * Apply column formatting for date and time columns.
+     *
+     * @return array
+     */
+    public function columnFormats(): array
+    {
+        return [
+            'D' => 'yyyy-mm-dd', // Date format
+            'E' => 'hh:mm AM/PM', // Clock In
+            'F' => 'hh:mm AM/PM', // Clock Out
+        ];
     }
 }
