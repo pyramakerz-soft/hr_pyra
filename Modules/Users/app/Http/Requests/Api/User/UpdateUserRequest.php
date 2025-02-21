@@ -48,7 +48,11 @@ class UpdateUserRequest extends FormRequest
                 Rule::unique('users', 'national_id')->ignore($user->id),
             ],
 
-            'code' => ['nullable', 'string'],
+            'code' => [
+                'nullable',
+                'string',
+                Rule::unique('users', 'code')->ignore($user->id),
+            ],
             'gender' => ['nullable', 'in:m,M,F,f'],
             'department_id' => ['nullable', 'exists:departments,id'],
             'salary' => ['nullable', 'numeric'],

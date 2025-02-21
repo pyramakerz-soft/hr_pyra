@@ -2772,6 +2772,10 @@
                                         "type": "string",
                                         "example": "John Doe"
                                     },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "Soft-hr"
+                                    },
                                     "email": {
                                         "type": "string",
                                         "example": "john@test.com"
@@ -3166,6 +3170,10 @@
                                         "type": "string",
                                         "example": "John Doe"
                                     },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "Soft-hr"
+                                    },
                                     "email": {
                                         "type": "string",
                                         "example": "john@test.com"
@@ -3256,6 +3264,10 @@
                                                         "id": {
                                                             "description": "User ID",
                                                             "type": "integer"
+                                                        },
+                                                        "code": {
+                                                            "description": "User code",
+                                                            "type": "string"
                                                         },
                                                         "name": {
                                                             "description": "User name",

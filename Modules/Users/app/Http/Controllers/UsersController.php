@@ -83,7 +83,7 @@ class UsersController extends Controller
 
 
     public function __construct() {}
-    
+
 
     /**
      * @OA\Get(
@@ -122,15 +122,15 @@ class UsersController extends Controller
         $search = request()->get('search', null);
         $usersData = null;
 
-              // Handle export request
-              if ($request->has('export')) {
-                $users = User::all();
-              
-    
-                // Proceed with export
-                return (new UsersExport($users ))
-                    ->download('all_user_clocks.xlsx');
-            }else
+        // Handle export request
+        if ($request->has('export')) {
+            $users = User::all();
+
+
+            // Proceed with export
+            return (new UsersExport($users))
+                ->download('all_user_clocks.xlsx');
+        } else
 
         if ($search) {
             $users = $this->searchUsersByNameOrCode($search);
@@ -148,7 +148,7 @@ class UsersController extends Controller
             ];
         }
 
-        
+
 
         if (!$usersData) {
             return $this->returnError('No Users Found');
@@ -223,6 +223,8 @@ class UsersController extends Controller
      *         @OA\JsonContent(
      *             required={"name", "email", "password", "phone", "department_id"},
      *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="code", type="string", example="Soft-hr"),
+
      *             @OA\Property(property="email", type="string", example="john@test.com"),
      *             @OA\Property(property="password", type="string", example="123456"),
      *             @OA\Property(property="phone", type="string", example="01203376559"),
@@ -251,6 +253,7 @@ class UsersController extends Controller
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="user", type="object",
      *                     @OA\Property(property="id", type="integer", description="User ID"),
+
      *                     @OA\Property(property="name", type="string", description="User name"),
      *                     @OA\Property(property="email", type="string", description="User email"),
      *                     @OA\Property(property="phone", type="string", description="User phone"),
@@ -294,10 +297,8 @@ class UsersController extends Controller
         if (!$department) {
             return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
         }
-        $code = $this->generateUniqueCode($request['department_id']);
-        if (!$code) {
-            return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
-        }
+        $code =  $request->code;
+       
         // Handle image upload
         $imageUrl = null;
         if (request()->hasFile('image')) {
@@ -442,6 +443,7 @@ class UsersController extends Controller
      *         @OA\JsonContent(
      *             required={},
      *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="code", type="string", example="Soft-hr"),
      *             @OA\Property(property="email", type="string", example="john@test.com"),
      *             @OA\Property(property="phone", type="string", example="01203376559"),
      *             @OA\Property(property="contact_phone", type="string", example="01203376669"),
@@ -466,6 +468,8 @@ class UsersController extends Controller
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="user", type="object",
      *                     @OA\Property(property="id", type="integer", description="User ID"),
+     *                     @OA\Property(property="code", type="string", description="User code"),
+
      *                     @OA\Property(property="name", type="string", description="User name"),
      *                     @OA\Property(property="email", type="string", description="User email"),
      *                     @OA\Property(property="phone", type="string", description="User phone"),
@@ -513,8 +517,7 @@ class UsersController extends Controller
             return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
         }
 
-        $code = $this->generateUniqueCode($departmentId);
-        $code = $code ?? $user->code;
+
 
         // Check if an image is provided in the request
         if (isset($request['image']) && $request['image']->isValid()) {
@@ -525,12 +528,12 @@ class UsersController extends Controller
 
         // Update user information
         $updatedUser =    $user->update([
+            'code' => $request['code'] ?? $user->code,
             'name' => $request['name'] ?? $user->name,
             'email' => $request['email'] ?? $user->email,
             'phone' => $request['phone'] ?? $user->phone,
             'contact_phone' => $request['contact_phone'] ?? $user->contact_phone,
             'national_id' => $request['national_id'] ?? $user->national_id,
-            'code' => $code,
             'gender' => $request['gender'] ?? $user->gender,
             'department_id' => (int) $departmentId,
             'image' => $imageUrl,
@@ -858,7 +861,7 @@ class UsersController extends Controller
         }
         $data['user_details'] = UserDetailResource::collection($user_details);
         return $this->returnData('data', $data, 'User Details Data');
-    } 
+    }
 
     /**
      * @OA\Get(

@@ -4,6 +4,7 @@ namespace Modules\Users\Http\Requests\Api\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
 {
@@ -14,7 +15,6 @@ class StoreUserRequest extends FormRequest
     {
 
         return true;
-
     }
 
     /**
@@ -32,7 +32,10 @@ class StoreUserRequest extends FormRequest
             'phone' => ['required', 'unique:users,phone', 'regex:/^01[0125][0-9]{8}$/'],
             'contact_phone' => ['required', 'unique:users,contact_phone', 'regex:/^01[0125][0-9]{8}$/'],
             'national_id' => ['required', 'string', 'unique:users,national_id', 'regex:/^[0-9]{14}$/'],
-            'code' => ['nullable', 'string'],
+            'code' => [
+                'string',
+                Rule::unique('users', 'code')
+            ],
             'gender' => ['required', 'in:m,M,F,f'],
             'department_id' => ['required', 'exists:departments,id'],
             'salary' => ['required', 'numeric'],
@@ -50,5 +53,4 @@ class StoreUserRequest extends FormRequest
             // 'is_float' => ['nullable'],
         ];
     }
-
 }
