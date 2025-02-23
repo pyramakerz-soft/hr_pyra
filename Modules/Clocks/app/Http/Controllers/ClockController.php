@@ -1148,9 +1148,11 @@ public function getUsersClockInStatus(Request $request)
             ->first();
 
             return [
-                'id' => $user->id,
+                'user_id' => $user->id,
                 'name' => $user->name,
                 'phone' => $user->phone,
+
+                'clock_id'=>$clockInOut?  $clockInOut->id:null, 
                 'date' => $clockInOut && $clockInOut->clock_in
                     ? Carbon::parse($clockInOut->clock_in)->format('Y-m-d')
                     : Carbon::now()->format('Y-m-d'), // Default to today's date if no record found
@@ -1275,9 +1277,11 @@ public function getUsersClockInStatus(Request $request)
             ->first();
 
             return [
-                'id' => $user->id,
+                'user_id' => $user->id,
                 'name' => $user->name,
                 'phone' => $user->phone,
+
+                'clock_id'=>$clockInOut?  $clockInOut->id:null, 
                 'date' => $clockInOut && $clockInOut->clock_in
                     ? Carbon::parse($clockInOut->clock_in)->format('Y-m-d')
                     : Carbon::now()->format('Y-m-d'), // Default to today's date if no record found
