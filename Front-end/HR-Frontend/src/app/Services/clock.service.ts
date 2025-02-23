@@ -80,14 +80,18 @@ export class ClockService {
     return this.http.get(`${this.baseUrl}/clocks/user/${id}?month=${date}&export=true`, { headers, responseType: 'blob' });  
   }
 
-  ExportAllUserDataById(date:string, department:string){
-    const token = localStorage.getItem("token");
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    if(department == "AllDepartment"){
-      return this.http.get(`${this.baseUrl}/all_clocks?month=${date}&export=true`, { headers, responseType: 'blob' });  
-    }
-    return this.http.get(`${this.baseUrl}/all_clocks?month=${date}&department=${department}&export=true`, { headers, responseType: 'blob' });  
+ExportAllUserDataById(fromDay: string, toDay: string, departmentId: string): Observable<Blob> {
+  const token = localStorage.getItem("token");
+  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+  let url = `${this.baseUrl}/all_clocks?export=true&from_day=${fromDay}&to_day=${toDay}`;
+
+  if (departmentId !== "AllDepartment") {
+    url += `&department_id=${departmentId}`;
   }
+
+  return this.http.get(url, { headers, responseType: 'blob' });
+}
 
    downloadAllUsersExcel(): Observable<Blob> {//new
     const token = localStorage.getItem("token");

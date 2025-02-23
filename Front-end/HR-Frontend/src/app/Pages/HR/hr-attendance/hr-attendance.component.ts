@@ -34,6 +34,8 @@ export class HrAttendanceComponent {
   loading: boolean = false; 
   errorMessage: string = '';
   isLoading: boolean = false; // Track loading state
+  from_day: string = '';
+  to_day: string = '';  
 
 
 
@@ -61,7 +63,7 @@ export class HrAttendanceComponent {
   years: number[] = [];
 
 
-  constructor(public router:Router , public userServ:UserServiceService, public UserClocksService: ClockService , public departmentServ: DepartmentService){}
+  constructor(public router:Router , public userServ:UserServiceService, public UserClocksService: ClockService ,private clockService:ClockService , public departmentServ: DepartmentService){}
 
   tableData:UserModel[]= [];
 
@@ -240,27 +242,28 @@ export class HrAttendanceComponent {
   }
 
  ExportData() {
-   this.isLoading = true; // Show spinner
-    this.UserClocksService.ExportAllUserDataById(this.DateString, this.SelectDepartment).subscribe(
-      (result: Blob) => {
-        this.isLoading = false; // Hide spinner
-        const url = window.URL.createObjectURL(result);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Employees_ClockIn.xlsx`; 
-        a.click();
-        window.URL.revokeObjectURL(url);
-      },
+
+
+  this.isLoading = true;
+
+  this.clockService.ExportAllUserDataById(this.from_day, this.to_day, this.SelectDepartment).subscribe(
+    (result: Blob) => {
+      this.isLoading = false;
+
+      const url = window.URL.createObjectURL(result);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Employees_ClockIn_${this.from_day}_to_${this.to_day}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    },
     (error) => {
-      this.loading = false; // Hide loading spinner
+      this.isLoading = false;
+
       if (error.status === 404) {
-        Swal.fire({   
-          text: "No attendance records found for this date.",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#FF7519",
-        });
+        alert("No attendance records found for this date.");
       } else {
-        this.errorMessage = "An error occurred while exporting data. Please try again.";
+        alert("An error occurred while exporting data. Please try again.");
       }
     }
   );

@@ -3,11 +3,30 @@
     <div>
       <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Attendance</p>
     </div>
+    
     <div class="flex justify-end">
-      <button (click)="ExportData()" [disabled]="isLoading" class="export-button">
-        <div *ngIf="isLoading" class="spinner"></div>
-        <span *ngIf="!isLoading">Export</span>
-      </button>
+
+<div class="flex items-center gap-4">
+  <div
+    class="w-full max-w-xs rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
+    <input type="date" id="from_day" [(ngModel)]="from_day"
+      class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
+  </div>
+
+  <div
+    class="w-full max-w-xs rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
+    <input type="date" id="to_day" [(ngModel)]="to_day"
+      class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
+  </div>
+
+  <button (click)="ExportData()" [disabled]="isLoading"
+    class="export-button bg-[#4F46E5] text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center">
+    <div *ngIf="isLoading" class="spinner"></div>
+    <span *ngIf="!isLoading">Export</span>
+  </button>
+</div>
+
+
     </div>
 
   </div>
