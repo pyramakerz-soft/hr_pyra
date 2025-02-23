@@ -295,7 +295,6 @@ class ClockController extends Controller
     
          if ($request->has('export')) {
              $clocksForExport = $query->orderBy('clock_in', 'desc')->get();
-             Log::info(["clocks_count" => $clocksForExport->count()]);
      
              return (new clocksExport($clocksForExport, $request->get('department')))
                  ->download('all_user_clocks.xlsx');
@@ -885,6 +884,9 @@ class ClockController extends Controller
      *     )
      * )
      */
+
+
+     
     public function hrClockIn(AddClockRequest $request, User $user)
     {
 
@@ -901,6 +903,76 @@ class ClockController extends Controller
         //3- Handle site clock-in if location_type is 'site'
         return $this->handleSiteClockInByHr($request, $user);
     }
+
+    
+ /**
+ * @OA\Get(
+ *     path="/api/get_count_issues",
+ *     summary="Get total count of clock-in issues",
+ *     description="Returns the total count of clock-in issues.",
+ *     tags={"Clock Issues"},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Count of clock-in issues",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="count", type="integer", example=10)
+ *             )
+ *         )
+ *     )
+ * )
+ */
+
+ public function getCountIssues()
+ {
+     $totalIssueCount['count'] = ClockInOut::where('is_issue', true)
+         ->count();
+     return $this->returnData('data', $totalIssueCount, 'Count of Issues');
+ 
+
+ }
+
+/**
+ * @OA\Get(
+ *     path="/api/get_clock_issues",
+ *     summary="Get clock-in issues",
+ *     description="Retrieve a paginated list of clock-in issues within a given month or the current month if no month is specified.",
+ *     tags={"Clock Issues"},
+ *     @OA\Parameter(
+ *         name="month",
+ *         in="query",
+ *         description="Month to filter clock-in issues (format: YYYY-MM)",
+ *         required=false,
+ *         @OA\Schema(type="string", format="date")
+ *     ),
+ *     @OA\Parameter(
+ *         name="date",
+ *         in="query",
+ *         description="Apply additional date filters",
+ *         required=false,
+ *         @OA\Schema(type="string", format="date")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="List of clock-in issues",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="clockIssues", type="array",
+ *                     @OA\Items(ref="#/components/schemas/ClockInOut")
+ *                 ),
+ *                 @OA\Property(property="count", type="integer", example=5)
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="No Clock Issues Found"
+ *     )
+ * )
+ */
+
     public function getClockIssues(Request $request)
     {
         if ($request->has('month')) {
@@ -943,14 +1015,37 @@ class ClockController extends Controller
 
         return $this->returnData('data', $response);
         }
-    public function getCountIssues()
-    {
-        $totalIssueCount['count'] = ClockInOut::where('is_issue', true)
-            ->count();
-        return $this->returnData('data', $totalIssueCount, 'Count of Issues');
-    
 
-    }
+
+        /**
+ * @OA\post(
+ *     path="/api/update_clock_issue/{id}",
+ *     summary="Update a clock issue",
+ *     description="Marks a clock-in issue as resolved.",
+ *     tags={"Clock Issues"},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         description="Clock-in issue ID",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Clock Issue Updated Successfully",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="clock", ref="#/components/schemas/ClockInOut")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="There is no issue for this clock"
+ *     )
+ * )
+ */
+
+ 
     public function updateClockIssues(Request $request, ClockInOut $clock)
     {
     if (!$clock->is_issue) {
@@ -961,4 +1056,210 @@ class ClockController extends Controller
         ]);
 
         return $this->returnData('clock', $clock, 'Clock Issue Updated Successfully');    }
+
+
+
+
+/**
+ * @OA\Get(
+ *     path="/api/no_clock_in",
+ *     summary="Get Users Who Clocked In or Didn't Clock In on a Specific Day",
+ *     description="Retrieves a list of users who either did not clock in or clocked in on a specific day.",
+ *     operationId="getUsersClockOutStatus",
+ *     tags={"Clock"},
+ *     @OA\Parameter(
+ *         name="date",
+ *         in="query",
+ *         required=false,
+ *         description="The date to check users for, in 'Y-m-d' format. Defaults to today's date if not provided.",
+ *         @OA\Schema(type="string", example="2025-02-23")
+ *     ),
+ *     @OA\Parameter(
+ *         name="type",
+ *         in="query",
+ *         required=false,
+ *         description="The type of users to retrieve: 'clocked_in' for users who clocked in, 'no_clock_in' for users who did not clock in. Defaults to 'no_clock_in'.",
+ *         @OA\Schema(type="string", enum={"clocked_in", "no_clock_in"}, example="no_clock_in")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Users who either clocked in or didn't clock in on the specified day",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", example="success"),
+ *             @OA\Property(property="data", type="array", 
+ *                 @OA\Items(
+ *                     @OA\Property(property="id", type="integer", example=1),
+ *                     @OA\Property(property="name", type="string", example="John Doe"),
+ *                     @OA\Property(property="email", type="string", example="john.doe@example.com")
+ *                 )
+ *             ),
+ *             @OA\Property(property="message", type="string", example="Users who didn't clock in on this day")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="No users found based on the filter",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", example="error"),
+ *             @OA\Property(property="message", type="string", example="No users found.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Invalid date format or other error",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", example="error"),
+ *             @OA\Property(property="message", type="string", example="Invalid date format.")
+ *         )
+ *     )
+ * )
+ */
+public function getUsersClockInStatus(Request $request)
+{
+    $date = $request->has('date') ? Carbon::parse($request->get('date')) : Carbon::today();
+    $startOfDay = $date->copy()->startOfDay(); // Ensure startOfDay() does not affect the original $date
+    $endOfDay = $date->copy()->endOfDay();     // Ensure endOfDay() does not affect the original $date
+    
+
+
+    // Default type is 'no_clock_in' if not provided
+    $type = $request->get('type', 'no_clock_in');
+
+    // Retrieve users based on clock-in status
+    if ($type === 'no_clock_in') {
+        // Get users who have not clocked in on the given day
+        $users = User::whereDoesntHave('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
+            $query->whereBetween('clock_in', [$startOfDay, $endOfDay]);
+        })->get();
+        
+        $message = 'Users who did not clock in on this day';
+    } elseif ($type === 'clocked_in') {
+        
+        $users = User::whereHas('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
+            
+            $query->where('clock_in', '>=', $startOfDay)
+                  ->where('clock_in', '<=', $endOfDay);
+        })->get();
+        
+        
+        
+        
+        $message = 'Users who clocked in on this day';
+    } else {
+        // Invalid type parameter
+        return $this->returnError('Invalid type parameter. Use "clocked_in" or "no_clock_in".');
+    }
+
+    // Check if we found any users based on the filter
+    if ($users->isEmpty()) {
+        return $this->returnError('No users found.');
+    }
+
+    // Return the users based on the selected filter
+    return $this->returnData('data', $users, $message);
+}
+
+
+
+/**
+ * @OA\Get(
+ *     path="/api/no_clock_out",
+ *     summary="Get Users Who Clocked In or Didn't Clock In on a Specific Day",
+ *     description="Retrieves a list of users who either did not clock in or clocked in on a specific day.",
+ *     operationId="getUsersClockInStatus",
+ *     tags={"Clock"},
+ *     @OA\Parameter(
+ *         name="date",
+ *         in="query",
+ *         required=false,
+ *         description="The date to check users for, in 'Y-m-d' format. Defaults to today's date if not provided.",
+ *         @OA\Schema(type="string", example="2025-02-23")
+ *     ),
+ *     @OA\Parameter(
+ *         name="type",
+ *         in="query",
+ *         required=false,
+ *         description="The type of users to retrieve: 'clocked_in' for users who clocked in, 'no_clock_in' for users who did not clock in. Defaults to 'no_clock_in'.",
+ *         @OA\Schema(type="string", enum={"clocked_out", "no_clock_out"}, example="no_clock_out")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Users who either clocked in or didn't clock in on the specified day",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", example="success"),
+ *             @OA\Property(property="data", type="array", 
+ *                 @OA\Items(
+ *                     @OA\Property(property="id", type="integer", example=1),
+ *                     @OA\Property(property="name", type="string", example="John Doe"),
+ *                     @OA\Property(property="email", type="string", example="john.doe@example.com")
+ *                 )
+ *             ),
+ *             @OA\Property(property="message", type="string", example="Users who didn't clock in on this day")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="No users found based on the filter",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", example="error"),
+ *             @OA\Property(property="message", type="string", example="No users found.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Invalid date format or other error",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", example="error"),
+ *             @OA\Property(property="message", type="string", example="Invalid date format.")
+ *         )
+ *     )
+ * )
+ */
+
+ public function getUsersClockOutStatus(Request $request)
+ {
+     $date = $request->has('date') ? Carbon::parse($request->get('date')) : Carbon::today();
+     $startOfDay = $date->copy()->startOfDay(); // Ensure startOfDay() does not affect the original $date
+     $endOfDay = $date->copy()->endOfDay();     // Ensure endOfDay() does not affect the original $date
+     
+ 
+ 
+     // Default type is 'no_clock_in' if not provided
+     $type = $request->get('type', 'no_clock_in');
+ 
+     // Retrieve users based on clock-in status
+     if ($type === 'no_clock_out') {
+         // Get users who have not clocked in on the given day
+         $users = User::whereDoesntHave('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
+             $query->whereBetween('clock_in', [$startOfDay, $endOfDay]);
+         })->get();
+         
+         $message = 'Users who did not clock in on this day';
+     } elseif ($type === 'clocked_out') {
+         
+         $users = User::whereHas('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
+             
+             $query->where('clock_out', '>=', $startOfDay)
+                   ->where('clock_out', '<=', $endOfDay);
+         })->get();
+         
+         
+         
+         
+         $message = 'Users who clocked in on this day';
+     } else {
+         // Invalid type parameter
+         return $this->returnError('Invalid type parameter. Use "clocked_in" or "no_clock_in".');
+     }
+ 
+     // Check if we found any users based on the filter
+     if ($users->isEmpty()) {
+         return $this->returnError('No users found.');
+     }
+ 
+     // Return the users based on the selected filter
+     return $this->returnData('data', $users, $message);
+ }
+ 
+
 }
