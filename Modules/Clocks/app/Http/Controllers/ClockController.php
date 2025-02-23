@@ -498,7 +498,7 @@ class ClockController extends Controller
         }
 
         // Prepare and return data
-        $data = $this->prepareClockData($clocks);
+        $data = $this->groupClockForUser($clocks);
         return $this->returnData("data", $data, "Clocks Data for {$authUser->name}");
     }
     /**
@@ -630,7 +630,7 @@ class ClockController extends Controller
             // throw new \Exception('', 406);
         }
 
-        if ($request->mob) {
+        if ($request->mob  && ! App::environment('local')) {
             if (is_null($authUser->mob)) {
                 $authUser->update(['mob' => $request->mob]);
             } elseif ($authUser->mob !== $request->mob) {

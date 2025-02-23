@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log as FacadesLog;
 use Log;
@@ -81,8 +82,8 @@ class AuthController extends Controller
         if ($request->mob) {
             if (is_null($user->mob)) {
                 $user->update(['mob' => $request->mob]);
-            } elseif ($user->mob !== $request->mob) {
-                throw new \Exception('Your current mobile is different from the original logged-in phone (' . $user->mob . ')(' . $request->mob . ')', 406);
+            } elseif ($user->mob !== $request->mob  &&  ! App::environment('local')) {
+                return $this->returnError('Your current mobile is different from the original logged-in phone (' . $user->mob . ')(' . $request->mob . ')', 406);
             }
         }
         // Handle serial number checking logic
@@ -208,6 +209,9 @@ class AuthController extends Controller
     public function profile()
     {
         $authUser = Auth::user();
+        if(  $authUser){
+
+        
         $user = User::where('id', $authUser->id)->first();
         if (!$user) {
             return $this->returnError('No User Found');
@@ -216,6 +220,8 @@ class AuthController extends Controller
         // dd($user->roles);
 
         return $this->returnData("User", new ProfileResource($user), "User Data");
+    }
+        return $this->returnError('user not found');
     }
 
     /**
