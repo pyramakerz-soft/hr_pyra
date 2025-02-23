@@ -29,13 +29,14 @@ export class UserServiceService {
     return this.http.get<AddEmployee>(this.baseURL + "/users/get_user_by_id/" + id, { headers });
   }
   
-  createUser(emp:AddEmployee) {
+  createUser(emp: AddEmployee) {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
     let formData = new FormData();
-    formData.append('image', emp.image as File );
+    formData.append('image', emp.image as File);
     formData.append('name', emp.name);
+    formData.append('code', emp.code || '');
     formData.append('department_id', emp.department_id?.toString() || '');
     formData.append('emp_type', emp.emp_type);
     formData.append('phone', emp.phone);
@@ -46,30 +47,37 @@ export class UserServiceService {
     formData.append('hiring_date', emp.hiring_date ? emp.hiring_date.toString() : '');
     formData.append('salary', emp.salary?.toString() || '');
     formData.append('overtime_hours', emp.overtime_hours?.toString() || '');
-    formData.append('working_hours_day', emp.working_hours_day?.toString() || '');
+    formData.append('working_hours_day', emp.working_hours_day?.toString() || ''); 
+    formData.append('working_hours_day', emp.working_hours_day?.toString() || ''); 
     formData.append('start_time', emp.start_time || '');
     formData.append('end_time', emp.end_time || '');
     formData.append('gender', emp.gender);
-    // formData.append('is_float', emp.is_float.toString());
-    
+
     emp.roles.forEach((role, index) => formData.append(`roles[${index}]`, role));
     emp.location_id.forEach((id, index) => formData.append(`location_id[${index}]`, id.toString()));
     emp.work_type_id.forEach((id, index) => formData.append(`work_type_id[${index}]`, id.toString()));
 
     return this.http.post<any>(this.baseURL + "/users/create_user", formData, { headers });
-  }
+}
 
-  updateUser(emp:AddEmployee, empId:number) {
+  updateUser(emp: AddEmployee, empId: number) {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    
-    let formData = new FormData();  
-    if(typeof emp.image == "string"){
-      formData.append('image', emp.image as string );
-    } else{
-      formData.append('image', emp.image as File );
+
+    let formData = new FormData();
+
+    // Handle the image field
+    if (typeof emp.image === "string") {
+        // If the image is a string (URL), skip appending it to FormData
+        // You might need to handle this differently on the server
+    } else if (emp.image instanceof File) {
+        // If the image is a file, append it to FormData
+        formData.append('image', emp.image);
     }
+
+    // Append other fields
     formData.append('name', emp.name || '');
+    formData.append('code', emp.code || '');
     formData.append('department_id', emp.department_id?.toString() || '');
     formData.append('emp_type', emp.emp_type || '');
     formData.append('phone', emp.phone || '');
@@ -83,14 +91,13 @@ export class UserServiceService {
     formData.append('start_time', emp.start_time || '');
     formData.append('end_time', emp.end_time || '');
     formData.append('gender', emp.gender || '');
-    // formData.append('is_float', emp.is_float?.toString() || '');
-   
+
     emp.roles.forEach((role, index) => formData.append(`roles[${index}]`, role));
     emp.location_id.forEach((id, index) => formData.append(`location_id[${index}]`, id.toString()));
     emp.work_type_id.forEach((id, index) => formData.append(`work_type_id[${index}]`, id.toString()));
 
     return this.http.post<any>(this.baseURL + "/users/update_user/" + empId, formData, { headers });
-  }
+}
   
   updatePassword(pass:string, empId:number){
     const token = localStorage.getItem("token");

@@ -267,65 +267,72 @@ export class HrEmployeeAddEditDetailsComponent {
 
   isFormValid(): boolean {
     let isValid = true;
+    
     for (const key in this.employee) {
-      if (this.employee.hasOwnProperty(key)) {
-        const field = key as keyof AddEmployee;
-        // && field != "is_float"
-        if (!this.employee[field] && field != "code" && field !='work_home' && field != "image" && field != "deparment_name" && field != "working_hours_day") {
-          if(this.EmployeeId !== 0){
-            continue
-          }
-          if(field=="start_time" || field=="end_time"){
-            if(!this.isFloatChecked){
-              this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-              isValid = false;
-            }else{
-              this.validationErrors[field] = '';
-            }
-          }else{
-            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-            isValid = false;
-          }
-        } else {
-          this.validationErrors[field] = '';
+        if (this.employee.hasOwnProperty(key)) {
+            const field = key as keyof AddEmployee;
+            // && field != "is_float"
+            if (!this.employee[field] && field != "code" && field !='work_home' && field != "image" && field != "deparment_name" && field != "working_hours_day") {
+                if(this.EmployeeId !== 0){
+                    continue
+                }
+                if(field=="start_time" || field=="end_time"){
+                    if(!this.isFloatChecked){
+                        this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+                        isValid = false;
+                    }else{
+                        this.validationErrors[field] = '';
+                    }
+                }else{
+                    this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
+                    isValid = false;
+                }
+            } else {
+                this.validationErrors[field] = '';
 
-          switch (field){
-            case "name":
-              if(this.employee.name.length < 3){
-                this.validationErrors[field] = 'Name must be more than 2 characters.';
-                isValid = false;
-              }
-              break;
-            case "phone":
-              if(!this.regexPhone.test(this.employee.phone)){
-                this.validationErrors[field] = 'Invalid phone number.';
-                isValid = false;
-              }
-              break;
-            case "contact_phone":
-              if(!this.regexPhone.test(this.employee.contact_phone)){
-                this.validationErrors[field] = 'Invalid contact phone number.';
-                isValid = false;
-              }
-              break;
-            case "password":
-              if(this.employee.password.length < 5 && this.EmployeeId === 0){
-                this.validationErrors[field] = 'Password must be more than 5 characters.';
-                isValid = false;
-              }
-              break;
-            case "email":
-              if(!this.regexEmail.test(this.employee.email)){
-                this.validationErrors[field] = 'Invalid email.';
-                isValid = false;
-              }
-              break;
-            case "national_id":
-              if(!this.regexNationalID.test(this.employee.national_id)){
-                this.validationErrors[field] = 'Invalid National ID.';
-                isValid = false;
-              }
-              break;
+                switch (field){
+                    case "name":
+                        if(this.employee.name.length < 3){
+                            this.validationErrors[field] = 'Name must be more than 2 characters.';
+                            isValid = false;
+                        }
+                        break;
+                    case "code":
+                        if(this.employee.code.length < 1){
+                            this.validationErrors[field] = 'Code is required.';
+                            isValid = false;
+                        }
+                        break;
+                    case "phone":
+                        if(!this.regexPhone.test(this.employee.phone)){
+                            this.validationErrors[field] = 'Invalid phone number.';
+                            isValid = false;
+                        }
+                        break;
+                    case "contact_phone":
+                        if(!this.regexPhone.test(this.employee.contact_phone)){
+                            this.validationErrors[field] = 'Invalid contact phone number.';
+                            isValid = false;
+                        }
+                        break;
+                    case "password":
+                        if(this.employee.password.length < 5 && this.EmployeeId === 0){
+                            this.validationErrors[field] = 'Password must be more than 5 characters.';
+                            isValid = false;
+                        }
+                        break;
+                    case "email":
+                        if(!this.regexEmail.test(this.employee.email)){
+                            this.validationErrors[field] = 'Invalid email.';
+                            isValid = false;
+                        }
+                        break;
+                    case "national_id":
+                        if(!this.regexNationalID.test(this.employee.national_id)){
+                            this.validationErrors[field] = 'Invalid National ID.';
+                            isValid = false;
+                        }
+                        break;
             // case "working_hours_day":
             //   if(this.employee.working_hours_day){
             //     if(this.employee.working_hours_day > 23){
@@ -417,54 +424,44 @@ export class HrEmployeeAddEditDetailsComponent {
     }
   }
   
-  SaveEmployee() {
+SaveEmployee() {
     if (this.isFormValid()) {
-      this.isSaved = true
-      this.employee.department_id = Number(this.employee.department_id);
-      if(this.EmployeeId === 0){
-        this.userService.createUser(this.employee).subscribe(
-          (result: any) => {
-            this.isSaved = false
-            this.router.navigateByUrl("HR/HREmployee")
-          },
-          error => {
-            if (error.error && error.error.errors) {
-              this.isSaved = false
-              this.handleServerErrors(error.error.errors as Record<keyof AddEmployee, string[]>);
-            }else{
-              Swal.fire({
-                icon: "error",
-                title: "Server Error, try in another time",
-                confirmButtonText: "OK",
-                confirmButtonColor: "#FF7519",
-              })
-            }
-          }
-        );
-      } else{
-        this.userService.updateUser(this.employee, this.EmployeeId).subscribe(
-          (result: any) => {
-            this.isSaved = false
-            this.router.navigateByUrl("HR/HREmployee")
-          },
-          error => {
-            if (error.error && error.error.errors) {
-              this.isSaved = false
-              this.handleServerErrors(error.error.errors as Record<keyof AddEmployee, string[]>);
-            }else{
-              Swal.fire({
-                icon: "error",
-                title: "Server Error, try in another time",
-                confirmButtonText: "OK",
-                confirmButtonColor: "#FF7519",
-              })
-            }
-          }
-        );
-      }
-    }
-  }
+        this.isSaved = true;
+        this.employee.department_id = Number(this.employee.department_id);
 
+        // Log the payload for debugging
+        console.log('Employee Payload:', this.employee);
+
+        if (this.EmployeeId === 0) {
+            console.log('1');
+            this.userService.createUser(this.employee).subscribe(
+                (result: any) => {
+                    this.isSaved = false;
+                    this.router.navigateByUrl("HR/HREmployee");
+                },
+                error => {
+                    this.isSaved = false;
+                    console.error('Create User Error:', error); // Log the full error
+                    this.handleServerErrors(error.error?.errors || {});
+                }
+            );
+        } else {
+            console.log('2');
+            this.userService.updateUser(this.employee, this.EmployeeId).subscribe(
+                (result: any) => {
+                    console.log('2.5');
+                    this.isSaved = false;
+                    this.router.navigateByUrl("HR/HREmployee");
+                },
+                error => {
+                    console.log('3');
+                    console.error('Update User Error:', error); // Log the full error
+                    this.handleServerErrors(error.error?.errors || {});
+                }
+            );
+        }
+    }
+}
   private handleServerErrors(errors: Record<keyof AddEmployee, string[]>) {
     for (const key in errors) {
       if (errors.hasOwnProperty(key)) {

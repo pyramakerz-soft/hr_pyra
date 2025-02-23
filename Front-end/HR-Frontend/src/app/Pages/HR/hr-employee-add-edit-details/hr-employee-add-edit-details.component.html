@@ -45,6 +45,18 @@
                             (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"
                             type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the name" maxlength="50">
                     </div>
+                    <!-- new -->
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Code
+                            <span *ngIf="validationErrors['code']" class="text-red-500 ml-3 font-normal">{{ validationErrors['code']
+                                }}</span>
+                        </label>
+                        <input [(ngModel)]="employee.code" (ngModelChange)="onInputValueChange({ field: 'code', value: $event })"
+                            type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the code"
+                            maxlength="50">
+                    </div>
+                    
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">
                             Work Type
