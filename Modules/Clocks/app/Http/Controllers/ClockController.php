@@ -1147,6 +1147,25 @@ public function getUsersClockInStatus(Request $request)
             ->whereBetween('clock_in', [$startOfDay, $endOfDay])
             ->first();
 
+
+            
+    // Retrieve all locations associated with the user
+    $locations = $user->user_locations()->get()->map(function ($location) {
+        return [
+            'id' => $location->id,
+            'name' => $location->name,
+            'latitude' => $location->latitude,
+            'longitude' => $location->longitude,
+        ];
+    });
+
+    // Retrieve all work types assigned to the user
+    $workTypes = $user->work_types()->get()->map(function ($workType) {
+        return [
+            'id' => $workType->id,
+            'name' => $workType->name,
+        ];
+    });
             return [
                 'user_id' => $user->id,
                 'name' => $user->name,
@@ -1163,6 +1182,13 @@ public function getUsersClockInStatus(Request $request)
                 'clock_out' => $clockInOut && $clockInOut->clock_out
                     ? Carbon::parse($clockInOut->clock_out)->format('H:i')
                     : '00:00',
+
+
+        // Adding multiple locations as an array
+        'locations' => $locations->isNotEmpty() ? $locations : null,
+
+        // Adding multiple work types as an array
+        'work_types' => $workTypes->isNotEmpty() ? $workTypes : null,
             ];
             
     });
@@ -1275,7 +1301,24 @@ public function getUsersClockInStatus(Request $request)
         $clockInOut = $user->user_clocks()
             ->whereBetween('clock_out', [$startOfDay, $endOfDay])
             ->first();
+         
+    // Retrieve all locations associated with the user
+    $locations = $user->user_locations()->get()->map(function ($location) {
+        return [
+            'id' => $location->id,
+            'name' => $location->name,
+            'latitude' => $location->latitude,
+            'longitude' => $location->longitude,
+        ];
+    });
 
+    // Retrieve all work types assigned to the user
+    $workTypes = $user->work_types()->get()->map(function ($workType) {
+        return [
+            'id' => $workType->id,
+            'name' => $workType->name,
+        ];
+    });
             return [
                 'user_id' => $user->id,
                 'name' => $user->name,
@@ -1292,6 +1335,13 @@ public function getUsersClockInStatus(Request $request)
                 'clock_out' => $clockInOut && $clockInOut->clock_out
                     ? Carbon::parse($clockInOut->clock_out)->format('H:i')
                     : '00:00',
+
+
+        // Adding multiple locations as an array
+        'locations' => $locations->isNotEmpty() ? $locations : null,
+
+        // Adding multiple work types as an array
+        'work_types' => $workTypes->isNotEmpty() ? $workTypes : null,
             ];
             
     });
