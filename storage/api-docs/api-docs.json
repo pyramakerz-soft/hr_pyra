@@ -1785,7 +1785,7 @@
                 }
             }
         },
-        "/api/no_clock_in": {
+        "/api/users_clocks_Ins": {
             "get": {
                 "tags": [
                     "Clock"
@@ -1903,7 +1903,7 @@
                 }
             }
         },
-        "/api/no_clock_out": {
+        "/api/users_clocks_Outs": {
             "get": {
                 "tags": [
                     "Clock"

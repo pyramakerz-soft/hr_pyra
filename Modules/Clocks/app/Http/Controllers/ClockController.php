@@ -1062,7 +1062,7 @@ class ClockController extends Controller
 
 /**
  * @OA\Get(
- *     path="/api/no_clock_in",
+ *     path="/api/users_clocks_Ins",
  *     summary="Get Users Who Clocked In or Didn't Clock In on a Specific Day",
  *     description="Retrieves a list of users who either did not clock in or clocked in on a specific day.",
  *     operationId="getUsersClockOutStatus",
@@ -1117,53 +1117,63 @@ class ClockController extends Controller
 public function getUsersClockInStatus(Request $request)
 {
     $date = $request->has('date') ? Carbon::parse($request->get('date')) : Carbon::today();
-    $startOfDay = $date->copy()->startOfDay(); // Ensure startOfDay() does not affect the original $date
-    $endOfDay = $date->copy()->endOfDay();     // Ensure endOfDay() does not affect the original $date
-    
+    $startOfDay = $date->copy()->startOfDay();
+    $endOfDay = $date->copy()->endOfDay();
 
-
-    // Default type is 'no_clock_in' if not provided
     $type = $request->get('type', 'no_clock_in');
 
-    // Retrieve users based on clock-in status
     if ($type === 'no_clock_in') {
-        // Get users who have not clocked in on the given day
         $users = User::whereDoesntHave('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
             $query->whereBetween('clock_in', [$startOfDay, $endOfDay]);
         })->get();
-        
+
         $message = 'Users who did not clock in on this day';
     } elseif ($type === 'clocked_in') {
-        
         $users = User::whereHas('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
-            
-            $query->where('clock_in', '>=', $startOfDay)
-                  ->where('clock_in', '<=', $endOfDay);
+            $query->whereBetween('clock_in', [$startOfDay, $endOfDay]);
         })->get();
-        
-        
-        
-        
+
         $message = 'Users who clocked in on this day';
     } else {
-        // Invalid type parameter
         return $this->returnError('Invalid type parameter. Use "clocked_in" or "no_clock_in".');
     }
 
-    // Check if we found any users based on the filter
     if ($users->isEmpty()) {
         return $this->returnError('No users found.');
     }
 
-    // Return the users based on the selected filter
-    return $this->returnData('data', $users, $message);
+    $usersData = $users->map(function ($user) use ($startOfDay, $endOfDay) {
+        $clockInOut = $user->user_clocks()
+            ->whereBetween('clock_in', [$startOfDay, $endOfDay])
+            ->first();
+
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'phone' => $user->phone,
+                'date' => $clockInOut && $clockInOut->clock_in
+                    ? Carbon::parse($clockInOut->clock_in)->format('Y-m-d')
+                    : Carbon::now()->format('Y-m-d'), // Default to today's date if no record found
+            
+                'clock_in' => $clockInOut && $clockInOut->clock_in
+                    ? Carbon::parse($clockInOut->clock_in)->format('H:i')
+                    : '00:00',
+                'clock_out' => $clockInOut && $clockInOut->clock_out
+                    ? Carbon::parse($clockInOut->clock_out)->format('H:i')
+                    : '00:00',
+            ];
+            
+    });
+
+    return $this->returnData('data', $usersData, $message);
 }
+
 
 
 
 /**
  * @OA\Get(
- *     path="/api/no_clock_out",
+ *     path="/api/users_clocks_Outs",
  *     summary="Get Users Who Clocked In or Didn't Clock In on a Specific Day",
  *     description="Retrieves a list of users who either did not clock in or clocked in on a specific day.",
  *     operationId="getUsersClockInStatus",
@@ -1179,7 +1189,7 @@ public function getUsersClockInStatus(Request $request)
  *         name="type",
  *         in="query",
  *         required=false,
- *         description="The type of users to retrieve: 'clocked_in' for users who clocked in, 'no_clock_in' for users who did not clock in. Defaults to 'no_clock_in'.",
+ *         description="The type of users to retrieve: 'clocked_in' for users who clocked out, 'no_clock_out' for users who did not clock in. Defaults to 'no_clock_out'.",
  *         @OA\Schema(type="string", enum={"clocked_out", "no_clock_out"}, example="no_clock_out")
  *     ),
  *     @OA\Response(
@@ -1257,8 +1267,32 @@ public function getUsersClockInStatus(Request $request)
          return $this->returnError('No users found.');
      }
  
+
+     
+    $usersData = $users->map(function ($user) use ($startOfDay, $endOfDay) {
+        $clockInOut = $user->user_clocks()
+            ->whereBetween('clock_out', [$startOfDay, $endOfDay])
+            ->first();
+
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'phone' => $user->phone,
+                'date' => $clockInOut && $clockInOut->clock_in
+                    ? Carbon::parse($clockInOut->clock_in)->format('Y-m-d')
+                    : Carbon::now()->format('Y-m-d'), // Default to today's date if no record found
+            
+                'clock_in' => $clockInOut && $clockInOut->clock_in
+                    ? Carbon::parse($clockInOut->clock_in)->format('H:i')
+                    : '00:00',
+                'clock_out' => $clockInOut && $clockInOut->clock_out
+                    ? Carbon::parse($clockInOut->clock_out)->format('H:i')
+                    : '00:00',
+            ];
+            
+    });
      // Return the users based on the selected filter
-     return $this->returnData('data', $users, $message);
+     return $this->returnData('data', $usersData, $message);
  }
  
 
