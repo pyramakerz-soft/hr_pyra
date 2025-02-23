@@ -503,11 +503,11 @@
                     "Clock"
                 ],
                 "summary": "Get All Clock Records",
-                "description": "Retrieve all clock-in and clock-out records with optional filters and pagination.",
+                "description": "Retrieve all clock-in and clock-out records with optional filters and pagination. Can filter by department and specify a date range.",
                 "operationId": "getAllClocks",
                 "parameters": [
                     {
-                        "name": "department",
+                        "name": "department_id",
                         "in": "query",
                         "description": "Filter by department ID",
                         "required": false,
@@ -519,11 +519,31 @@
                     {
                         "name": "export",
                         "in": "query",
-                        "description": "Flag to export the clock records",
+                        "description": "Flag to export the clock records. If set to true, the response will be an export file.",
                         "required": false,
                         "schema": {
                             "type": "boolean",
-                            "example": ""
+                            "example": true
+                        }
+                    },
+                    {
+                        "name": "from_day",
+                        "in": "query",
+                        "description": "Start date for the date range filter. Format: YYYY-MM-DD. If not provided, defaults to the 26th of the previous month.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024-01-26"
+                        }
+                    },
+                    {
+                        "name": "to_day",
+                        "in": "query",
+                        "description": "End date for the date range filter. Format: YYYY-MM-DD. If not provided, defaults to the 26th of the current month.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024-02-26"
                         }
                     },
                     {

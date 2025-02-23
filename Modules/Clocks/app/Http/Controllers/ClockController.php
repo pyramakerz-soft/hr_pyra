@@ -123,174 +123,196 @@ class ClockController extends Controller
         ];
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/all_clocks",
-     *     tags={"Clock"},
-     *     summary="Get All Clock Records",
-     *     description="Retrieve all clock-in and clock-out records with optional filters and pagination.",
-     *     operationId="getAllClocks",
-     *     @OA\Parameter(
-     *         name="department",
-     *         in="query",
-     *         description="Filter by department ID",
-     *         required=false,
-     *         @OA\Schema(
-     *             type="integer",
-     *             example=1
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         name="export",
-     *         in="query",
-     *         description="Flag to export the clock records",
-     *         required=false,
-     *         @OA\Schema(
-     *             type="boolean",
-     *             example=""
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         name="page",
-     *         in="query",
-     *         description="Page number for pagination",
-     *         required=false,
-     *         @OA\Schema(
-     *             type="integer",
-     *             example=1
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="All Clocks Data",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(
-     *                 property="status",
-     *                 type="string",
-     *                 example="success"
-     *             ),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(
-     *                     property="clocks",
-     *                     type="array",
-     *                     @OA\Items(
-     *                         @OA\Property(property="id", type="integer", example=1),
-     *                         @OA\Property(property="user_id", type="integer", example=23),
-     *                         @OA\Property(property="clock_in", type="string", format="date-time", example="2024-09-25T08:30:00"),
-     *                         @OA\Property(property="clock_out", type="string", format="date-time", example="2024-09-25T17:00:00"),
-     *                         @OA\Property(property="total_hours", type="string", example="8:30"),
-     *                         @OA\Property(property="department", type="string", example="Sales")
-     *                     )
-     *                 ),
-     *                 @OA\Property(
-     *                     property="pagination",
-     *                     type="object",
-     *                     @OA\Property(property="current_page", type="integer", example=1),
-     *                     @OA\Property(property="total_pages", type="integer", example=5),
-     *                     @OA\Property(property="per_page", type="integer", example=7),
-     *                     @OA\Property(property="total_records", type="integer", example=35)
-     *                 )
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="All Clocks Data"
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="No Clocks Found",
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="status",
-     *                 type="string",
-     *                 example="error"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="No Clocks Found"
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Internal Server Error",
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="status",
-     *                 type="string",
-     *                 example="error"
-     *             ),
-     *             @OA\Property(
-     *                 property="message",
-     *                 type="string",
-     *                 example="An error occurred while retrieving clock records."
-     *             )
-     *         )
-     *     ),
-     *     security={{ "bearerAuth": {} }}
-     * )
-     */
+/**
+ * @OA\Get(
+ *     path="/api/all_clocks",
+ *     tags={"Clock"},
+ *     summary="Get All Clock Records",
+ *     description="Retrieve all clock-in and clock-out records with optional filters and pagination. Can filter by department and specify a date range.",
+ *     operationId="getAllClocks",
+ *     @OA\Parameter(
+ *         name="department_id",
+ *         in="query",
+ *         description="Filter by department ID",
+ *         required=false,
+ *         @OA\Schema(
+ *             type="integer",
+ *             example=1
+ *         )
+ *     ),
+ *     @OA\Parameter(
+ *         name="export",
+ *         in="query",
+ *         description="Flag to export the clock records. If set to true, the response will be an export file.",
+ *         required=false,
+ *         @OA\Schema(
+ *             type="boolean",
+ *             example=true
+ *         )
+ *     ),
+ *     @OA\Parameter(
+ *         name="from_day",
+ *         in="query",
+ *         description="Start date for the date range filter. Format: YYYY-MM-DD. If not provided, defaults to the 26th of the previous month.",
+ *         required=false,
+ *         @OA\Schema(
+ *             type="string",
+ *             example="2024-01-26"
+ *         )
+ *     ),
+ *     @OA\Parameter(
+ *         name="to_day",
+ *         in="query",
+ *         description="End date for the date range filter. Format: YYYY-MM-DD. If not provided, defaults to the 26th of the current month.",
+ *         required=false,
+ *         @OA\Schema(
+ *             type="string",
+ *             example="2024-02-26"
+ *         )
+ *     ),
+ *     @OA\Parameter(
+ *         name="page",
+ *         in="query",
+ *         description="Page number for pagination",
+ *         required=false,
+ *         @OA\Schema(
+ *             type="integer",
+ *             example=1
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="All Clocks Data",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(
+ *                 property="status",
+ *                 type="string",
+ *                 example="success"
+ *             ),
+ *             @OA\Property(
+ *                 property="data",
+ *                 type="object",
+ *                 @OA\Property(
+ *                     property="clocks",
+ *                     type="array",
+ *                     @OA\Items(
+ *                         @OA\Property(property="id", type="integer", example=1),
+ *                         @OA\Property(property="user_id", type="integer", example=23),
+ *                         @OA\Property(property="clock_in", type="string", format="date-time", example="2024-09-25T08:30:00"),
+ *                         @OA\Property(property="clock_out", type="string", format="date-time", example="2024-09-25T17:00:00"),
+ *                         @OA\Property(property="total_hours", type="string", example="8:30"),
+ *                         @OA\Property(property="department", type="string", example="Sales")
+ *                     )
+ *                 ),
+ *                 @OA\Property(
+ *                     property="pagination",
+ *                     type="object",
+ *                     @OA\Property(property="current_page", type="integer", example=1),
+ *                     @OA\Property(property="total_pages", type="integer", example=5),
+ *                     @OA\Property(property="per_page", type="integer", example=7),
+ *                     @OA\Property(property="total_records", type="integer", example=35)
+ *                 )
+ *             ),
+ *             @OA\Property(
+ *                 property="message",
+ *                 type="string",
+ *                 example="All Clocks Data"
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="No Clocks Found",
+ *         @OA\JsonContent(
+ *             @OA\Property(
+ *                 property="status",
+ *                 type="string",
+ *                 example="error"
+ *             ),
+ *             @OA\Property(
+ *                 property="message",
+ *                 type="string",
+ *                 example="No Clocks Found"
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Internal Server Error",
+ *         @OA\JsonContent(
+ *             @OA\Property(
+ *                 property="status",
+ *                 type="string",
+ *                 example="error"
+ *             ),
+ *             @OA\Property(
+ *                 property="message",
+ *                 type="string",
+ *                 example="An error occurred while retrieving clock records."
+ *             )
+ *         )
+ *     ),
+ *     security={{ "bearerAuth": {} }}
+ * )
+ */
 
-    public function allClocks(Request $request)
-    {
+     public function allClocks(Request $request)
+     {
+         $query = ClockInOut::query();
+     
+         foreach ($this->filters as $filter) {
+             $query = $filter->apply($query, $request);
+         }
 
+        //  return $this->returnData("data", $query->get(), "All Clocks Data");
 
-        $query = ClockInOut::query();
-    // Apply all filters
-    foreach ($this->filters as $filter) {
-        $query = $filter->apply($query, $request);
+     $fromDay = $request->get('from_day');
+     $toDay = $request->get('to_day');
+     
+     if ($fromDay && $toDay) {
+         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $fromDay) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $toDay)) {
+            
+             $defaultStartDate = Carbon::parse($fromDay)->startOfDay();  // Parse and set start of day
+             $defaultEndDate = Carbon::parse($toDay)->endOfDay();        // Parse and set end of day
+
+         } else {
+             return $this->returnError('Invalid Date Format. Expected YYYY-MM-DD.');
+         }
+     } else {
+        $now = Carbon::now();
+
+         $defaultStartDate = $now->copy()->subMonth()->day(26)->startOfDay(); 
+         $defaultEndDate = $now->copy()->day(26)->endOfDay();                
+     }
+ 
+     if ($defaultStartDate && $defaultEndDate) {
+        $query->whereBetween('clock_in', [
+            $defaultStartDate->startOfDay(), 
+            $defaultEndDate->endOfDay()      
+        ]);
     }
-
-        if ($request->has('month')) {
-            $monthYear = $request->get('month');
-
-            if (preg_match('/^\d{4}-\d{2}$/', $monthYear)) {
-                list($year, $month) = explode('-', $monthYear);
-
-                $query->whereYear('clock_in', $year)
-                    ->whereMonth('clock_in', $month);
-
-                $clocks = $query->get();
-            } else {
-                return $this->returnError('Invalid Month Format. Expected YYYY-MM.');
-            }
-        }
-
-        // Handle export request
-        if ($request->has('export')) {
-            $clocksForExport = $query->orderBy('clock_in', 'desc')->get();  // Using `get()` instead of `paginate()` for export
-            // Log the number of clocks to be exported (for debugging)
-            Log::info(["clocks_count" => $clocksForExport->count()]);
-
-
-            // Proceed with export
-            return (new clocksExport($clocksForExport, $request->get('department')))
-                ->download('all_user_clocks.xlsx');
-        }
-        // Handle pagination
-        $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
-
-        if ($clocks->isEmpty()) {
-            return $this->returnError('No Clocks Found');
-        }
-
-
-
-        // Prepare and return data
-        $data = $this->prepareClockData($clocks);
-        if (!isset($data['clocks'])) {
-            return $this->returnError('No Clocks Found');
-        }
-
-        return $this->returnData("data", $data, "All Clocks Data");
-    }
-
+    
+         if ($request->has('export')) {
+             $clocksForExport = $query->orderBy('clock_in', 'desc')->get();
+             Log::info(["clocks_count" => $clocksForExport->count()]);
+     
+             return (new clocksExport($clocksForExport, $request->get('department')))
+                 ->download('all_user_clocks.xlsx');
+         }
+         $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+     
+         if ($clocks->isEmpty()) {
+             return $this->returnError('No Clocks Found');
+         }
+     
+         $data = $this->prepareClockData($clocks);
+         if (!isset($data['clocks'])) {
+             return $this->returnError('No Clocks Found');
+         }
+     
+         return $this->returnData("data", $data, "All Clocks Data");
+     }
     /**
      * @OA\Get(
      *     path="/api/clocks/user/{user}",
