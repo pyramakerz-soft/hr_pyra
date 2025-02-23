@@ -1647,6 +1647,380 @@
                 }
             }
         },
+        "/api/get_count_issues": {
+            "get": {
+                "tags": [
+                    "Clock Issues"
+                ],
+                "summary": "Get total count of clock-in issues",
+                "description": "Returns the total count of clock-in issues.",
+                "operationId": "04a851a0d940e9ef805a43c1e43abdd8",
+                "responses": {
+                    "200": {
+                        "description": "Count of clock-in issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/get_clock_issues": {
+            "get": {
+                "tags": [
+                    "Clock Issues"
+                ],
+                "summary": "Get clock-in issues",
+                "description": "Retrieve a paginated list of clock-in issues within a given month or the current month if no month is specified.",
+                "operationId": "93c2285147e4cdcf6e46a32cdcbd7213",
+                "parameters": [
+                    {
+                        "name": "month",
+                        "in": "query",
+                        "description": "Month to filter clock-in issues (format: YYYY-MM)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "Apply additional date filters",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of clock-in issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "clockIssues": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/ClockInOut"
+                                                    }
+                                                },
+                                                "count": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No Clock Issues Found"
+                    }
+                }
+            }
+        },
+        "/api/update_clock_issue/{id}": {
+            "post": {
+                "tags": [
+                    "Clock Issues"
+                ],
+                "summary": "Update a clock issue",
+                "description": "Marks a clock-in issue as resolved.",
+                "operationId": "466aebd5ab5aaf1e87f055ec3ca5e066",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Clock-in issue ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Clock Issue Updated Successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "clock": {
+                                            "$ref": "#/components/schemas/ClockInOut"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "There is no issue for this clock"
+                    }
+                }
+            }
+        },
+        "/api/users_clocks_Ins": {
+            "get": {
+                "tags": [
+                    "Clock"
+                ],
+                "summary": "Get Users Who Clocked In or Didn't Clock In on a Specific Day",
+                "description": "Retrieves a list of users who either did not clock in or clocked in on a specific day.",
+                "operationId": "getUsersClockOutStatus",
+                "parameters": [
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "The date to check users for, in 'Y-m-d' format. Defaults to today's date if not provided.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "2025-02-23"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "The type of users to retrieve: 'clocked_in' for users who clocked in, 'no_clock_in' for users who did not clock in. Defaults to 'no_clock_in'.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "clocked_in",
+                                "no_clock_in"
+                            ],
+                            "example": "no_clock_in"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Users who either clocked in or didn't clock in on the specified day",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "John Doe"
+                                                    },
+                                                    "email": {
+                                                        "type": "string",
+                                                        "example": "john.doe@example.com"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Users who didn't clock in on this day"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No users found based on the filter",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No users found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid date format or other error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid date format."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users_clocks_Outs": {
+            "get": {
+                "tags": [
+                    "Clock"
+                ],
+                "summary": "Get Users Who Clocked In or Didn't Clock In on a Specific Day",
+                "description": "Retrieves a list of users who either did not clock in or clocked in on a specific day.",
+                "operationId": "getUsersClockInStatus",
+                "parameters": [
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "The date to check users for, in 'Y-m-d' format. Defaults to today's date if not provided.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "2025-02-23"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "The type of users to retrieve: 'clocked_in' for users who clocked in, 'no_clock_in' for users who did not clock in. Defaults to 'no_clock_in'.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "clocked_out",
+                                "no_clock_out"
+                            ],
+                            "example": "no_clock_out"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Users who either clocked in or didn't clock in on the specified day",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "John Doe"
+                                                    },
+                                                    "email": {
+                                                        "type": "string",
+                                                        "example": "john.doe@example.com"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Users who didn't clock in on this day"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No users found based on the filter",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No users found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid date format or other error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid date format."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/locations": {
             "get": {
                 "tags": [
@@ -4644,6 +5018,10 @@
         {
             "name": "Clock",
             "description": "Clock"
+        },
+        {
+            "name": "Clock Issues",
+            "description": "Clock Issues"
         },
         {
             "name": "Location",

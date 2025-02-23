@@ -32,6 +32,13 @@ Route::group(['middleware' => ['auth:api', 'role:Hr']], function () {
     Route::post('/update_clock_issue/{clock}', [ClockController::class, 'updateClockIssues']);
 
 
+    Route::post('/update_clock_issue/{clock}', [ClockController::class, 'updateClockIssues']);
+
+    Route::get('/users_clocks_Ins', [ClockController::class, 'getUsersClockInStatus']);
+
+    Route::get('/users_clocks_Outs', [ClockController::class, 'getUsersClockOutStatus']);
+    
+
 
 });
 
