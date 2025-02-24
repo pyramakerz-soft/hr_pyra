@@ -133,6 +133,8 @@ trait ClockCalculationsHelperTrait
             ->where('user_locations.location_id', $location_id)
             ->where('locations.id', $location_id)
             ->first();
+            
+            Log::error("Error fetching address: " . $userLocation.'\n'.$authUser.'\n'.$location_id);
         return $userLocation;
     }
     protected function prepareClockData($clocks)
@@ -350,6 +352,8 @@ trait ClockCalculationsHelperTrait
     {
         // Retrieve location details using location_id from the request
         $location_id = $request->location_id;
+        // Log::error("Error fetching address: " . $request->location_id);
+        //         Log::error("Error fetching address: " . $authUser);
 
         // Validate that the location_id is assigned to the user
         $userLocation = $this->getUserAssignedLocationById($authUser, $location_id);

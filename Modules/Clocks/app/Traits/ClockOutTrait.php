@@ -82,6 +82,8 @@ use ClockCalculationsHelperTrait;
         //3- Validate location of user and location of the site
         $latitude = $request->latitude;
         $longitude = $request->longitude;
+        $latest_clock_in = ClockInOut::where('user_id',$authUser->id)->orderBy('id','DESC')->first()->location_id;
+        $request->location_id = $latest_clock_in;
           // 1- Validate location of user and location of the site
           $userLocation = $this->validateLocations($request, $authUser);
 
