@@ -44,7 +44,7 @@ class UpdateClockOutsListener
             $duration = $clockInTimestamp->diff($endTimestamp);
             $durationFormatted = sprintf('%02d:%02d:%02d', $duration->h, $duration->i, $duration->s);
             $clock->update([
-                'clock_out' => $endTimestamp,
+                'clock_out' => NULL,
                 'is_issue' => true,
                 'early_leave' => "00:00:00",
                 'duration' => $durationFormatted,
