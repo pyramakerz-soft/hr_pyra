@@ -1925,7 +1925,7 @@
                     {
                         "name": "type",
                         "in": "query",
-                        "description": "The type of users to retrieve: 'clocked_in' for users who clocked in, 'no_clock_in' for users who did not clock in. Defaults to 'no_clock_in'.",
+                        "description": "The type of users to retrieve: 'clocked_in' for users who clocked out, 'no_clock_out' for users who did not clock in. Defaults to 'no_clock_out'.",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -3021,6 +3021,209 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/excuse/add_user_excuse": {
+            "post": {
+                "tags": [
+                    "Excuses"
+                ],
+                "summary": "Add a new excuse for the authenticated user",
+                "operationId": "addUserExcuse",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "date",
+                                    "from",
+                                    "to",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-02-27"
+                                    },
+                                    "from": {
+                                        "type": "string",
+                                        "example": "09:00"
+                                    },
+                                    "to": {
+                                        "type": "string",
+                                        "example": "17:00"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "approved",
+                                            "rejected"
+                                        ],
+                                        "example": "pending"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User Excuse created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Excuse": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/excuse/show_user_excuses": {
+            "get": {
+                "tags": [
+                    "Excuses"
+                ],
+                "summary": "Show all excuses for the authenticated user",
+                "operationId": "showUserExcuses",
+                "responses": {
+                    "200": {
+                        "description": "List of user excuses",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Excuses": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/excuse/change_excuse_status/{excuse}": {
+            "post": {
+                "tags": [
+                    "Excuses"
+                ],
+                "summary": "Change the status of a specific excuse",
+                "operationId": "changeExcuseStatus",
+                "parameters": [
+                    {
+                        "name": "excuse",
+                        "in": "path",
+                        "description": "Excuse ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "approved",
+                                            "rejected"
+                                        ],
+                                        "example": "approved"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Excuse status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Excuse": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Excuse not found"
+                    },
+                    "403": {
+                        "description": "Unauthorized to change status"
+                    }
+                }
+            }
+        },
+        "/api/excuse/get_excuses_of_manager_employees": {
+            "get": {
+                "tags": [
+                    "Excuses"
+                ],
+                "summary": "Get excuses of employees in the manager's department",
+                "operationId": "getExcusesOfManagerEmployees",
+                "responses": {
+                    "200": {
+                        "description": "List of excuses for employees in the manager's department",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Excuses": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                }
             }
         },
         "/api/users/getAllUsers": {
@@ -5011,6 +5214,10 @@
         }
     ],
     "tags": [
+        {
+            "name": "Excuses",
+            "description": "Operations related to user excuses"
+        },
         {
             "name": "Auth",
             "description": "Auth"

@@ -67,7 +67,7 @@ class Handler extends ExceptionHandler
             return $this->returnError($exception->getMessage());
         }
         if ($exception instanceof NotFoundHttpException) {
-            return $this->returnError('Link Not Found');
+            return $this->returnError('Link Not Found'.$exception->getMessage());
 
         }
         //unauthorized
