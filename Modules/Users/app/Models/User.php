@@ -35,7 +35,9 @@ class User extends Authenticatable implements JWTSubject
         'department_id',
         'image',
         'serial_number',
-        'mob'
+        'mob',
+        'parent_manager_id' // Added for manager hierarchy
+
     ];
 
     /**
@@ -77,35 +79,30 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    // A user(manager) belongs to a department
+    public function managedDepartments()
+    {
+        return $this->belongsToMany(Department::class, 'department_managers', 'manager_id', 'department_id');
+    }
     public function department()
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Department::class, 'department_id');
     }
 
-    // A user can have many managers
     public function managers()
     {
         return $this->belongsToMany(User::class, 'user_managers', 'user_id', 'manager_id');
     }
+    
 
-    // A user(manager) can manage many users
-    public function managedUsers()
-    {
-        return $this->belongsToMany(User::class, 'user_managers', 'manager_id', 'user_id');
-    }
 
     public function user_detail()
     {
         return $this->hasOne(UserDetail::class);
     }
-    public function user_vacations()
-    {
-        return $this->hasMany(UserVacation::class);
-    }
+
     public function user_holidays()
     {
-        return $this->hasMany(UserHoliday::class);
+        return $this->hasMany(UserVacation::class);
     }
     public function user_locations()
     {
@@ -130,6 +127,39 @@ class User extends Authenticatable implements JWTSubject
     public function getRoleName()
     {
         return $this->getRoleNames()->first(); // Get the first role name
+    }
+
+
+    public function user_vacations()
+    {
+        return $this->hasMany(UserVacation::class);
+    }
+    public function excuses()
+    {
+        return $this->hasMany(Excuse::class);  // A user can have many excuses
+    }
+
+    public function overTimes()
+    {
+        return $this->hasMany(OverTime::class);  // A user can have many excuses
+    }
+
+
+    /**
+     * Get the direct superior (manager) of the user.
+     */
+    public function parentManager()
+    {
+        return $this->belongsTo(User::class, 'parent_manager_id');
+    }
+   
+        /**
+     * Get all subordinates (direct reports) of the user.
+     */
+    // employees el taht manager
+    public function subordinates()
+    {
+        return $this->hasMany(User::class, 'parent_manager_id');
     }
 
 }

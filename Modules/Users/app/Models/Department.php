@@ -11,22 +11,24 @@ class Department extends Model
     //Constant
     // public const Academic_school = 'ACADEMIC_SCHOOL';
     // public const Factory = 'FACTORY';
+    protected $guarded = [];
 
-    // A department has one manager
-    public function manager()
-    {
-        return $this->belongsTo(User::class, 'manager_id');
-    }
-
-    // A department has many users
+   
+    /**
+     * A department can have many users.
+     */
     public function users()
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'department_id');
     }
 
-    public function user_holidays()
+    /**
+     * A department can have many vacations associated with users.
+     */
+    public function user_vacations()
     {
-        return $this->hasMany(UserHoliday::class);
+        return $this->hasMany(UserVacation::class);
     }
+
 
 }

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Users\Http\Controllers\DepartmentController;
+use Modules\Users\Http\Controllers\ExcuseController;
 use Modules\Users\Http\Controllers\PermissionController;
 use Modules\Users\Http\Controllers\RoleController;
 use Modules\Users\Http\Controllers\UsersController;
@@ -17,6 +18,23 @@ use Modules\Users\Http\Controllers\WorkTypeController;
  * is assigned the "api" middleware group. Enjoy building your API!
  *
 */
+
+
+Route::group(['prefix' => 'excuse'], function () {
+
+
+
+    Route::post('/add_user_excuse', [ExcuseController::class, 'addUserExcuse'])->name('add_user_excuse'); //HR role
+    Route::get('/show_user_excuses', [ExcuseController::class, 'showUserExcuses']);
+
+    Route::group(['middleware' => 'role:Manager'], function () {
+
+        Route::post('/change_excuse_status/{excuse}', [ExcuseController::class, 'changeExcuseStatus']);
+        Route::get('/get_excuses_of_manager_employees', [ExcuseController::class, 'getExcusesOfManagerEmployees']);
+    
+    });
+
+});
 
 Route::group(['middleware' => 'role:Hr'], function () {
 
@@ -42,7 +60,6 @@ Route::group(['middleware' => 'role:Hr'], function () {
         Route::get('user_details/{userDetail}', [UsersController::class, 'showUserDetails']); // Get a specific user detail
 
 
-
     });
 
 
@@ -64,6 +81,8 @@ Route::group(['middleware' => 'role:Hr'], function () {
     Route::post('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update'); //HR role
     Route::apiResource('roles', RoleController::class)->except('update'); //HR role
     Route::apiResource('permissions', PermissionController::class)->except('update'); //HR role
+
+
 
 
 
