@@ -3226,6 +3226,414 @@
                 }
             }
         },
+        "/api/overtime/add_user_overtime": {
+            "post": {
+                "tags": [
+                    "Overtime"
+                ],
+                "summary": "Add a new overtime for the authenticated user",
+                "operationId": "addUserOvertime",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "date",
+                                    "from",
+                                    "to",
+                                    "reason",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-02-27"
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "format": "reason",
+                                        "example": "bla bla"
+                                    },
+                                    "from": {
+                                        "type": "string",
+                                        "example": "09:00"
+                                    },
+                                    "to": {
+                                        "type": "string",
+                                        "example": "17:00"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "approved",
+                                            "rejected"
+                                        ],
+                                        "example": "pending"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User Overtime created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Overtime": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/overtime/show_user_overtime": {
+            "get": {
+                "tags": [
+                    "Overtime"
+                ],
+                "summary": "Show all overtimes for the authenticated user",
+                "operationId": "showUserOvertime",
+                "responses": {
+                    "200": {
+                        "description": "List of user overtimes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Overtimes": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/overtime/change_overtime_status/{overtime}": {
+            "post": {
+                "tags": [
+                    "Overtime"
+                ],
+                "summary": "Change the status of a specific overtime",
+                "operationId": "changeOvertimeStatus",
+                "parameters": [
+                    {
+                        "name": "overtime",
+                        "in": "path",
+                        "description": "Overtime ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "approved",
+                                            "rejected"
+                                        ],
+                                        "example": "approved"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Overtime status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Overtime": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Overtime not found"
+                    },
+                    "403": {
+                        "description": "Unauthorized to change status"
+                    }
+                }
+            }
+        },
+        "/api/overtime/get_overtime_of_manager_employees": {
+            "get": {
+                "tags": [
+                    "Overtime"
+                ],
+                "summary": "Get overtimes of employees in the manager's department",
+                "operationId": "getOvertimeOfManagerEmployees",
+                "responses": {
+                    "200": {
+                        "description": "List of overtimes for employees in the manager's department",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Overtimes": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/vacation/add_user_vacation": {
+            "post": {
+                "tags": [
+                    "Vacation"
+                ],
+                "summary": "Add a new vacation for the authenticated user",
+                "operationId": "addUserVacation",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "from",
+                                    "to_date",
+                                    "from_date"
+                                ],
+                                "properties": {
+                                    "to_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-02-27"
+                                    },
+                                    "from_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-02-28"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "approved",
+                                            "rejected"
+                                        ],
+                                        "example": "pending"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User Vacation created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Vacation": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/vacation/show_user_vacations": {
+            "get": {
+                "tags": [
+                    "Vacation"
+                ],
+                "summary": "Show all vacations for the authenticated user",
+                "operationId": "showUserVacations",
+                "responses": {
+                    "200": {
+                        "description": "List of user vacations",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Vacations": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/vacation/change_vacation_status/{vacation}": {
+            "post": {
+                "tags": [
+                    "Vacation"
+                ],
+                "summary": "Change the status of a specific vacation",
+                "operationId": "changeVacationStatus",
+                "parameters": [
+                    {
+                        "name": "vacation",
+                        "in": "path",
+                        "description": "Vacation ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "approved",
+                                            "rejected"
+                                        ],
+                                        "example": "approved"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Vacation status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Vacation": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Vacation not found"
+                    },
+                    "403": {
+                        "description": "Unauthorized to change status"
+                    }
+                }
+            }
+        },
+        "/api/vacation/get_vacations_of_manager_employees": {
+            "get": {
+                "tags": [
+                    "Vacation"
+                ],
+                "summary": "Get vacations of employees in the manager's department",
+                "operationId": "getVacationsOfManagerEmployees",
+                "responses": {
+                    "200": {
+                        "description": "List of vacations for employees in the manager's department",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Vacations": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
         "/api/users/getAllUsers": {
             "get": {
                 "tags": [
@@ -5217,6 +5625,14 @@
         {
             "name": "Excuses",
             "description": "Operations related to user excuses"
+        },
+        {
+            "name": "Overtime",
+            "description": "Operations related to user overtime"
+        },
+        {
+            "name": "Vacation",
+            "description": "Operations related to user Vacation"
         },
         {
             "name": "Auth",

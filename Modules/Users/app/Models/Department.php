@@ -13,6 +13,17 @@ class Department extends Model
     // public const Factory = 'FACTORY';
     protected $guarded = [];
 
+
+// In the Department model
+public function managers()
+{
+    return $this->belongsToMany(User::class, 'department_managers', 'department_id', 'manager_id')
+                ;
+}
+
+
+
+
    
     /**
      * A department can have many users.
