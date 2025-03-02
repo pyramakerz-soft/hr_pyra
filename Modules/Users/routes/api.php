@@ -3,9 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Users\Http\Controllers\DepartmentController;
 use Modules\Users\Http\Controllers\ExcuseController;
+use Modules\Users\Http\Controllers\OverTimeController;
 use Modules\Users\Http\Controllers\PermissionController;
 use Modules\Users\Http\Controllers\RoleController;
 use Modules\Users\Http\Controllers\UsersController;
+use Modules\Users\Http\Controllers\UserVacationController;
 use Modules\Users\Http\Controllers\WorkTypeController;
 
 /*
@@ -31,10 +33,37 @@ Route::group(['prefix' => 'excuse'], function () {
 
         Route::post('/change_excuse_status/{excuse}', [ExcuseController::class, 'changeExcuseStatus']);
         Route::get('/get_excuses_of_manager_employees', [ExcuseController::class, 'getExcusesOfManagerEmployees']);
-    
     });
-
 });
+
+Route::group(['prefix' => 'overtime'], function () {
+
+    // Route to add a new overtime for the authenticated user
+    Route::post('/add_user_overtime', [OverTimeController::class, 'addUserOvertime'])->name('add_user_overtime'); // HR role
+    Route::get('/show_user_overtime', [OverTimeController::class, 'showUserOvertime']);
+
+    Route::group(['middleware' => 'role:Manager'], function () {
+
+        // Route to change overtime status
+        Route::post('/change_overtime_status/{overtime}', [OverTimeController::class, 'changeOvertimeStatus']);
+        Route::get('/get_overtime_of_manager_employees', [OverTimeController::class, 'getOvertimeOfManagerEmployees']);
+    });
+});
+
+
+Route::group(['prefix' => 'vacation'], function () {
+
+    Route::post('/add_user_vacation', [UserVacationController::class, 'addUserVacation'])->name('add_user_vacation');
+    Route::get('/show_user_vacations', [UserVacationController::class, 'showUserVacations']);
+
+    Route::group(['middleware' => 'role:Manager'], function () {
+
+        Route::post('/change_vacation_status/{vacation}', [UserVacationController::class, 'changeVacationStatus']);
+        Route::get('/get_vacations_of_manager_employees', [UserVacationController::class, 'getVacationsOfManagerEmployees']);
+    });
+});
+
+
 
 Route::group(['middleware' => 'role:Hr'], function () {
 

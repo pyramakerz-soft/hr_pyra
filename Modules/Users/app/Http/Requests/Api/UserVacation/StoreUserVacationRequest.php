@@ -22,10 +22,9 @@ class StoreUserVacationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'sick_left' => ['required', 'integer', 'max:5'],
-            'paid_left' => ['required', 'integer', 'max:15'],
-            'deduction_left' => ['required', 'integer', 'max:1'],
-            'user_id' => ['required', 'exists:users,id'],
+            'from_date' => 'required|date_format:Y-m-d',
+            'to_date' => 'required|date_format:Y-m-d',
+            'status' => 'nullable|in:pending,approved,rejected',
 
         ];
     }

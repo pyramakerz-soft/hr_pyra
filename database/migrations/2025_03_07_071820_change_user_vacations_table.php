@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::table('user_vacations', function (Blueprint $table) {
             $table->dropColumn(['sick_left', 'paid_left', 'deduction_left']);
-            $table->time('from_date');
-            $table->time('to_date');   
+            $table->date('from_date');
+            $table->date('to_date');   
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending'); 
 
         });

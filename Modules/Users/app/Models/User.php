@@ -100,10 +100,6 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(UserDetail::class);
     }
 
-    public function user_holidays()
-    {
-        return $this->hasMany(UserVacation::class);
-    }
     public function user_locations()
     {
         return $this->belongsToMany(Location::class, 'user_locations', 'user_id', 'location_id')->withTimestamps();
@@ -116,10 +112,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(ClockInOut::class);
     }
-    public function user_overtimes()
-    {
-        return $this->hasMany(OverTimeInOut::class);
-    }
+
     public function work_types()
     {
         return $this->belongsToMany(WorkType::class, 'user_work_type', 'user_id', 'work_type_id')->withTimestamps();
