@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 27, 2025 at 02:35 PM
+-- Generation Time: Mar 04, 2025 at 12:26 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -2097,10 +2097,19 @@ CREATE TABLE `excuses` (
 --
 
 INSERT INTO `excuses` (`id`, `date`, `from`, `to`, `created_at`, `updated_at`, `status`, `user_id`) VALUES
-(1, '2025-02-27', '09:00:00', '17:00:00', '2025-02-27 10:11:14', '2025-02-27 10:11:14', 'pending', 386),
-(2, '2025-02-27', '44:08:43', '58:08:43', NULL, NULL, 'pending', 488),
-(3, '2025-02-27', '44:08:43', '58:08:43', NULL, NULL, 'pending', 488),
-(4, '2025-02-27', '09:00:00', '17:00:00', '2025-02-27 11:27:47', '2025-02-27 11:27:47', 'pending', 372);
+(1, '2025-02-27', '09:00:00', '17:00:00', '2025-02-27 10:11:14', '2025-03-04 09:14:51', 'approved', 367),
+(2, '2025-02-27', '44:08:43', '58:08:43', NULL, '2025-03-04 09:21:53', 'approved', 488),
+(3, '2025-02-27', '44:08:43', '58:08:43', NULL, '2025-03-04 09:21:55', 'approved', 488),
+(4, '2025-02-27', '09:00:00', '17:00:00', '2025-02-27 11:27:47', '2025-03-04 09:21:56', 'approved', 372),
+(5, '2025-02-27', '09:00:00', '17:00:00', '2025-03-04 05:08:13', '2025-03-04 09:21:58', 'rejected', 367),
+(6, '2025-02-27', '09:00:00', '17:00:00', '2025-03-04 05:09:00', '2025-03-04 09:21:59', 'rejected', 367),
+(7, '2025-02-27', '09:00:00', '17:00:00', '2025-03-04 05:11:30', '2025-03-04 09:22:01', 'rejected', 367),
+(8, '2025-02-27', '09:00:00', '17:00:00', '2025-03-04 05:12:51', '2025-03-04 09:22:03', 'rejected', 367),
+(9, '2025-03-04', '09:17:00', '14:17:00', '2025-03-04 05:17:20', '2025-03-04 09:22:05', 'rejected', 367),
+(10, '2025-03-04', '09:18:00', '21:18:00', '2025-03-04 05:18:59', '2025-03-04 09:22:08', 'rejected', 367),
+(11, '2025-03-04', '09:19:00', '10:19:00', '2025-03-04 05:19:52', '2025-03-04 09:22:09', 'rejected', 367),
+(12, '2025-03-04', '09:19:00', '10:19:00', '2025-03-04 05:20:46', '2025-03-04 09:22:12', 'approved', 367),
+(13, '2025-03-04', '09:20:00', '10:20:00', '2025-03-04 05:20:59', '2025-03-04 09:22:15', 'approved', 367);
 
 -- --------------------------------------------------------
 
@@ -2657,7 +2666,7 @@ INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `na
 (383, 'Salma Mamdouh', 'salma_mamdouh@pyramakerz.com', NULL, '$2y$12$k7oRwtyei.WwawcxvQUfv.bziofM.yA4NdpW76jLoGWuZlP0CI9EW', '29503171600724', 'SOFT-3323', NULL, 'OPPO CPH2113', '01068598135', '01283402754', NULL, 'f', 1, NULL, '2024-10-14 11:22:55', '2025-02-10 05:11:52', NULL),
 (384, 'Mai Abd El Maasod', 'mai_abdelmaasod@pyramakerz.com', NULL, '$2y$12$t03FXj06xIn9XS4hrD5odugTk1qh6gy/kWJVWy9vknF.RH32RluU6', '28501020201341', 'ADMI-4568', NULL, 'OPPO CPH2531', '01221386824', '01019246477', NULL, 'f', 53, NULL, '2024-10-20 11:48:47', '2025-02-10 06:38:46', NULL),
 (385, 'Eman Ismail', 'eman_iIsmail@pyramakerz.com', NULL, '$2y$12$f7JGV6Z.BeeV2HXHw4wURugUWiJYWlZHSuZOMmJ76Zm7uxm1PHY0e', '29202030201826', 'SOFT-2030', NULL, NULL, '01011647123', '01090655902', NULL, 'f', 1, NULL, '2024-10-20 12:41:53', '2024-10-29 11:21:38', NULL),
-(386, 'Ashraf Abd Elmenam', 'ashraf_abdelmenam@pyramakerz.com', NULL, '$2y$12$aCrFiU0mHxTR3.ktrtea8OnLVFQWLYP58.KU5vlyBNdODqtj1Q2D6', '26612101602617', 'SOFT-2792', NULL, NULL, '01099160991', '01234567891', NULL, 'm', 1, NULL, '2024-10-22 08:13:10', '2025-02-06 13:46:19', NULL),
+(386, 'Ashraf Abd Elmenam', 'ashraf_abdelmenam@pyramakerz.com', NULL, '$2y$12$aCrFiU0mHxTR3.ktrtea8OnLVFQWLYP58.KU5vlyBNdODqtj1Q2D6', '26612101602617', 'SOFT-2792', NULL, 'google sdk_gphone64_x86_64', '01099160991', '01234567891', NULL, 'm', 1, NULL, '2024-10-22 08:13:10', '2025-03-04 06:57:21', NULL),
 (387, 'Zeyad Elshnawy', 'zeyad_elshnawy@pyramakerz.com', NULL, '$2y$12$7D98/fLXIpVI1xuOkRY/l.KJhSdsV/EAQAC/pNB4Plhnaogo3m3qi', '29908030201893', 'ACAD-9899', NULL, 'HUAWEI YAL-L21', '01067665476', '01067665466', NULL, 'm', 2, NULL, '2024-10-29 11:32:07', '2025-02-10 05:50:01', NULL),
 (412, 'Hager Khaled', 'hager_Khaled@pyramakerz.com', NULL, '$2y$12$oERSqXVyGV9iwmnnah3yHuRT4.32sa6xJVzqbWTH788ywmXP8Mpmm', '29804180200585', 'SOFT-8698', NULL, 'realme RMX1921', '01146018547', '01121750740', NULL, 'f', 1, NULL, '2024-12-16 12:54:49', '2025-02-10 05:55:23', NULL),
 (413, 'Esraa omar', 'esraa_omar@pyramakerz.com', NULL, '$2y$12$a59JUM2pofXWiolSwbcSqeFb9neT577EVRpiilT3BuB/dnCKMRsqm', '30211150203223', 'SOFT-6671', NULL, 'samsung SM-N950F', '01220857735', '01150500780', NULL, 'f', 1, NULL, '2024-12-16 13:12:32', '2025-02-10 06:55:26', NULL),
@@ -3823,7 +3832,7 @@ ALTER TABLE `department_managers`
 -- AUTO_INCREMENT for table `excuses`
 --
 ALTER TABLE `excuses`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `failed_jobs`
