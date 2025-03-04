@@ -22,7 +22,7 @@ class StoreExcusesRequest extends FormRequest
     public function rules()
     {
         return [
-            'date' => 'required|date_format:Y-m-d', // Validate date format
+            'date' => 'required|date', // Validate date format
             'from' => 'required|date_format:H:i',  // Validate time format
             'to' => 'required|date_format:H:i',   // Validate time format
 
