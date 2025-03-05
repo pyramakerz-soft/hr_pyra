@@ -99,7 +99,7 @@ class OverTimeController extends Controller
         // Fetch and paginate the user's overtime
         $userOvertime = $authUser->overTimes()
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(6);
 
         return $this->returnData('Overtime', $userOvertime, 'User Overtime Data');
     }
@@ -216,13 +216,32 @@ class OverTimeController extends Controller
             $startDate = $currentDate->copy()->subMonth()->setDay(26);
             $endDate = $currentDate->copy()->setDay(26);
         }
+  
 
-        // Fetch overtime records for employees in the managed departments
-        $overtimes = Overtime::whereIn('user_id', $employeeIds)
-            ->whereBetween('date', [$startDate, $endDate])
-            ->orderBy('date', 'desc')
-            ->get();
+    // Fetch excuses with pagination
+    $overTimes = Overtime::whereIn('user_id', $employeeIds)
+        ->whereBetween('date', [$startDate, $endDate])
+        ->with('user') // Eager load user data to avoid N+1 problem
+        ->paginate(6, ['*'], 'page', request()->query('page', 1));
 
-        return $this->returnData('Overtime', $overtimes, 'Overtime for employees in the departments managed by the authenticated user');
-    }
+    // Convert to collection before mapping
+    $overTimeWithUserData = collect($overTimes->items())->map(function ($overTime) {
+        return [
+            'overTime' => $overTime,
+            'user' => $overTime->user, // Include user details
+        ];
+    });
+
+    return $this->returnData('OverTimes', [
+        'data' => $overTimeWithUserData,
+        'pagination' => [
+            'total' => $overTimes->total(),
+            'per_page' => $overTimes->perPage(),
+            'current_page' => $overTimes->currentPage(),
+            'last_page' => $overTimes->lastPage(),
+            'next_page_url' => $overTimes->nextPageUrl(),
+            'prev_page_url' => $overTimes->previousPageUrl(),
+        ]
+    ], 'overTimes for employees in the departments managed by the authenticated user');
+}
 }
