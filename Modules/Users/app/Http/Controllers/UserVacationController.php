@@ -214,12 +214,36 @@ class UserVacationController extends Controller
             $endDate = $currentDate->copy()->setDay(26);
         }
 
-// Fetch vacations for employees in the managed departments
-$vacations = UserVacation::whereIn('user_id', $employeeIds)
-    ->where('from_date', '>=', $startDate)  // Ensure from_date is after or equal to the startDate
-    ->orderBy('from_date', 'desc')          // Sorting by the from_date column
-    ->get();
 
-        return $this->returnData('Vacations', $vacations, 'Vacations for employees in the departments managed by the authenticated user');
-    }
+    // Fetch excuses with pagination
+    $vacations = UserVacation::whereIn('user_id', $employeeIds)
+        ->whereBetween('from_date', [$startDate, $endDate])
+        ->with('user') // Eager load user data to avoid N+1 problem
+        ->paginate(6, ['*'], 'page', request()->query('page', 1));
+
+    // Convert to collection before mapping
+    $vacationsWithUserData = collect($vacations->items())->map(function ($vacation) {
+        return [
+            'vacation' => $vacation,
+            'user' => $vacation->user, // Include user details
+        ];
+    });
+
+    return $this->returnData('Vacations', [
+        'data' => $vacationsWithUserData,
+        'pagination' => [
+            'total' => $vacations->total(),
+            'per_page' => $vacations->perPage(),
+            'current_page' => $vacations->currentPage(),
+            'last_page' => $vacations->lastPage(),
+            'next_page_url' => $vacations->nextPageUrl(),
+            'prev_page_url' => $vacations->previousPageUrl(),
+        ]
+    ], 'Vacations for employees in the departments managed by the authenticated user');
+
+
+}
+
+
+
 }
