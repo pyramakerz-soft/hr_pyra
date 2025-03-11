@@ -3,11 +3,11 @@
 namespace App\Listeners;
 
 use App\Events\CheckClockOutsEvent;
-use App\Models\ClockInOut;
 use App\Traits\ResponseTrait;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Modules\Clocks\Models\ClockInOut;
 
 class UpdateClockOutsListener
 {
@@ -42,12 +42,15 @@ class UpdateClockOutsListener
             $endTimestamp = Carbon::parse($clockInDate . ' ' . $endTime);
             $clockInTimestamp = Carbon::parse($clock->clock_in);
             $duration = $clockInTimestamp->diff($endTimestamp);
-            $durationFormatted = sprintf('%02d:%02d:%02d', $duration->h, $duration->i, $duration->s);
             $clock->update([
+<<<<<<< HEAD
                 'clock_out' => NULL,
+=======
+                'clock_out' => null,
+>>>>>>> a623b53a (finished phase2)
                 'is_issue' => true,
                 'early_leave' => "00:00:00",
-                'duration' => $durationFormatted,
+                'duration' => "00:00:00",
             ]);
             Log::info($clock->toArray());
         }

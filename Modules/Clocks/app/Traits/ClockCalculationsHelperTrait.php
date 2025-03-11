@@ -126,17 +126,34 @@ trait ClockCalculationsHelperTrait
 
         return $query;
     }
+
     protected function getUserAssignedLocationById($authUser, $location_id)
     {
+        // Log function parameters
+        Log::info('getUserAssignedLocationById called', [
+            'authUserId' => $authUser->id ?? 'N/A',
+            'location_id' => $location_id
+        ]);
+    
         // Retrieve the user's assigned location by location_id
         $userLocation = $authUser->user_locations()
             ->where('user_locations.location_id', $location_id)
             ->where('locations.id', $location_id)
             ->first();
+<<<<<<< HEAD
             
             // Log::error("Error fetching address: " . $userLocation.'\n'.$authUser.'\n'.$location_id);
+=======
+    
+        // Log the query result
+        Log::info('User location fetched', [
+            'userLocation' => $userLocation
+        ]);
+    
+>>>>>>> a623b53a (finished phase2)
         return $userLocation;
     }
+    
     protected function prepareClockData($clocks)
     {
         // Ensure $clocks is paginated
@@ -367,10 +384,10 @@ trait ClockCalculationsHelperTrait
         $longitude = $request->longitude;
         $distance = $this->haversineDistance($latitude, $longitude, $userLocation->latitude, $userLocation->longitude);
         // Check if user is within an acceptable range (e.g., 50 meters)
+        // Check if user is within the acceptable range
         if ($distance > $range) {
-            // Log and return error response if user is not within the range
-            Log::info("Distance exceeds {$range} meters. Returning error.");
-            return $this->returnError('User is not located at the correct location.');
+            Log::info("User location: ({$latitude}, {$longitude}) is outside the range of {$range} meters. Returning error.");
+            return $this->returnError('User is not located at the correct location.'.' User location: ({$latitude}, {$longitude}) is outside the range of {$range} meters. Returning error.');
         }
         // Return the validated location
         return $userLocation;
