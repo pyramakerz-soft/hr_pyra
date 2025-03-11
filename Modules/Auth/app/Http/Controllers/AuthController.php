@@ -69,6 +69,7 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
+        try{
         $credentials = $request->only('email', 'password');
 
         // Validate user credentials
@@ -93,7 +94,10 @@ class AuthController extends Controller
         $token = $this->generateToken($request, $user);
 
         //return response with token
-        return $this->respondWithToken($token);
+        return $this->respondWithToken($token);}
+        catch(\Exception $e){
+            return $this->returnError('An error occurred '. $e->getMessage(), 500);
+        }
     }
 
     /**

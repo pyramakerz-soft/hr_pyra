@@ -37,7 +37,8 @@ trait AuthTrait
 
     protected function validateSerialNumber(Request $request, User $user)
 {
-    if ($request->serial_number) {
+    if ($request->serial_number ) {
+        
         // Check if the serial number doesn't contain "#" (indicating an outdated version)
         if (strpos($request->serial_number, '#') === false) {
             throw new \Exception('Please update the app to the latest version to continue.', 406);
