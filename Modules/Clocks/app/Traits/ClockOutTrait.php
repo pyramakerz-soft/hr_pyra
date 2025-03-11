@@ -37,6 +37,19 @@ use ClockCalculationsHelperTrait;
         $user = User::findorFail($clock->user_id);
         $userEndTime = Carbon::parse($user->user_detail->end_time);
 
+           // 2- Check if the clockIn and clockOut are on different days
+    if (!$clockIn->isSameDay($clockOut)) {
+        // Close the current day's clock at 23:59:59
+        $endOfDay = $clockIn->copy()->endOfDay(); // Get 23:59:59 of the clockIn day
+
+        
+        $this->updateClockRecord($clock, $clockIn, $endOfDay, $this->calculateDuration($clockIn, $endOfDay), 0, 0);  // Close today's clock-in
+
+        // Create a new clock-in for the next day at 00:00:00
+        $startOfNextDay = $clockOut->copy()->startOfDay(); // Get 00:00:00 of the next day
+        return $this->updateClockRecord($clock, $startOfNextDay, $clockOut, $this->calculateDuration($startOfNextDay, $clockOut), 0, 0);  // New clock for tomorrow
+    }
+
         //3- calculate Early_Leave
         $early_leave = $this->calculateEarlyLeave($clockOut, $userEndTime);
         $late_arrive = $clock->late_arrive;
@@ -79,6 +92,8 @@ use ClockCalculationsHelperTrait;
             return $this->returnError('No location data found for the last clock-in.');
         }
 
+        $request->location_id= $lastClockedInLocation->id;
+        
         //3- Validate location of user and location of the site
         $latitude = $request->latitude;
         $longitude = $request->longitude;

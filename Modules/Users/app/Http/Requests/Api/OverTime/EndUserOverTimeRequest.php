@@ -4,7 +4,7 @@ namespace Modules\Users\Http\Requests\Api\OverTime;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreUserOverTimeRequest extends FormRequest
+class EndUserOverTimeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +22,9 @@ class StoreUserOverTimeRequest extends FormRequest
     public function rules()
     {
         return [
-            'date' => 'required|date_format:Y-m-d', // Validate date format
-            'from' => 'required|date_format:H:i',  // Validate time format
-            'to' => 'required|date_format:H:i',   // Validate time format
-            'reason' => 'required|String',   // Validate time format
-            'status' => 'nullable|in:pending,approved,rejected', // Optional status field
+            'to' => 'required|date',  // Validate 'to' as required and a valid date
+            'reason' => 'required|string',  // Validate 'reason' as required and a string
+            'overtime_id' => 'required|exists:over_time,id',  // Validate that 'overtime_id' exists in the 'over_time' table
         ];
     }
 }

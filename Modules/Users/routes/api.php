@@ -38,8 +38,8 @@ Route::group(['prefix' => 'excuse'], function () {
 
 Route::group(['prefix' => 'overtime'], function () {
 
-    // Route to add a new overtime for the authenticated user
-    Route::post('/add_user_overtime', [OverTimeController::class, 'addUserOvertime'])->name('add_user_overtime'); // HR role
+    Route::post('/start_user_overtime', [OverTimeController::class, 'addStartUserOvertime'])->name('start_user_overtime'); 
+    Route::post('/end_user_overtime', [OverTimeController::class, 'addEndUserOvertime'])->name('end_user_overtime'); 
     Route::get('/show_user_overtime', [OverTimeController::class, 'showUserOvertime']);
 
     Route::group(['middleware' => 'role:Manager'], function () {

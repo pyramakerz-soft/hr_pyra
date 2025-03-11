@@ -3328,52 +3328,83 @@
                 ]
             }
         },
-        "/api/overtime/add_user_overtime": {
+        "/api/overtime/start_user_overtime": {
             "post": {
                 "tags": [
                     "Overtime"
                 ],
-                "summary": "Add a new overtime for the authenticated user",
-                "operationId": "addUserOvertime",
+                "summary": "start a new overtime for the authenticated user",
+                "operationId": "startUserOvertime",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "date",
-                                    "from",
-                                    "to",
-                                    "reason",
-                                    "status"
+                                    "from"
                                 ],
                                 "properties": {
-                                    "date": {
+                                    "to": {
                                         "type": "string",
                                         "format": "date",
                                         "example": "2025-02-27"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User Overtime created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Overtime": {
+                                            "type": "object"
+                                        }
                                     },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/overtime/end_user_overtime": {
+            "post": {
+                "tags": [
+                    "Overtime"
+                ],
+                "summary": "end a overtime for the authenticated user",
+                "operationId": "endUserOvertime",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "to",
+                                    "reason"
+                                ],
+                                "properties": {
                                     "reason": {
                                         "type": "string",
                                         "format": "reason",
                                         "example": "bla bla"
                                     },
-                                    "from": {
-                                        "type": "string",
-                                        "example": "09:00"
-                                    },
                                     "to": {
                                         "type": "string",
-                                        "example": "17:00"
-                                    },
-                                    "status": {
-                                        "type": "string",
-                                        "enum": [
-                                            "pending",
-                                            "approved",
-                                            "rejected"
-                                        ],
-                                        "example": "pending"
+                                        "example": "2025-02-27"
                                     }
                                 },
                                 "type": "object"
