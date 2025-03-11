@@ -134,7 +134,7 @@ trait ClockCalculationsHelperTrait
             ->where('locations.id', $location_id)
             ->first();
             
-            Log::error("Error fetching address: " . $userLocation.'\n'.$authUser.'\n'.$location_id);
+            // Log::error("Error fetching address: " . $userLocation.'\n'.$authUser.'\n'.$location_id);
         return $userLocation;
     }
     protected function prepareClockData($clocks)
