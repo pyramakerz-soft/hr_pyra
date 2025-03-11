@@ -140,17 +140,12 @@ trait ClockCalculationsHelperTrait
             ->where('user_locations.location_id', $location_id)
             ->where('locations.id', $location_id)
             ->first();
-<<<<<<< HEAD
-            
-            // Log::error("Error fetching address: " . $userLocation.'\n'.$authUser.'\n'.$location_id);
-=======
-    
+
         // Log the query result
         Log::info('User location fetched', [
             'userLocation' => $userLocation
         ]);
     
->>>>>>> a623b53a (finished phase2)
         return $userLocation;
     }
     

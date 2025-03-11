@@ -43,11 +43,7 @@ class UpdateClockOutsListener
             $clockInTimestamp = Carbon::parse($clock->clock_in);
             $duration = $clockInTimestamp->diff($endTimestamp);
             $clock->update([
-<<<<<<< HEAD
-                'clock_out' => NULL,
-=======
-                'clock_out' => null,
->>>>>>> a623b53a (finished phase2)
+
                 'is_issue' => true,
                 'early_leave' => "00:00:00",
                 'duration' => "00:00:00",
