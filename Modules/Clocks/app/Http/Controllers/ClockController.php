@@ -7,6 +7,7 @@ use App\Models\AppVersion;
 use App\Traits\ResponseTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -472,35 +473,57 @@ class ClockController extends Controller
      * )
      */
 
-    public function showUserClocks(Request $request)
-    {
-        $authUser = Auth::user();
 
-        $query = ClockInOut::where('user_id', $authUser->id);
-
-    // Apply filters
-    foreach ($this->filters as $filter) {
-        $query = $filter->apply($query, $request);
-    }
-
-        // Handle pagination
-        $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
-
-        if ($clocks->isEmpty()) {
-            return $this->returnError('No Clocks Found For This User');
-        }
-
-        // Handle export request
-        if ($request->has('export')) {
-
-            return ($this->clocksExport($clocks, $authUser->department->name ?? null))
-                ->download('all_user_clocks.xlsx');
-        }
-
-        // Prepare and return data
-        $data = $this->groupClockForUser($clocks);
-        return $this->returnData("data", $data, "Clocks Data for {$authUser->name}");
-    }
+     public function showUserClocks(Request $request)
+     {
+         $authUser = Auth::user();
+     
+         $query = ClockInOut::where('user_id', $authUser->id);
+     
+         // Apply filters
+         foreach ($this->filters as $filter) {
+             $query = $filter->apply($query, $request);
+         }
+     
+         // Fetch all clocks before grouping
+         $clocks = $query->orderBy('clock_in', 'desc')->get();
+     
+         if ($clocks->isEmpty()) {
+             return $this->returnError('No Clocks Found For This User');
+         }
+     
+         // Group clocks by date
+         $groupedData = $this->groupClockForUser($clocks);
+     
+         // Convert grouped clocks array to a collection for pagination
+         $groupedCollection = collect($groupedData['clocks']);
+     
+         // Paginate the grouped collection manually
+         $perPage = 7; // Adjust if needed
+         $currentPage = LengthAwarePaginator::resolveCurrentPage();
+         $currentItems = $groupedCollection->slice(($currentPage - 1) * $perPage, $perPage)->values();
+     
+         $paginatedData = new LengthAwarePaginator(
+             $currentItems,
+             $groupedCollection->count(),
+             $perPage,
+             $currentPage,
+             ['path' => LengthAwarePaginator::resolveCurrentPath()]
+         );
+     
+         // Return formatted response
+         return $this->returnData("data", [
+             'clocks' => $paginatedData->items(),
+             'pagination' => [
+                 'current_page' => $paginatedData->currentPage(),
+                 'next_page_url' => $paginatedData->nextPageUrl(),
+                 'previous_page_url' => $paginatedData->previousPageUrl(),
+                 'last_page' => $paginatedData->lastPage(),
+                 'total' => $paginatedData->total(),
+             ]
+         ], "Clocks Data for {$authUser->name}");
+     }
+     
     /**
      * @OA\Get(
      *     path="/api/clock_by_id/{clock}",

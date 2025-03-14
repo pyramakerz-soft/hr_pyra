@@ -59,7 +59,6 @@ trait ClockCalculationsHelperTrait
     protected function calculateDuration($clockIn, $clockOut)
     {
         return $clockOut ? Carbon::parse($clockIn)->diff(Carbon::parse($clockOut))->format('%H:%I:%S') : null;
-
     }
     protected function isLocationTime($authUser)
     {
@@ -72,7 +71,6 @@ trait ClockCalculationsHelperTrait
             ->first();
         if (!$clock) {
             throw ValidationException::withMessages(['error' => 'No clocks found for this user']);
-
         }
         return $clock;
     }
@@ -134,7 +132,7 @@ trait ClockCalculationsHelperTrait
             'authUserId' => $authUser->id ?? 'N/A',
             'location_id' => $location_id
         ]);
-    
+
         // Retrieve the user's assigned location by location_id
         $userLocation = $authUser->user_locations()
             ->where('user_locations.location_id', $location_id)
@@ -145,10 +143,10 @@ trait ClockCalculationsHelperTrait
         Log::info('User location fetched', [
             'userLocation' => $userLocation
         ]);
-    
+
         return $userLocation;
     }
-    
+
     protected function prepareClockData($clocks)
     {
         // Ensure $clocks is paginated
@@ -191,50 +189,50 @@ trait ClockCalculationsHelperTrait
 
 
 
-    protected function groupClockForUser($clocks) 
-{
-    // Ensure $clocks is paginated
-    $isPaginated = $clocks instanceof LengthAwarePaginator;
+    protected function groupClockForUser($clocks)
+    {
+        // Ensure $clocks is paginated
+        $isPaginated = $clocks instanceof LengthAwarePaginator;
 
-    // Group clocks by date
-    $groupedClocks = $clocks->groupBy(function ($clock) {
-        return Carbon::parse($clock->clock_in)->toDateString(); // Group by clock_in date
-    });
-
-    $data = [];
-    foreach ($groupedClocks as $date => $clocksForDay) {
-        if ($clocksForDay->isEmpty()) {
-            continue;
-        }
-
-        // Sort clocks by clock_in time (descending order)
-        $sortedClocks = $clocksForDay->sortByDesc(function ($clock) {
-            return Carbon::parse($clock->clock_in);
-        })->values(); // Reset array keys
-
-        // Format each clock using ClockResource
-        $formattedClocks = $sortedClocks->map(function ($clock) {
-            return (new ClockResource($clock))->toArray(request());
+        // Group clocks by date
+        $groupedClocks = $clocks->groupBy(function ($clock) {
+            return Carbon::parse($clock->clock_in)->toDateString(); // Group by clock_in date
         });
 
-        // Group under the respective date
-        $data[] = [
-            'Date' => $date,
-            'clocks' => $formattedClocks,
+        $data = [];
+        foreach ($groupedClocks as $date => $clocksForDay) {
+            if ($clocksForDay->isEmpty()) {
+                continue;
+            }
+
+            // Sort clocks by clock_in time (descending order)
+            $sortedClocks = $clocksForDay->sortByDesc(function ($clock) {
+                return Carbon::parse($clock->clock_in);
+            })->values(); // Reset array keys
+
+            // Format each clock using ClockResource
+            $formattedClocks = $sortedClocks->map(function ($clock) {
+                return (new ClockResource($clock))->toArray(request());
+            });
+
+            // Group under the respective date
+            $data[] = [
+                'Date' => $date,
+                'clocks' => $formattedClocks,
+            ];
+        }
+
+        return [
+            'clocks' => $data,
+            'pagination' => $isPaginated ? [
+                'current_page' => $clocks->currentPage(),
+                'next_page_url' => $clocks->nextPageUrl(),
+                'previous_page_url' => $clocks->previousPageUrl(),
+                'last_page' => $clocks->lastPage(),
+                'total' => $clocks->total(),
+            ] : null,
         ];
     }
-
-    return [
-        'clocks' => $data,
-        'pagination' => $isPaginated ? [
-            'current_page' => $clocks->currentPage(),
-            'next_page_url' => $clocks->nextPageUrl(),
-            'previous_page_url' => $clocks->previousPageUrl(),
-            'last_page' => $clocks->lastPage(),
-            'total' => $clocks->total(),
-        ] : null,
-    ];
-}
 
 
 
@@ -259,7 +257,7 @@ trait ClockCalculationsHelperTrait
         return $distance;
     }
 
-    
+
     protected function getAddressFromCoordinates($latitude, $longitude)
     {
         $client = new Client();
@@ -278,9 +276,9 @@ trait ClockCalculationsHelperTrait
             return null;
         }
     }
-  
 
-    
+
+
     protected function updateClockRecord($clock, $clockIn, $clockOut, $duration, $lateArrive, $earlyLeave)
     {
         $clock->update([
@@ -291,7 +289,6 @@ trait ClockCalculationsHelperTrait
             'early_leave' => $earlyLeave,
         ]);
         return $this->returnData("clock", new ClockResource($clock), "Clock Updated Successfully");
-
     }
     protected function updateSiteClock($request, $clock, $user)
     {
@@ -346,12 +343,16 @@ trait ClockCalculationsHelperTrait
 
 
 
-      protected function validateClockTime($clockIn, $clockOut)
+    protected function validateClockTime($clockIn, $clockOut)
     {
-    
+
         if (!$clockIn->isSameDay($clockOut)) {
 
-
+            // Log the incoming clock-in and clock-out times
+            Log::info("Validating Clock Time", [
+                'clock_in' => $clockIn ? $clockIn->toDateTimeString() : 'null',
+                'clock_out' => $clockOut ? $clockOut->toDateTimeString() : 'null',
+            ]);
             throw ValidationException::withMessages(['error' => 'Clock-out must be on the same day as clock-in.']);
         }
         if ($clockOut->lessThanOrEqualTo($clockIn)) {
@@ -383,11 +384,9 @@ trait ClockCalculationsHelperTrait
         if ($distance > $range) {
             $dist = round($distance - $range, 2);
             Log::info("User location: ({$latitude}, {$longitude}) is outside the range of {$dist} meters. Returning error.");
-            return $this->returnError('User is not located at the correct location.'." User location: ({$latitude}, {$longitude}) is outside the range of {$dist} meters. Returning error.");
+            return $this->returnError('User is not located at the correct location.' . " User location: ({$latitude}, {$longitude}) is outside the range of {$dist} meters. Returning error.");
         }
         // Return the validated location
         return $userLocation;
     }
-
-
 }
