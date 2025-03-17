@@ -71,7 +71,7 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        $departments = Department::with('manager')->get();
+        $departments = Department::with('managers')->get();
         if ($departments->isEmpty()) {
             return $this->returnError('No departments Found');
         }

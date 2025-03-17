@@ -137,7 +137,7 @@ class Handler extends ExceptionHandler
 
         // Runtime Exceptions (generic runtime errors)
         if ($exception instanceof RuntimeException) {
-            return $this->returnError('Runtime Error', Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->returnError('Runtime Error'.$exception->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         // Filesystem Exception (handles file-related errors)

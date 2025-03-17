@@ -14,17 +14,16 @@ class Department extends Model
     protected $guarded = [];
 
 
-// In the Department model
-public function managers()
-{
-    return $this->belongsToMany(User::class, 'department_managers', 'department_id', 'manager_id')
-                ;
-}
+    // In the Department model
+    public function managers()
+    {
+        return $this->belongsToMany(User::class, 'department_managers', 'department_id', 'manager_id');
+    }
 
 
 
 
-   
+
     /**
      * A department can have many users.
      */
@@ -40,6 +39,4 @@ public function managers()
     {
         return $this->hasMany(UserVacation::class);
     }
-
-
 }
