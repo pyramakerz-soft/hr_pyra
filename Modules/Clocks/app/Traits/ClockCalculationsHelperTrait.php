@@ -382,9 +382,9 @@ trait ClockCalculationsHelperTrait
         // Check if user is within an acceptable range (e.g., 50 meters)
         // Check if user is within the acceptable range
         if ($distance > $range) {
-            $dist = round($distance - $range, 2);
-            Log::info("User location: ({$latitude}, {$longitude}) is outside the range of {$dist} meters. Returning error.");
-            return $this->returnError('User is not located at the correct location.' . " User location: ({$latitude}, {$longitude}) is outside the range of {$dist} meters. Returning error.");
+            $dist = round($distance - $range, 1);
+            Log::info("User ".$authUser->name ." location: {$userLocation->name}____({$latitude}, {$longitude}) is outside the range of {$dist} meters. Returning error.");
+            return $this->returnError("You are not located at the correct location of {$userLocation->name}" . " you are outside with {$dist} meters outside the range.");
         }
         // Return the validated location
         return $userLocation;
