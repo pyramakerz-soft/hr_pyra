@@ -137,7 +137,19 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(OverTime::class);  // A user can have many excuses
     }
 
-
+    public function allParentManagers()
+    {
+        $managers = collect();
+        $currentManager = $this->parentManager;
+    
+        while ($currentManager) {
+            $managers->push($currentManager);
+            $currentManager = $currentManager->parentManager;
+        }
+    
+        return $managers;
+    }
+    
     /**
      * Get the direct superior (manager) of the user.
      */

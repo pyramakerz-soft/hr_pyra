@@ -141,29 +141,29 @@ class UserVacationController extends Controller
         $request->validate([
             'status' => 'required|in:pending,approved,rejected',
         ]);
-    
+
         $vacation = UserVacation::find($vacationId);
-    
+
         if (!$vacation) {
             return $this->returnError('Vacation not found', 404);
         }
-    
+
         $authUser = Auth::user();
         $department = $vacation->user->department;
 
-    $managerIds = $department->managers()->pluck('users.id')->toArray();
+        $managerIds = $department->managers()->pluck('users.id')->toArray();
 
-    if (!in_array($authUser->id, $managerIds) && $vacation->user_id != $authUser->id) {
-        return $this->returnError('You are not authorized to update this vacation', 403);
-    }
-    
+        if (!in_array($authUser->id, $managerIds) && $vacation->user_id != $authUser->id) {
+            return $this->returnError('You are not authorized to update this vacation', 403);
+        }
+
         // If the user is the manager or the vacation belongs to the authenticated user
         $vacation->status = $request->input('status');
         $vacation->save();
-    
+
         return $this->returnData('Vacation', $vacation, 'Vacation status updated successfully');
     }
-    
+
 
     /**
      * @OA\Get(
@@ -195,10 +195,20 @@ class UserVacationController extends Controller
             return $this->returnError('Manager is not assigned to any department', 404);
         }
 
+
+        // Get all parent managers
+        $parentManagers = $manager->allParentManagers();
+
+        // Exclude employees who are managers at any level above
+        $parentManagerIds = $parentManagers->pluck('id')->toArray();
         // Get all employees in those departments
         $employeeIds = User::whereIn('department_id', $departmentIds)
             ->where('id', '!=', $manager->id) // Exclude the manager
             ->pluck('id');
+
+        $employeeIds = $employeeIds->diff($parentManagerIds);
+
+
 
         if ($employeeIds->isEmpty()) {
             return $this->returnError('No employees found under this manager', 404);
@@ -215,35 +225,30 @@ class UserVacationController extends Controller
         }
 
 
-    // Fetch excuses with pagination
-    $vacations = UserVacation::whereIn('user_id', $employeeIds)
-        ->whereBetween('from_date', [$startDate, $endDate])
-        ->with('user') // Eager load user data to avoid N+1 problem
-        ->paginate(6, ['*'], 'page', request()->query('page', 1));
+        // Fetch excuses with pagination
+        $vacations = UserVacation::whereIn('user_id', $employeeIds)
+            ->whereBetween('from_date', [$startDate, $endDate])
+            ->with('user') // Eager load user data to avoid N+1 problem
+            ->paginate(6, ['*'], 'page', request()->query('page', 1));
 
-    // Convert to collection before mapping
-    $vacationsWithUserData = collect($vacations->items())->map(function ($vacation) {
-        return [
-            'vacation' => $vacation,
-            'user' => $vacation->user, // Include user details
-        ];
-    });
+        // Convert to collection before mapping
+        $vacationsWithUserData = collect($vacations->items())->map(function ($vacation) {
+            return [
+                'vacation' => $vacation,
+                'user' => $vacation->user, // Include user details
+            ];
+        });
 
-    return $this->returnData('Vacations', [
-        'data' => $vacationsWithUserData,
-        'pagination' => [
-            'total' => $vacations->total(),
-            'per_page' => $vacations->perPage(),
-            'current_page' => $vacations->currentPage(),
-            'last_page' => $vacations->lastPage(),
-            'next_page_url' => $vacations->nextPageUrl(),
-            'prev_page_url' => $vacations->previousPageUrl(),
-        ]
-    ], 'Vacations for employees in the departments managed by the authenticated user');
-
-
-}
-
-
-
+        return $this->returnData('Vacations', [
+            'data' => $vacationsWithUserData,
+            'pagination' => [
+                'total' => $vacations->total(),
+                'per_page' => $vacations->perPage(),
+                'current_page' => $vacations->currentPage(),
+                'last_page' => $vacations->lastPage(),
+                'next_page_url' => $vacations->nextPageUrl(),
+                'prev_page_url' => $vacations->previousPageUrl(),
+            ]
+        ], 'Vacations for employees in the departments managed by the authenticated user');
+    }
 }

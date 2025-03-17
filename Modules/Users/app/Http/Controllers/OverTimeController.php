@@ -254,50 +254,55 @@ public function addStartUserOvertime(StartUserOverTimeRequest $request)
      *         description="Unauthorized"
      *     )
      * )
-     */
-    public function getOvertimeOfManagerEmployees()
-    {
-        $manager = Auth::user();
+     */public function getOvertimeOfManagerEmployees()
+{
+    $manager = Auth::user();
 
-        // Get department IDs where the user is a manager
-        $departmentIds = $manager->managedDepartments()->pluck('departments.id');
+    // Get department IDs where the user is a manager
+    $departmentIds = $manager->managedDepartments()->pluck('departments.id');
 
-        if ($departmentIds->isEmpty()) {
-            return $this->returnError('Manager is not assigned to any department', 404);
-        }
+    if ($departmentIds->isEmpty()) {
+        return $this->returnError('Manager is not assigned to any department', 404);
+    }
 
-        // Get all employees in those departments
-        $employeeIds = User::whereIn('department_id', $departmentIds)
-            ->where('id', '!=', $manager->id) // Exclude the manager
-            ->pluck('id');
-// return     $employeeIds;
-        if ($employeeIds->isEmpty()) {
-            return $this->returnError('No employees found under this manager', 404);
-        }
+    // Get employees under the manager
+    $employeeIds = User::whereIn('department_id', $departmentIds)
+        ->where('id', '!=', $manager->id)
+        ->pluck('id');
 
-        // Define the date range (26th of previous month to 26th of current month)
-        $currentDate = Carbon::now();
-        if ($currentDate->day > 26) {
-            $startDate = $currentDate->copy()->setDay(26);
-            $endDate = $currentDate->copy()->addMonth()->setDay(26);
-        } else {
-            $startDate = $currentDate->copy()->subMonth()->setDay(26);
-            $endDate = $currentDate->copy()->setDay(26);
-        }
-  
+    if ($employeeIds->isEmpty()) {
+        return $this->returnError('No employees found under this manager', 404);
+    }
 
-    // Fetch excuses with pagination
+    // Get all parent managers
+    $parentManagers = $manager->allParentManagers();
+
+    // Exclude employees who are managers at any level above
+    $parentManagerIds = $parentManagers->pluck('id')->toArray();
+    $employeeIds = $employeeIds->diff($parentManagerIds);
+
+    // Define the date range (26th of previous month to 26th of current month)
+    $currentDate = Carbon::now();
+    if ($currentDate->day > 26) {
+        $startDate = $currentDate->copy()->setDay(26);
+        $endDate = $currentDate->copy()->addMonth()->setDay(26);
+    } else {
+        $startDate = $currentDate->copy()->subMonth()->setDay(26);
+        $endDate = $currentDate->copy()->setDay(26);
+    }
+
+    // Fetch overtime records
     $overTimes = Overtime::whereIn('user_id', $employeeIds)
         ->whereBetween('from', [$startDate, $endDate])
-         ->whereNotNull('to') // Only fetch records where 'to' date is not null
-        ->with('user') // Eager load user data to avoid N+1 problem
+        ->whereNotNull('to')
+        ->with('user')
         ->paginate(6, ['*'], 'page', request()->query('page', 1));
 
-    // Convert to collection before mapping
+    // Format response
     $overTimeWithUserData = collect($overTimes->items())->map(function ($overTime) {
         return [
             'overTime' => $overTime,
-            'user' => $overTime->user, // Include user details
+            'user' => $overTime->user,
         ];
     });
 
@@ -311,6 +316,7 @@ public function addStartUserOvertime(StartUserOverTimeRequest $request)
             'next_page_url' => $overTimes->nextPageUrl(),
             'prev_page_url' => $overTimes->previousPageUrl(),
         ]
-    ], 'overTimes for employees in the departments managed by the authenticated user');
+    ], 'OverTimes for employees in the departments managed by the authenticated user');
 }
+
 }
