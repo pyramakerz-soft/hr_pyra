@@ -48,7 +48,7 @@ class UpdateClockOutsListener
                 'early_leave' => "00:00:00",
                 'duration' => "00:00:00",
             ]);
-            Log::info($clock->toArray());
+            Log::info("Clocked Out by Issue : ". $clock->toArray());
         }
     }
 }
