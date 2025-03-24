@@ -79,14 +79,18 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function managedDepartments()
-    {
-        return $this->belongsToMany(Department::class, 'department_managers', 'manager_id', 'department_id');
-    }
+ 
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
+
+
+    public function subDepartment()
+    {
+        return $this->belongsTo(SubDepartment::class, 'sub_department_id');
+    }
+
 
     public function managers()
     {
@@ -137,34 +141,5 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(OverTime::class);  // A user can have many excuses
     }
 
-    public function allParentManagers()
-    {
-        $managers = collect();
-        $currentManager = $this->parentManager;
-    
-        while ($currentManager) {
-            $managers->push($currentManager);
-            $currentManager = $currentManager->parentManager;
-        }
-    
-        return $managers;
-    }
-    
-    /**
-     * Get the direct superior (manager) of the user.
-     */
-    public function parentManager()
-    {
-        return $this->belongsTo(User::class, 'parent_manager_id');
-    }
-   
-        /**
-     * Get all subordinates (direct reports) of the user.
-     */
-    // employees el taht manager
-    public function subordinates()
-    {
-        return $this->hasMany(User::class, 'parent_manager_id');
-    }
 
 }

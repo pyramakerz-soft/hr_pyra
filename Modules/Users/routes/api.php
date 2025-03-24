@@ -105,6 +105,17 @@ Route::group(['middleware' => 'role:Hr'], function () {
     Route::apiResource('departments', DepartmentController::class)->except('update'); //HR role
     Route::get('department_employees', [DepartmentController::class, 'getDepartmentEmployees']); //HR role
 
+
+    // sub Depratment
+    Route::get('/departments/{departmentId}/sub-departments', [DepartmentController::class, 'getSubDepartment'])->name('departments.getSubDepartment'); //HR role
+    Route::post('/departments/{departmentId}/sub-departments', [DepartmentController::class, 'storeSubDepartment'])->name('departments.storeSubDepartment'); //HR role
+    Route::put( '/departments/{departmentId}/sub-departments/{subDepartmentId}', [DepartmentController::class, 'updateSubDepartment'])->name('departments.updateSubDepartment'); //HR role
+    
+    Route::delete( '/departments/{departmentId}/sub-departments/{subDepartmentId}', [DepartmentController::class, 'deleteSubDepartment'])->name('departments.deleteSubDepartment'); //HR role
+
+
+
+
     //Role and Permission Management
     Route::post('/roles/{role}', [RoleController::class, 'update'])->name('roles.update'); //HR role
     Route::post('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update'); //HR role

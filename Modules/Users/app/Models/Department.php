@@ -8,20 +8,28 @@ use Illuminate\Database\Eloquent\Model;
 class Department extends Model
 {
     use HasFactory;
-    //Constant
-    // public const Academic_school = 'ACADEMIC_SCHOOL';
-    // public const Factory = 'FACTORY';
+  
     protected $guarded = [];
 
 
-    // In the Department model
-    public function managers()
+
+    public function manager()
     {
-        return $this->belongsToMany(User::class, 'department_managers', 'department_id', 'manager_id');
+        return $this->belongsTo(User::class, 'manager_id');
     }
 
+    public function subDepartments()
+    {
+        return $this->hasMany(SubDepartment::class);
+    }
 
-
+    public function employees()
+    {
+        return User::where(function ($query) {
+            $query->where('department_id', $this->id) // Users in the department
+                ->orWhereIn('sub_department_id', $this->subDepartments()->pluck('id')); // Users in sub-departments
+        })->where('id', '!=', $this->manager_id); // Exclude department manager
+    }
 
 
     /**
@@ -30,13 +38,5 @@ class Department extends Model
     public function users()
     {
         return $this->hasMany(User::class, 'department_id');
-    }
-
-    /**
-     * A department can have many vacations associated with users.
-     */
-    public function user_vacations()
-    {
-        return $this->hasMany(UserVacation::class);
     }
 }
