@@ -23,6 +23,7 @@ use Modules\Users\Exports\UsersExport;
 use Modules\Users\Http\Requests\Api\User\StoreUserRequest;
 use Modules\Users\Http\Requests\Api\User\UpdateUserRequest;
 use Modules\Users\Models\Department;
+use Modules\Users\Models\SubDepartment;
 use Modules\Users\Models\User;
 use Modules\Users\Models\UserDetail;
 use Modules\Users\Models\WorkType;
@@ -297,8 +298,17 @@ class UsersController extends Controller
         if (!$department) {
             return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
         }
+        if ($request->sub_department_id) {
+            $subDepartment = SubDepartment::find($request['sub_department_id']);
+
+            if ( ! $subDepartment || $subDepartment->department_id != $department->id) {
+                return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
+            }
+        }
+
+
         $code =  $request->code;
-       
+
         // Handle image upload
         $imageUrl = null;
         if (request()->hasFile('image')) {
@@ -315,6 +325,10 @@ class UsersController extends Controller
             'code' => $code,
             'gender' => $request['gender'],
             'department_id' => (int) $request['department_id'],
+
+            'sub_department_id' => (int) $request['sub_department_id'],
+
+
             'image' => $imageUrl,
             'serial_number' => null,
         ]);

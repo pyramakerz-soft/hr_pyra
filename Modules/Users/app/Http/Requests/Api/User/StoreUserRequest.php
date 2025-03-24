@@ -50,6 +50,11 @@ class StoreUserRequest extends FormRequest
             'work_type_id' => ['required', 'exists:work_types,id'],
             'image' => $this->hasFile('image') ? ['image', 'mimes:jpeg,png,jpg', 'max:15360'] : ['nullable'],
             'serial_number' => ['nullable', 'string'],
+
+
+
+            'sub_department_id' => [ 'exists:sub_departments,id'],
+
             // 'is_float' => ['nullable'],
         ];
     }
