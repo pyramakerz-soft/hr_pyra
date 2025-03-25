@@ -20,8 +20,17 @@ class RoleController extends Controller
 
 
     }
-    /**
-     * Display a listing of the resource.
+      /**
+     * @OA\Get(
+     *     path="/api/roles",
+     *     summary="Get all roles",
+     *     tags={"Roles"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Roles retrieved successfully",
+     *     ),
+     *     @OA\Response(response=404, description="No Roles Found")
+     * )
      */
     public function index()
     {
@@ -35,7 +44,21 @@ class RoleController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/roles",
+     *     summary="Create a new role",
+     *     tags={"Roles"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name", "permissions"},
+     *             @OA\Property(property="name", type="string", example="admin"),
+     *             @OA\Property(property="permissions", type="array", @OA\Items(type="string"))
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Role created successfully"),
+     *     @OA\Response(response=400, description="Failed to Store Role")
+     * )
      */
     public function store(StoreRoleRequest $request)
     {
@@ -50,7 +73,14 @@ class RoleController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/roles/{id}",
+     *     summary="Get role details",
+     *     tags={"Roles"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Role data retrieved successfully"),
+     *     @OA\Response(response=404, description="Role not found")
+     * )
      */
     public function show(Role $role)
     {
@@ -60,8 +90,23 @@ class RoleController extends Controller
         return $this->returnData('role', $role, 'Role Data');
     }
 
-    /**
-     * Update the specified resource in storage.
+      /**
+     * @OA\Put(
+     *     path="/api/roles/{id}",
+     *     summary="Update a role",
+     *     tags={"Roles"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name", "permissions"},
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="permissions", type="array", @OA\Items(type="string"))
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Role updated successfully"),
+     *     @OA\Response(response=400, description="Failed to update Role")
+     * )
      */
     public function update(UpdateRoleRequest $request, Role $role)
     {
@@ -75,8 +120,15 @@ class RoleController extends Controller
 
     }
 
-    /**
-     * Remove the specified resource from storage.
+     /**
+     * @OA\Delete(
+     *     path="/api/roles/{id}",
+     *     summary="Delete a role",
+     *     tags={"Roles"},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Role deleted successfully"),
+     *     @OA\Response(response=404, description="Role not found")
+     * )
      */
     public function destroy(Role $role)
     {
