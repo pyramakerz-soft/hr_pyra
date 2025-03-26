@@ -37,7 +37,6 @@ class StoreUserRequest extends FormRequest
                 Rule::unique('users', 'code')
             ],
             'gender' => ['required', 'in:m,M,F,f'],
-            'department_id' => ['required', 'exists:departments,id'],
             'salary' => ['required', 'numeric'],
             'working_hours_day' => ['required', 'numeric', 'min:4'],
             'overtime_hours' => ['required', 'numeric'],
@@ -50,9 +49,10 @@ class StoreUserRequest extends FormRequest
             'work_type_id' => ['required', 'exists:work_types,id'],
             'image' => $this->hasFile('image') ? ['image', 'mimes:jpeg,png,jpg', 'max:15360'] : ['nullable'],
             'serial_number' => ['nullable', 'string'],
-
-
-
+            
+            
+            
+            'department_id' => [ 'exists:departments,id'],
             'sub_department_id' => [ 'exists:sub_departments,id'],
 
             // 'is_float' => ['nullable'],

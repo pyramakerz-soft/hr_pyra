@@ -188,26 +188,8 @@ class UserVacationController extends Controller
     {
         $manager = Auth::user();
 
-        // Get department IDs where the user is a manager
-        $departmentIds = $manager->managedDepartments()->pluck('departments.id');
-
-        if ($departmentIds->isEmpty()) {
-            return $this->returnError('Manager is not assigned to any department', 404);
-        }
-
-
-        // Get all parent managers
-        $parentManagers = $manager->allParentManagers();
-
-        // Exclude employees who are managers at any level above
-        $parentManagerIds = $parentManagers->pluck('id')->toArray();
-        // Get all employees in those departments
-        $employeeIds = User::whereIn('department_id', $departmentIds)
-            ->where('id', '!=', $manager->id) // Exclude the manager
-            ->pluck('id');
-
-        $employeeIds = $employeeIds->diff($parentManagerIds);
-
+       
+        $employeeIds = $manager->getManagedEmployeeIds();
 
 
         if ($employeeIds->isEmpty()) {

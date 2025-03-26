@@ -152,11 +152,11 @@ class ExcuseController extends Controller
         $authUser = Auth::user();
         $department = $excuse->user->department;
 
-    $managerIds = $department->managers()->pluck('users.id')->toArray();
+        $managerIds = $department->managers()->pluck('users.id')->toArray();
 
-    if (!in_array($authUser->id, $managerIds) && $excuse->user_id != $authUser->id) {
-        return $this->returnError('You are not authorized to update this excuse', 403);
-    }
+        if (!in_array($authUser->id, $managerIds) && $excuse->user_id != $authUser->id) {
+            return $this->returnError('You are not authorized to update this excuse', 403);
+        }
 
         $excuse->status = $request->input('status');
         $excuse->save();
@@ -164,127 +164,108 @@ class ExcuseController extends Controller
         return $this->returnData('Excuse', $excuse, 'Excuse status updated successfully');
     }
 
-  /**
- * @OA\Get(
- *     path="/api/excuse/get_excuses_of_manager_employees",
- *     tags={"Excuses"},
- *     summary="Get excuses of employees in the manager's department",
- *     operationId="getExcusesOfManagerEmployees",
- *     security={{ "bearerAuth": {} }},
- *     @OA\Parameter(
- *         name="page",
- *         in="query",
- *         description="Page number for pagination",
- *         required=false,
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="List of excuses for employees in the manager's department",
- *         @OA\JsonContent(
- *             @OA\Property(property="status", type="string", example="success"),
- *             @OA\Property(property="Excuses", type="object",
- *                 @OA\Property(property="data", type="array",
- *                     @OA\Items(type="object",
- *                         @OA\Property(property="excuse", type="object",
- *                             @OA\Property(property="id", type="integer", example=1),
- *                             @OA\Property(property="user_id", type="integer", example=101),
- *                             @OA\Property(property="date", type="string", format="date", example="2024-08-01"),
- *                             @OA\Property(property="reason", type="string", example="Medical leave")
- *                         ),
- *                         @OA\Property(property="user", type="object",
- *                             @OA\Property(property="id", type="integer", example=101),
- *                             @OA\Property(property="name", type="string", example="John Doe"),
- *                             @OA\Property(property="email", type="string", format="email", example="john.doe@example.com")
- *                         )
- *                     )
- *                 ),
- *                 @OA\Property(property="pagination", type="object",
- *                     @OA\Property(property="total", type="integer", example=50),
- *                     @OA\Property(property="per_page", type="integer", example=6),
- *                     @OA\Property(property="current_page", type="integer", example=1),
- *                     @OA\Property(property="last_page", type="integer", example=9),
- *                     @OA\Property(property="next_page_url", type="string", nullable=true, example="http://yourapi.com/api/excuse/get_excuses_of_manager_employees?page=2"),
- *                     @OA\Property(property="prev_page_url", type="string", nullable=true, example=null)
- *                 )
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=403,
- *         description="Unauthorized"
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="Manager not assigned to any department or no employees found"
- *     )
- * )
- */
-public function getExcusesOfManagerEmployees()
-{
-    $manager = Auth::user();
-    
-    // Get department IDs where the user is a manager
-    $departmentIds = $manager->managedDepartments()->pluck('departments.id');
+    /**
+     * @OA\Get(
+     *     path="/api/excuse/get_excuses_of_manager_employees",
+     *     tags={"Excuses"},
+     *     summary="Get excuses of employees in the manager's department",
+     *     operationId="getExcusesOfManagerEmployees",
+     *     security={{ "bearerAuth": {} }},
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of excuses for employees in the manager's department",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="Excuses", type="object",
+     *                 @OA\Property(property="data", type="array",
+     *                     @OA\Items(type="object",
+     *                         @OA\Property(property="excuse", type="object",
+     *                             @OA\Property(property="id", type="integer", example=1),
+     *                             @OA\Property(property="user_id", type="integer", example=101),
+     *                             @OA\Property(property="date", type="string", format="date", example="2024-08-01"),
+     *                             @OA\Property(property="reason", type="string", example="Medical leave")
+     *                         ),
+     *                         @OA\Property(property="user", type="object",
+     *                             @OA\Property(property="id", type="integer", example=101),
+     *                             @OA\Property(property="name", type="string", example="John Doe"),
+     *                             @OA\Property(property="email", type="string", format="email", example="john.doe@example.com")
+     *                         )
+     *                     )
+     *                 ),
+     *                 @OA\Property(property="pagination", type="object",
+     *                     @OA\Property(property="total", type="integer", example=50),
+     *                     @OA\Property(property="per_page", type="integer", example=6),
+     *                     @OA\Property(property="current_page", type="integer", example=1),
+     *                     @OA\Property(property="last_page", type="integer", example=9),
+     *                     @OA\Property(property="next_page_url", type="string", nullable=true, example="http://yourapi.com/api/excuse/get_excuses_of_manager_employees?page=2"),
+     *                     @OA\Property(property="prev_page_url", type="string", nullable=true, example=null)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Manager not assigned to any department or no employees found"
+     *     )
+     * )
+     */
+    public function getExcusesOfManagerEmployees()
+    {
+        $manager = Auth::user();
 
-    if ($departmentIds->isEmpty()) {
-        return $this->returnError('Manager is not assigned to any department', 404);
+
+
+        $employeeIds = $manager->getManagedEmployeeIds();
+
+
+        if ($employeeIds->isEmpty()) {
+            return $this->returnError('No employees found under this manager', 404);
+        }
+
+        // Define the date range (26th of previous month to 26th of current month)
+        $currentDate = Carbon::now();
+        if ($currentDate->day > 26) {
+            $startDate = $currentDate->copy()->setDay(26);
+            $endDate = $currentDate->copy()->addMonth()->setDay(26);
+        } else {
+            $startDate = $currentDate->copy()->subMonth()->setDay(26);
+            $endDate = $currentDate->copy()->setDay(26);
+        }
+
+        // Fetch excuses with pagination
+        $excuses = Excuse::whereIn('user_id', $employeeIds)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->with('user') // Eager load user data to avoid N+1 problem
+            ->paginate(6, ['*'], 'page', request()->query('page', 1));
+
+        // Convert to collection before mapping
+        $excusesWithUserData = collect($excuses->items())->map(function ($excuse) {
+            return [
+                'excuse' => $excuse,
+            ];
+        });
+
+        return $this->returnData('Excuses', [
+            'data' => $excusesWithUserData,
+            'pagination' => [
+                'total' => $excuses->total(),
+                'per_page' => $excuses->perPage(),
+                'current_page' => $excuses->currentPage(),
+                'last_page' => $excuses->lastPage(),
+                'next_page_url' => $excuses->nextPageUrl(),
+                'prev_page_url' => $excuses->previousPageUrl(),
+            ]
+        ], 'Excuses for employees in the departments managed by the authenticated user');
     }
-
-
-
-    // Get all parent managers
-    $parentManagers = $manager->allParentManagers();
-
-    // Exclude employees who are managers at any level above
-    $parentManagerIds = $parentManagers->pluck('id')->toArray();
-    // Get all employees in those departments
-    $employeeIds = User::whereIn('department_id', $departmentIds)
-        ->where('id', '!=', $manager->id) // Exclude the manager
-        ->pluck('id');
-
-        $employeeIds = $employeeIds->diff($parentManagerIds);
-
-
-    if ($employeeIds->isEmpty()) {
-        return $this->returnError('No employees found under this manager', 404);
-    }
-
-    // Define the date range (26th of previous month to 26th of current month)
-    $currentDate = Carbon::now();
-    if ($currentDate->day > 26) {
-        $startDate = $currentDate->copy()->setDay(26);
-        $endDate = $currentDate->copy()->addMonth()->setDay(26);
-    } else {
-        $startDate = $currentDate->copy()->subMonth()->setDay(26);
-        $endDate = $currentDate->copy()->setDay(26);
-    }
-
-    // Fetch excuses with pagination
-    $excuses = Excuse::whereIn('user_id', $employeeIds)
-        ->whereBetween('date', [$startDate, $endDate])
-        ->with('user') // Eager load user data to avoid N+1 problem
-        ->paginate(6, ['*'], 'page', request()->query('page', 1));
-
-    // Convert to collection before mapping
-    $excusesWithUserData = collect($excuses->items())->map(function ($excuse) {
-        return [
-            'excuse' => $excuse,
-            'user' => $excuse->user, // Include user details
-        ];
-    });
-
-    return $this->returnData('Excuses', [
-        'data' => $excusesWithUserData,
-        'pagination' => [
-            'total' => $excuses->total(),
-            'per_page' => $excuses->perPage(),
-            'current_page' => $excuses->currentPage(),
-            'last_page' => $excuses->lastPage(),
-            'next_page_url' => $excuses->nextPageUrl(),
-            'prev_page_url' => $excuses->previousPageUrl(),
-        ]
-    ], 'Excuses for employees in the departments managed by the authenticated user');
-}
-
 }

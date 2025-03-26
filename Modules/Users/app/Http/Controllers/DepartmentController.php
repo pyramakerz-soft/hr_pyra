@@ -268,7 +268,7 @@ public function getSubDepartment(Request $request, $departmentId)
         // Validate the request
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'teamlead_id' => 'required|integer|exists:users,id',
+            'teamlead_id' => 'integer|exists:users,id',
         ]);
 
         // Check if the parent department exists

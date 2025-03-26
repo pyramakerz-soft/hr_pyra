@@ -233,6 +233,8 @@ class UsersController extends Controller
      *             @OA\Property(property="national_id", type="string", example="30201010214335"),
      *             @OA\Property(property="gender", type="string", example="m"),
      *             @OA\Property(property="department_id", type="integer", example=1),
+     *             @OA\Property(property="sub_department_id", type="integer", example=1),
+
      *             @OA\Property(property="image", type="string", format="binary", description="Profile image"),
      *             @OA\Property(property="roles", type="array", @OA\Items(type="string"), description="Roles to assign",example="employee"),
      *             @OA\Property(property="location_id", type="array", @OA\Items(type="integer"), description="Location IDs to assign",example=1),
@@ -294,14 +296,16 @@ class UsersController extends Controller
 
         $request->validated();
 
+        if($request['department_id'] ){
         $department = Department::find($request['department_id']);
         if (!$department) {
             return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
         }
+    }
         if ($request->sub_department_id) {
             $subDepartment = SubDepartment::find($request['sub_department_id']);
 
-            if ( ! $subDepartment || $subDepartment->department_id != $department->id) {
+            if ( ( $department && $subDepartment->department_id != $department->id ) || (! $subDepartment )) {
                 return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
             }
         }
@@ -491,6 +495,8 @@ class UsersController extends Controller
      *                     @OA\Property(property="national_id", type="string", description="User national ID"),
      *                     @OA\Property(property="gender", type="string", description="User gender"),
      *                     @OA\Property(property="department_id", type="integer", description="Department ID"),
+     *                     @OA\Property(property="sub_department_id", type="integer", description="sub_department_id ID"),
+
      *                     @OA\Property(property="image", type="string", description="URL of user image"),
      *                     @OA\Property(property="serial_number", type="string", description="User serial number")
      *                 ),
@@ -523,13 +529,28 @@ class UsersController extends Controller
 
         $request->validated();
 
+
+        if($request['department_id'] ){
+            $department = Department::find($request['department_id']);
+            if (!$department) {
+                return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
+            }
+        }
+            if ($request->sub_department_id) {
+                $subDepartment = SubDepartment::find($request['sub_department_id']);
+    
+                if ( ( $department && $subDepartment->department_id != $department->id ) || (! $subDepartment )) {
+                    return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
+                }
+            }
+    
+
         // Ensure that the department_id exists in $data before accessing it
         $departmentId = isset($request['department_id']) ? $request['department_id'] : $user->department_id;
-        // Validate department inside updateUser
-        $department = Department::findorFail($departmentId);
-        if (!$department) {
-            return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
-        }
+
+        $sub_department_id = isset($request['sub_department_id']) ? $request['sub_department_id'] : $user->sub_department_id;
+
+      
 
 
 
@@ -550,6 +571,8 @@ class UsersController extends Controller
             'national_id' => $request['national_id'] ?? $user->national_id,
             'gender' => $request['gender'] ?? $user->gender,
             'department_id' => (int) $departmentId,
+            'sub_department_id' => (int) $sub_department_id,
+
             'image' => $imageUrl,
         ]);
 

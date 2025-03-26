@@ -54,7 +54,6 @@ class UpdateUserRequest extends FormRequest
                 Rule::unique('users', 'code')->ignore($user->id),
             ],
             'gender' => ['nullable', 'in:m,M,F,f'],
-            'department_id' => ['nullable', 'exists:departments,id'],
             'salary' => ['nullable', 'numeric'],
             'working_hours_day' => ['nullable', 'numeric', 'min:4'],
             'overtime_hours' => ['nullable', 'numeric'],
@@ -65,6 +64,9 @@ class UpdateUserRequest extends FormRequest
             'end_time' => ['nullable'],
             'location_id' => ['nullable', 'exists:locations,id'],
             'work_type_id' => ['nullable', 'exists:work_types,id'],
+
+            'department_id' => [ 'nullable',,'exists:departments,id'],
+            'sub_department_id' => [ 'nullable',,'exists:sub_departments,id'],
             // 'is_float' => ['nullable'],
         ];
     }
