@@ -4482,6 +4482,10 @@
                                         "type": "integer",
                                         "example": 1
                                     },
+                                    "sub_department_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
                                     "image": {
                                         "description": "Profile image",
                                         "type": "string",
@@ -4973,6 +4977,10 @@
                                                         },
                                                         "department_id": {
                                                             "description": "Department ID",
+                                                            "type": "integer"
+                                                        },
+                                                        "sub_department_id": {
+                                                            "description": "sub_department_id ID",
                                                             "type": "integer"
                                                         },
                                                         "image": {

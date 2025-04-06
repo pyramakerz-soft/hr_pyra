@@ -65,8 +65,8 @@ class UpdateUserRequest extends FormRequest
             'location_id' => ['nullable', 'exists:locations,id'],
             'work_type_id' => ['nullable', 'exists:work_types,id'],
 
-            'department_id' => [ 'nullable',,'exists:departments,id'],
-            'sub_department_id' => [ 'nullable',,'exists:sub_departments,id'],
+            'department_id' => [ 'nullable','exists:departments,id'],
+            'sub_department_id' => [ 'nullable','exists:sub_departments,id'],
             // 'is_float' => ['nullable'],
         ];
     }
