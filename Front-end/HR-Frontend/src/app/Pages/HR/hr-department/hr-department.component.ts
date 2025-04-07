@@ -57,9 +57,16 @@ AddButton:boolean=false
   }
 
 
+
   EditDepartment(id: number) {
     this.AddButton=true;
     this.router.navigateByUrl("/HR/HRDepartmentEdit/" + id);
+
+  }
+
+  navigateToSubDept(id: number) {
+    this.AddButton=true;
+    this.router.navigateByUrl("/HR/HRSubDepartment/" + id);
 
   }
 

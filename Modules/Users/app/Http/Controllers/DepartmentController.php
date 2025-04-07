@@ -142,7 +142,7 @@ public function getSubDepartment(Request $request, $departmentId)
 {
     $role = $request->query('role');
     
-    $department = Department::with(['subDepartments.manager'])->find($departmentId);
+    $department = Department::with(['subDepartments.teamLead'])->find($departmentId);
 
     if (!$department) {
         return $this->returnError('Department not found');
@@ -150,7 +150,7 @@ public function getSubDepartment(Request $request, $departmentId)
 
     // If role is "team_lead", return only sub-departments without a team lead
     if ($role === 'Team Lead') {
-        $subDepartments = $department->subDepartments()->doesntHave('manager')->get();
+        $subDepartments = $department->subDepartments()->doesntHave('teamLead')->get();
     } else {
         $subDepartments = $department->subDepartments;
     }
@@ -159,6 +159,72 @@ public function getSubDepartment(Request $request, $departmentId)
 }
 
 
+/**
+ * @OA\Get(
+ *   path="/api/departments/{departmentId}/sub-departments/{subDepartmentId}",
+ *   summary="Get a specific sub-department by its ID",
+ *   tags={"Sub-Department"},
+ *   security={{"bearerAuth": {}}},
+ *   @OA\Parameter(
+ *     name="departmentId",
+ *     in="path",
+ *     required=true,
+ *     description="ID of the department",
+ *     @OA\Schema(type="integer")
+ *   ),
+ *   @OA\Parameter(
+ *     name="subDepartmentId",
+ *     in="path",
+ *     required=true,
+ *     description="ID of the sub-department",
+ *     @OA\Schema(type="integer")
+ *   ),
+ *   @OA\Response(
+ *     response=200,
+ *     description="A specific sub-department",
+ *     @OA\JsonContent(
+ *       type="object",
+ *       @OA\Property(property="id", type="integer"),
+ *       @OA\Property(property="name", type="string"),
+ *     )
+ *   ),
+ *   @OA\Response(
+ *     response=404,
+ *     description="Sub-department or department not found",
+ *     @OA\JsonContent(
+ *       @OA\Property(property="message", type="string", example="Sub-department not found")
+ *     )
+ *   ),
+ *   @OA\Response(
+ *     response=401,
+ *     description="Unauthorized",
+ *     @OA\JsonContent(
+ *       @OA\Property(property="message", type="string", example="Unauthorized")
+ *     )
+ *   )
+ * )
+ */
+public function getSubDepartmentById(Request $request, $departmentId, $subDepartmentId)
+{
+    // Fetch the department and its sub-departments, including the manager
+    $department = Department::with(['subDepartments.teamLead'])->find($departmentId);
+
+    // Check if the department exists
+    if (!$department) {
+        return $this->returnError('Department not found');
+    }
+
+    // Find the specific sub-department by its ID
+    $subDepartment = $department->subDepartments()->with('teamLead')->find($subDepartmentId);
+
+    // Check if the sub-department exists
+    if (!$subDepartment) {
+        return $this->returnError('Sub-department not found');
+    }
+
+    // Return the sub-department in the response
+    return $this->returnData("data", $subDepartment, "Sub-Department Data");
+}
 
 
     /**
@@ -283,7 +349,7 @@ public function getSubDepartment(Request $request, $departmentId)
             'teamlead_id' => $validatedData['teamlead_id'],
             'department_id' => $departmentId,
 
-        ])->with('manager')->get();
+        ])->with('teamLead')->get();
 
 
         return $this->returnData("sub_department", $subDepartment, "Sub-department stored successfully");
@@ -389,7 +455,7 @@ public function getSubDepartment(Request $request, $departmentId)
 
 
     /**
-     * @OA\Put(
+     * @OA\Post(
      *   path="/api/departments/{departmentId}/sub-departments/{subDepartmentId}",
      *   summary="Update a sub-department",
      *   tags={"Sub-Department"},

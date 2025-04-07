@@ -113,7 +113,6 @@ public supDeptServ:SubDepartmentService
     }else
    { // Set all users' selected state to match "Select All" checkbox
     this.tableData.forEach(row => {
-      console.log('/ssffff');
       
       this.selectedUsers.push({ userId: row.id, userName: row.name });
       this.isSelectAllChecked=true;

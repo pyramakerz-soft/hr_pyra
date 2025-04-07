@@ -1,10 +1,10 @@
 <div>
     <div class="flex justify-between items-center">
       <div>
-        <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Department</p>
+        <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Sub Department</p>
       </div>
       <button class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg"
-      (click)="NavigateToAddDepartment()"
+      (click)="NavigateToAddSubDepartment()"
       [disabled]="AddButton"
       >
         Add
@@ -24,9 +24,7 @@
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
               Manager Name  
             </th>
-            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-              Is Location Time  
-            </th>
+        
             <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
               Actions  
             </th>
@@ -34,42 +32,32 @@
         </thead>
         <tbody>
           <!-- No Data Row -->
-          <tr *ngIf="departments.length === 0">
+          <tr *ngIf="subDepts.length === 0">
             <td colspan="5" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
               No Data Found
             </td>
           </tr>
   
           <!-- Data Rows -->
-          <tr *ngFor="let row of departments; let i = index"
+          <tr *ngFor="let row of subDepts; let i = index"
               [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}"
               class="border-t border-gray-300 text-xs md:text-sm">
   
             <td class="py-5 px-4">{{ row.id }}</td>
             <td class="py-5 px-4">{{ row.name }}</td>
             <td class="py-5 px-4">
-              {{ row.manager_name }}
+              {{ ''}}
             </td>
-            <td class="py-5 px-4">{{ row.is_location_time }}</td>
 
             <td class="py-5 px-4">
-
               <div class="px-2">
+                <button (click)="EditSubDepartment(row.id)"
+                [disabled]="AddButton"
 
-
-                <button (click)="navigateToSubDept(row.id)"
-                [disabled]="AddButton" >
-
-                  <i class="fas fa-eye text-[#101828] w-3 md:w-4"></i>
+                >
+                  <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
                 </button>
-
-                <button (click)="EditDepartment(row.id)"
-                [disabled]="AddButton" >
-
-                  <i class="fas fa-edit text-[#101828]  ml-2 w-3 md:w-4"></i>
-                </button>
-
-                <button (click)="deleteDepartment(row.id)">
+                <button (click)="deleteSubDepartment(row.id)">
                   <i class="fa fa-trash text-[#CC161D] ml-2 w-3 md:w-4"></i>
                 </button>
               </div>

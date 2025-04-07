@@ -81,6 +81,10 @@ Route::group(['middleware' => 'role:Hr'], function () {
 
         //User Management
         Route::get('/manager_names', [UsersController::class, 'ManagerNames']); //HR role
+      
+        Route::get('/teamlead_names', [UsersController::class, 'teamleadNames']); //HR role
+
+      
         Route::get('/employees_per_month', [UsersController::class, 'employeesPerMonth']); //HR role
 
 
@@ -108,8 +112,12 @@ Route::group(['middleware' => 'role:Hr'], function () {
 
     // sub Depratment
     Route::get('/departments/{departmentId}/sub-departments', [DepartmentController::class, 'getSubDepartment'])->name('departments.getSubDepartment'); //HR role
+   
+   
+        Route::get('/departments/{departmentId}/sub-departments/{subDepartmentId}', [DepartmentController::class, 'getSubDepartmentById'])->name('departments.getSubDepartmentById'); //HR role
+
     Route::post('/departments/{departmentId}/sub-departments', [DepartmentController::class, 'storeSubDepartment'])->name('departments.storeSubDepartment'); //HR role
-    Route::put('/departments/{departmentId}/sub-departments/{subDepartmentId}', [DepartmentController::class, 'updateSubDepartment'])->name('departments.updateSubDepartment'); //HR role
+    Route::post('/departments/{departmentId}/sub-departments/{subDepartmentId}', [DepartmentController::class, 'updateSubDepartment'])->name('departments.updateSubDepartment'); //HR role
 
     Route::delete('/departments/{departmentId}/sub-departments/{subDepartmentId}', [DepartmentController::class, 'deleteSubDepartment'])->name('departments.deleteSubDepartment'); //HR role
 

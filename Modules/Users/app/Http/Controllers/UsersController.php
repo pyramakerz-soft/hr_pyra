@@ -258,6 +258,68 @@ private function formatPagination($users)
     }
 
 
+
+
+
+
+
+    /**
+     * @OA\Get(
+     *     path="/api/users/team_lead_names",
+     *     tags={"User"},
+     *     summary="Get names of all team_leads",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of team_lead names retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="team_lead_Names", type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="team_lead_id", type="integer", description="ID of the team_lead"),
+     *                     @OA\Property(property="team_lead_name", type="string", description="Name of the team_lead")
+     *                 )
+     *             ),
+     *             @OA\Property(property="message", type="string", description="Success message")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No team_lead found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No team_lead found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized access")
+     *         )
+     *     )
+     * )
+     */
+    public function teamleadNames()
+    {
+        $data = [];
+        $role = Role::where('name', 'Team leader')->first();
+        if (!$role) {
+            return $this->returnError('team lead role not found', 404);
+        }
+        $teamLeads = User::Role('Team leader')->get(['id', 'name']);
+        $data = $teamLeads->map(function ($teamLead) {
+            return [
+                'team_lead_id' => $teamLead->id,
+                'team_lead_name' => $teamLead->name,
+            ];
+        });
+        return $this->returnData('teamLeadNames', $data, 'Team leader names');
+    }
+
+
+
+
     /**
      * @OA\Post(
      *     path="/api/users/create_user",

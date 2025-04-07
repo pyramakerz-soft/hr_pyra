@@ -16,7 +16,7 @@ class SubDepartment extends Model
         return $this->belongsTo(Department::class);
     }
 
-    public function manager()
+    public function teamLead()
     {
         return $this->belongsTo(User::class, 'teamlead_id');
     }
