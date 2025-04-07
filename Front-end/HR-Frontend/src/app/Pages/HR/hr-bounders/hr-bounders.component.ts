@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { BoundersPopUpComponent } from '../../../Components/bounders-pop-up/bounders-pop-up.component';
-import { MatDialog } from '@angular/material/dialog';
-import { Location } from '../../../Models/location';
-import { LocationsService } from '../../../Services/locations.service';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
+import { BoundersPopUpComponent } from '../../../Components/bounders-pop-up/bounders-pop-up.component';
+import { Location } from '../../../Models/location';
+import { DepartmentService } from '../../../Services/department.service';
+import { LocationsService } from '../../../Services/locations.service';
 
 @Component({
   selector: 'app-hr-bounders',
@@ -26,7 +27,13 @@ export class HrBoundersComponent {
   AddButton:boolean=false
 
 
-  constructor(public dialog: MatDialog, public locationServ: LocationsService) { }
+
+
+
+  constructor(public dialog: MatDialog, public locationServ: LocationsService,
+public departmentServ: DepartmentService
+
+  ) { }
 
   ngOnInit() {
     const savedPageNumber = localStorage.getItem('HrLocationsCN');
@@ -45,6 +52,7 @@ export class HrBoundersComponent {
 
 
   }
+
 
 
   getAllLocations(page: number) {

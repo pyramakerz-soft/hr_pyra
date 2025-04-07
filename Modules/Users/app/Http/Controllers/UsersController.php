@@ -15,6 +15,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
@@ -118,44 +119,88 @@ class UsersController extends Controller
      * )
      */
     public function index(Request $request)
-    {
+{
+    $search = $request->get('search');
+    $department = $request->get('department_id');
+    $subDepartment = $request->get('sub_department_id');
+    $usersData = null;
 
-        $search = request()->get('search', null);
-        $usersData = null;
+    // Base query
+    $usersQuery = User::query();
 
-        // Handle export request
-        if ($request->has('export')) {
-            $users = User::all();
+    // Filter by department
+    if ($department) {
+        $usersQuery->where('department_id', $department);
+    }
 
+    // Filter by sub-department
+    if ($subDepartment) {
+        $usersQuery->where('sub_department_id', $subDepartment);
+    }
 
-            // Proceed with export
-            return (new UsersExport($users))
-                ->download('all_user_clocks.xlsx');
-        } else
+    // Handle export
+    if ($request->has('export')) {
+        $users = $usersQuery->get();
 
-        if ($search) {
-            $users = $this->searchUsersByNameOrCode($search);
-            if ($users->isEmpty()) {
-                $usersData =  null;
-            }
-            $usersData =  [
+        return (new UsersExport($users))
+            ->download('all_user_clocks.xlsx');
+    }
+
+    // Handle search
+    if ($search) {
+        $users = $this->searchUsersByNameOrCode($search);
+
+        // Apply department/sub-department filtering to search results
+        if ($department) {
+            $users = $users->where('department_id', $department);
+        }
+        if ($subDepartment) {
+            $users = $users->where('sub_department_id', $subDepartment);
+        }
+
+        $usersData = $users->isEmpty() ? null : [
+            'users' => UserResource::collection($users),
+        ];
+    } else {
+        // If filters are applied, fetch all users matching the filters (no pagination)
+        if ($department || $subDepartment) {
+            Log::info('Fetching all users without pagination');
+            $users = $usersQuery->get();  // Fetch all users without pagination
+            $usersData = [
                 'users' => UserResource::collection($users),
+                'pagination' => null,  // No pagination if no pagination applied
             ];
         } else {
-            $users = User::paginate(5);
-            $usersData =  [
+            // Otherwise, apply pagination
+            $users = $usersQuery->paginate(5);
+
+            $usersData = [
                 'users' => UserResource::collection($users),
-                'pagination' => $this->formatPagination($users),
+                'pagination' => $this->formatPagination($users),  // Format pagination
             ];
         }
-
-
-
-        if (!$usersData) {
-            return $this->returnError('No Users Found');
-        }
-        return $this->returnData("data", $usersData, "Users Data");
     }
+
+    if (!$usersData) {
+        return $this->returnError('No Users Found');
+    }
+
+    return $this->returnData("data", $usersData, "Users Data");
+}
+
+// Function to format pagination data
+private function formatPagination($users)
+{
+    return [
+        'current_page' => $users->currentPage(),
+        'last_page' => $users->lastPage(),
+        'per_page' => $users->perPage(),
+        'total' => $users->total(),
+    ];
+}
+
+    
+
 
 
     /**
@@ -296,16 +341,16 @@ class UsersController extends Controller
 
         $request->validated();
 
-        if($request['department_id'] ){
-        $department = Department::find($request['department_id']);
-        if (!$department) {
-            return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
+        if ($request['department_id']) {
+            $department = Department::find($request['department_id']);
+            if (!$department) {
+                return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
+            }
         }
-    }
         if ($request->sub_department_id) {
             $subDepartment = SubDepartment::find($request['sub_department_id']);
 
-            if ( ( $department && $subDepartment->department_id != $department->id ) || (! $subDepartment )) {
+            if (($department && $subDepartment->department_id != $department->id) || (! $subDepartment)) {
                 return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
             }
         }
@@ -530,27 +575,27 @@ class UsersController extends Controller
         $request->validated();
 
 
-        if($request['department_id'] ){
+        if ($request['department_id']) {
             $department = Department::find($request['department_id']);
             if (!$department) {
                 return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
             }
         }
-            if ($request->sub_department_id) {
-                $subDepartment = SubDepartment::find($request['sub_department_id']);
-    
-                if ( ( $department && $subDepartment->department_id != $department->id ) || (! $subDepartment )) {
-                    return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
-                }
+        if ($request->sub_department_id) {
+            $subDepartment = SubDepartment::find($request['sub_department_id']);
+
+            if (($department && $subDepartment->department_id != $department->id) || (! $subDepartment)) {
+                return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
             }
-    
+        }
+
 
         // Ensure that the department_id exists in $data before accessing it
         $departmentId = isset($request['department_id']) ? $request['department_id'] : $user->department_id;
 
         $sub_department_id = isset($request['sub_department_id']) ? $request['sub_department_id'] : $user->sub_department_id;
 
-      
+
 
 
 

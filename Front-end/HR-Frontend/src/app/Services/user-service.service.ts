@@ -1,8 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { UserModel } from '../Models/user-model';
 import { Observable } from 'rxjs';
 import { AddEmployee } from '../Models/add-employee';
+import { UserModel } from '../Models/user-model';
 import { ApiService } from './api.service';
 
 @Injectable({
@@ -108,12 +108,28 @@ export class UserServiceService {
     return this.http.post<any>(this.baseURL + "/users/update_password/" + empId, body, { headers });
   }
 
-  SearchByName(Name:string){
+  SearchByNameAndDeptAndSubDep(Name: string, deptId?: number|null, subId?: number|null) {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers?search=${Name}`, { headers });
+  
+    let params: any = { search: Name };
+  
+    if (deptId != null) {
+      params.department_id = deptId;
+    }
+  
+    if (subId != null) {
+      params.sub_department_id = subId;
+    }
+    console.log('/////');
+    
+  console.log(deptId);
+  console.log(subId);
+  
+  
+    return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, { headers, params });
   }
-
+  
   getAllUsersName(){
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);

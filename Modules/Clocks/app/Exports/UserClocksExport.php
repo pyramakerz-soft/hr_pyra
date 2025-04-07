@@ -71,8 +71,8 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
 
 
             $formattedTotal = null;
-
             if ($dailyClocks->isNotEmpty()) {
+
                 foreach ($dailyClocks as $clock) {
                     $clockIn = $clock->clock_in ? Carbon::parse($clock->clock_in) : null;
                     $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out) : null;
@@ -80,8 +80,8 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                     if ($clockIn && $clockOut) {
                         $diff = $clockIn->diffInMinutes($clockOut);
 
-                        $accumulatedTotalMinutes +=  $diff ;
-                        $formattedTotal +=$diff;
+                        $accumulatedTotalMinutes +=  $diff;
+                        $formattedTotal += $diff;
                     }
 
                     $finalCollection->push([
@@ -91,11 +91,11 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                         'Total Over time in That Day' =>  $emptyFeild,
                         'Is this date has vacation' =>  $emptyFeild,
 
-                        'Name' => $clock->user->name,
+                        'Name' => $this->user->name,
                         'Clock In' => $clockIn ? $clockIn->format('h:iA') : '',
                         'Clock Out' => $clockOut ? $clockOut->format('h:iA') : '',
-                        'Code' => $clock->user->code,
-                        'Department' => $clock->user->department ? $clock->user->department->name : 'N/A',
+                        'Code' => $this->user->code,
+                        'Department' => $this->user->department ? $clock->user->department->name : 'N/A',
                         'Location In' => $clock->location_type === "float"
                             ? $clock->address_clock_in
                             : ($clock->location_type === "home"
@@ -112,7 +112,6 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                                     : null)),
                     ]);
                 }
-
             } else {
                 // No clocks in this day → add empty row
                 $finalCollection->push([
@@ -122,15 +121,17 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                     'Total Over time in That Day' =>  $emptyFeild,
                     'Is this date has vacation' =>  $emptyFeild,
 
-                    'Name' =>  $emptyFeild,
+                    'Name' => $this->user->name,
                     'Clock In' =>  $emptyFeild,
                     'Clock Out' =>  $emptyFeild,
-                    'Code' =>  $emptyFeild,
-                    'Department' =>  $emptyFeild,
+                    'Code' => $this->user->code,
+                    'Department' => $this->user->department->name,
+
                     'Location In' =>  $emptyFeild,
                     'Location Out' =>  $emptyFeild,
                 ]);
             }
+
 
             // Daily Excuses
             $dailyExcuses = $this->user->excuses()->where('status', 'approved')
@@ -166,7 +167,7 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
             // Add summary
             $finalCollection->push([
                 'Date' => 'SUMMARY---->' . $formattedDate,
-                'Total Hours in That Day' =>  $totalHoursInSpecificDay  ,
+                'Total Hours in That Day' =>  $totalHoursInSpecificDay,
                 'Total Excuses in That Day' => $formattedExcuses,
                 'Total Over time in That Day' => $formattedOverTimes,
                 'Is this date has vacation' => $isVacation == 0 ? 'NO' : 'YES',
@@ -206,7 +207,7 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
             'Total Hours in That Day' => sprintf('%02d:%02d', floor($accumulatedTotalMinutes / 60), $accumulatedTotalMinutes % 60),
             'Total Excuses in That Day' => sprintf('%02d:%02d', floor($accumulatedExcuses / 60), $accumulatedExcuses % 60),
             'Total Over time in That Day' => sprintf('%02d:%02d', floor($accumulatedOverTimes / 60), $accumulatedOverTimes % 60),
-            'Is this date has vacation' =>  $accumulatedVacation,
+            'Is this date has vacation' =>  $accumulatedVacation == '0' ? 'NO VACATIONS' : $accumulatedVacation . '  Days ',
             'Name' => 'N/A',
             'Clock In' => $emptyFeild,
             'Clock Out' => $emptyFeild,

@@ -2,9 +2,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
+import { Clock } from '../Models/clock';
 import { EmployeeDashboard } from '../Models/employee-dashboard';
 import { ApiService } from './api.service';
-import { Clock } from '../Models/clock';
 
 @Injectable({
   providedIn: 'root'
@@ -74,11 +74,22 @@ export class ClockService {
     return this.http.post<EmployeeDashboard>(`${this.baseUrl}/update_clock/user/${Userid}/clock/${clockId}`,body,{ headers, responseType: 'json' });
   }
 
-  ExportUserDataById(id:number, date:string){
-    const token = localStorage.getItem("token");
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get(`${this.baseUrl}/clocks/user/${id}?month=${date}&export=true`, { headers, responseType: 'blob' });  
-  }
+  ExportUserDataById(id:number, fromDate?: string, toDate?: string){
+
+
+      const token = localStorage.getItem("token");
+      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+      // Build the URL with the optional "fromDate" and "toDate" parameters
+      let url = `${this.baseUrl}/clocks/user/${id}?export=true`;
+    
+      if (fromDate && toDate) {
+        url += `&from_day=${fromDate}&to=${toDate}`;
+      } 
+    
+      return this.http.get(url, { headers, responseType: 'blob' });  
+    
+ }
 
 ExportAllUserDataById(fromDay: string, toDay: string, departmentId: string): Observable<Blob> {
   const token = localStorage.getItem("token");
