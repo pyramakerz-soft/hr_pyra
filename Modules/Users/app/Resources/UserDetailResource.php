@@ -4,6 +4,7 @@ namespace Modules\Users\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Log;
 
 class UserDetailResource extends JsonResource
 {
@@ -29,6 +30,10 @@ class UserDetailResource extends JsonResource
         if (count($locationTypes) > 1) {
             $work_home = true;
         }
+        Log::info('/////////////////');
+
+        Log::info(json_encode( $this->user->roles()->first(),
+));
 
         return [
             "id" => $this->user->id,
@@ -39,9 +44,11 @@ class UserDetailResource extends JsonResource
             "contact_phone" => $this->user->contact_phone,
             "gender" => $this->user->gender,
             "department_id" => $this->user->department_id  ?? null,
+            "sub_department_id" => $this->user->sub_department_id  ?? null,
+
             "deparment_name" => $this->user->department->name ?? null,
-            "roles" => $this->user->roles->pluck('name'),
-            "national_id" => $this->user->national_id ,
+            "role" => $this->user->roles->first(),
+            "national_id" => $this->user->national_id,
             "salary" => $salary,
             "working_hours_day" => $working_hours_day,
             "hourly_rate" => $hourly_rate,

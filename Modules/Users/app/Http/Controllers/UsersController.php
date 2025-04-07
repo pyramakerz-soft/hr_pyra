@@ -343,7 +343,7 @@ private function formatPagination($users)
      *             @OA\Property(property="sub_department_id", type="integer", example=1),
 
      *             @OA\Property(property="image", type="string", format="binary", description="Profile image"),
-     *             @OA\Property(property="roles", type="array", @OA\Items(type="string"), description="Roles to assign",example="employee"),
+     *             @OA\Property(property="role", type="array", @OA\Items(type="string"), description="Roles to assign",example="employee"),
      *             @OA\Property(property="location_id", type="array", @OA\Items(type="integer"), description="Location IDs to assign",example=1),
      *             @OA\Property(property="work_type_id", type="array", @OA\Items(type="integer"), description="Work Type IDs to assign",example=1),
      *             @OA\Property(property="salary", type="number", format="float", description="User salary",example="8000"),
@@ -435,9 +435,9 @@ private function formatPagination($users)
             'national_id' => $request['national_id'],
             'code' => $code,
             'gender' => $request['gender'],
-            'department_id' => (int) $request['department_id'],
+            'department_id' => $request['department_id'],
 
-            'sub_department_id' => (int) $request['sub_department_id'],
+            'sub_department_id' => $request['sub_department_id'],
 
 
             'image' => $imageUrl,
@@ -480,7 +480,8 @@ private function formatPagination($users)
         ]);
 
 
-        $this->assignRoles($user, $request['roles'] ?? []);
+        $this->assignRoles($user, [$request['role']]);
+
         $this->assignLocations($user, $request['location_id'] ?? []);
         $this->assignWorkTypes($user, $request['work_type_id'] ?? []);
 
@@ -677,8 +678,8 @@ private function formatPagination($users)
             'contact_phone' => $request['contact_phone'] ?? $user->contact_phone,
             'national_id' => $request['national_id'] ?? $user->national_id,
             'gender' => $request['gender'] ?? $user->gender,
-            'department_id' => (int) $departmentId,
-            'sub_department_id' => (int) $sub_department_id,
+            'department_id' => $departmentId,
+            'sub_department_id' => $sub_department_id,
 
             'image' => $imageUrl,
         ]);
@@ -722,9 +723,11 @@ private function formatPagination($users)
 
 
         // Assign roles, locations, and work types
-        if ($request->has('roles')) {
-            $this->assignRoles($user, $request->input('roles'));
-        }
+
+            Log::info($request);
+            Log::info(json_encode([$request['role']]));
+            $this->assignRoles($user, [$request['role']]);
+        
 
         if ($request->has('location_id')) {
             $this->assignLocations($user, $request->input('location_id'));
@@ -1140,7 +1143,7 @@ private function formatPagination($users)
                 'end_time',
                 'emp_type',
                 'hiring_date',
-                'roles',
+                'role',
                 'location_id',
                 'work_type_id',
             ];

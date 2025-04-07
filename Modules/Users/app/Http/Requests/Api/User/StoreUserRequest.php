@@ -52,8 +52,8 @@ class StoreUserRequest extends FormRequest
             
             
             
-            'department_id' => [ 'exists:departments,id'],
-            'sub_department_id' => [ 'exists:sub_departments,id'],
+            'department_id' => [ 'nullable','exists:departments,id'],
+            'sub_department_id' => ['nullable', 'exists:sub_departments,id'],
 
             // 'is_float' => ['nullable'],
         ];

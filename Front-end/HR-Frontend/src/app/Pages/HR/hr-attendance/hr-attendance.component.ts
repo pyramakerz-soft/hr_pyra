@@ -202,9 +202,12 @@ onDepartmentChange() {
   this.selectedUsers=[]
   this.isSelectAllChecked=false;
  this.subDepartments = [];
+
  console.log(this.selectedDepartment);
  this.selectedSubDepartment=null;
  if (this.selectedDepartment) {
+  this.supDeptServ.setDeptId(this.selectedDepartment);
+
    this.getSubDepartments(this.selectedDepartment);
    this.Search()
  }

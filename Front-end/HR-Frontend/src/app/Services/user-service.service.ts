@@ -38,6 +38,8 @@ export class UserServiceService {
     formData.append('name', emp.name);
     formData.append('code', emp.code || '');
     formData.append('department_id', emp.department_id?.toString() || '');
+    formData.append('sub_department_id', emp.sub_department_id?.toString() || '');
+
     formData.append('emp_type', emp.emp_type);
     formData.append('phone', emp.phone);
     formData.append('contact_phone', emp.contact_phone);
@@ -52,8 +54,10 @@ export class UserServiceService {
     formData.append('start_time', emp.start_time || '');
     formData.append('end_time', emp.end_time || '');
     formData.append('gender', emp.gender);
+    formData.append('role', emp.role?.name.toString() || ''); 
 
-    emp.roles.forEach((role, index) => formData.append(`roles[${index}]`, role));
+
+    // emp.roles.forEach((role, index) => formData.append(`roles[${index}]`, role));
     emp.location_id.forEach((id, index) => formData.append(`location_id[${index}]`, id.toString()));
     emp.work_type_id.forEach((id, index) => formData.append(`work_type_id[${index}]`, id.toString()));
 
@@ -79,6 +83,8 @@ export class UserServiceService {
     formData.append('name', emp.name || '');
     formData.append('code', emp.code || '');
     formData.append('department_id', emp.department_id?.toString() || '');
+    formData.append('sub_department_id', emp.sub_department_id?.toString() || '');
+
     formData.append('emp_type', emp.emp_type || '');
     formData.append('phone', emp.phone || '');
     formData.append('contact_phone', emp.contact_phone || '');
@@ -91,8 +97,9 @@ export class UserServiceService {
     formData.append('start_time', emp.start_time || '');
     formData.append('end_time', emp.end_time || '');
     formData.append('gender', emp.gender || '');
+    formData.append('role', emp.role?.name.toString() || ''); 
 
-    emp.roles.forEach((role, index) => formData.append(`roles[${index}]`, role));
+    // emp.roles.forEach((role, index) => formData.append(`roles[${index}]`, role));
     emp.location_id.forEach((id, index) => formData.append(`location_id[${index}]`, id.toString()));
     emp.work_type_id.forEach((id, index) => formData.append(`work_type_id[${index}]`, id.toString()));
 
