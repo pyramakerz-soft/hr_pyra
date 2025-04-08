@@ -5,15 +5,15 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use Illuminate\Database\Seeder;
-use Modules\Location\Database\Seeders\LocationSeeder;
-use Modules\Location\Database\Seeders\UserLocationSeeder;
-use Modules\Users\Database\Seeders\DepartmentSeeder;
-use Modules\Users\Database\Seeders\PermissionSeeder;
-use Modules\Users\Database\Seeders\UserDetailSeeder;
-use Modules\Users\Database\Seeders\UserHolidaySeeder;
-use Modules\Users\Database\Seeders\UserSeeder;
-use Modules\Users\Database\Seeders\UserVacationSeeder;
-use Modules\Users\Database\Seeders\UserWorkTypeSeeder;
+// use Modules\Location\Database\Seeders\LocationSeeder;
+// use Modules\Location\Database\Seeders\UserLocationSeeder;
+// use Modules\Users\Database\Seeders\DepartmentSeeder;
+// use Modules\Users\Database\Seeders\PermissionSeeder;
+// use Modules\Users\Database\Seeders\UserDetailSeeder;
+// use Modules\Users\Database\Seeders\UserHolidaySeeder;
+// use Modules\Users\Database\Seeders\UserSeeder;
+// use Modules\Users\Database\Seeders\UserVacationSeeder;
+// use Modules\Users\Database\Seeders\UserWorkTypeSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -38,19 +38,20 @@ class DatabaseSeeder extends Seeder
         ];
 
         $this->call([
-            DepartmentSeeder::class,
-            UserWorkTypeSeeder::class,
+            // DepartmentSeeder::class,
+            // UserWorkTypeSeeder::class,
 
-            UserSeeder::class,
-            UserWorkTypeSeeder::class,
-            UserHolidaySeeder::class,
-            UserVacationSeeder::class,
-            LocationSeeder::class,
-            UserDetailSeeder::class,
+            // UserSeeder::class,
+            // UserWorkTypeSeeder::class,
+            // UserHolidaySeeder::class,
+            // UserVacationSeeder::class,
+            // LocationSeeder::class,
+            // UserDetailSeeder::class,
 
-            PermissionSeeder::class,
-            UserLocationSeeder::class,
-            ClockSeeder::class,
+            // PermissionSeeder::class,
+            // UserLocationSeeder::class,
+            // ClockSeeder::class,
+            RolesSeeder::class
         ]);
 
     }

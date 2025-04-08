@@ -29,7 +29,7 @@ Route::group(['prefix' => 'excuse'], function () {
     Route::post('/add_user_excuse', [ExcuseController::class, 'addUserExcuse'])->name('add_user_excuse'); //HR role
     Route::get('/show_user_excuses', [ExcuseController::class, 'showUserExcuses']);
 
-    Route::group(['middleware' => 'role:Manager'], function () {
+    Route::group(['middleware' => 'role:Manager|Team leader|Hr'], function () {
 
         Route::post('/change_excuse_status/{excuse}', [ExcuseController::class, 'changeExcuseStatus']);
         Route::get('/get_excuses_of_manager_employees', [ExcuseController::class, 'getExcusesOfManagerEmployees']);
@@ -38,8 +38,8 @@ Route::group(['prefix' => 'excuse'], function () {
 
 Route::group(['prefix' => 'overtime'], function () {
 
-    Route::post('/start_user_overtime', [OverTimeController::class, 'addStartUserOvertime'])->name('start_user_overtime'); 
-    Route::post('/end_user_overtime', [OverTimeController::class, 'addEndUserOvertime'])->name('end_user_overtime'); 
+    Route::post('/start_user_overtime', [OverTimeController::class, 'addStartUserOvertime'])->name('start_user_overtime');
+    Route::post('/end_user_overtime', [OverTimeController::class, 'addEndUserOvertime'])->name('end_user_overtime');
     Route::get('/show_user_overtime', [OverTimeController::class, 'showUserOvertime']);
 
     Route::group(['middleware' => 'role:Manager'], function () {
@@ -81,6 +81,10 @@ Route::group(['middleware' => 'role:Hr'], function () {
 
         //User Management
         Route::get('/manager_names', [UsersController::class, 'ManagerNames']); //HR role
+      
+        Route::get('/teamlead_names', [UsersController::class, 'teamleadNames']); //HR role
+
+      
         Route::get('/employees_per_month', [UsersController::class, 'employeesPerMonth']); //HR role
 
 
@@ -104,6 +108,21 @@ Route::group(['middleware' => 'role:Hr'], function () {
     Route::post('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update'); //HR role
     Route::apiResource('departments', DepartmentController::class)->except('update'); //HR role
     Route::get('department_employees', [DepartmentController::class, 'getDepartmentEmployees']); //HR role
+
+
+    // sub Depratment
+    Route::get('/departments/{departmentId}/sub-departments', [DepartmentController::class, 'getSubDepartment'])->name('departments.getSubDepartment'); //HR role
+   
+   
+        Route::get('/departments/{departmentId}/sub-departments/{subDepartmentId}', [DepartmentController::class, 'getSubDepartmentById'])->name('departments.getSubDepartmentById'); //HR role
+
+    Route::post('/departments/{departmentId}/sub-departments', [DepartmentController::class, 'storeSubDepartment'])->name('departments.storeSubDepartment'); //HR role
+    Route::post('/departments/{departmentId}/sub-departments/{subDepartmentId}', [DepartmentController::class, 'updateSubDepartment'])->name('departments.updateSubDepartment'); //HR role
+
+    Route::delete('/departments/{departmentId}/sub-departments/{subDepartmentId}', [DepartmentController::class, 'deleteSubDepartment'])->name('departments.deleteSubDepartment'); //HR role
+
+
+
 
     //Role and Permission Management
     Route::post('/roles/{role}', [RoleController::class, 'update'])->name('roles.update'); //HR role

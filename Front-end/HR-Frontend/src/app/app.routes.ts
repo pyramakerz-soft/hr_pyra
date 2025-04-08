@@ -22,6 +22,8 @@ import { HrDepartmentComponent } from './Pages/HR/hr-department/hr-department.co
 import { HrDepartmentAddComponent } from './Pages/HR/hr-department-add/hr-department-add.component';
 import { UserDataService } from './Services/Resolvers/user-data.service';
 import { HrIssuesComponent } from './Pages/HR/hr-issues/hr-issues.component';
+import { HrSubDepartmentComponent } from './Pages/HR/hr-sub-department/hr-sub-department.component';
+import { HrSubDepartmentAddComponent } from './Pages/HR/hr-sub-department-add/hr-sub-department-add.component';
 
 export const routes: Routes = [
     { 
@@ -59,10 +61,17 @@ export const routes: Routes = [
             { path: "HREmployeeDetailsAdd", component: HrEmployeeAddEditDetailsComponent, title: "HREmployeeDetailsAdd" },
             { path: "HREmployeeDetailsEdit/:Id", component: HrEmployeeAddEditDetailsComponent, title: "HREmployeeDetailsEdit" },
             { path: "HRAttendanceEmployeeEdit/:Id", component: AttendenceEditComponent, title: "HRAttendanceEmployeeEdit" },
+
             { path: "HRDepartment", component: HrDepartmentComponent, title: "HRDepartment" },
             { path: "HRDepartmentAdd", component: HrDepartmentAddComponent, title: "HRDepartmentAdd" },
             { path: "HRDepartmentEdit/:id", component: HrDepartmentAddComponent, title: "HRDepartmentEdit" },
+
+            { path: "HRSubDepartment/:id", component: HrSubDepartmentComponent, title: "HRSubDepartment" },
+            { path: "HRSubDepartmentAdd", component: HrSubDepartmentAddComponent, title: "HRSubDepartmentAdd" },
+            { path: "HRSubDepartmentEdit/:id", component: HrSubDepartmentAddComponent, title: "HRSubDepartmentEdit" },
+
             { path: "HRIssues", component: HrIssuesComponent, title: "HRIssues" },
+            
 
         ]
     },

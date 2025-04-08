@@ -15,6 +15,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
@@ -23,6 +24,7 @@ use Modules\Users\Exports\UsersExport;
 use Modules\Users\Http\Requests\Api\User\StoreUserRequest;
 use Modules\Users\Http\Requests\Api\User\UpdateUserRequest;
 use Modules\Users\Models\Department;
+use Modules\Users\Models\SubDepartment;
 use Modules\Users\Models\User;
 use Modules\Users\Models\UserDetail;
 use Modules\Users\Models\WorkType;
@@ -117,44 +119,88 @@ class UsersController extends Controller
      * )
      */
     public function index(Request $request)
-    {
+{
+    $search = $request->get('search');
+    $department = $request->get('department_id');
+    $subDepartment = $request->get('sub_department_id');
+    $usersData = null;
 
-        $search = request()->get('search', null);
-        $usersData = null;
+    // Base query
+    $usersQuery = User::query();
 
-        // Handle export request
-        if ($request->has('export')) {
-            $users = User::all();
+    // Filter by department
+    if ($department) {
+        $usersQuery->where('department_id', $department);
+    }
 
+    // Filter by sub-department
+    if ($subDepartment) {
+        $usersQuery->where('sub_department_id', $subDepartment);
+    }
 
-            // Proceed with export
-            return (new UsersExport($users))
-                ->download('all_user_clocks.xlsx');
-        } else
+    // Handle export
+    if ($request->has('export')) {
+        $users = $usersQuery->get();
 
-        if ($search) {
-            $users = $this->searchUsersByNameOrCode($search);
-            if ($users->isEmpty()) {
-                $usersData =  null;
-            }
-            $usersData =  [
+        return (new UsersExport($users))
+            ->download('all_user_clocks.xlsx');
+    }
+
+    // Handle search
+    if ($search) {
+        $users = $this->searchUsersByNameOrCode($search);
+
+        // Apply department/sub-department filtering to search results
+        if ($department) {
+            $users = $users->where('department_id', $department);
+        }
+        if ($subDepartment) {
+            $users = $users->where('sub_department_id', $subDepartment);
+        }
+
+        $usersData = $users->isEmpty() ? null : [
+            'users' => UserResource::collection($users),
+        ];
+    } else {
+        // If filters are applied, fetch all users matching the filters (no pagination)
+        if ($department || $subDepartment) {
+            Log::info('Fetching all users without pagination');
+            $users = $usersQuery->get();  // Fetch all users without pagination
+            $usersData = [
                 'users' => UserResource::collection($users),
+                'pagination' => null,  // No pagination if no pagination applied
             ];
         } else {
-            $users = User::paginate(5);
-            $usersData =  [
+            // Otherwise, apply pagination
+            $users = $usersQuery->paginate(5);
+
+            $usersData = [
                 'users' => UserResource::collection($users),
-                'pagination' => $this->formatPagination($users),
+                'pagination' => $this->formatPagination($users),  // Format pagination
             ];
         }
-
-
-
-        if (!$usersData) {
-            return $this->returnError('No Users Found');
-        }
-        return $this->returnData("data", $usersData, "Users Data");
     }
+
+    if (!$usersData) {
+        return $this->returnError('No Users Found');
+    }
+
+    return $this->returnData("data", $usersData, "Users Data");
+}
+
+// Function to format pagination data
+private function formatPagination($users)
+{
+    return [
+        'current_page' => $users->currentPage(),
+        'last_page' => $users->lastPage(),
+        'per_page' => $users->perPage(),
+        'total' => $users->total(),
+    ];
+}
+
+    
+
 
 
     /**
@@ -212,6 +258,68 @@ class UsersController extends Controller
     }
 
 
+
+
+
+
+
+    /**
+     * @OA\Get(
+     *     path="/api/users/team_lead_names",
+     *     tags={"User"},
+     *     summary="Get names of all team_leads",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of team_lead names retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="team_lead_Names", type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="team_lead_id", type="integer", description="ID of the team_lead"),
+     *                     @OA\Property(property="team_lead_name", type="string", description="Name of the team_lead")
+     *                 )
+     *             ),
+     *             @OA\Property(property="message", type="string", description="Success message")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No team_lead found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No team_lead found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized access")
+     *         )
+     *     )
+     * )
+     */
+    public function teamleadNames()
+    {
+        $data = [];
+        $role = Role::where('name', 'Team leader')->first();
+        if (!$role) {
+            return $this->returnError('team lead role not found', 404);
+        }
+        $teamLeads = User::Role('Team leader')->get(['id', 'name']);
+        $data = $teamLeads->map(function ($teamLead) {
+            return [
+                'team_lead_id' => $teamLead->id,
+                'team_lead_name' => $teamLead->name,
+            ];
+        });
+        return $this->returnData('teamLeadNames', $data, 'Team leader names');
+    }
+
+
+
+
     /**
      * @OA\Post(
      *     path="/api/users/create_user",
@@ -232,8 +340,10 @@ class UsersController extends Controller
      *             @OA\Property(property="national_id", type="string", example="30201010214335"),
      *             @OA\Property(property="gender", type="string", example="m"),
      *             @OA\Property(property="department_id", type="integer", example=1),
+     *             @OA\Property(property="sub_department_id", type="integer", example=1),
+
      *             @OA\Property(property="image", type="string", format="binary", description="Profile image"),
-     *             @OA\Property(property="roles", type="array", @OA\Items(type="string"), description="Roles to assign",example="employee"),
+     *             @OA\Property(property="role", type="array", @OA\Items(type="string"), description="Roles to assign",example="employee"),
      *             @OA\Property(property="location_id", type="array", @OA\Items(type="integer"), description="Location IDs to assign",example=1),
      *             @OA\Property(property="work_type_id", type="array", @OA\Items(type="integer"), description="Work Type IDs to assign",example=1),
      *             @OA\Property(property="salary", type="number", format="float", description="User salary",example="8000"),
@@ -293,12 +403,23 @@ class UsersController extends Controller
 
         $request->validated();
 
-        $department = Department::find($request['department_id']);
-        if (!$department) {
-            return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
+        if ($request['department_id']) {
+            $department = Department::find($request['department_id']);
+            if (!$department) {
+                return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
+            }
         }
+        if ($request->sub_department_id) {
+            $subDepartment = SubDepartment::find($request['sub_department_id']);
+
+            if (($department && $subDepartment->department_id != $department->id) || (! $subDepartment)) {
+                return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
+            }
+        }
+
+
         $code =  $request->code;
-       
+
         // Handle image upload
         $imageUrl = null;
         if (request()->hasFile('image')) {
@@ -314,7 +435,11 @@ class UsersController extends Controller
             'national_id' => $request['national_id'],
             'code' => $code,
             'gender' => $request['gender'],
-            'department_id' => (int) $request['department_id'],
+            'department_id' => $request['department_id'],
+
+            'sub_department_id' => $request['sub_department_id'],
+
+
             'image' => $imageUrl,
             'serial_number' => null,
         ]);
@@ -355,7 +480,8 @@ class UsersController extends Controller
         ]);
 
 
-        $this->assignRoles($user, $request['roles'] ?? []);
+        $this->assignRoles($user, [$request['role']]);
+
         $this->assignLocations($user, $request['location_id'] ?? []);
         $this->assignWorkTypes($user, $request['work_type_id'] ?? []);
 
@@ -477,6 +603,8 @@ class UsersController extends Controller
      *                     @OA\Property(property="national_id", type="string", description="User national ID"),
      *                     @OA\Property(property="gender", type="string", description="User gender"),
      *                     @OA\Property(property="department_id", type="integer", description="Department ID"),
+     *                     @OA\Property(property="sub_department_id", type="integer", description="sub_department_id ID"),
+
      *                     @OA\Property(property="image", type="string", description="URL of user image"),
      *                     @OA\Property(property="serial_number", type="string", description="User serial number")
      *                 ),
@@ -509,13 +637,28 @@ class UsersController extends Controller
 
         $request->validated();
 
+
+        if ($request['department_id']) {
+            $department = Department::find($request['department_id']);
+            if (!$department) {
+                return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
+            }
+        }
+        if ($request->sub_department_id) {
+            $subDepartment = SubDepartment::find($request['sub_department_id']);
+
+            if (($department && $subDepartment->department_id != $department->id) || (! $subDepartment)) {
+                return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
+            }
+        }
+
+
         // Ensure that the department_id exists in $data before accessing it
         $departmentId = isset($request['department_id']) ? $request['department_id'] : $user->department_id;
-        // Validate department inside updateUser
-        $department = Department::findorFail($departmentId);
-        if (!$department) {
-            return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
-        }
+
+        $sub_department_id = isset($request['sub_department_id']) ? $request['sub_department_id'] : $user->sub_department_id;
+
+
 
 
 
@@ -535,7 +678,9 @@ class UsersController extends Controller
             'contact_phone' => $request['contact_phone'] ?? $user->contact_phone,
             'national_id' => $request['national_id'] ?? $user->national_id,
             'gender' => $request['gender'] ?? $user->gender,
-            'department_id' => (int) $departmentId,
+            'department_id' => $departmentId,
+            'sub_department_id' => $sub_department_id,
+
             'image' => $imageUrl,
         ]);
 
@@ -578,9 +723,11 @@ class UsersController extends Controller
 
 
         // Assign roles, locations, and work types
-        if ($request->has('roles')) {
-            $this->assignRoles($user, $request->input('roles'));
-        }
+
+            Log::info($request);
+            Log::info(json_encode([$request['role']]));
+            $this->assignRoles($user, [$request['role']]);
+        
 
         if ($request->has('location_id')) {
             $this->assignLocations($user, $request->input('location_id'));
@@ -996,7 +1143,7 @@ class UsersController extends Controller
                 'end_time',
                 'emp_type',
                 'hiring_date',
-                'roles',
+                'role',
                 'location_id',
                 'work_type_id',
             ];

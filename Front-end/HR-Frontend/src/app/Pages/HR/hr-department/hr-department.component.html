@@ -53,13 +53,22 @@
             <td class="py-5 px-4">{{ row.is_location_time }}</td>
 
             <td class="py-5 px-4">
-              <div class="px-2">
-                <button (click)="EditDepartment(row.id)"
-                [disabled]="AddButton"
 
-                >
-                  <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
+              <div class="px-2">
+
+
+                <button (click)="navigateToSubDept(row.id)"
+                [disabled]="AddButton" >
+
+                  <i class="fas fa-eye text-[#101828] w-3 md:w-4"></i>
                 </button>
+
+                <button (click)="EditDepartment(row.id)"
+                [disabled]="AddButton" >
+
+                  <i class="fas fa-edit text-[#101828]  ml-2 w-3 md:w-4"></i>
+                </button>
+
                 <button (click)="deleteDepartment(row.id)">
                   <i class="fa fa-trash text-[#CC161D] ml-2 w-3 md:w-4"></i>
                 </button>

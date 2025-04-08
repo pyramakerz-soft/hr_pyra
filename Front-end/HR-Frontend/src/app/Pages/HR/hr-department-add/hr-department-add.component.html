@@ -41,20 +41,24 @@
         </div>
 
         <div *ngIf="isDropdownOpen"
-          class="w-full border border-[#E5E5EA] rounded-xl bg-white mt-1 max-h-60 overflow-y-auto">
-          <ng-container *ngIf="ManagerNames.length !== 0; else noDataTemplate">
-            <div *ngFor="let manager of ManagerNames" class="p-2 hover:bg-gray-100 flex items-center">
-              <input type="radio" [(ngModel)]="nameSelected" [value]="manager.manager_name" name="managerSelection"
-                class="mr-2" (change)="selectManager(manager)">
-              <label class="text-xs md:text-sm">{{ manager.manager_name }}</label>
-            </div>
-          </ng-container>
-          <ng-template #noDataTemplate>
-            <div class="p-2">No Data Found</div>
-          </ng-template>
-        </div>
+        class="w-full border border-[#E5E5EA] rounded-xl bg-white mt-1 max-h-60 overflow-y-auto shadow-lg transition-all ease-in-out duration-200">
+        
+        <ng-container *ngIf="ManagerNames.length !== 0; else noDataTemplate">
+          <div *ngFor="let manager of ManagerNames" 
+            class="p-3 hover:bg-gray-200 rounded-md flex items-center cursor-pointer transition-colors duration-200"
+            (click)="selectManager(manager)">
+            <input type="radio" [(ngModel)]="nameSelected" [value]="manager.manager_name" name="managerSelection"
+              class="mr-2 text-blue-600 focus:ring-0" [checked]="nameSelected === manager.manager_name">
+            <label class="text-sm text-gray-700">{{ manager.manager_name }}</label>
+          </div>
+        </ng-container>
+        
+        <ng-template #noDataTemplate>
+          <div class="p-3 text-center text-gray-500">No Data Found</div>
+        </ng-template>
+        
       </div>
-
+      
       <div class="py-9">
         <div class="flex items-center">
           <input type="checkbox" class="border border-[#E5E5EA] rounded-lg w-5 h-5 md:w-6 md:h-6 text-xs md:text-base px-1"

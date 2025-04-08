@@ -160,7 +160,7 @@ export class HREmployeeComponent {
 
   Search() {
     if (this.selectedName) {
-      this.userServ.SearchByName(this.selectedName).subscribe(
+      this.userServ.SearchByNameAndDeptAndSubDep(this.selectedName).subscribe(
         (d: any) => {
           this.tableData = d.data.users;
           this.PagesNumber = 1;
@@ -202,7 +202,7 @@ export class HREmployeeComponent {
 
   selectUser(location: string) {
     this.selectedName = location;
-    this.userServ.SearchByName(this.selectedName).subscribe(
+    this.userServ.SearchByNameAndDeptAndSubDep(this.selectedName).subscribe(
       (d: any) => {
         this.tableData = d.data.users;
         this.DisplayPagginationOrNot = false;

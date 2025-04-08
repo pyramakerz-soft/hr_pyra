@@ -93,8 +93,8 @@
                   'bg-[#57571B]': row.department !== 'Software' && row.department !== 'Academic'
 
                 }">
-              {{ row.department }}
-            </div>
+                {{ row.department ? row.department : 'No department assigned' }}
+              </div>
           </td>
           <td class="py-5 px-4">{{ row.position }}</td>
           <td class="py-5 px-4">{{ row.phone }}</td>

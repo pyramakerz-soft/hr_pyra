@@ -1,18 +1,19 @@
-import { Component, HostListener } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { RolesService } from '../../../Services/roles.service';
-import { RoleModel } from '../../../Models/role-model';
-import { DepartmentService } from '../../../Services/department.service';
-import { Department } from '../../../Models/department';
-import { AddEmployee } from '../../../Models/add-employee';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { UserServiceService } from '../../../Services/user-service.service';
-import Swal from 'sweetalert2'
-import { WorkTypeService } from '../../../Services/work-type.service';
-import { WorkType } from '../../../Models/work-type';
+import { Component, HostListener } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import Swal from 'sweetalert2';
+import { AddEmployee } from '../../../Models/add-employee';
 import { AssignLocationToUser } from '../../../Models/assign-location-to-user';
+import { Department } from '../../../Models/department';
+import { RoleModel } from '../../../Models/role-model';
+import { WorkType } from '../../../Models/work-type';
+import { DepartmentService } from '../../../Services/department.service';
 import { LocationsService } from '../../../Services/locations.service';
+import { RolesService } from '../../../Services/roles.service';
+import { SubDepartmentService } from '../../../Services/sub-department.service';
+import { UserServiceService } from '../../../Services/user-service.service';
+import { WorkTypeService } from '../../../Services/work-type.service';
 
 @Component({
   selector: 'app-hr-employee-add-edit-details',
@@ -24,7 +25,6 @@ import { LocationsService } from '../../../Services/locations.service';
 export class HrEmployeeAddEditDetailsComponent {
   EmployeeId:number = 0
   roles: RoleModel[] = [];
-  departments: Department[] = [];
   workTypes: WorkType[] = [];
   Locations: AssignLocationToUser[] = [];
   isDropdownOpen = false;
@@ -33,7 +33,7 @@ export class HrEmployeeAddEditDetailsComponent {
   isFloatChecked: boolean = false;
   
   employee: AddEmployee = new AddEmployee(
-    null, '', '', null, null, '', '', '', '', '', '', null, null, null, null, null, null, '', [], [], [], [], [], false
+    null, '', '', null, null, null, '', '', '', '', '', '', null, null, null, null, null, null, '',null, [], [], [], [], false
   );
 
   regexPhone = /^(010|011|012|015)\d{8}$/;
@@ -44,13 +44,24 @@ export class HrEmployeeAddEditDetailsComponent {
 
   validationErrors: { [key in keyof AddEmployee]?: string } = {};
   
+
+  SelectDepartment:string="AllDepartment";
+  departments:Department[]=[]
+  subDepartments: any[] = [];
+  
+  selectedDepartment: number | null = null;
+  selectedSubDepartment: number | null = null;
+
+
   constructor(private route: ActivatedRoute,  
               public roleService: RolesService, 
               public departmentService: DepartmentService,
               public userService: UserServiceService, 
               public workTypeService: WorkTypeService,
               public locationService: LocationsService,
-              public router: Router
+              public router: Router,
+              public supDeptServ:SubDepartmentService
+              
             ){}
   
   ngOnInit(): void {
@@ -65,6 +76,23 @@ export class HrEmployeeAddEditDetailsComponent {
     this.getRoles()
     this.getWorkType()
     this.getLocations()
+
+
+
+
+  }
+
+
+  getRoles(){
+    
+    this.roleService.getall().subscribe(
+      (roles: any) => {
+        
+        this.roles = roles.roles
+        
+      }
+
+    );
   }
 
   toggleDropdown(event: MouseEvent) {
@@ -87,6 +115,66 @@ export class HrEmployeeAddEditDetailsComponent {
   ngOnDestroy() {
     document.removeEventListener('click', this.onDocumentClick);
   }
+
+
+
+
+
+
+
+
+
+
+  GetAllDepartment(){
+    this.departmentService.getall().subscribe(
+      (d: any) => {
+        this.departments = d.data.departments;
+      }
+    );
+  }
+
+
+
+
+
+onDepartmentChange() {
+
+ this.subDepartments = [];
+
+ console.log(this.selectedDepartment);
+ this.selectedSubDepartment=null;
+
+ console.log('///ss');
+ if (this.selectedDepartment) {
+  this.supDeptServ.setDeptId(this.selectedDepartment);
+
+   this.getSubDepartments(this.selectedDepartment);
+ }
+}
+
+getSubDepartments(departmentId: number) {
+  console.log(departmentId);
+  
+ this.supDeptServ.getall (departmentId).subscribe(
+   (res: any) => {
+     this.subDepartments = res.data || res;
+   },
+   (err) => {
+     console.error('Failed to fetch sub-departments', err);
+   }
+ );
+}
+
+onSubDepartmentChange() {
+
+
+}
+
+
+
+
+
+
 
   filterNumericInput(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -113,7 +201,20 @@ export class HrEmployeeAddEditDetailsComponent {
     this.userService.getUserById(id).subscribe(
       (d: any) => {
         this.employee = d.User;
-        this.employee.roles = this.employee.roles || []
+        console.log( this.employee );
+        this.selectedDepartment=this.employee.department_id
+        this.selectedSubDepartment=this.employee.sub_department_id
+
+        console.log('///');
+        
+        console.log( this.employee.sub_department_id);
+
+        if( this.employee.department_id){
+          this.supDeptServ.setDeptId(this.employee.department_id!);
+          this.getSubDepartments(  this.employee.department_id)
+
+        }
+        // this.employee.role = this.employee.role || ''
         // this.employee.is_float == 1 ? this.isFloatChecked = true : this.isFloatChecked = false 
         if(typeof this.employee.image == "string"){
           this.imagePreview = this.employee.image
@@ -130,13 +231,6 @@ export class HrEmployeeAddEditDetailsComponent {
     );
   }
 
-  getRoles(){
-    this.roleService.getall().subscribe(
-      (roles: any) => {
-        this.roles = roles.roles
-      }
-    );
-  }
   
   getWorkType(){
     this.workTypeService.getall().subscribe(
@@ -209,26 +303,20 @@ export class HrEmployeeAddEditDetailsComponent {
   //   }
   // }
 
-  onRoleChange(roleName: string, event: Event) {
-    const isChecked = (event.target as HTMLInputElement).checked;
-
-    if (isChecked) {
-      if (!this.employee.roles.includes(roleName)) {
-        this.employee.roles.push(roleName);
-      }
+  toggleSingleRole(role: RoleModel) {
+    if (this.employee.role === role) {
+      this.employee.role = null; // uncheck if already selected
     } else {
-      const index = this.employee.roles.indexOf(roleName);
-      if (index > -1) {
-        this.employee.roles.splice(index, 1);
-      }
+      this.employee.role = role; // set selected role
     }
 
-    if (this.employee.roles.length > 0) {
-      this.validationErrors['roles'] = '';
-    } else {
-      this.validationErrors['roles'] = '*Role is required.';
+    if (this.employee.role?.name !== 'Employee') {
+      this.selectedDepartment = null;
+      this.selectedSubDepartment = null;
     }
+  
   }
+  
 
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
@@ -267,108 +355,148 @@ export class HrEmployeeAddEditDetailsComponent {
 
   isFormValid(): boolean {
     let isValid = true;
-    
+    console.log("Validation started.");
+  
+    console.log("Employee object:", this.employee);
+  
+    // Convert to string for saving/debugging
+    const employeeStr = JSON.stringify(this.employee);
+    console.log("Stringified employee:", employeeStr);
+  
     for (const key in this.employee) {
-        if (this.employee.hasOwnProperty(key)) {
-            const field = key as keyof AddEmployee;
-            // && field != "is_float"
-            if (!this.employee[field] && field != "code" && field !='work_home' && field != "image" && field != "deparment_name" && field != "working_hours_day") {
-                if(this.EmployeeId !== 0){
-                    continue
-                }
-                if(field=="start_time" || field=="end_time"){
-                    if(!this.isFloatChecked){
-                        this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-                        isValid = false;
-                    }else{
-                        this.validationErrors[field] = '';
-                    }
-                }else{
-                    this.validationErrors[field] = `*${this.capitalizeField(field)} is required`
-                    isValid = false;
-                }
-            } else {
-                this.validationErrors[field] = '';
+      if (this.employee.hasOwnProperty(key)) {
+        const field = key as keyof AddEmployee;
+  
+        if (this.employee.role?.name === 'Employee') {
+          console.log("Role is 'Employee'");
+  
+          if (!this.selectedDepartment) {
+            console.log("selectedDepartment is missing");
+            this.validationErrors['selectedDepartment' as keyof AddEmployee] = '*Department is required for Employees.';
+            isValid = false;
+          } else {
+            console.log("selectedDepartment is valid");
+            this.validationErrors['selectedDepartment' as keyof AddEmployee] = '';
+            isValid = true;
+          }
+        }
 
-                switch (field){
-                    case "name":
-                        if(this.employee.name.length < 3){
-                            this.validationErrors[field] = 'Name must be more than 2 characters.';
-                            isValid = false;
-                        }
-                        break;
-                    case "code":
-                        if(this.employee.code.length < 1){
-                            this.validationErrors[field] = 'Code is required.';
-                            isValid = false;
-                        }
-                        break;
-                    case "phone":
-                        if(!this.regexPhone.test(this.employee.phone)){
-                            this.validationErrors[field] = 'Invalid phone number.';
-                            isValid = false;
-                        }
-                        break;
-                    case "contact_phone":
-                        if(!this.regexPhone.test(this.employee.contact_phone)){
-                            this.validationErrors[field] = 'Invalid contact phone number.';
-                            isValid = false;
-                        }
-                        break;
-                    case "password":
-                        if(this.employee.password.length < 5 && this.EmployeeId === 0){
-                            this.validationErrors[field] = 'Password must be more than 5 characters.';
-                            isValid = false;
-                        }
-                        break;
-                    case "email":
-                        if(!this.regexEmail.test(this.employee.email)){
-                            this.validationErrors[field] = 'Invalid email.';
-                            isValid = false;
-                        }
-                        break;
-                    case "national_id":
-                        if(!this.regexNationalID.test(this.employee.national_id)){
-                            this.validationErrors[field] = 'Invalid National ID.';
-                            isValid = false;
-                        }
-                        break;
-            // case "working_hours_day":
-            //   if(this.employee.working_hours_day){
-            //     if(this.employee.working_hours_day > 23){
-            //       this.validationErrors[field] = 'Invalid working hours day.';
-            //       isValid = false;
-            //     }
-            //   }
-            //   break;
+            // Skip validation for department_id and sub_department_id if role is not Employee
+            if (this.employee.role?.name !== 'Employee' && (
+                field === "deparment_name"||
+              field === "department_id" || field === "sub_department_id")) {
+              continue; // Skip this field from validation
+            }
+  
+            console.log(`Checking field: ${field}, value:`, this.employee[field]);
+
+        if (!this.employee[field] && field !== "code" && field !== 'work_home' && field !== "image" &&  field !== "working_hours_day") {
+          console.log(`Field ${field} is missing`);
+  
+          if (this.EmployeeId !== 0) {
+            console.log("EmployeeId is not 0, skipping validation for this field.");
+            continue;
+          }
+  
+          if (field === "start_time" || field === "end_time") {
+            if (!this.isFloatChecked) {
+              console.log(`${field} is required and isFloatChecked is false`);
+              this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+              isValid = false;
+            } else {
+              this.validationErrors[field] = '';
+            }
+          } else {
+            this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
+            isValid = false;
+          }
+        } else {
+          this.validationErrors[field] = '';
+  
+          switch (field) {
+            case "name":
+              if (this.employee.name.length < 3) {
+                console.log("Name is too short");
+                this.validationErrors[field] = 'Name must be more than 2 characters.';
+                isValid = false;
+              }
+              break;
+            case "code":
+              if (this.employee.code.length < 1) {
+                console.log("Code is missing");
+                this.validationErrors[field] = 'Code is required.';
+                isValid = false;
+              }
+              break;
+            case "phone":
+              if (!this.regexPhone.test(this.employee.phone)) {
+                console.log("Phone is invalid");
+                this.validationErrors[field] = 'Invalid phone number.';
+                isValid = false;
+              }
+              break;
+            case "contact_phone":
+              if (!this.regexPhone.test(this.employee.contact_phone)) {
+                console.log("Contact phone is invalid");
+                this.validationErrors[field] = 'Invalid contact phone number.';
+                isValid = false;
+              }
+              break;
+            case "password":
+              if (this.employee.password.length < 5 && this.EmployeeId === 0) {
+                console.log("Password is too short");
+                this.validationErrors[field] = 'Password must be more than 5 characters.';
+                isValid = false;
+              }
+              break;
+            case "email":
+              if (!this.regexEmail.test(this.employee.email)) {
+                console.log("Email is invalid");
+                this.validationErrors[field] = 'Invalid email.';
+                isValid = false;
+              }
+              break;
+            case "national_id":
+              if (!this.regexNationalID.test(this.employee.national_id)) {
+                console.log("National ID is invalid");
+                this.validationErrors[field] = 'Invalid National ID.';
+                isValid = false;
+              }
+              break;
           }
         }
       }
     }
-
-    if(this.employee.roles.length == 0){
-      this.validationErrors['roles'] = '*Role is required.';
+  
+    if (!this.employee.role) {
+      console.log("Role is missing");
+      this.validationErrors['role'] = '*Role is required.';
       isValid = false;
     } else {
-      this.validationErrors['roles'] = '';
+      this.validationErrors['role'] = '';
     }
-
-    if(!this.isFloatChecked){
-      if(this.employee.work_type_id.length == 0){
+  
+    if (!this.isFloatChecked) {
+      console.log("isFloatChecked is false");
+  
+      if (this.employee.work_type_id.length === 0) {
+        console.log("work_type_id is empty");
         this.validationErrors['work_type_id'] = '*Work Type is required.';
         isValid = false;
       } else {
         this.validationErrors['work_type_id'] = '';
       }
-      
-      if(this.employee.location_id.length == 0){
+  
+      if (this.employee.location_id.length === 0) {
+        console.log("location_id is empty");
         this.validationErrors['location_id'] = '*Location is required.';
         isValid = false;
       } else {
         this.validationErrors['location_id'] = '';
       }
-
-      if(this.employee.start_time != null && this.employee.end_time != null){
+  
+      if (this.employee.start_time != null && this.employee.end_time != null) {
+        console.log(`Start Time: ${this.employee.start_time}, End Time: ${this.employee.end_time}`);
         let [xHours, xMinutes] = this.employee.start_time.split(':').map(Number);
         let [yHours, yMinutes] = this.employee.end_time.split(':').map(Number);
   
@@ -379,41 +507,27 @@ export class HrEmployeeAddEditDetailsComponent {
         end_timeDate.setHours(yHours, yMinutes, 0, 0);
   
         const diffMilliseconds = end_timeDate.getTime() - start_timeDate.getTime();
-  
         const diffHours = diffMilliseconds / (1000 * 60 * 60);
-        if(diffHours < 4){
+        console.log(`Calculated working hours: ${diffHours}`);
+  
+        if (diffHours < 4) {
           isValid = false;
           Swal.fire({
             icon: "warning",
             title: "Working Hours must be at least 4",
             confirmButtonText: "OK",
             confirmButtonColor: "#FF7519",
-          })
-        }else{
-          this.employee.working_hours_day = diffHours
+          });
+        } else {
+          this.employee.working_hours_day = diffHours;
         }
-        const workingHoursDay = this.employee.working_hours_day != null ? this.employee.working_hours_day : 0; 
-  
-        // if (diffHours - parseFloat(workingHoursDay.toString()) > 0 || diffHours - parseFloat(workingHoursDay.toString()) < 0 || diffHours < 0 ) {
-        //   this.validationErrors['start_time'] = 'Invalid Start Time.';
-        //   this.validationErrors["end_time"] = 'Invalid End Time.';
-        //   this.validationErrors['working_hours_day'] = 'Invalid Working hours day.';
-        //   isValid = false;
-        //   Swal.fire({
-        //     icon: "error",
-        //     title: "Invalid Input",
-        //     text: "Starting Time and Ending Time not Compatible with Working hours day",
-        //     confirmButtonText: "OK",
-        //     confirmButtonColor: "#FF7519",
-            
-        //   });
-        // }
       }
     }
-
+  
+    console.log("Validation result:", isValid);
     return isValid;
   }
-
+  
   onInputValueChange(event: { field: keyof AddEmployee, value: any }) {
     const { field, value } = event;
     if (field in this.employee) {
@@ -427,7 +541,13 @@ export class HrEmployeeAddEditDetailsComponent {
 SaveEmployee() {
     if (this.isFormValid()) {
         this.isSaved = true;
-        this.employee.department_id = Number(this.employee.department_id);
+        this.employee.department_id =this.selectedDepartment==null? null:Number(this.selectedDepartment);
+        this.employee.sub_department_id =this.selectedSubDepartment==null?null: Number(this.selectedSubDepartment);
+        console.log('//ssss');
+        
+console.log('/ssss////');
+
+console.log(this.employee.role);
 
         // Log the payload for debugging
         console.log('Employee Payload:', this.employee);

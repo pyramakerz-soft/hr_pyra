@@ -22,9 +22,11 @@ use Modules\Clocks\Traits\ClockCalculationsHelperTrait;
 use Modules\Clocks\Traits\ClockInTrait;
 use Modules\Clocks\Traits\ClockOutTrait;
 use Modules\Clocks\Exports\ClocksExport;
+use Modules\Clocks\Exports\UserClocksExport;
 use Modules\Clocks\Filters\Api\DateFilter;
 use Modules\Clocks\Filters\Api\DepartmentFilter;
 use Modules\Clocks\Filters\Api\MonthFilter;
+use Modules\Users\Exports\UsersExport;
 use Modules\Users\Models\User;
 
 /**
@@ -112,10 +114,9 @@ use Modules\Users\Models\User;
 class ClockController extends Controller
 {
     use ResponseTrait, ClockCalculationsHelperTrait,  ClockInTrait, ClockOutTrait;
-    
+
     protected $filters;
-    public function __construct(      
-    )
+    public function __construct()
     {
         $this->filters = [
             new DepartmentFilter(),
@@ -124,195 +125,200 @@ class ClockController extends Controller
         ];
     }
 
-/**
- * @OA\Get(
- *     path="/api/all_clocks",
- *     tags={"Clock"},
- *     summary="Get All Clock Records",
- *     description="Retrieve all clock-in and clock-out records with optional filters and pagination. Can filter by department and specify a date range.",
- *     operationId="getAllClocks",
- *     @OA\Parameter(
- *         name="department_id",
- *         in="query",
- *         description="Filter by department ID",
- *         required=false,
- *         @OA\Schema(
- *             type="integer",
- *             example=1
- *         )
- *     ),
- *     @OA\Parameter(
- *         name="export",
- *         in="query",
- *         description="Flag to export the clock records. If set to true, the response will be an export file.",
- *         required=false,
- *         @OA\Schema(
- *             type="boolean",
- *             example=true
- *         )
- *     ),
- *     @OA\Parameter(
- *         name="from_day",
- *         in="query",
- *         description="Start date for the date range filter. Format: YYYY-MM-DD. If not provided, defaults to the 26th of the previous month.",
- *         required=false,
- *         @OA\Schema(
- *             type="string",
- *             example="2024-01-26"
- *         )
- *     ),
- *     @OA\Parameter(
- *         name="to_day",
- *         in="query",
- *         description="End date for the date range filter. Format: YYYY-MM-DD. If not provided, defaults to the 26th of the current month.",
- *         required=false,
- *         @OA\Schema(
- *             type="string",
- *             example="2024-02-26"
- *         )
- *     ),
- *     @OA\Parameter(
- *         name="page",
- *         in="query",
- *         description="Page number for pagination",
- *         required=false,
- *         @OA\Schema(
- *             type="integer",
- *             example=1
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="All Clocks Data",
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(
- *                 property="status",
- *                 type="string",
- *                 example="success"
- *             ),
- *             @OA\Property(
- *                 property="data",
- *                 type="object",
- *                 @OA\Property(
- *                     property="clocks",
- *                     type="array",
- *                     @OA\Items(
- *                         @OA\Property(property="id", type="integer", example=1),
- *                         @OA\Property(property="user_id", type="integer", example=23),
- *                         @OA\Property(property="clock_in", type="string", format="date-time", example="2024-09-25T08:30:00"),
- *                         @OA\Property(property="clock_out", type="string", format="date-time", example="2024-09-25T17:00:00"),
- *                         @OA\Property(property="total_hours", type="string", example="8:30"),
- *                         @OA\Property(property="department", type="string", example="Sales")
- *                     )
- *                 ),
- *                 @OA\Property(
- *                     property="pagination",
- *                     type="object",
- *                     @OA\Property(property="current_page", type="integer", example=1),
- *                     @OA\Property(property="total_pages", type="integer", example=5),
- *                     @OA\Property(property="per_page", type="integer", example=7),
- *                     @OA\Property(property="total_records", type="integer", example=35)
- *                 )
- *             ),
- *             @OA\Property(
- *                 property="message",
- *                 type="string",
- *                 example="All Clocks Data"
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="No Clocks Found",
- *         @OA\JsonContent(
- *             @OA\Property(
- *                 property="status",
- *                 type="string",
- *                 example="error"
- *             ),
- *             @OA\Property(
- *                 property="message",
- *                 type="string",
- *                 example="No Clocks Found"
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=500,
- *         description="Internal Server Error",
- *         @OA\JsonContent(
- *             @OA\Property(
- *                 property="status",
- *                 type="string",
- *                 example="error"
- *             ),
- *             @OA\Property(
- *                 property="message",
- *                 type="string",
- *                 example="An error occurred while retrieving clock records."
- *             )
- *         )
- *     ),
- *     security={{ "bearerAuth": {} }}
- * )
- */
+    /**
+     * @OA\Get(
+     *     path="/api/all_clocks",
+     *     tags={"Clock"},
+     *     summary="Get All Clock Records",
+     *     description="Retrieve all clock-in and clock-out records with optional filters and pagination. Can filter by department and specify a date range.",
+     *     operationId="getAllClocks",
+     *     @OA\Parameter(
+     *         name="department_id",
+     *         in="query",
+     *         description="Filter by department ID",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="integer",
+     *             example=1
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="export",
+     *         in="query",
+     *         description="Flag to export the clock records. If set to true, the response will be an export file.",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="boolean",
+     *             example=true
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="from_day",
+     *         in="query",
+     *         description="Start date for the date range filter. Format: YYYY-MM-DD. If not provided, defaults to the 26th of the previous month.",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="string",
+     *             example="2024-01-26"
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="to_day",
+     *         in="query",
+     *         description="End date for the date range filter. Format: YYYY-MM-DD. If not provided, defaults to the 26th of the current month.",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="string",
+     *             example="2024-02-26"
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="integer",
+     *             example=1
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="All Clocks Data",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="status",
+     *                 type="string",
+     *                 example="success"
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="clocks",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="user_id", type="integer", example=23),
+     *                         @OA\Property(property="clock_in", type="string", format="date-time", example="2024-09-25T08:30:00"),
+     *                         @OA\Property(property="clock_out", type="string", format="date-time", example="2024-09-25T17:00:00"),
+     *                         @OA\Property(property="total_hours", type="string", example="8:30"),
+     *                         @OA\Property(property="department", type="string", example="Sales")
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="pagination",
+     *                     type="object",
+     *                     @OA\Property(property="current_page", type="integer", example=1),
+     *                     @OA\Property(property="total_pages", type="integer", example=5),
+     *                     @OA\Property(property="per_page", type="integer", example=7),
+     *                     @OA\Property(property="total_records", type="integer", example=35)
+     *                 )
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="All Clocks Data"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No Clocks Found",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="status",
+     *                 type="string",
+     *                 example="error"
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="No Clocks Found"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="status",
+     *                 type="string",
+     *                 example="error"
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="An error occurred while retrieving clock records."
+     *             )
+     *         )
+     *     ),
+     *     security={{ "bearerAuth": {} }}
+     * )
+     */
 
-     public function allClocks(Request $request)
-     {
-         $query = ClockInOut::query();
-     
-         foreach ($this->filters as $filter) {
-             $query = $filter->apply($query, $request);
-         }
+    public function allClocks(Request $request)
+    {
+        $query = ClockInOut::query();
+
+        foreach ($this->filters as $filter) {
+            $query = $filter->apply($query, $request);
+        }
 
         //  return $this->returnData("data", $query->get(), "All Clocks Data");
 
-     $fromDay = $request->get('from_day');
-     $toDay = $request->get('to_day');
-     
-     if ($fromDay && $toDay) {
-         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $fromDay) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $toDay)) {
-            
-             $defaultStartDate = Carbon::parse($fromDay)->startOfDay();  // Parse and set start of day
-             $defaultEndDate = Carbon::parse($toDay)->endOfDay();        // Parse and set end of day
+        $fromDay = $request->get('from_day');
+        $toDay = $request->get('to_day');
 
-         } else {
-             return $this->returnError('Invalid Date Format. Expected YYYY-MM-DD.');
-         }
-     } else {
-        $now = Carbon::now();
+        if ($fromDay && $toDay) {
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $fromDay) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $toDay)) {
 
-         $defaultStartDate = $now->copy()->subMonth()->day(26)->startOfDay(); 
-         $defaultEndDate = $now->copy()->day(26)->endOfDay();                
-     }
- 
-     if ($defaultStartDate && $defaultEndDate) {
-        $query->whereBetween('clock_in', [
-            $defaultStartDate->startOfDay(), 
-            $defaultEndDate->endOfDay()      
-        ]);
+                $defaultStartDate = Carbon::parse($fromDay)->startOfDay();  // Parse and set start of day
+                $defaultEndDate = Carbon::parse($toDay)->endOfDay();        // Parse and set end of day
+
+            } else {
+                return $this->returnError('Invalid Date Format. Expected YYYY-MM-DD.');
+            }
+        } else {
+            $now = Carbon::now();
+
+            $defaultStartDate = $now->copy()->subMonth()->day(26)->startOfDay();
+            $defaultEndDate = $now->copy()->day(26)->endOfDay();
+        }
+
+        if ($defaultStartDate && $defaultEndDate) {
+            $query->whereBetween('clock_in', [
+                $defaultStartDate->startOfDay(),
+                $defaultEndDate->endOfDay()
+            ]);
+        }
+
+        if ($request->has('export')) {
+            $clocksForExport = $query->orderBy('clock_in', 'desc')->get();
+
+            return (new clocksExport(
+                $clocksForExport,
+                $fromDay,
+                $toDay
+
+            ))
+                ->download('all_user_clocks.xlsx');
+        }
+        $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+
+        if ($clocks->isEmpty()) {
+            return $this->returnError('No Clocks Found');
+        }
+
+        $data = $this->prepareClockData($clocks);
+        if (!isset($data['clocks'])) {
+            return $this->returnError('No Clocks Found');
+        }
+
+        return $this->returnData("data", $data, "All Clocks Data");
     }
-    
-         if ($request->has('export')) {
-             $clocksForExport = $query->orderBy('clock_in', 'desc')->get();
-     
-             return (new clocksExport($clocksForExport, $request->get('department')))
-                 ->download('all_user_clocks.xlsx');
-         }
-         $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
-     
-         if ($clocks->isEmpty()) {
-             return $this->returnError('No Clocks Found');
-         }
-     
-         $data = $this->prepareClockData($clocks);
-         if (!isset($data['clocks'])) {
-             return $this->returnError('No Clocks Found');
-         }
-     
-         return $this->returnData("data", $data, "All Clocks Data");
-     }
     /**
      * @OA\Get(
      *     path="/api/clocks/user/{user}",
@@ -379,39 +385,66 @@ class ClockController extends Controller
      * )
      */
 
-     public function getUserClocksById(Request $request, User $user)
-     {
-         // Start the query for the clocks
-         $query = ClockInOut::where('user_id', $user->id);
-     
-         // Apply filters if any
-         foreach ($this->filters as $filter) {
-             $query = $filter->apply($query, $request);
-         }
-     
-         // If there's an export request, we want to get all data (not paginated)
-         if ($request->has('export')) {
-             // Get all data without pagination (this ensures all clocks are exported)
-             $clocks = $query->orderBy('clock_in', 'desc')->get(); 
-     Log::info(  $clocks->count());
-             // Return the export file with all data
-             return (new ClocksExport($clocks, null, $user->id))
-                 ->download('all_user_clocks.xlsx');
-         }
-     
-         // Otherwise, handle pagination
-         $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
-     
-         // If no clocks are found, return an error message
-         if ($clocks->isEmpty()) {
-             return $this->returnError('No Clocks Found For This User');
-         }
-     
-         // Prepare and return paginated data
-         $data = $this->prepareClockData($clocks);
-         return $this->returnData("data", $data, "Clocks Data for {$user->name}");
-     }
-     
+    public function getUserClocksById(Request $request, User $user)
+    {
+        // Start the query for the clocks
+        $query = ClockInOut::where('user_id', $user->id);
+
+        // Apply filters if any
+        foreach ($this->filters as $filter) {
+            $query = $filter->apply($query, $request);
+        }
+
+        // If there's an export request, we want to get all data (not paginated)
+        if ($request->has('export')) {
+            $fromDay = $request->get('from_day');
+            $toDay = $request->get('to_day');
+
+            if ($fromDay && $toDay) {
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $fromDay) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $toDay)) {
+
+                    $defaultStartDate = Carbon::parse($fromDay)->startOfDay();  // Parse and set start of day
+                    $defaultEndDate = Carbon::parse($toDay)->endOfDay();        // Parse and set end of day
+
+                } else {
+                    return $this->returnError('Invalid Date Format. Expected YYYY-MM-DD.');
+                }
+            } else {
+                $now = Carbon::now();
+
+                $defaultStartDate = $now->copy()->subMonth()->day(26)->startOfDay();
+                $defaultEndDate = $now->copy()->day(26)->endOfDay();
+            }
+
+            $query->whereBetween('clock_in', [
+                $defaultStartDate->startOfDay(),
+                $defaultEndDate->endOfDay()
+            ]);
+
+            // Get all data without pagination (this ensures all clocks are exported)
+            $clocks = $query->orderBy('clock_in', 'desc')->get();
+
+            // Return the export file with all data
+            return (new UserClocksExport(
+                $user,
+                $fromDay,
+                $toDay
+            ))->download('user_clock_ins.xlsx');
+        }
+
+        // Otherwise, handle pagination
+        $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+
+        // If no clocks are found, return an error message
+        if ($clocks->isEmpty()) {
+            return $this->returnError('No Clocks Found For This User');
+        }
+
+        // Prepare and return paginated data
+        $data = $this->prepareClockData($clocks);
+        return $this->returnData("data", $data, "Clocks Data for {$user->name}");
+    }
+
     /**
      * @OA\Get(
      *     path="/api/user_clocks",
@@ -474,56 +507,56 @@ class ClockController extends Controller
      */
 
 
-     public function showUserClocks(Request $request)
-     {
-         $authUser = Auth::user();
-     
-         $query = ClockInOut::where('user_id', $authUser->id);
-     
-         // Apply filters
-         foreach ($this->filters as $filter) {
-             $query = $filter->apply($query, $request);
-         }
-     
-         // Fetch all clocks before grouping
-         $clocks = $query->orderBy('clock_in', 'desc')->get();
-     
-         if ($clocks->isEmpty()) {
-             return $this->returnError('No Clocks Found For This User');
-         }
-     
-         // Group clocks by date
-         $groupedData = $this->groupClockForUser($clocks);
-     
-         // Convert grouped clocks array to a collection for pagination
-         $groupedCollection = collect($groupedData['clocks']);
-     
-         // Paginate the grouped collection manually
-         $perPage = 7; // Adjust if needed
-         $currentPage = LengthAwarePaginator::resolveCurrentPage();
-         $currentItems = $groupedCollection->slice(($currentPage - 1) * $perPage, $perPage)->values();
-     
-         $paginatedData = new LengthAwarePaginator(
-             $currentItems,
-             $groupedCollection->count(),
-             $perPage,
-             $currentPage,
-             ['path' => LengthAwarePaginator::resolveCurrentPath()]
-         );
-     
-         // Return formatted response
-         return $this->returnData("data", [
-             'clocks' => $paginatedData->items(),
-             'pagination' => [
-                 'current_page' => $paginatedData->currentPage(),
-                 'next_page_url' => $paginatedData->nextPageUrl(),
-                 'previous_page_url' => $paginatedData->previousPageUrl(),
-                 'last_page' => $paginatedData->lastPage(),
-                 'total' => $paginatedData->total(),
-             ]
-         ], "Clocks Data for {$authUser->name}");
-     }
-     
+    public function showUserClocks(Request $request)
+    {
+        $authUser = Auth::user();
+
+        $query = ClockInOut::where('user_id', $authUser->id);
+
+        // Apply filters
+        foreach ($this->filters as $filter) {
+            $query = $filter->apply($query, $request);
+        }
+
+        // Fetch all clocks before grouping
+        $clocks = $query->orderBy('clock_in', 'desc')->get();
+
+        if ($clocks->isEmpty()) {
+            return $this->returnError('No Clocks Found For This User');
+        }
+
+        // Group clocks by date
+        $groupedData = $this->groupClockForUser($clocks);
+
+        // Convert grouped clocks array to a collection for pagination
+        $groupedCollection = collect($groupedData['clocks']);
+
+        // Paginate the grouped collection manually
+        $perPage = 7; // Adjust if needed
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentItems = $groupedCollection->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $paginatedData = new LengthAwarePaginator(
+            $currentItems,
+            $groupedCollection->count(),
+            $perPage,
+            $currentPage,
+            ['path' => LengthAwarePaginator::resolveCurrentPath()]
+        );
+
+        // Return formatted response
+        return $this->returnData("data", [
+            'clocks' => $paginatedData->items(),
+            'pagination' => [
+                'current_page' => $paginatedData->currentPage(),
+                'next_page_url' => $paginatedData->nextPageUrl(),
+                'previous_page_url' => $paginatedData->previousPageUrl(),
+                'last_page' => $paginatedData->lastPage(),
+                'total' => $paginatedData->total(),
+            ]
+        ], "Clocks Data for {$authUser->name}");
+    }
+
     /**
      * @OA\Get(
      *     path="/api/clock_by_id/{clock}",
@@ -909,7 +942,7 @@ class ClockController extends Controller
      */
 
 
-     
+
     public function hrClockIn(AddClockRequest $request, User $user)
     {
 
@@ -927,74 +960,72 @@ class ClockController extends Controller
         return $this->handleSiteClockInByHr($request, $user);
     }
 
-    
- /**
- * @OA\Get(
- *     path="/api/get_count_issues",
- *     summary="Get total count of clock-in issues",
- *     description="Returns the total count of clock-in issues.",
- *     tags={"Clock Issues"},
- *     @OA\Response(
- *         response=200,
- *         description="Count of clock-in issues",
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(property="data", type="object",
- *                 @OA\Property(property="count", type="integer", example=10)
- *             )
- *         )
- *     )
- * )
- */
 
- public function getCountIssues()
- {
-     $totalIssueCount['count'] = ClockInOut::where('is_issue', true)
-         ->count();
-     return $this->returnData('data', $totalIssueCount, 'Count of Issues');
- 
+    /**
+     * @OA\Get(
+     *     path="/api/get_count_issues",
+     *     summary="Get total count of clock-in issues",
+     *     description="Returns the total count of clock-in issues.",
+     *     tags={"Clock Issues"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Count of clock-in issues",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="count", type="integer", example=10)
+     *             )
+     *         )
+     *     )
+     * )
+     */
 
- }
+    public function getCountIssues()
+    {
+        $totalIssueCount['count'] = ClockInOut::where('is_issue', true)
+            ->count();
+        return $this->returnData('data', $totalIssueCount, 'Count of Issues');
+    }
 
-/**
- * @OA\Get(
- *     path="/api/get_clock_issues",
- *     summary="Get clock-in issues",
- *     description="Retrieve a paginated list of clock-in issues within a given month or the current month if no month is specified.",
- *     tags={"Clock Issues"},
- *     @OA\Parameter(
- *         name="month",
- *         in="query",
- *         description="Month to filter clock-in issues (format: YYYY-MM)",
- *         required=false,
- *         @OA\Schema(type="string", format="date")
- *     ),
- *     @OA\Parameter(
- *         name="date",
- *         in="query",
- *         description="Apply additional date filters",
- *         required=false,
- *         @OA\Schema(type="string", format="date")
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="List of clock-in issues",
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(property="data", type="object",
- *                 @OA\Property(property="clockIssues", type="array",
- *                     @OA\Items(ref="#/components/schemas/ClockInOut")
- *                 ),
- *                 @OA\Property(property="count", type="integer", example=5)
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="No Clock Issues Found"
- *     )
- * )
- */
+    /**
+     * @OA\Get(
+     *     path="/api/get_clock_issues",
+     *     summary="Get clock-in issues",
+     *     description="Retrieve a paginated list of clock-in issues within a given month or the current month if no month is specified.",
+     *     tags={"Clock Issues"},
+     *     @OA\Parameter(
+     *         name="month",
+     *         in="query",
+     *         description="Month to filter clock-in issues (format: YYYY-MM)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="date",
+     *         in="query",
+     *         description="Apply additional date filters",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of clock-in issues",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="clockIssues", type="array",
+     *                     @OA\Items(ref="#/components/schemas/ClockInOut")
+     *                 ),
+     *                 @OA\Property(property="count", type="integer", example=5)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No Clock Issues Found"
+     *     )
+     * )
+     */
 
     public function getClockIssues(Request $request)
     {
@@ -1002,7 +1033,6 @@ class ClockController extends Controller
             $month = Carbon::parse($request->get('month'));
             $startOfMonth = (clone $month)->startOfMonth()->startOfDay();
             $endOfMonth = (clone $month)->endOfMonth()->endOfDay();
-
         } else {
             $startOfMonth = Carbon::now()->startOfMonth()->startOfDay();
             $endOfMonth = Carbon::now()->endOfMonth()->endOfDay();
@@ -1037,168 +1067,169 @@ class ClockController extends Controller
         ];
 
         return $this->returnData('data', $response);
-        }
+    }
 
 
-        /**
- * @OA\post(
- *     path="/api/update_clock_issue/{id}",
- *     summary="Update a clock issue",
- *     description="Marks a clock-in issue as resolved.",
- *     tags={"Clock Issues"},
- *     @OA\Parameter(
- *         name="id",
- *         in="path",
- *         description="Clock-in issue ID",
- *         required=true,
- *         @OA\Schema(type="integer")
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Clock Issue Updated Successfully",
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(property="clock", ref="#/components/schemas/ClockInOut")
- *         )
- *     ),
- *     @OA\Response(
- *         response=400,
- *         description="There is no issue for this clock"
- *     )
- * )
- */
+    /**
+     * @OA\post(
+     *     path="/api/update_clock_issue/{id}",
+     *     summary="Update a clock issue",
+     *     description="Marks a clock-in issue as resolved.",
+     *     tags={"Clock Issues"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Clock-in issue ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Clock Issue Updated Successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="clock", ref="#/components/schemas/ClockInOut")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="There is no issue for this clock"
+     *     )
+     * )
+     */
 
- 
+
     public function updateClockIssues(Request $request, ClockInOut $clock)
     {
-    if (!$clock->is_issue) {
+        if (!$clock->is_issue) {
             return $this->returnError('There is no issue for this clock');
         }
         $clock->update([
             'is_issue' => false,
         ]);
 
-        return $this->returnData('clock', $clock, 'Clock Issue Updated Successfully');    }
-
-
-
-
-/**
- * @OA\Get(
- *     path="/api/users_clocks_Ins",
- *     summary="Get Users Who Clocked In or Didn't Clock In on a Specific Day",
- *     description="Retrieves a list of users who either did not clock in or clocked in on a specific day.",
- *     operationId="getUsersClockOutStatus",
- *     tags={"Clock"},
- *     @OA\Parameter(
- *         name="date",
- *         in="query",
- *         required=false,
- *         description="The date to check users for, in 'Y-m-d' format. Defaults to today's date if not provided.",
- *         @OA\Schema(type="string", example="2025-02-23")
- *     ),
- *     @OA\Parameter(
- *         name="type",
- *         in="query",
- *         required=false,
- *         description="The type of users to retrieve: 'clocked_in' for users who clocked in, 'no_clock_in' for users who did not clock in. Defaults to 'no_clock_in'.",
- *         @OA\Schema(type="string", enum={"clocked_in", "no_clock_in"}, example="no_clock_in")
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Users who either clocked in or didn't clock in on the specified day",
- *         @OA\JsonContent(
- *             @OA\Property(property="status", type="string", example="success"),
- *             @OA\Property(property="data", type="array", 
- *                 @OA\Items(
- *                     @OA\Property(property="id", type="integer", example=1),
- *                     @OA\Property(property="name", type="string", example="John Doe"),
- *                     @OA\Property(property="email", type="string", example="john.doe@example.com")
- *                 )
- *             ),
- *             @OA\Property(property="message", type="string", example="Users who didn't clock in on this day")
- *         )
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="No users found based on the filter",
- *         @OA\JsonContent(
- *             @OA\Property(property="status", type="string", example="error"),
- *             @OA\Property(property="message", type="string", example="No users found.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=400,
- *         description="Invalid date format or other error",
- *         @OA\JsonContent(
- *             @OA\Property(property="status", type="string", example="error"),
- *             @OA\Property(property="message", type="string", example="Invalid date format.")
- *         )
- *     )
- * )
- */
-public function getUsersClockInStatus(Request $request)
-{
-    $date = $request->has('date') ? Carbon::parse($request->get('date')) : Carbon::today();
-    $startOfDay = $date->copy()->startOfDay();
-    $endOfDay = $date->copy()->endOfDay();
-
-    $type = $request->get('type', 'no_clock_in');
-
-    if ($type === 'no_clock_in') {
-        $users = User::whereDoesntHave('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
-            $query->whereBetween('clock_in', [$startOfDay, $endOfDay]);
-        })->get();
-
-        $message = 'Users who did not clock in on this day';
-    } elseif ($type === 'clocked_in') {
-        $users = User::whereHas('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
-            $query->whereBetween('clock_in', [$startOfDay, $endOfDay]);
-        })->get();
-
-        $message = 'Users who clocked in on this day';
-    } else {
-        return $this->returnError('Invalid type parameter. Use "clocked_in" or "no_clock_in".');
+        return $this->returnData('clock', $clock, 'Clock Issue Updated Successfully');
     }
 
-    if ($users->isEmpty()) {
-        return $this->returnError('No users found.');
-    }
-
-    $usersData = $users->map(function ($user) use ($startOfDay, $endOfDay) {
-        $clockInOut = $user->user_clocks()
-            ->whereBetween('clock_in', [$startOfDay, $endOfDay])
-            ->first();
 
 
-            
-    // Retrieve all locations associated with the user
-    $locations = $user->user_locations()->get()->map(function ($location) {
-        return [
-            'id' => $location->id,
-            'name' => $location->name,
-            'latitude' => $location->latitude,
-            'longitude' => $location->longitude,
-        ];
-    });
 
-    // Retrieve all work types assigned to the user
-    $workTypes = $user->work_types()->get()->map(function ($workType) {
-        return [
-            'id' => $workType->id,
-            'name' => $workType->name,
-        ];
-    });
+    /**
+     * @OA\Get(
+     *     path="/api/users_clocks_Ins",
+     *     summary="Get Users Who Clocked In or Didn't Clock In on a Specific Day",
+     *     description="Retrieves a list of users who either did not clock in or clocked in on a specific day.",
+     *     operationId="getUsersClockOutStatus",
+     *     tags={"Clock"},
+     *     @OA\Parameter(
+     *         name="date",
+     *         in="query",
+     *         required=false,
+     *         description="The date to check users for, in 'Y-m-d' format. Defaults to today's date if not provided.",
+     *         @OA\Schema(type="string", example="2025-02-23")
+     *     ),
+     *     @OA\Parameter(
+     *         name="type",
+     *         in="query",
+     *         required=false,
+     *         description="The type of users to retrieve: 'clocked_in' for users who clocked in, 'no_clock_in' for users who did not clock in. Defaults to 'no_clock_in'.",
+     *         @OA\Schema(type="string", enum={"clocked_in", "no_clock_in"}, example="no_clock_in")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Users who either clocked in or didn't clock in on the specified day",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="data", type="array", 
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="John Doe"),
+     *                     @OA\Property(property="email", type="string", example="john.doe@example.com")
+     *                 )
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Users who didn't clock in on this day")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No users found based on the filter",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="No users found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid date format or other error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Invalid date format.")
+     *         )
+     *     )
+     * )
+     */
+    public function getUsersClockInStatus(Request $request)
+    {
+        $date = $request->has('date') ? Carbon::parse($request->get('date')) : Carbon::today();
+        $startOfDay = $date->copy()->startOfDay();
+        $endOfDay = $date->copy()->endOfDay();
+
+        $type = $request->get('type', 'no_clock_in');
+
+        if ($type === 'no_clock_in') {
+            $users = User::whereDoesntHave('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
+                $query->whereBetween('clock_in', [$startOfDay, $endOfDay]);
+            })->get();
+
+            $message = 'Users who did not clock in on this day';
+        } elseif ($type === 'clocked_in') {
+            $users = User::whereHas('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
+                $query->whereBetween('clock_in', [$startOfDay, $endOfDay]);
+            })->get();
+
+            $message = 'Users who clocked in on this day';
+        } else {
+            return $this->returnError('Invalid type parameter. Use "clocked_in" or "no_clock_in".');
+        }
+
+        if ($users->isEmpty()) {
+            return $this->returnError('No users found.');
+        }
+
+        $usersData = $users->map(function ($user) use ($startOfDay, $endOfDay) {
+            $clockInOut = $user->user_clocks()
+                ->whereBetween('clock_in', [$startOfDay, $endOfDay])
+                ->first();
+
+
+
+            // Retrieve all locations associated with the user
+            $locations = $user->user_locations()->get()->map(function ($location) {
+                return [
+                    'id' => $location->id,
+                    'name' => $location->name,
+                    'latitude' => $location->latitude,
+                    'longitude' => $location->longitude,
+                ];
+            });
+
+            // Retrieve all work types assigned to the user
+            $workTypes = $user->work_types()->get()->map(function ($workType) {
+                return [
+                    'id' => $workType->id,
+                    'name' => $workType->name,
+                ];
+            });
             return [
                 'user_id' => $user->id,
                 'name' => $user->name,
                 'phone' => $user->phone,
 
-                'clock_id'=>$clockInOut?  $clockInOut->id:null, 
+                'clock_id' => $clockInOut ?  $clockInOut->id : null,
                 'date' => $clockInOut && $clockInOut->clock_in
                     ? Carbon::parse($clockInOut->clock_in)->format('Y-m-d')
                     : Carbon::now()->format('Y-m-d'), // Default to today's date if no record found
-            
+
                 'clock_in' => $clockInOut && $clockInOut->clock_in
                     ? Carbon::parse($clockInOut->clock_in)->format('H:i')
                     : '00:00',
@@ -1207,151 +1238,150 @@ public function getUsersClockInStatus(Request $request)
                     : '00:00',
 
 
-        // Adding multiple locations as an array
-        'locations' => $locations->isNotEmpty() ? $locations : null,
+                // Adding multiple locations as an array
+                'locations' => $locations->isNotEmpty() ? $locations : null,
 
-        // Adding multiple work types as an array
-        'work_types' => $workTypes->isNotEmpty() ? $workTypes : null,
+                // Adding multiple work types as an array
+                'work_types' => $workTypes->isNotEmpty() ? $workTypes : null,
             ];
-            
-    });
+        });
 
-    return $this->returnData('data', $usersData, $message);
-}
-
+        return $this->returnData('data', $usersData, $message);
+    }
 
 
 
-/**
- * @OA\Get(
- *     path="/api/users_clocks_Outs",
- *     summary="Get Users Who Clocked In or Didn't Clock In on a Specific Day",
- *     description="Retrieves a list of users who either did not clock in or clocked in on a specific day.",
- *     operationId="getUsersClockInStatus",
- *     tags={"Clock"},
- *     @OA\Parameter(
- *         name="date",
- *         in="query",
- *         required=false,
- *         description="The date to check users for, in 'Y-m-d' format. Defaults to today's date if not provided.",
- *         @OA\Schema(type="string", example="2025-02-23")
- *     ),
- *     @OA\Parameter(
- *         name="type",
- *         in="query",
- *         required=false,
- *         description="The type of users to retrieve: 'clocked_in' for users who clocked out, 'no_clock_out' for users who did not clock in. Defaults to 'no_clock_out'.",
- *         @OA\Schema(type="string", enum={"clocked_out", "no_clock_out"}, example="no_clock_out")
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Users who either clocked in or didn't clock in on the specified day",
- *         @OA\JsonContent(
- *             @OA\Property(property="status", type="string", example="success"),
- *             @OA\Property(property="data", type="array", 
- *                 @OA\Items(
- *                     @OA\Property(property="id", type="integer", example=1),
- *                     @OA\Property(property="name", type="string", example="John Doe"),
- *                     @OA\Property(property="email", type="string", example="john.doe@example.com")
- *                 )
- *             ),
- *             @OA\Property(property="message", type="string", example="Users who didn't clock in on this day")
- *         )
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="No users found based on the filter",
- *         @OA\JsonContent(
- *             @OA\Property(property="status", type="string", example="error"),
- *             @OA\Property(property="message", type="string", example="No users found.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=400,
- *         description="Invalid date format or other error",
- *         @OA\JsonContent(
- *             @OA\Property(property="status", type="string", example="error"),
- *             @OA\Property(property="message", type="string", example="Invalid date format.")
- *         )
- *     )
- * )
- */
 
- public function getUsersClockOutStatus(Request $request)
- {
-     $date = $request->has('date') ? Carbon::parse($request->get('date')) : Carbon::today();
-     $startOfDay = $date->copy()->startOfDay(); // Ensure startOfDay() does not affect the original $date
-     $endOfDay = $date->copy()->endOfDay();     // Ensure endOfDay() does not affect the original $date
-     
- 
- 
-     // Default type is 'no_clock_in' if not provided
-     $type = $request->get('type', 'no_clock_in');
- 
-     // Retrieve users based on clock-in status
-     if ($type === 'no_clock_out') {
-         // Get users who have not clocked in on the given day
-         $users = User::whereDoesntHave('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
-             $query->whereBetween('clock_in', [$startOfDay, $endOfDay]);
-         })->get();
-         
-         $message = 'Users who did not clock in on this day';
-     } elseif ($type === 'clocked_out') {
-         
-         $users = User::whereHas('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
-             
-             $query->where('clock_out', '>=', $startOfDay)
-                   ->where('clock_out', '<=', $endOfDay);
-         })->get();
-         
-         
-         
-         
-         $message = 'Users who clocked in on this day';
-     } else {
-         // Invalid type parameter
-         return $this->returnError('Invalid type parameter. Use "clocked_in" or "no_clock_in".');
-     }
- 
-     // Check if we found any users based on the filter
-     if ($users->isEmpty()) {
-         return $this->returnError('No users found.');
-     }
- 
+    /**
+     * @OA\Get(
+     *     path="/api/users_clocks_Outs",
+     *     summary="Get Users Who Clocked In or Didn't Clock In on a Specific Day",
+     *     description="Retrieves a list of users who either did not clock in or clocked in on a specific day.",
+     *     operationId="getUsersClockInStatus",
+     *     tags={"Clock"},
+     *     @OA\Parameter(
+     *         name="date",
+     *         in="query",
+     *         required=false,
+     *         description="The date to check users for, in 'Y-m-d' format. Defaults to today's date if not provided.",
+     *         @OA\Schema(type="string", example="2025-02-23")
+     *     ),
+     *     @OA\Parameter(
+     *         name="type",
+     *         in="query",
+     *         required=false,
+     *         description="The type of users to retrieve: 'clocked_in' for users who clocked out, 'no_clock_out' for users who did not clock in. Defaults to 'no_clock_out'.",
+     *         @OA\Schema(type="string", enum={"clocked_out", "no_clock_out"}, example="no_clock_out")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Users who either clocked in or didn't clock in on the specified day",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="data", type="array", 
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="John Doe"),
+     *                     @OA\Property(property="email", type="string", example="john.doe@example.com")
+     *                 )
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Users who didn't clock in on this day")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No users found based on the filter",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="No users found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid date format or other error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Invalid date format.")
+     *         )
+     *     )
+     * )
+     */
 
-     
-    $usersData = $users->map(function ($user) use ($startOfDay, $endOfDay) {
-        $clockInOut = $user->user_clocks()
-            ->whereBetween('clock_out', [$startOfDay, $endOfDay])
-            ->first();
-         
-    // Retrieve all locations associated with the user
-    $locations = $user->user_locations()->get()->map(function ($location) {
-        return [
-            'id' => $location->id,
-            'name' => $location->name,
-            'latitude' => $location->latitude,
-            'longitude' => $location->longitude,
-        ];
-    });
+    public function getUsersClockOutStatus(Request $request)
+    {
+        $date = $request->has('date') ? Carbon::parse($request->get('date')) : Carbon::today();
+        $startOfDay = $date->copy()->startOfDay(); // Ensure startOfDay() does not affect the original $date
+        $endOfDay = $date->copy()->endOfDay();     // Ensure endOfDay() does not affect the original $date
 
-    // Retrieve all work types assigned to the user
-    $workTypes = $user->work_types()->get()->map(function ($workType) {
-        return [
-            'id' => $workType->id,
-            'name' => $workType->name,
-        ];
-    });
+
+
+        // Default type is 'no_clock_in' if not provided
+        $type = $request->get('type', 'no_clock_in');
+
+        // Retrieve users based on clock-in status
+        if ($type === 'no_clock_out') {
+            // Get users who have not clocked in on the given day
+            $users = User::whereDoesntHave('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
+                $query->whereBetween('clock_in', [$startOfDay, $endOfDay]);
+            })->get();
+
+            $message = 'Users who did not clock in on this day';
+        } elseif ($type === 'clocked_out') {
+
+            $users = User::whereHas('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
+
+                $query->where('clock_out', '>=', $startOfDay)
+                    ->where('clock_out', '<=', $endOfDay);
+            })->get();
+
+
+
+
+            $message = 'Users who clocked in on this day';
+        } else {
+            // Invalid type parameter
+            return $this->returnError('Invalid type parameter. Use "clocked_in" or "no_clock_in".');
+        }
+
+        // Check if we found any users based on the filter
+        if ($users->isEmpty()) {
+            return $this->returnError('No users found.');
+        }
+
+
+
+        $usersData = $users->map(function ($user) use ($startOfDay, $endOfDay) {
+            $clockInOut = $user->user_clocks()
+                ->whereBetween('clock_out', [$startOfDay, $endOfDay])
+                ->first();
+
+            // Retrieve all locations associated with the user
+            $locations = $user->user_locations()->get()->map(function ($location) {
+                return [
+                    'id' => $location->id,
+                    'name' => $location->name,
+                    'latitude' => $location->latitude,
+                    'longitude' => $location->longitude,
+                ];
+            });
+
+            // Retrieve all work types assigned to the user
+            $workTypes = $user->work_types()->get()->map(function ($workType) {
+                return [
+                    'id' => $workType->id,
+                    'name' => $workType->name,
+                ];
+            });
             return [
                 'user_id' => $user->id,
                 'name' => $user->name,
                 'phone' => $user->phone,
 
-                'clock_id'=>$clockInOut?  $clockInOut->id:null, 
+                'clock_id' => $clockInOut ?  $clockInOut->id : null,
                 'date' => $clockInOut && $clockInOut->clock_in
                     ? Carbon::parse($clockInOut->clock_in)->format('Y-m-d')
                     : Carbon::now()->format('Y-m-d'), // Default to today's date if no record found
-            
+
                 'clock_in' => $clockInOut && $clockInOut->clock_in
                     ? Carbon::parse($clockInOut->clock_in)->format('H:i')
                     : '00:00',
@@ -1360,17 +1390,14 @@ public function getUsersClockInStatus(Request $request)
                     : '00:00',
 
 
-        // Adding multiple locations as an array
-        'locations' => $locations->isNotEmpty() ? $locations : null,
+                // Adding multiple locations as an array
+                'locations' => $locations->isNotEmpty() ? $locations : null,
 
-        // Adding multiple work types as an array
-        'work_types' => $workTypes->isNotEmpty() ? $workTypes : null,
+                // Adding multiple work types as an array
+                'work_types' => $workTypes->isNotEmpty() ? $workTypes : null,
             ];
-            
-    });
-     // Return the users based on the selected filter
-     return $this->returnData('data', $usersData, $message);
- }
- 
-
+        });
+        // Return the users based on the selected filter
+        return $this->returnData('data', $usersData, $message);
+    }
 }

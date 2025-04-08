@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { UserModel } from '../../../Models/user-model';
-import { UserServiceService } from '../../../Services/user-service.service';
 import { FormsModule } from '@angular/forms';
-import { ClockService } from '../../../Services/clock.service';
-import Swal from 'sweetalert2';
-import { DepartmentService } from '../../../Services/department.service';
+import { Router } from '@angular/router';
 import { Department } from '../../../Models/department';
+import { UserModel } from '../../../Models/user-model';
+import { ClockService } from '../../../Services/clock.service';
+import { DepartmentService } from '../../../Services/department.service';
+import { SubDepartmentService } from '../../../Services/sub-department.service';
+import { UserServiceService } from '../../../Services/user-service.service';
 
 interface data{
   Employees:string,
@@ -38,6 +38,9 @@ export class HrAttendanceComponent {
   to_day: string = '';  
 
 
+  selectedUsers: { userId: number, userName: string }[] = [];
+
+
 
   selectedMonth: string = "01";
   selectedYear: number = 0;
@@ -45,6 +48,7 @@ export class HrAttendanceComponent {
   departments:Department[]=[]
   DateString: string = "2019-01";
 
+  isSelectAllChecked: boolean = false;
 
   months = [
     { name: 'January', value: "01" },
@@ -62,8 +66,16 @@ export class HrAttendanceComponent {
   ];
   years: number[] = [];
 
+  subDepartments: any[] = [];
+  
+  selectedDepartment: number | null = null;
+  selectedSubDepartment: number | null = null;
 
-  constructor(public router:Router , public userServ:UserServiceService, public UserClocksService: ClockService ,private clockService:ClockService , public departmentServ: DepartmentService){}
+
+  constructor(public router:Router , public userServ:UserServiceService, public UserClocksService: ClockService ,private clockService:ClockService , public departmentServ: DepartmentService,
+public supDeptServ:SubDepartmentService
+
+  ){}
 
   tableData:UserModel[]= [];
 
@@ -90,6 +102,71 @@ export class HrAttendanceComponent {
 
   }
 
+
+  // Method to handle "Select All" checkbox state change
+  toggleSelectAll() {
+    this.selectedUsers=[]
+
+    if(!this.isSelectAllChecked){
+      this.selectedUsers=[]
+      this.isSelectAllChecked=false;
+    }else
+   { // Set all users' selected state to match "Select All" checkbox
+    this.tableData.forEach(row => {
+      
+      this.selectedUsers.push({ userId: row.id, userName: row.name });
+      this.isSelectAllChecked=true;
+
+    });}
+  }
+
+// Method to check if the user is selected
+isUserSelected(userId: number): boolean {
+  return this.selectedUsers.some(u => u.userId === userId);
+}
+  // Method to handle checkbox selection change
+  onUserSelectionChange(row: any): void {
+    
+    if (row.selected) {
+      // If selected, add user to the selectedUsers array
+      this.selectedUsers.push({ userId: row.id, userName: row.name });
+    } else {
+      // If not selected, remove user from the selectedUsers array
+      this.selectedUsers = this.selectedUsers.filter(u => u.userId !== row.id);
+    }
+  }
+
+
+ExportData(){
+  
+  this.selectedUsers.forEach(user => {
+    this.isLoading=true;
+    this.clockService.ExportUserDataById(user.userId, this.from_day, this.to_day).subscribe(
+      (result: Blob) => {
+        const userName = user.userName; // Get the user name from selectedUsers
+        const url = window.URL.createObjectURL(result);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${userName}_ClockIn_${this.from_day}_to_${this.to_day}.xlsx`; // Use the userName for the file name
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+
+      (error) => {
+        this.isLoading=false;
+
+        console.error('Error exporting user data:', error);
+      }
+    );
+  });
+      this.isLoading=false;
+
+}
+
+
+
+  
+
   NavigateToEmployeeAttendanceDetails(EmpId:number){
     this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/"+EmpId)
   }
@@ -101,7 +178,7 @@ export class HrAttendanceComponent {
     this.userServ.getall(pgNumber).subscribe(
       (d: any) => {
         this.tableData = d.data.users;
-        this.PagesNumber=d.data.pagination.last_page;
+        this.PagesNumber = d.data.pagination?.last_page || 1; // Check for last_page and default to 1 if not available
         this.generatePages();
       },
       (error) => {
@@ -116,6 +193,46 @@ export class HrAttendanceComponent {
       }
     );
   }
+
+
+
+
+
+onDepartmentChange() {
+  this.selectedUsers=[]
+  this.isSelectAllChecked=false;
+ this.subDepartments = [];
+
+ console.log(this.selectedDepartment);
+ this.selectedSubDepartment=null;
+ if (this.selectedDepartment) {
+  this.supDeptServ.setDeptId(this.selectedDepartment);
+
+   this.getSubDepartments(this.selectedDepartment);
+   this.Search()
+ }
+}
+
+getSubDepartments(departmentId: number) {
+ this.supDeptServ.getall (departmentId).subscribe(
+   (res: any) => {
+     this.subDepartments = res.data || res;
+   },
+   (err) => {
+     console.error('Failed to fetch sub-departments', err);
+   }
+ );
+}
+
+onSubDepartmentChange() {
+  this.selectedUsers=[]
+  this.isSelectAllChecked=false;
+
+ this.Search(); // optionally trigger search/filter
+}
+
+
+
 
   generatePages() {
     this.pages = [];
@@ -136,22 +253,33 @@ export class HrAttendanceComponent {
     this.getAllEmployees(this.CurrentPageNumber);
   }
 
+  
   Search(){
-    if(this.selectedName){
-    this.userServ.SearchByName(this.selectedName).subscribe(
+    // if(this.selectedName){
+    this.userServ.SearchByNameAndDeptAndSubDep(this.selectedName,this.selectedDepartment,this.selectedSubDepartment).subscribe(
       (d: any) => {
         this.tableData = d.data.users;
         this.PagesNumber=1;
-        this.DisplayPagginationOrNot=false;
+        // this.DisplayPagginationOrNot=false;
         this.filteredUsers=[];
+
+
+
+
+        this.tableData = d.data.users;
+        this.PagesNumber = d.data.pagination?.last_page || 1; // Check for last_page and default to 1 if not available
+        this.generatePages();
+      
+      
+
       },
       (error) => {
       }
     );
-  }
-  else{
-    this.DisplayPagginationOrNot=true;
-  }
+  // }
+  // else{
+  //   this.DisplayPagginationOrNot=true;
+  // }
   }
   
 
@@ -184,7 +312,7 @@ export class HrAttendanceComponent {
 
   selectUser(location: string) {
     this.selectedName = location;
-    this.userServ.SearchByName(this.selectedName).subscribe(
+    this.userServ.SearchByNameAndDeptAndSubDep(this.selectedName).subscribe(
       (d: any) => {
         this.tableData=d.data.users;
         this.DisplayPagginationOrNot=false;
@@ -233,41 +361,14 @@ export class HrAttendanceComponent {
   }
 
 
-  onDepartmentChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    if (target) {
-      this.SelectDepartment = target.value; 
-    }
+  // onDepartmentChange(event: Event): void {
+  //   const target = event.target as HTMLSelectElement;
+  //   if (target) {
+  //     this.SelectDepartment = target.value; 
+  //   }
 
-  }
+  // }
 
- ExportData() {
-
-
-  this.isLoading = true;
-
-  this.clockService.ExportAllUserDataById(this.from_day, this.to_day, this.SelectDepartment).subscribe(
-    (result: Blob) => {
-      this.isLoading = false;
-
-      const url = window.URL.createObjectURL(result);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Employees_ClockIn_${this.from_day}_to_${this.to_day}.xlsx`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    },
-    (error) => {
-      this.isLoading = false;
-
-      if (error.status === 404) {
-        alert("No attendance records found for this date.");
-      } else {
-        alert("An error occurred while exporting data. Please try again.");
-      }
-    }
-  );
-}
 
   
   saveCurrentPageNumber() {

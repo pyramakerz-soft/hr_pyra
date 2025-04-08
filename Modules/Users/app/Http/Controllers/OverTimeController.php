@@ -258,28 +258,12 @@ public function addStartUserOvertime(StartUserOverTimeRequest $request)
 {
     $manager = Auth::user();
 
-    // Get department IDs where the user is a manager
-    $departmentIds = $manager->managedDepartments()->pluck('departments.id');
+    $employeeIds = $manager->getManagedEmployeeIds();
 
-    if ($departmentIds->isEmpty()) {
-        return $this->returnError('Manager is not assigned to any department', 404);
-    }
-
-    // Get employees under the manager
-    $employeeIds = User::whereIn('department_id', $departmentIds)
-        ->where('id', '!=', $manager->id)
-        ->pluck('id');
 
     if ($employeeIds->isEmpty()) {
         return $this->returnError('No employees found under this manager', 404);
     }
-
-    // Get all parent managers
-    $parentManagers = $manager->allParentManagers();
-
-    // Exclude employees who are managers at any level above
-    $parentManagerIds = $parentManagers->pluck('id')->toArray();
-    $employeeIds = $employeeIds->diff($parentManagerIds);
 
     // Define the date range (26th of previous month to 26th of current month)
     $currentDate = Carbon::now();

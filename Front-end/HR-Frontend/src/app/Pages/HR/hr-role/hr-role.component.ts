@@ -38,6 +38,7 @@ export class HrRoleComponent {
   }
 
   GetAllRoles():void{
+    
     this.roleService.getall().subscribe(
       (d: any) => {
         this.tableData = d.roles; 

@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Modules\Users\Http\Requests\Api\Department\StoreDepartmentRequest;
 use Modules\Users\Http\Requests\Api\Department\UpdateDepartmentRequest;
 use Modules\Users\Models\Department;
+use Modules\Users\Models\SubDepartment;
 use Modules\Users\Models\User;
 use Modules\Users\Resources\DepartmentResource;
 
@@ -44,6 +45,13 @@ class DepartmentController extends Controller
      *   summary="Get a list of departments",
      *   tags={"Department"},
      *   security={{"bearerAuth": {}}},
+     *   @OA\Parameter(
+     *     name="role",
+     *     in="query",
+     *     required=false,
+     *     description="Filter by role (e.g., 'Manager')",
+     *     @OA\Schema(type="string")
+     *   ),
      *   @OA\Response(
      *     response=200,
      *     description="A list of departments",
@@ -69,16 +77,156 @@ class DepartmentController extends Controller
      *   )
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        $departments = Department::with('managers')->get();
-        if ($departments->isEmpty()) {
-            return $this->returnError('No departments Found');
-        }
-        $data['departments'] = DepartmentResource::collection($departments);
-        return $this->returnData("data", $data, "departments Data");
+        $role = $request->query('role');
 
+        // If role is "manager", return only departments without a manager
+        if ($role === 'Manager') {
+            $departments = Department::doesntHave('manager')->get();
+        } else {
+            $departments = Department::with('manager')->get();
+        }
+
+        if ($departments->isEmpty()) {
+            return $this->returnError('No departments found');
+        }
+
+        $data['departments'] = DepartmentResource::collection($departments);
+        return $this->returnData("data", $data, "Departments Data");
     }
+
+
+
+  /**
+ * @OA\Get(
+ *   path="/api/departments/{departmentId}/sub-departments",
+ *   summary="Get a list of sub-departments for a department",
+ *   tags={"Sub-Department"},
+ *   security={{"bearerAuth": {}}},
+ *   @OA\Parameter(
+ *     name="departmentId",
+ *     in="path",
+ *     required=true,
+ *     description="ID of the department",
+ *     @OA\Schema(type="integer")
+ *   ),
+ *   @OA\Parameter(
+ *     name="role",
+ *     in="query",
+ *     required=false,
+ *     description="Filter by role (e.g., 'Team Lead')",
+ *     @OA\Schema(type="string")
+ *   ),
+ *   @OA\Response(
+ *     response=200,
+ *     description="A list of sub-departments",
+ *   ),
+ *   @OA\Response(
+ *     response=404,
+ *     description="Department not found",
+ *     @OA\JsonContent(
+ *       @OA\Property(property="message", type="string", example="Department not found")
+ *     )
+ *   ),
+ *   @OA\Response(
+ *     response=401,
+ *     description="Unauthorized",
+ *     @OA\JsonContent(
+ *       @OA\Property(property="message", type="string", example="Unauthorized")
+ *     )
+ *   )
+ * )
+ */
+public function getSubDepartment(Request $request, $departmentId)
+{
+    $role = $request->query('role');
+    
+    $department = Department::with(['subDepartments.teamLead'])->find($departmentId);
+
+    if (!$department) {
+        return $this->returnError('Department not found');
+    }
+
+    // If role is "team_lead", return only sub-departments without a team lead
+    if ($role === 'Team Lead') {
+        $subDepartments = $department->subDepartments()->doesntHave('teamLead')->get();
+    } else {
+        $subDepartments = $department->subDepartments;
+    }
+
+    return $this->returnData("data", $subDepartments, "Sub-Departments Data");
+}
+
+
+/**
+ * @OA\Get(
+ *   path="/api/departments/{departmentId}/sub-departments/{subDepartmentId}",
+ *   summary="Get a specific sub-department by its ID",
+ *   tags={"Sub-Department"},
+ *   security={{"bearerAuth": {}}},
+ *   @OA\Parameter(
+ *     name="departmentId",
+ *     in="path",
+ *     required=true,
+ *     description="ID of the department",
+ *     @OA\Schema(type="integer")
+ *   ),
+ *   @OA\Parameter(
+ *     name="subDepartmentId",
+ *     in="path",
+ *     required=true,
+ *     description="ID of the sub-department",
+ *     @OA\Schema(type="integer")
+ *   ),
+ *   @OA\Response(
+ *     response=200,
+ *     description="A specific sub-department",
+ *     @OA\JsonContent(
+ *       type="object",
+ *       @OA\Property(property="id", type="integer"),
+ *       @OA\Property(property="name", type="string"),
+ *     )
+ *   ),
+ *   @OA\Response(
+ *     response=404,
+ *     description="Sub-department or department not found",
+ *     @OA\JsonContent(
+ *       @OA\Property(property="message", type="string", example="Sub-department not found")
+ *     )
+ *   ),
+ *   @OA\Response(
+ *     response=401,
+ *     description="Unauthorized",
+ *     @OA\JsonContent(
+ *       @OA\Property(property="message", type="string", example="Unauthorized")
+ *     )
+ *   )
+ * )
+ */
+public function getSubDepartmentById(Request $request, $departmentId, $subDepartmentId)
+{
+    // Fetch the department and its sub-departments, including the manager
+    $department = Department::with(['subDepartments.teamLead'])->find($departmentId);
+
+    // Check if the department exists
+    if (!$department) {
+        return $this->returnError('Department not found');
+    }
+
+    // Find the specific sub-department by its ID
+    $subDepartment = $department->subDepartments()->with('teamLead')->find($subDepartmentId);
+
+    // Check if the sub-department exists
+    if (!$subDepartment) {
+        return $this->returnError('Sub-department not found');
+    }
+
+    // Return the sub-department in the response
+    return $this->returnData("data", $subDepartment, "Sub-Department Data");
+}
+
+
     /**
      * @OA\Post(
      *   path="/api/departments",
@@ -127,8 +275,86 @@ class DepartmentController extends Controller
         if ($department->save()) {
             return $this->returnData("department", $department, "department stored successfully");
         }
-
     }
+
+
+    /**
+     * @OA\Post(
+     *   path="/api/departments/{departmentId}/sub-departments",
+     *   summary="Create a new sub-department under a department",
+     *   tags={"Sub-Department"},
+     *   security={{"bearerAuth": {}}},
+     *   @OA\Parameter(
+     *     name="departmentId",
+     *     in="path",
+     *     required=true,
+     *     description="ID of the parent department",
+     *     @OA\Schema(type="integer")
+     *   ),
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\JsonContent(
+     *       @OA\Property(property="name", type="string", example="HR Sub-Department"),
+     *       @OA\Property(property="teamlead_id", type="integer", example=364)
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=201,
+     *     description="Sub-department created successfully",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Sub-department stored successfully"),
+     *       @OA\Property(property="sub_department", ref="#/components/schemas/Department")
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=400,
+     *     description="Bad Request",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Invalid input data")
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=404,
+     *     description="Parent department not found",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Department not found")
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=401,
+     *     description="Unauthorized",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Unauthorized")
+     *     )
+     *   )
+     * )
+     */
+    public function storeSubDepartment(Request $request, $departmentId)
+    {
+        // Validate the request
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'teamlead_id' => 'integer|exists:users,id',
+        ]);
+
+        // Check if the parent department exists
+        $parentDepartment = Department::find($departmentId);
+        if (!$parentDepartment) {
+            return $this->returnError('Department not found');
+        }
+
+        // Create the sub-department
+        $subDepartment =  SubDepartment::create([
+            'name' => $validatedData['name'],
+            'teamlead_id' => $validatedData['teamlead_id'],
+            'department_id' => $departmentId,
+
+        ])->with('teamLead')->get();
+
+
+        return $this->returnData("sub_department", $subDepartment, "Sub-department stored successfully");
+    }
+
 
     /**
      * @OA\Get(
@@ -224,8 +450,179 @@ class DepartmentController extends Controller
         if ($department->save()) {
             return $this->returnData("department", $department, "department updated successfully");
         }
-
     }
+
+
+
+    /**
+     * @OA\Post(
+     *   path="/api/departments/{departmentId}/sub-departments/{subDepartmentId}",
+     *   summary="Update a sub-department",
+     *   tags={"Sub-Department"},
+     *   security={{"bearerAuth": {}}},
+     *   @OA\Parameter(
+     *     name="departmentId",
+     *     in="path",
+     *     required=true,
+     *     @OA\Schema(type="integer"),
+     *     description="Department ID"
+     *   ),
+     *   @OA\Parameter(
+     *     name="subDepartmentId",
+     *     in="path",
+     *     required=true,
+     *     @OA\Schema(type="integer"),
+     *     description="Sub-Department ID"
+     *   ),
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\JsonContent(
+     *       @OA\Property(property="name", type="string", example="Updated Sub-Department Name"),
+     *       @OA\Property(property="teamlead_id", type="integer", example=3),
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Sub-department updated successfully",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Sub-department updated successfully"),
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=404,
+     *     description="Sub-department not found",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Sub-department not found")
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=401,
+     *     description="Unauthorized",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Unauthorized")
+     *     )
+     *   )
+     * )
+     */
+    public function updateSubDepartment(Request $request,  $departmentId, $subDepartmentId)
+    {
+        $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'teamlead_id' => 'sometimes|integer|exists:users,id',
+        ]);
+
+        // Find the sub-department manually
+        $department = Department::where('id', $departmentId)
+            ->where('id', $departmentId)
+            ->first();
+
+        // Check if department exists
+        if (!$department) {
+            return $this->returnError('Department not found');
+        }
+
+        // Find the sub-department manually
+        $subDepartment = SubDepartment::where('id', $subDepartmentId)
+            ->where('id', $subDepartmentId)
+            ->first();
+
+        // Check if department exists
+        if (!$subDepartment) {
+            return $this->returnError('sub Department not found');
+        }
+
+
+        // Update fields
+        $subDepartment->name = $request->name ?? $subDepartment->name;
+        $subDepartment->teamlead_id = $request->teamlead_id ?? $subDepartment->teamlead_id;
+
+        if ($subDepartment->save()) {
+            return $this->returnData("sub_department", $subDepartment, "Sub-department updated successfully");
+        }
+
+        return $this->returnError("Failed to update sub-department");
+    }
+
+
+
+    /**
+     * @OA\Delete(
+     *   path="/api/departments/{departmentId}/sub-departments/{subDepartmentId}",
+     *   summary="Delete a sub-department",
+     *   tags={"Sub-Department"},
+     *   security={{"bearerAuth": {}}},
+     *   @OA\Parameter(
+     *     name="departmentId",
+     *     in="path",
+     *     required=true,
+     *     @OA\Schema(type="integer"),
+     *     description="Department ID"
+     *   ),
+     *   @OA\Parameter(
+     *     name="subDepartmentId",
+     *     in="path",
+     *     required=true,
+     *     @OA\Schema(type="integer"),
+     *     description="Sub-Department ID"
+     *   ),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Sub-department deleted successfully",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Sub-department deleted successfully")
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=404,
+     *     description="Sub-department not found",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Sub-department not found")
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=401,
+     *     description="Unauthorized",
+     *     @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Unauthorized")
+     *     )
+     *   )
+     * )
+     */
+    public function deleteSubDepartment(Request $request,  $departmentId, $subDepartmentId)
+    {
+
+        // Find the sub-department manually
+
+        $department = Department::where('id', $departmentId)
+            ->where('id', $departmentId)
+            ->first();
+
+        // Check if department exists
+        if (!$department) {
+            return $this->returnError('Department not found');
+        }
+        // Find the sub-department manually
+        $subDepartment = SubDepartment::where('id', $subDepartmentId)
+            ->first();
+
+        // Check if department exists
+        if (!$subDepartment) {
+            return $this->returnError('sub Department not found');
+        }
+
+
+        if ($subDepartment->department_id !== $department->id) {
+            return $this->returnError("Sub-department does not belong to this department", 403);
+        }
+
+        if ($subDepartment->delete()) {
+
+
+            return $this->returnData("sub_department", [], "Sub-department deleted successfully");
+        }
+        return $this->returnError("Failed to delete sub-department");
+    }
+
 
     /**
      * @OA\Delete(
@@ -268,7 +665,6 @@ class DepartmentController extends Controller
         if ($department->delete()) {
             return $this->returnData("department", $department, "department deleted successfully");
         }
-
     }
     /**
      * @OA\Get(
@@ -377,5 +773,4 @@ class DepartmentController extends Controller
 
         return $this->returnData('departmentEmployeesCounts', $data, 'Count of Employee Departments for the year ' . $year);
     }
-
 }

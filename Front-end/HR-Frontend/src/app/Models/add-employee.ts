@@ -1,9 +1,13 @@
+import { RoleModel } from "./role-model";
+
 export class AddEmployee {
     constructor(
         public image: File|null|string,
         public name: string,
         public code: string,
         public department_id: number | null,
+        public sub_department_id: number | null,
+
         public deparment_name: string | null,
         public emp_type: string, // position
         public phone: string,
@@ -18,7 +22,7 @@ export class AddEmployee {
         public start_time: string | null,
         public end_time: string | null,
         public gender: string,
-        public roles: string[],
+        public role: RoleModel | null = null,
         public location_id: number[],
         public location: string[],
         public work_type_id: number[],

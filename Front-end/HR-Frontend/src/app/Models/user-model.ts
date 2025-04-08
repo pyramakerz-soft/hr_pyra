@@ -9,6 +9,9 @@ export class UserModel {
         public role : string ,
         public position : string ,
         public code : string ,
+
+        public selected?: boolean // Optional selected property
+
     ){}
 }
 
