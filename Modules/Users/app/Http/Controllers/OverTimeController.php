@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Modules\Users\Enums\StatusEnum;
 use Modules\Users\Http\Requests\Api\OverTime\EndUserOverTimeRequest;
 use Modules\Users\Http\Requests\Api\OverTime\StartUserOverTimeRequest;
-use Modules\Users\Models\Overtime;  // Ensure you have an Overtime model
+use Modules\Users\Models\OverTime;
 use Modules\Users\Models\User;
 
 /**
@@ -60,7 +60,7 @@ public function addStartUserOvertime(StartUserOverTimeRequest $request)
     $authUser = Auth::user();
 
     // Create new overtime
-    $userOvertime = Overtime::create([
+    $userOvertime = OverTime::create([
         'from' => $request->input('from'),
         'status' => StatusEnum::Pending,
         'user_id' => $authUser->id,
@@ -116,7 +116,7 @@ public function addStartUserOvertime(StartUserOverTimeRequest $request)
         $authUser = Auth::user();
     
         // Find the overtime record by its ID
-        $userOvertime = Overtime::find($request->overtime_id);
+        $userOvertime = OverTime::find($request->overtime_id);
     
   
             // Update the overtime record
