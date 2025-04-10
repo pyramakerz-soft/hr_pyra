@@ -17,15 +17,15 @@ class ProfileResource extends JsonResource
         // Set timezone to Africa/Cairo
         $timezone = 'Africa/Cairo';
         $now = now()->setTimezone($timezone)->toDateString(); // Convert server time to Africa/Cairo
-    
-     
+
+
         $user_clock = $authUser->user_clocks()
             ->whereNull('clock_out') // Ensure clock_out is NULL
             ->whereNotNull('clock_in') // Ensure clock_in is NOT NULL
             ->whereDate('clock_in', $now) // Check based on Cairo timezone
             ->latest('clock_in') // Get the latest clock-in
             ->first();
-    
+
         if ($user_clock) {
             return array_merge($user_clock->toArray(), [
                 'location' => $user_clock->location ? [
@@ -37,10 +37,10 @@ class ProfileResource extends JsonResource
                 ] : null,
             ]);
         }
-    
+
         return null;
     }
-    
+
 
 
     // Helper method to get user clocks for the current day
@@ -77,6 +77,9 @@ class ProfileResource extends JsonResource
     // Method to check if notification should be sent based on location
     private function isNotifyByLocation()
     {
+        if (! $this->department) {
+            return false;
+        }
         return $this->department->is_location_time ? true : false;
     }
     // Method to check if the user is clocked out
@@ -118,8 +121,8 @@ class ProfileResource extends JsonResource
             'national_id' => $this->national_id,
             'image' => $this->image ?? null,
             'job_title' => $this->user_detail->emp_type ?? null,
-            'department_id' => $this->department->id,
-            'department_name' => $this->department->name,
+            'department_id' => $this->department == null ? null : $this->department->id,
+            'department_name' => $this->department == null ? null : $this->department->name,
             'role_name' => $this->getRoleName(),
             'is_clocked_out' => $this->isClockedOut($authUser),
 
