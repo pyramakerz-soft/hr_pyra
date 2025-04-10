@@ -149,11 +149,9 @@ class UserVacationController extends Controller
         }
 
         $authUser = Auth::user();
-        $department = $vacation->user->department;
+        $employeeIds =   $authUser->getManagedEmployeeIds();
 
-        $managerIds = $department->managers()->pluck('users.id')->toArray();
-
-        if (!in_array($authUser->id, $managerIds) && $vacation->user_id != $authUser->id) {
+        if (!in_array($vacation->user_id, $employeeIds->toArray())) {
             return $this->returnError('You are not authorized to update this vacation', 403);
         }
 

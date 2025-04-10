@@ -24,58 +24,58 @@ class OverTimeController extends Controller
 {
     use ResponseTrait;
 
-  /**
- * @OA\Post(
- *     path="/api/overtime/start_user_overtime",
- *     tags={"Overtime"},
- *     summary="start a new overtime for the authenticated user",
- *     operationId="startUserOvertime",
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             required={ "from", },
- *             @OA\Property(property="to", type="string", format="date", example="2025-02-27"),
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="User Overtime created successfully",
- *         @OA\JsonContent(
- *             @OA\Property(property="Overtime", type="object")
- *         )
- *     ),
- *     @OA\Response(
- *         response=400,
- *         description="Invalid input"
- *     ),
- *     @OA\Response(
- *         response=401,
- *         description="Unauthorized"
- *     )
- * )
- */
-public function addStartUserOvertime(StartUserOverTimeRequest $request)
-{
-    $request->validated();
-    $authUser = Auth::user();
+    /**
+     * @OA\Post(
+     *     path="/api/overtime/start_user_overtime",
+     *     tags={"Overtime"},
+     *     summary="start a new overtime for the authenticated user",
+     *     operationId="startUserOvertime",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={ "from", },
+     *             @OA\Property(property="to", type="string", format="date", example="2025-02-27"),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User Overtime created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="Overtime", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid input"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
+    public function addStartUserOvertime(StartUserOverTimeRequest $request)
+    {
+        $request->validated();
+        $authUser = Auth::user();
 
-    // Create new overtime
-    $userOvertime = OverTime::create([
-        'from' => $request->input('from'),
-        'status' => StatusEnum::Pending,
-        'user_id' => $authUser->id,
-    ]);
+        // Create new overtime
+        $userOvertime = OverTime::create([
+            'from' => $request->input('from'),
+            'status' => StatusEnum::Pending,
+            'user_id' => $authUser->id,
+        ]);
 
-    // Return the created overtime data in the response
-    return response()->json([
-        'Overtime' => $userOvertime,
-        'message' => 'User Overtime created successfully'
-    ], 200);
-}
+        // Return the created overtime data in the response
+        return response()->json([
+            'Overtime' => $userOvertime,
+            'message' => 'User Overtime created successfully'
+        ], 200);
+    }
 
 
 
-    
+
     /**
      * @OA\Post(
      *     path="/api/overtime/end_user_overtime",
@@ -112,24 +112,24 @@ public function addStartUserOvertime(StartUserOverTimeRequest $request)
     public function addEndUserOvertime(EndUserOverTimeRequest $request)
     {
         $request->validated();
-    
+
         $authUser = Auth::user();
-    
+
         // Find the overtime record by its ID
         $userOvertime = OverTime::find($request->overtime_id);
-    
-  
-            // Update the overtime record
-            $userOvertime->update([
-                'to' => $request->input('to'),
-                'reason' => $request->input('reason'),
-                'user_id' => $authUser->id,
-            ]);
-    
-            // Return the updated overtime data
-            return $this->returnData('Overtime', $userOvertime, 'User Overtime Data');
+
+
+        // Update the overtime record
+        $userOvertime->update([
+            'to' => $request->input('to'),
+            'reason' => $request->input('reason'),
+            'user_id' => $authUser->id,
+        ]);
+
+        // Return the updated overtime data
+        return $this->returnData('Overtime', $userOvertime, 'User Overtime Data');
     }
-    
+
 
     /**
      * @OA\Get(
@@ -153,24 +153,24 @@ public function addStartUserOvertime(StartUserOverTimeRequest $request)
     public function showUserOvertime(Request $request)
     {
         $authUser = Auth::user();
-    
+
         // Fetch and paginate the user's overtime
         $userOvertime = $authUser->overTimes()
             ->orderBy('created_at', 'desc')
             ->paginate(6);
-    
+
         // Fetch the ongoing overtime (if any) where the 'to' column is null
         $ongoingOvertime = $authUser->overTimes()
             ->whereNull('to')  // 'to' column is null, indicating it's an ongoing overtime
             ->first();  // Get the first ongoing overtime (if any)
-    
+
         // Return the data along with the ongoing overtime if any
-        return $this->returnData('OverTimeData',[
+        return $this->returnData('OverTimeData', [
             'Overtimes' => $userOvertime,
             'OngoingOvertime' => $ongoingOvertime,
         ], 'User Overtimes');
     }
-    
+
 
     /**
      * @OA\Post(
@@ -224,11 +224,13 @@ public function addStartUserOvertime(StartUserOverTimeRequest $request)
         $authUser = Auth::user();
         $department = $overtime->user->department;
 
-    $managerIds = $department->managers()->pluck('users.id')->toArray();
 
-    if (!in_array($authUser->id, $managerIds) && $overtime->user_id != $authUser->id) {
-        return $this->returnError('You are not authorized to update this overtime', 403);
-    }
+
+        $employeeIds =   $authUser->getManagedEmployeeIds();
+
+        if (!in_array($overtime->user_id, $employeeIds->toArray())) {
+            return $this->returnError('You are not authorized to update this overtime', 403);
+        }
 
         $overtime->status = $request->input('status');
         $overtime->save();
@@ -254,53 +256,52 @@ public function addStartUserOvertime(StartUserOverTimeRequest $request)
      *         description="Unauthorized"
      *     )
      * )
-     */public function getOvertimeOfManagerEmployees()
-{
-    $manager = Auth::user();
+     */ public function getOvertimeOfManagerEmployees()
+    {
+        $manager = Auth::user();
 
-    $employeeIds = $manager->getManagedEmployeeIds();
+        $employeeIds = $manager->getManagedEmployeeIds();
 
 
-    if ($employeeIds->isEmpty()) {
-        return $this->returnError('No employees found under this manager', 404);
+        if ($employeeIds->isEmpty()) {
+            return $this->returnError('No employees found under this manager', 404);
+        }
+
+        // Define the date range (26th of previous month to 26th of current month)
+        $currentDate = Carbon::now();
+        if ($currentDate->day > 26) {
+            $startDate = $currentDate->copy()->setDay(26);
+            $endDate = $currentDate->copy()->addMonth()->setDay(26);
+        } else {
+            $startDate = $currentDate->copy()->subMonth()->setDay(26);
+            $endDate = $currentDate->copy()->setDay(26);
+        }
+
+        // Fetch overtime records
+        $overTimes = Overtime::whereIn('user_id', $employeeIds)
+            ->whereBetween('from', [$startDate, $endDate])
+            ->whereNotNull('to')
+            ->with('user')
+            ->paginate(6, ['*'], 'page', request()->query('page', 1));
+
+        // Format response
+        $overTimeWithUserData = collect($overTimes->items())->map(function ($overTime) {
+            return [
+                'overTime' => $overTime,
+                'user' => $overTime->user,
+            ];
+        });
+
+        return $this->returnData('OverTimes', [
+            'data' => $overTimeWithUserData,
+            'pagination' => [
+                'total' => $overTimes->total(),
+                'per_page' => $overTimes->perPage(),
+                'current_page' => $overTimes->currentPage(),
+                'last_page' => $overTimes->lastPage(),
+                'next_page_url' => $overTimes->nextPageUrl(),
+                'prev_page_url' => $overTimes->previousPageUrl(),
+            ]
+        ], 'OverTimes for employees in the departments managed by the authenticated user');
     }
-
-    // Define the date range (26th of previous month to 26th of current month)
-    $currentDate = Carbon::now();
-    if ($currentDate->day > 26) {
-        $startDate = $currentDate->copy()->setDay(26);
-        $endDate = $currentDate->copy()->addMonth()->setDay(26);
-    } else {
-        $startDate = $currentDate->copy()->subMonth()->setDay(26);
-        $endDate = $currentDate->copy()->setDay(26);
-    }
-
-    // Fetch overtime records
-    $overTimes = Overtime::whereIn('user_id', $employeeIds)
-        ->whereBetween('from', [$startDate, $endDate])
-        ->whereNotNull('to')
-        ->with('user')
-        ->paginate(6, ['*'], 'page', request()->query('page', 1));
-
-    // Format response
-    $overTimeWithUserData = collect($overTimes->items())->map(function ($overTime) {
-        return [
-            'overTime' => $overTime,
-            'user' => $overTime->user,
-        ];
-    });
-
-    return $this->returnData('OverTimes', [
-        'data' => $overTimeWithUserData,
-        'pagination' => [
-            'total' => $overTimes->total(),
-            'per_page' => $overTimes->perPage(),
-            'current_page' => $overTimes->currentPage(),
-            'last_page' => $overTimes->lastPage(),
-            'next_page_url' => $overTimes->nextPageUrl(),
-            'prev_page_url' => $overTimes->previousPageUrl(),
-        ]
-    ], 'OverTimes for employees in the departments managed by the authenticated user');
-}
-
 }

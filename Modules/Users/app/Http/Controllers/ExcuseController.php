@@ -150,11 +150,11 @@ class ExcuseController extends Controller
         }
 
         $authUser = Auth::user();
-        $department = $excuse->user->department;
 
-        $managerIds = $department->managers()->pluck('users.id')->toArray();
+      
+        $employeeIds =   $authUser->getManagedEmployeeIds();
 
-        if (!in_array($authUser->id, $managerIds) && $excuse->user_id != $authUser->id) {
+        if (!in_array($excuse->user_id, $employeeIds->toArray())) {
             return $this->returnError('You are not authorized to update this excuse', 403);
         }
 
