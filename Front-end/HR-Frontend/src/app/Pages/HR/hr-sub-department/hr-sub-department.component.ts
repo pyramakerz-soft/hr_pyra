@@ -74,12 +74,11 @@ this.GetSubDepartment()
     });
   }
 
-
-  EditSubDepartment(id: number) {
-    this.AddButton=true;
-    this.router.navigateByUrl("/HR/HRSubDepartmentEdit/" + id);
-
+  EditSubDepartment( subDeptId: number) {
+    this.AddButton = true;
+    this.router.navigateByUrl(`/HR/HRSubDepartmentEdit/${this.DeptId}/${subDeptId}`);
   }
+  
 
   NavigateToAddSubDepartment() {
     this.AddButton=true;

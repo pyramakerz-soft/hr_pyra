@@ -22,7 +22,8 @@ export class HrSubDepartmentAddComponent {
   DeptName: string = ""
   mode: string = ""
   DeptId: number = 1;
-  
+  subDeptId: number = 1;
+
 
   DeptNameError: string = ""; 
   TeamLeadError: string = ""; 
@@ -37,13 +38,18 @@ export class HrSubDepartmentAddComponent {
   ngOnInit() {
 
     this.route.params.subscribe(params => {
-      if (params['id']) {
-        this.DeptId=params['id']
+      console.log(params);
+      
+      if (params['deptId'] && params['subDeptId']  ) {
+        console.log('/ssss');
+        
+        this.DeptId=params['deptId']
+        this.subDeptId=params['subDeptId']
 
 
         this.subDeptSer.setDeptId(this.DeptId);
 
-        this.GetByID(params['id']);
+        this.GetByID();
         this.mode = "Edit"
       }
       else {
@@ -64,9 +70,7 @@ export class HrSubDepartmentAddComponent {
       (d: any) => {
         // console.log(d);  // Add this log
         this.TeamLeadNames =d.teamLeadNames
-        console.log('/sdssds');
-        
-console.log(this.TeamLeadNames);
+   
 
       }
     );
@@ -156,9 +160,11 @@ console.log(this.TeamLeadNames);
   }
 
 
-GetByID(id: number){
-  this.subDeptSer.GetByID(id).subscribe(
+GetByID(){
+  this.subDeptSer.GetByID(this.subDeptId).subscribe(
     (d: any) => {
+      console.log('/////');
+      
       console.log(d);
       
       this.DeptName = d.data.name;
@@ -168,7 +174,7 @@ GetByID(id: number){
 }
 
 cancel(){
-  this.router.navigateByUrl("/HR/HRDepartment");
+  this.router.navigateByUrl("/HR/HRSubDepartment/" + this.DeptId);
 
 }
 
@@ -177,11 +183,11 @@ UpdateDepartment(){
   if (teamLead) {
     const teamLeadId = teamLead.team_lead_id;
 
-    this.subDeptSer.UpdateDept(this.DeptId, this.DeptName, teamLeadId ).subscribe(
+    this.subDeptSer.UpdateDept(this.subDeptId, this.DeptName, teamLeadId ).subscribe(
       (response: any) => {
         this.router.navigateByUrl("/HR/HRSubDepartment/" + this.DeptId);
 
-    
+
 
       },
       (error: any) => {
