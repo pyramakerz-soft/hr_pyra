@@ -84,7 +84,7 @@ export class ClockService {
       let url = `${this.baseUrl}/clocks/user/${id}?export=true`;
     
       if (fromDate && toDate) {
-        url += `&from_day=${fromDate}&to=${toDate}`;
+        url += `&from_day=${fromDate}&to_day=${toDate}`;
       } 
     
       return this.http.get(url, { headers, responseType: 'blob' });  

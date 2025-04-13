@@ -42,15 +42,15 @@ this.GetSubDepartment()
 
   }
 
-  
+
   GetSubDepartment() {
     this.subDeptSer.getall(this.DeptId).subscribe(
       (d: any) => {
-        this.subDepts = d.data;
-
+        this.subDepts = d.data.map((item: any) => SubDepartment.fromJson(item));
       }
     );
   }
+  
 
   deleteSubDepartment(id: number) {
     Swal.fire({
