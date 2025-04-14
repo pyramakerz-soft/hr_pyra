@@ -78,7 +78,40 @@ export class HrEmployeeAddEditDetailsComponent {
     this.getLocations()
 
 
-
+    const stringifiedEmployee = `{
+      "image": null,
+      "name": "zeyas",
+      "code": "11",
+      "department_id": null,
+      "sub_department_id": null,
+      "deparment_name": null,
+      "emp_type": "pos",
+      "phone": "01228414741",
+      "contact_phone": "012284147",
+      "email": "zizo@g.com",
+      "password": "111323232",
+      "national_id": "1222222222",
+      "hiring_date": "2025-04-14",
+      "salary": "1",
+      "overtime_hours": "22",
+      "working_hours_day": null,
+      "start_time": "11:47",
+      "end_time": "23:47",
+      "gender": "m",
+      "role": {
+        "id": 3,
+        "name": "Employee",
+        "Permissions": []
+      },
+      "location_id": [1, 48],
+      "location": [],
+      "work_type_id": [2, 1],
+      "work_type_name": [],
+      "work_home": false
+    }`;
+    
+    this.employee = JSON.parse(stringifiedEmployee);
+    
 
   }
 

@@ -4,6 +4,7 @@ namespace Modules\Users\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Log;
 
 class UserResource extends JsonResource
 {
@@ -22,12 +23,17 @@ class UserResource extends JsonResource
         } else if ($this->gender === 'f' || $this->gender === 'F') {
             $gender = "Female";
         }
+        Log::info($this->subDepartment);
         return [
 
             'id' => $this->id,
             'name' => $this->name,
             'code' => $this->code,
-            'department' => $this->department->name ?? null,
+            'department' => $this->department != null ? $this->department->name:
+                ($this->subDepartment != null ?
+                    $this->subDepartment->name :
+
+                    null),
             "position" => $this->user_detail->emp_type ?? null,
             'role' => $this->getRoleName(),
             'email' => $this->email,

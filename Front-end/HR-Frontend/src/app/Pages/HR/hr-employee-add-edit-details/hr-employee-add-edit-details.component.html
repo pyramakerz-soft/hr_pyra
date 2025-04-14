@@ -108,34 +108,31 @@ class="mb-4 text-xs md:text-sm"
   (change)="onDepartmentChange()"
   name="department"
 >
-  <option [ngValue]="null" disabled selected>Select Department</option>
+  <option [ngValue]="null">-- No Department Selected --</option>
   <option *ngFor="let dept of departments" [ngValue]="dept.id">
     {{ dept.name }}
   </option>
 </select>
+
 </div>
 
 <!-- Sub Department Dropdown -->
 <div 
 class="mb-4 text-xs md:text-sm" 
 *ngIf="(employee.role?.name === 'Employee' && subDepartments.length > 0)">
-<label class="font-semibold block mb-2 md:mb-3">
-  Sub Department
-  <span *ngIf="validationErrors['department_id']" class="text-red-500 ml-3 font-normal">
-    {{ validationErrors['department_id'] }}
-  </span>
-</label>
+
 <select 
   class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl overflow-y-auto"
   [(ngModel)]="selectedSubDepartment"
   (change)="onSubDepartmentChange()"
   name="subDepartment"
 >
-  <option [ngValue]="null" disabled selected>Select Sub Department</option>
-  <option *ngFor="let sub of subDepartments" [value]="sub.id">
+  <option [ngValue]="null">-- No Sub Department Selected --</option>
+  <option *ngFor="let sub of subDepartments" [ngValue]="sub.id">
     {{ sub.name }}
   </option>
 </select>
+
 </div>
 
                       
