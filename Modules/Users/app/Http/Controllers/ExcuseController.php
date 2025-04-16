@@ -228,7 +228,6 @@ class ExcuseController extends Controller
 
         $employeeIds = $manager->getManagedEmployeeIds();
 
-
         if ($employeeIds->isEmpty()) {
             return $this->returnError('No employees found under this manager', 404);
         }
