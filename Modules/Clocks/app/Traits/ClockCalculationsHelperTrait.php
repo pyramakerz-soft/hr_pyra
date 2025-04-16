@@ -62,7 +62,10 @@ trait ClockCalculationsHelperTrait
     }
     protected function isLocationTime($authUser)
     {
-        return $authUser->department->is_location_time ? true : false;
+        if (!$authUser || !$authUser->department) {
+            return false;
+        }
+        return (bool) $authUser->department->is_location_time;
     }
     protected function getUserClock($userId, $clockId)
     {
