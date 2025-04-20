@@ -38,29 +38,29 @@ trait AuthTrait
 
     protected function validateSerialNumber(Request $request, User $user)
     {
-        if ($request->serial_number) {
+        if ($request->new_serial_number) {
 
             // Check if the serial number doesn't contain "#" (indicating an outdated version)
-            if (strpos($request->serial_number, '#') === false) {
+            if (strpos($request->new_serial_number, '#') === false) {
                 throw new \Exception('Please update the app to the latest version to continue.', 406);
             }
 
-            if (is_null($user->serial_number)) {
+            if (is_null($user->new_serial_number)) {
                 $request->validate([
                     'serial_number' => [Rule::unique('users', 'serial_number')->ignore($user->id)],
                 ]);
-                $user->update(['serial_number' => $request->serial_number]);
+                $user->update(['serial_number' => $request->new_serial_number]);
             }
             // If user already has a serial number but it doesn't contain "#", update it
             elseif (strpos($user->serial_number, '#') === false) {
-                $user->update(['serial_number' => $request->serial_number]);
+                $user->update(['serial_number' => $request->new_serial_number]);
             }
             // If the user's serial number is different from the request serial number, throw an error
-            elseif ($user->serial_number !== $request->serial_number) {
+            elseif ($user->serial_number !== $request->new_serial_number) {
                 Log::info('SERIAL COMPRISON');
 
                 Log::info('user SERIAL '.$user->serial_number );
-                Log::info('REQUEST SERIAL '.$request->serial_number);
+                Log::info('REQUEST SERIAL '.$request->new_serial_number);
 
                 throw new \Exception('Serial number does not match', 406);
             }

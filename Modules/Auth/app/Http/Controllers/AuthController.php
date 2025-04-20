@@ -87,6 +87,9 @@ class AuthController extends Controller
                 return $this->returnError('Your current mobile is different from the original logged-in phone (' . $user->mob . ')(' . $request->mob . ')', 406);
             }
         }
+
+
+        
         // Handle serial number checking logic
         $this->validateSerialNumber($request, $user);
 
