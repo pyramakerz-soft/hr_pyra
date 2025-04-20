@@ -14,7 +14,8 @@ class RolesSeeder extends Seeder
      */
     public function run()
     {
-        $roles = ['Team leader', 'manager', 'employee', 'hr'];
+        $roles = ['Team leader', 'manager', 'employee', 'Hr','Admin'];
+        
 
         foreach ($roles as $roleName) {
             if (!Role::where('name', $roleName)->exists()) {

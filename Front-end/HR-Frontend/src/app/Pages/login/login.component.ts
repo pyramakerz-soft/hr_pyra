@@ -83,7 +83,7 @@ export class LoginComponent {
               // Navigate based on role
               if (this.accountService.r.role_name === "Employee") {
                 this.router.navigateByUrl("employee");
-              } else if (this.accountService.r.role_name === "Hr") {
+              } else if (this.accountService.r.role_name === "Hr"  ||  this.accountService.r.role_name === "Admin" ) {
                 this.router.navigateByUrl("HR");
               }
             }

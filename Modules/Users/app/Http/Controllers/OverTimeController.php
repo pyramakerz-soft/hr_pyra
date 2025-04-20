@@ -238,70 +238,155 @@ class OverTimeController extends Controller
         return $this->returnData('Overtime', $overtime, 'Overtime status updated successfully');
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/overtime/get_overtime_of_manager_employees",
-     *     tags={"Overtime"},
-     *     summary="Get overtimes of employees in the manager's department",
-     *     operationId="getOvertimeOfManagerEmployees",
-     *     @OA\Response(
-     *         response=200,
-     *         description="List of overtimes for employees in the manager's department",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="Overtimes", type="array", @OA\Items(type="object"))
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Unauthorized"
-     *     )
-     * )
+   /**
+ * @OA\Get(
+ *     path="/api/overtime/get_overtime_of_manager_employees",
+ *     tags={"Overtime"},
+ *     summary="Get overtimes of employees in the manager's department",
+ *     operationId="getOvertimeOfManagerEmployees",
+ *     security={{ "bearerAuth": {} }},
+ *     @OA\Parameter(
+ *         name="page",
+ *         in="query",
+ *         description="Page number for pagination",
+ *         required=false,
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\Parameter(
+ *         name="searchTerm",
+ *         in="query",
+ *         description="Filter by employee name (partial match allowed)",
+ *         required=false,
+ *         @OA\Schema(type="string", example="Sarah")
+ *     ),
+ *     @OA\Parameter(
+ *         name="status",
+ *         in="query",
+ *         description="Filter by status: pending, approved, rejected or 'all'. You can also pass multiple values (e.g. status[]=pending&status[]=approved)",
+ *         required=false,
+ *         @OA\Schema(
+ *             type="array",
+ *             @OA\Items(
+ *                 type="string",
+ *                 enum={"pending", "approved", "rejected", "all"},
+ *                 example="approved"
+ *             ),
+ *             collectionFormat="multi"
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="List of overtimes for employees in the manager's department",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", example="success"),
+ *             @OA\Property(property="OverTimes", type="object",
+ *                 @OA\Property(property="data", type="array",
+ *                     @OA\Items(type="object",
+ *                         @OA\Property(property="overTime", type="object",
+ *                             @OA\Property(property="id", type="integer", example=1),
+ *                             @OA\Property(property="user_id", type="integer", example=102),
+ *                             @OA\Property(property="from", type="string", format="datetime", example="2024-08-01 17:00:00"),
+ *                             @OA\Property(property="to", type="string", format="datetime", example="2024-08-01 20:00:00"),
+ *                             @OA\Property(property="reason", type="string", example="Project delivery")
+ *                         ),
+ *                         @OA\Property(property="user", type="object",
+ *                             @OA\Property(property="id", type="integer", example=102),
+ *                             @OA\Property(property="name", type="string", example="Sarah Connor"),
+ *                             @OA\Property(property="email", type="string", format="email", example="sarah.connor@example.com")
+ *                         )
+ *                     )
+ *                 ),
+ *                 @OA\Property(property="pagination", type="object",
+ *                     @OA\Property(property="total", type="integer", example=50),
+ *                     @OA\Property(property="per_page", type="integer", example=6),
+ *                     @OA\Property(property="current_page", type="integer", example=1),
+ *                     @OA\Property(property="last_page", type="integer", example=9),
+ *                     @OA\Property(property="next_page_url", type="string", nullable=true, example="http://yourapi.com/api/overtime/get_overtime_of_manager_employees?page=2"),
+ *                     @OA\Property(property="prev_page_url", type="string", nullable=true, example=null)
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Unauthorized"
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Manager not assigned to any department or no employees found"
+ *     )
+ * )
+ 
      */ public function getOvertimeOfManagerEmployees()
-    {
-        $manager = Auth::user();
-
-        $employeeIds = $manager->getManagedEmployeeIds();
-
-
-        if ($employeeIds->isEmpty()) {
-            return $this->returnError('No employees found under this manager', 404);
-        }
-
-        // Define the date range (26th of previous month to 26th of current month)
-        $currentDate = Carbon::now();
-        if ($currentDate->day > 26) {
-            $startDate = $currentDate->copy()->setDay(26);
-            $endDate = $currentDate->copy()->addMonth()->setDay(26);
-        } else {
-            $startDate = $currentDate->copy()->subMonth()->setDay(26);
-            $endDate = $currentDate->copy()->setDay(26);
-        }
-
-        // Fetch overtime records
-        $overTimes = Overtime::whereIn('user_id', $employeeIds)
-            ->whereBetween('from', [$startDate, $endDate])
-            ->whereNotNull('to')
-            ->with('user')
-            ->paginate(6, ['*'], 'page', request()->query('page', 1));
-
-        // Format response
-        $overTimeWithUserData = collect($overTimes->items())->map(function ($overTime) {
-            return [
-                'overTime' => $overTime,
-                'user' => $overTime->user,
-            ];
-        });
-
-        return $this->returnData('OverTimes', [
-            'data' => $overTimeWithUserData,
-            'pagination' => [
-                'total' => $overTimes->total(),
-                'per_page' => $overTimes->perPage(),
-                'current_page' => $overTimes->currentPage(),
-                'last_page' => $overTimes->lastPage(),
-                'next_page_url' => $overTimes->nextPageUrl(),
-                'prev_page_url' => $overTimes->previousPageUrl(),
-            ]
-        ], 'OverTimes for employees in the departments managed by the authenticated user');
-    }
+     {
+         $manager = Auth::user();
+     
+         $employeeIds = $manager->getManagedEmployeeIds();
+     
+         if ($employeeIds->isEmpty()) {
+             return $this->returnError('No employees found under this manager', 404);
+         }
+     
+         // Date range: 26th of previous month to 26th of current month
+         $currentDate = Carbon::now();
+         if ($currentDate->day > 26) {
+             $startDate = $currentDate->copy()->setDay(26);
+             $endDate = $currentDate->copy()->addMonth()->setDay(26);
+         } else {
+             $startDate = $currentDate->copy()->subMonth()->setDay(26);
+             $endDate = $currentDate->copy()->setDay(26);
+         }
+     
+         $searchTerm = request()->query('searchTerm');
+         $statusFilter = request()->query('status');
+     
+         // Build query
+         $query = Overtime::whereIn('user_id', $employeeIds)
+             ->whereBetween('from', [$startDate, $endDate])
+             ->whereNotNull('to')
+             ->with('user');
+     
+         // Filter by employee name
+         if (!empty($searchTerm)) {
+             $query->whereHas('user', function ($q) use ($searchTerm) {
+                 $q->where('name', 'LIKE', '%' . $searchTerm . '%');
+             });
+         }
+     
+         // Filter by status if not 'all' or null
+         if (!empty($statusFilter) && $statusFilter !== 'all') {
+             if (is_array($statusFilter)) {
+                 $query->whereIn('status', $statusFilter);
+             } else {
+                 $query->where('status', $statusFilter);
+             }
+         }
+     
+         // Sort by latest created
+         $query->orderBy('created_at', 'desc');
+     
+         // Paginate results
+         $overTimes = $query->paginate(6, ['*'], 'page', request()->query('page', 1));
+     
+         // Format response
+         $overTimeWithUserData = collect($overTimes->items())->map(function ($overTime) {
+             return [
+                 'overTime' => $overTime,
+                 'user' => $overTime->user,
+             ];
+         });
+     
+         return $this->returnData('OverTimes', [
+             'data' => $overTimeWithUserData,
+             'pagination' => [
+                 'total' => $overTimes->total(),
+                 'per_page' => $overTimes->perPage(),
+                 'current_page' => $overTimes->currentPage(),
+                 'last_page' => $overTimes->lastPage(),
+                 'next_page_url' => $overTimes->nextPageUrl(),
+                 'prev_page_url' => $overTimes->previousPageUrl(),
+             ]
+         ], 'OverTimes for employees in the departments managed by the authenticated user');
+     }
+     
 }

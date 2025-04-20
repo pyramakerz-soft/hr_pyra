@@ -2954,12 +2954,12 @@
                     }
                 ]
             },
-            "put": {
+            "post": {
                 "tags": [
                     "Sub-Department"
                 ],
                 "summary": "Update a sub-department",
-                "operationId": "8a49e6aabc37c31d80732bc139cb9ba4",
+                "operationId": "08f7990011f5764e60134369d0b43ebc",
                 "parameters": [
                     {
                         "name": "departmentId",
@@ -3675,6 +3675,36 @@
                             "type": "integer",
                             "example": 1
                         }
+                    },
+                    {
+                        "name": "searchTerm",
+                        "in": "query",
+                        "description": "Filter by employee name (partial match allowed)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "John"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status: pending, approved, rejected or 'all'. You can also pass multiple values (e.g. status[]=pending&status[]=approved)",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "pending",
+                                    "approved",
+                                    "rejected",
+                                    "all"
+                                ],
+                                "example": "pending"
+                            },
+                            "collectionFormat": "multi"
+                        }
                     }
                 ],
                 "responses": {
@@ -4007,6 +4037,48 @@
                 ],
                 "summary": "Get overtimes of employees in the manager's department",
                 "operationId": "getOvertimeOfManagerEmployees",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "searchTerm",
+                        "in": "query",
+                        "description": "Filter by employee name (partial match allowed)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Sarah"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status: pending, approved, rejected or 'all'. You can also pass multiple values (e.g. status[]=pending&status[]=approved)",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "pending",
+                                    "approved",
+                                    "rejected",
+                                    "all"
+                                ],
+                                "example": "approved"
+                            },
+                            "collectionFormat": "multi"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of overtimes for employees in the manager's department",
@@ -4014,11 +4086,98 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "Overtimes": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "OverTimes": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "overTime": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    },
+                                                                    "user_id": {
+                                                                        "type": "integer",
+                                                                        "example": 102
+                                                                    },
+                                                                    "from": {
+                                                                        "type": "string",
+                                                                        "format": "datetime",
+                                                                        "example": "2024-08-01 17:00:00"
+                                                                    },
+                                                                    "to": {
+                                                                        "type": "string",
+                                                                        "format": "datetime",
+                                                                        "example": "2024-08-01 20:00:00"
+                                                                    },
+                                                                    "reason": {
+                                                                        "type": "string",
+                                                                        "example": "Project delivery"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "user": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 102
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string",
+                                                                        "example": "Sarah Connor"
+                                                                    },
+                                                                    "email": {
+                                                                        "type": "string",
+                                                                        "format": "email",
+                                                                        "example": "sarah.connor@example.com"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "pagination": {
+                                                    "properties": {
+                                                        "total": {
+                                                            "type": "integer",
+                                                            "example": 50
+                                                        },
+                                                        "per_page": {
+                                                            "type": "integer",
+                                                            "example": 6
+                                                        },
+                                                        "current_page": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "last_page": {
+                                                            "type": "integer",
+                                                            "example": 9
+                                                        },
+                                                        "next_page_url": {
+                                                            "type": "string",
+                                                            "example": "http://yourapi.com/api/overtime/get_overtime_of_manager_employees?page=2",
+                                                            "nullable": true
+                                                        },
+                                                        "prev_page_url": {
+                                                            "type": "string",
+                                                            "example": null,
+                                                            "nullable": true
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -4028,8 +4187,16 @@
                     },
                     "403": {
                         "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Manager not assigned to any department or no employees found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/roles": {
@@ -4366,6 +4533,48 @@
                 ],
                 "summary": "Get vacations of employees in the manager's department",
                 "operationId": "getVacationsOfManagerEmployees",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "searchTerm",
+                        "in": "query",
+                        "description": "Filter by employee name (partial match allowed)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Ali"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status: pending, approved, rejected or 'all'. You can also pass multiple values (e.g. status[]=pending&status[]=approved)",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "pending",
+                                    "approved",
+                                    "rejected",
+                                    "all"
+                                ],
+                                "example": "approved"
+                            },
+                            "collectionFormat": "multi"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of vacations for employees in the manager's department",
@@ -4373,11 +4582,96 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
                                         "Vacations": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "vacation": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    },
+                                                                    "user_id": {
+                                                                        "type": "integer",
+                                                                        "example": 103
+                                                                    },
+                                                                    "from_date": {
+                                                                        "type": "string",
+                                                                        "format": "date",
+                                                                        "example": "2024-08-10"
+                                                                    },
+                                                                    "to_date": {
+                                                                        "type": "string",
+                                                                        "format": "date",
+                                                                        "example": "2024-08-20"
+                                                                    },
+                                                                    "reason": {
+                                                                        "type": "string",
+                                                                        "example": "Annual leave"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "user": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 103
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string",
+                                                                        "example": "Ali Hassan"
+                                                                    },
+                                                                    "email": {
+                                                                        "type": "string",
+                                                                        "format": "email",
+                                                                        "example": "ali.hassan@example.com"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "pagination": {
+                                                    "properties": {
+                                                        "total": {
+                                                            "type": "integer",
+                                                            "example": 25
+                                                        },
+                                                        "per_page": {
+                                                            "type": "integer",
+                                                            "example": 6
+                                                        },
+                                                        "current_page": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "last_page": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "next_page_url": {
+                                                            "type": "string",
+                                                            "example": "http://yourapi.com/api/vacation/get_vacations_of_manager_employees?page=2"
+                                                        },
+                                                        "prev_page_url": {
+                                                            "type": "string",
+                                                            "example": null
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -4387,8 +4681,16 @@
                     },
                     "403": {
                         "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Manager not assigned to any department or no employees found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/users/getAllUsers": {
@@ -4655,7 +4957,7 @@
                                         "type": "string",
                                         "format": "binary"
                                     },
-                                    "roles": {
+                                    "role": {
                                         "description": "Roles to assign",
                                         "type": "array",
                                         "items": {

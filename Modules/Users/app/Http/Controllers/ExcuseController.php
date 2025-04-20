@@ -164,75 +164,95 @@ class ExcuseController extends Controller
         return $this->returnData('Excuse', $excuse, 'Excuse status updated successfully');
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/excuse/get_excuses_of_manager_employees",
-     *     tags={"Excuses"},
-     *     summary="Get excuses of employees in the manager's department",
-     *     operationId="getExcusesOfManagerEmployees",
-     *     security={{ "bearerAuth": {} }},
-     *     @OA\Parameter(
-     *         name="page",
-     *         in="query",
-     *         description="Page number for pagination",
-     *         required=false,
-     *         @OA\Schema(type="integer", example=1)
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="List of excuses for employees in the manager's department",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="status", type="string", example="success"),
-     *             @OA\Property(property="Excuses", type="object",
-     *                 @OA\Property(property="data", type="array",
-     *                     @OA\Items(type="object",
-     *                         @OA\Property(property="excuse", type="object",
-     *                             @OA\Property(property="id", type="integer", example=1),
-     *                             @OA\Property(property="user_id", type="integer", example=101),
-     *                             @OA\Property(property="date", type="string", format="date", example="2024-08-01"),
-     *                             @OA\Property(property="reason", type="string", example="Medical leave")
-     *                         ),
-     *                         @OA\Property(property="user", type="object",
-     *                             @OA\Property(property="id", type="integer", example=101),
-     *                             @OA\Property(property="name", type="string", example="John Doe"),
-     *                             @OA\Property(property="email", type="string", format="email", example="john.doe@example.com")
-     *                         )
-     *                     )
-     *                 ),
-     *                 @OA\Property(property="pagination", type="object",
-     *                     @OA\Property(property="total", type="integer", example=50),
-     *                     @OA\Property(property="per_page", type="integer", example=6),
-     *                     @OA\Property(property="current_page", type="integer", example=1),
-     *                     @OA\Property(property="last_page", type="integer", example=9),
-     *                     @OA\Property(property="next_page_url", type="string", nullable=true, example="http://yourapi.com/api/excuse/get_excuses_of_manager_employees?page=2"),
-     *                     @OA\Property(property="prev_page_url", type="string", nullable=true, example=null)
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Unauthorized"
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Manager not assigned to any department or no employees found"
-     *     )
-     * )
-     */
+/**
+ * @OA\Get(
+ *     path="/api/excuse/get_excuses_of_manager_employees",
+ *     tags={"Excuses"},
+ *     summary="Get excuses of employees in the manager's department",
+ *     operationId="getExcusesOfManagerEmployees",
+ *     security={{ "bearerAuth": {} }},
+ *     @OA\Parameter(
+ *         name="page",
+ *         in="query",
+ *         description="Page number for pagination",
+ *         required=false,
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\Parameter(
+ *         name="searchTerm",
+ *         in="query",
+ *         description="Filter by employee name (partial match allowed)",
+ *         required=false,
+ *         @OA\Schema(type="string", example="John")
+ *     ),
+ *     @OA\Parameter(
+ *         name="status",
+ *         in="query",
+ *         description="Filter by status: pending, approved, rejected or 'all'. You can also pass multiple values (e.g. status[]=pending&status[]=approved)",
+ *         required=false,
+ *         @OA\Schema(
+ *             type="array",
+ *             @OA\Items(
+ *                 type="string",
+ *                 enum={"pending", "approved", "rejected", "all"},
+ *                 example="pending"
+ *             ),
+ *             collectionFormat="multi"
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="List of excuses for employees in the manager's department",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", example="success"),
+ *             @OA\Property(property="Excuses", type="object",
+ *                 @OA\Property(property="data", type="array",
+ *                     @OA\Items(type="object",
+ *                         @OA\Property(property="excuse", type="object",
+ *                             @OA\Property(property="id", type="integer", example=1),
+ *                             @OA\Property(property="user_id", type="integer", example=101),
+ *                             @OA\Property(property="date", type="string", format="date", example="2024-08-01"),
+ *                             @OA\Property(property="reason", type="string", example="Medical leave")
+ *                         ),
+ *                         @OA\Property(property="user", type="object",
+ *                             @OA\Property(property="id", type="integer", example=101),
+ *                             @OA\Property(property="name", type="string", example="John Doe"),
+ *                             @OA\Property(property="email", type="string", format="email", example="john.doe@example.com")
+ *                         )
+ *                     )
+ *                 ),
+ *                 @OA\Property(property="pagination", type="object",
+ *                     @OA\Property(property="total", type="integer", example=50),
+ *                     @OA\Property(property="per_page", type="integer", example=6),
+ *                     @OA\Property(property="current_page", type="integer", example=1),
+ *                     @OA\Property(property="last_page", type="integer", example=9),
+ *                     @OA\Property(property="next_page_url", type="string", nullable=true, example="http://yourapi.com/api/excuse/get_excuses_of_manager_employees?page=2"),
+ *                     @OA\Property(property="prev_page_url", type="string", nullable=true, example=null)
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Unauthorized"
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Manager not assigned to any department or no employees found"
+ *     )
+ * )
+ */
     public function getExcusesOfManagerEmployees()
     {
         $manager = Auth::user();
-
-
-
+    
         $employeeIds = $manager->getManagedEmployeeIds();
-
+    
         if ($employeeIds->isEmpty()) {
             return $this->returnError('No employees found under this manager', 404);
         }
-
-        // Define the date range (26th of previous month to 26th of current month)
+    
+        // Date range: 26th of previous month to 26th of current month
         $currentDate = Carbon::now();
         if ($currentDate->day > 26) {
             $startDate = $currentDate->copy()->setDay(26);
@@ -241,20 +261,45 @@ class ExcuseController extends Controller
             $startDate = $currentDate->copy()->subMonth()->setDay(26);
             $endDate = $currentDate->copy()->setDay(26);
         }
-
-        // Fetch excuses with pagination
-        $excuses = Excuse::whereIn('user_id', $employeeIds)
+    
+        $searchTerm = request()->query('searchTerm');
+        $statusFilter = request()->query('status');
+    
+        // Build the base query
+        $query = Excuse::whereIn('user_id', $employeeIds)
             ->whereBetween('date', [$startDate, $endDate])
-            ->with('user') // Eager load user data to avoid N+1 problem
-            ->paginate(6, ['*'], 'page', request()->query('page', 1));
-
-        // Convert to collection before mapping
+            ->with('user');
+    
+        // Apply search term filter if provided
+        if (!empty($searchTerm)) {
+            $query->whereHas('user', function ($q) use ($searchTerm) {
+                $q->where('name', 'LIKE', '%' . $searchTerm . '%');
+            });
+        }
+    
+        // Apply status filter if provided and not "all"
+        if (!empty($statusFilter) && $statusFilter !== 'all') {
+            // You can also support multiple status values if needed:
+            if (is_array($statusFilter)) {
+                $query->whereIn('status', $statusFilter);
+            } else {
+                $query->where('status', $statusFilter);
+            }
+        }
+    
+        // Order by latest created_at
+        $query->orderBy('created_at', 'desc');
+    
+        // Paginate the results
+        $excuses = $query->paginate(6, ['*'], 'page', request()->query('page', 1));
+    
+        // Format response
         $excusesWithUserData = collect($excuses->items())->map(function ($excuse) {
             return [
                 'excuse' => $excuse,
             ];
         });
-
+    
         return $this->returnData('Excuses', [
             'data' => $excusesWithUserData,
             'pagination' => [
@@ -267,4 +312,5 @@ class ExcuseController extends Controller
             ]
         ], 'Excuses for employees in the departments managed by the authenticated user');
     }
+    
 }

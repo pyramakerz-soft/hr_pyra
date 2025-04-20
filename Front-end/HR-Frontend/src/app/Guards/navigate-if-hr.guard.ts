@@ -6,7 +6,7 @@ export const navigateIfHrGuard: CanActivateFn = (route, state) => {
   let role = localStorage.getItem("role")
   const router = inject(Router); 
 
-  if(token != null && role !== "Hr"){
+  if(token != null && role !== "Hr" && role !== "Admin"){
     router.navigateByUrl('employee');
     return false;
   }

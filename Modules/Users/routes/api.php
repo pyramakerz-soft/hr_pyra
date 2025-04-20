@@ -29,7 +29,7 @@ Route::group(['prefix' => 'excuse'], function () {
     Route::post('/add_user_excuse', [ExcuseController::class, 'addUserExcuse'])->name('add_user_excuse'); //HR role
     Route::get('/show_user_excuses', [ExcuseController::class, 'showUserExcuses']);
 
-    Route::group(['middleware' => 'role:Manager|Team leader|Hr'], function () {
+    Route::group(['middleware' => 'role:Manager|Team leader|Hr|Admin'], function () {
 
         Route::post('/change_excuse_status/{excuse}', [ExcuseController::class, 'changeExcuseStatus']);
         Route::get('/get_excuses_of_manager_employees', [ExcuseController::class, 'getExcusesOfManagerEmployees']);
@@ -42,7 +42,7 @@ Route::group(['prefix' => 'overtime'], function () {
     Route::post('/end_user_overtime', [OverTimeController::class, 'addEndUserOvertime'])->name('end_user_overtime');
     Route::get('/show_user_overtime', [OverTimeController::class, 'showUserOvertime']);
 
-    Route::group(['middleware' => 'role:Manager|Team leader|Hr'], function () {
+    Route::group(['middleware' => 'role:Manager|Team leader|Hr|Admin'], function () {
 
         // Route to change overtime status
         Route::post('/change_overtime_status/{overtime}', [OverTimeController::class, 'changeOvertimeStatus']);
@@ -56,7 +56,7 @@ Route::group(['prefix' => 'vacation'], function () {
     Route::post('/add_user_vacation', [UserVacationController::class, 'addUserVacation'])->name('add_user_vacation');
     Route::get('/show_user_vacations', [UserVacationController::class, 'showUserVacations']);
 
-    Route::group(['middleware' => 'role:Manager|Team leader|Hr'], function () {
+    Route::group(['middleware' => 'role:Manager|Team leader|Hr|Admin'], function () {
 
         Route::post('/change_vacation_status/{vacation}', [UserVacationController::class, 'changeVacationStatus']);
         Route::get('/get_vacations_of_manager_employees', [UserVacationController::class, 'getVacationsOfManagerEmployees']);
@@ -65,7 +65,7 @@ Route::group(['prefix' => 'vacation'], function () {
 
 
 
-Route::group(['middleware' => 'role:Hr'], function () {
+Route::group(['middleware' => 'role:Hr|Admin'], function () {
 
     Route::group(['prefix' => 'users'], function () {
 

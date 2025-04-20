@@ -10,7 +10,7 @@ class AuthorizationService
     use ResponseTrait;
     public function authorizeHrUser($user)
     {
-        if (!$user->hasRole('Hr')) {
+        if (!$user->hasRole('Hr') ||! $user->hasRole('Admin') ) {
             throw new AuthorizationException('You are not authorized to view user clocks.');
         }
     }

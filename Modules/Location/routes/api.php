@@ -14,7 +14,7 @@ use Modules\Location\Http\Controllers\LocationController;
  *
 */
 
-Route::group(['middleware' => ['auth:api', 'role:Hr']], function () {
+Route::group(['middleware' => ['auth:api', 'role:Hr|Admin']], function () {
 
     //Location Management
     Route::post('/locations/{location}', [LocationController::class, 'update'])->name('locations.update'); //HR role
