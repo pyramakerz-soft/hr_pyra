@@ -91,6 +91,24 @@ export class ClockService {
     
  }
 
+ 
+ ExportAbsentUserData( fromDate?: string, toDate?: string){
+
+
+  const token = localStorage.getItem("token");
+  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+  // Build the URL with the optional "fromDate" and "toDate" parameters
+  let url = `${this.baseUrl}/getAbsentUser/?export=true`;
+
+  if (fromDate && toDate) {
+    url += `&from_day=${fromDate}&to_day=${toDate}`;
+  } 
+
+  return this.http.get(url, { headers, responseType: 'blob' });  
+
+}
+
 ExportAllUserDataById(fromDay: string, toDay: string, departmentId: string): Observable<Blob> {
   const token = localStorage.getItem("token");
   const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);

@@ -164,6 +164,29 @@ ExportData(){
 }
 
 
+ExportAbsentUserData(){
+  
+  this.isLoading=true;
+  this.clockService.ExportAbsentUserData( this.from_day, this.to_day).subscribe(
+    (result: Blob) => {
+      const url = window.URL.createObjectURL(result);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `absent_users.xlsx`; // Use the userName for the file name
+      a.click();
+      window.URL.revokeObjectURL(url);
+    },
+
+    (error) => {
+      this.isLoading=false;
+
+      console.error('Error exporting user data:', error);
+    }
+  );
+      this.isLoading=false;
+
+}
+
 
   
 

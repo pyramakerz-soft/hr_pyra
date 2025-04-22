@@ -37,7 +37,8 @@ Route::group(['middleware' => ['auth:api', 'role:Hr']], function () {
     Route::get('/users_clocks_Ins', [ClockController::class, 'getUsersClockInStatus']);
 
     Route::get('/users_clocks_Outs', [ClockController::class, 'getUsersClockOutStatus']);
-    
+    Route::get('/getAbsentUser', [ClockController::class, 'getAbsentUser'])->name('clocks.getAbsentUser'); //HR role
+
 
 
 });

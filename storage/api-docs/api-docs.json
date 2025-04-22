@@ -686,6 +686,96 @@
                 ]
             }
         },
+        "/api/getAbsentUser": {
+            "get": {
+                "tags": [
+                    "Clock"
+                ],
+                "summary": "Get Users Without Clock-In Records",
+                "description": "Export an Excel file listing users who did not clock in during a given date range. If no dates are provided, today's date is used.",
+                "operationId": "getAbsentUser",
+                "parameters": [
+                    {
+                        "name": "from_day",
+                        "in": "query",
+                        "description": "Start date (YYYY-MM-DD). Defaults to today's date if not provided.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-04-01"
+                        }
+                    },
+                    {
+                        "name": "to_day",
+                        "in": "query",
+                        "description": "End date (YYYY-MM-DD). Defaults to today's date if not provided.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-04-20"
+                        }
+                    },
+                    {
+                        "name": "export",
+                        "in": "query",
+                        "description": "Flag to export the clock records instead of displaying paginated data",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Excel file download",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Absent users exported successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An error occurred while exporting absent users."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/clocks/user/{user}": {
             "get": {
                 "tags": [
@@ -810,31 +900,12 @@
                 "operationId": "showUserClocks",
                 "parameters": [
                     {
-                        "name": "date",
-                        "in": "query",
-                        "description": "Optional filters to apply to the clock records (e.g., date range, location)",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
                         "name": "export",
                         "in": "query",
-                        "description": "Optional export format (e.g., CSV, PDF)",
+                        "description": "Flag to export the clock records instead of displaying paginated data",
                         "required": false,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "The page number for pagination",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
+                            "type": "boolean"
                         }
                     }
                 ],

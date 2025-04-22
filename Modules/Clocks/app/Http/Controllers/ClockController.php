@@ -11,6 +11,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Modules\Clocks\Exports\AbsentUsersExport;
 use Modules\Clocks\Http\Requests\Api\AddClockRequest;
 use Modules\Clocks\Http\Requests\Api\ClockInRequest;
 use Modules\Clocks\Http\Requests\Api\ClockOutRequest;
@@ -319,6 +320,96 @@ class ClockController extends Controller
 
         return $this->returnData("data", $data, "All Clocks Data");
     }
+
+
+/**
+ * @OA\Get(
+ *     path="/api/getAbsentUser",
+ *     tags={"Clock"},
+ *     summary="Get Users Without Clock-In Records",
+ *     description="Export an Excel file listing users who did not clock in during a given date range. If no dates are provided, today's date is used.",
+ *     operationId="getAbsentUser",
+ *     @OA\Parameter(
+ *         name="from_day",
+ *         in="query",
+ *         description="Start date (YYYY-MM-DD). Defaults to today's date if not provided.",
+ *         required=false,
+ *         @OA\Schema(
+ *             type="string",
+ *             format="date",
+ *             example="2025-04-01"
+ *         )
+ *     ),
+ *     @OA\Parameter(
+ *         name="to_day",
+ *         in="query",
+ *         description="End date (YYYY-MM-DD). Defaults to today's date if not provided.",
+ *         required=false,
+ *         @OA\Schema(
+ *             type="string",
+ *             format="date",
+ *             example="2025-04-20"
+ *         )
+ *     ),
+    *     @OA\Parameter(
+     *         name="export",
+     *         in="query",
+     *         required=false,
+     *         description="Flag to export the clock records instead of displaying paginated data",
+     *         @OA\Schema(
+     *             type="boolean",
+     *         )
+     *     ),
+ * 
+ *     @OA\Response(
+ *         response=200,
+ *         description="Excel file download",
+ *         @OA\JsonContent(
+ *             @OA\Property(
+ *                 property="status",
+ *                 type="string",
+ *                 example="success"
+ *             ),
+ *             @OA\Property(
+ *                 property="message",
+ *                 type="string",
+ *                 example="Absent users exported successfully."
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Internal Server Error",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="string", example="error"),
+ *             @OA\Property(property="message", type="string", example="An error occurred while exporting absent users.")
+ *         )
+ *     ),
+ *     security={{ "bearerAuth": {} }}
+ * )
+ */
+
+
+     public function getAbsentUser(Request $request)
+     {
+ 
+         //  return $this->returnData("data", $query->get(), "All Clocks Data");
+         if ($request->has('export')) {
+
+         $fromDay = $request->get('from_day');
+         $toDay = $request->get('to_day');
+         
+         return (new AbsentUsersExport(
+            $fromDay,
+            $toDay
+
+        ))
+            ->download('Absent_User.xlsx');
+        }
+
+     }
+
+
     /**
      * @OA\Get(
      *     path="/api/clocks/user/{user}",
@@ -455,26 +546,13 @@ class ClockController extends Controller
      *     security={{"bearerAuth":{}}},
      *
      *     @OA\Parameter(
-     *         name="date",
-     *         in="query",
-     *         required=false,
-     *         description="Optional filters to apply to the clock records (e.g., date range, location)",
-     *         @OA\Schema(type="string")
-     *     ),
-     * 
-     *     @OA\Parameter(
      *         name="export",
      *         in="query",
      *         required=false,
-     *         description="Optional export format (e.g., CSV, PDF)",
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="page",
-     *         in="query",
-     *         required=false,
-     *         description="The page number for pagination",
-     *         @OA\Schema(type="integer", example=1)
+     *         description="Flag to export the clock records instead of displaying paginated data",
+     *         @OA\Schema(
+     *             type="boolean",
+     *         )
      *     ),
      *     @OA\Response(
      *         response=200,

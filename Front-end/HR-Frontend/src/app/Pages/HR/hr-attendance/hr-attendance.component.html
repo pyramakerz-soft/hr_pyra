@@ -6,23 +6,39 @@
     
     <div class="flex justify-end">
 <div class="flex items-center gap-4">
-  <div
-    class="w-full max-w-xs rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
-    <input type="date" id="from_day" [(ngModel)]="from_day"
-      class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
+  <div class="w-full max-w-xs mt-4">
+    <label for="from_day" class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+    <div
+      class="rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
+      <input type="date" id="from_day" [(ngModel)]="from_day"
+        class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
+    </div>
   </div>
-
-  <div
-    class="w-full max-w-xs rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
-    <input type="date" id="to_day" [(ngModel)]="to_day"
-      class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
+  
+  <div class="w-full max-w-xs mt-4">
+    <label for="to_day" class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+    <div
+      class="rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
+      <input type="date" id="to_day" [(ngModel)]="to_day"
+        class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
+    </div>
   </div>
+  
 
   <button (click)="ExportData()" [disabled]="isLoading"
     class="export-button bg-[#4F46E5] text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center">
     <div *ngIf="isLoading" class="spinner"></div>
     <span *ngIf="!isLoading">Export</span>
   </button>
+
+
+
+  <button (click)="ExportAbsentUserData()" [disabled]="isLoading"
+  class="export-button bg-[#4F46E5] text-white font-medium rounded-lg flex items-center justify-center w-auto px-4 py-2">
+  <div *ngIf="isLoading" class="spinner mr-2"></div>
+  <span *ngIf="!isLoading">Export Absent Users</span>
+</button>
+
 </div>
 
     </div>
