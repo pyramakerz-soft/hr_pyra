@@ -253,21 +253,20 @@ class ExcuseController extends Controller
         }
     
         // Date range: 26th of previous month to 26th of current month
-        $currentDate = Carbon::now();
-        if ($currentDate->day > 26) {
-            $startDate = $currentDate->copy()->setDay(26);
-            $endDate = $currentDate->copy()->addMonth()->setDay(26);
-        } else {
-            $startDate = $currentDate->copy()->subMonth()->setDay(26);
-            $endDate = $currentDate->copy()->setDay(26);
-        }
-    
+            // $currentDate = Carbon::now();
+            // if ($currentDate->day > 26) {
+            //     $startDate = $currentDate->copy()->setDay(26);
+            //     $endDate = $currentDate->copy()->addMonth()->setDay(26);
+            // } else {
+            //     $startDate = $currentDate->copy()->subMonth()->setDay(26);
+            //     $endDate = $currentDate->copy()->setDay(26);
+            // }
+        
         $searchTerm = request()->query('searchTerm');
         $statusFilter = request()->query('status');
     
         // Build the base query
         $query = Excuse::whereIn('user_id', $employeeIds)
-            ->whereBetween('date', [$startDate, $endDate])
             ->with('user');
     
         // Apply search term filter if provided

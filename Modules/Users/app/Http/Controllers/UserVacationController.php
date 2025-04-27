@@ -252,22 +252,21 @@ class UserVacationController extends Controller
             return $this->returnError('No employees found under this manager', 404);
         }
     
-        // Define the date range (26th of previous month to 26th of current month)
-        $currentDate = Carbon::now();
-        if ($currentDate->day > 26) {
-            $startDate = $currentDate->copy()->setDay(26);
-            $endDate = $currentDate->copy()->addMonth()->setDay(26);
-        } else {
-            $startDate = $currentDate->copy()->subMonth()->setDay(26);
-            $endDate = $currentDate->copy()->setDay(26);
-        }
+        // // Define the date range (26th of previous month to 26th of current month)
+        // $currentDate = Carbon::now();
+        // if ($currentDate->day > 26) {
+        //     $startDate = $currentDate->copy()->setDay(26);
+        //     $endDate = $currentDate->copy()->addMonth()->setDay(26);
+        // } else {
+        //     $startDate = $currentDate->copy()->subMonth()->setDay(26);
+        //     $endDate = $currentDate->copy()->setDay(26);
+        // }
     
         $searchTerm = request()->query('searchTerm');
         $statusFilter = request()->query('status');
     
         // Build the query
         $query = UserVacation::whereIn('user_id', $employeeIds)
-            ->whereBetween('from_date', [$startDate, $endDate])
             ->with('user');
     
         // Filter by employee name
