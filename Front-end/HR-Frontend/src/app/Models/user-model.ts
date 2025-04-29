@@ -9,6 +9,7 @@ export class UserModel {
         public role : string ,
         public position : string ,
         public code : string ,
+        public clock_in_time? : string ,
 
         public selected?: boolean // Optional selected property
 

@@ -2,6 +2,7 @@
 
 namespace Modules\Users\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Log;
@@ -18,11 +19,25 @@ class UserResource extends JsonResource
     public function toArray(Request $request): array
     {
 
-        if ($this->gender === 'm' || $this->gender === 'M') {
-            $gender = "Male";
-        } else if ($this->gender === 'f' || $this->gender === 'F') {
-            $gender = "Female";
-        }
+
+        $today = Carbon::now()->format('Y-m-d'); // Only date, no time
+        Log::info($today);  
+        // Get the first ClockInOut record where clock_in is not null and date is today
+        $clockInRecord = $this->user_clocks()
+        ->whereDate('clock_in', $today)
+        ->whereNotNull('clock_in')
+        ->orderBy('clock_in', 'desc')
+        ->first(); // ✅ correct
+        Log::info($clockInRecord);
+        // Log::info('All Clock Records Today:', $this->user_clocks()->whereDate('clock_in', $today)->get());
+
+        // Format clock-in time or return empty string
+
+        $clockInTime = $clockInRecord && $clockInRecord->clock_in
+        ? Carbon::parse($clockInRecord->clock_in)->format('h:i A')
+        : '--:--';
+
+      
         Log::info($this->subDepartment);
         return [
 
@@ -38,7 +53,9 @@ class UserResource extends JsonResource
             'role' => $this->getRoleName(),
             'email' => $this->email,
             'phone' => $this->phone,
-            'working_hours' => $this->user_detail->working_hours_day ?? null,
+            'working_hours' => $this->user_detail->working_hours_day ?? null,    
+                'clock_in_time' => $clockInTime, // ✅ Today's clock-in time or empty
+
         ];
     }
 }

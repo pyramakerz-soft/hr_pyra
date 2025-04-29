@@ -55,6 +55,12 @@ export class HrEmployeeAttendanceDetailsComponent {
   ];
   years: number[] = [];
 
+
+
+  from_day: string = '';
+  to_day: string = '';  
+
+
   constructor(public empDashserv: EmployeeDashService, public UserClocksService:
     ClockService, public activatedRoute: ActivatedRoute, public userService: UserServiceService,
     public route: Router, public dialog: MatDialog) { }
@@ -258,12 +264,13 @@ export class HrEmployeeAttendanceDetailsComponent {
   }
 
   ExportData() {
-    this.UserClocksService.ExportUserDataById(this.UserID, this.DateString).subscribe(
+    this.UserClocksService.ExportUserDataById(this.UserID, this.from_day, this.to_day).subscribe(
       (result: Blob) => {
         const url = window.URL.createObjectURL(result);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${this.employee.name}_ClockIn.xlsx`;
+        a.download = `${this.employee.name}_ClockIn_${this.from_day}_to_${this.to_day}.xlsx`; // Use the userName for the file name
+
         a.click();
         window.URL.revokeObjectURL(url);
       },
