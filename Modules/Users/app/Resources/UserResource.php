@@ -18,6 +18,7 @@ class UserResource extends JsonResource
 
     public function toArray(Request $request): array
     {
+        $timezoneValue = $this->timezone ? $this->timezone->value : 3;  // Default to +3 if no timezone
 
 
         $today = Carbon::now()->format('Y-m-d'); // Only date, no time
@@ -55,6 +56,7 @@ class UserResource extends JsonResource
             'phone' => $this->phone,
             'working_hours' => $this->user_detail->working_hours_day ?? null,    
                 'clock_in_time' => $clockInTime, // ✅ Today's clock-in time or empty
+                'userTimeZone' => $timezoneValue,  // The timezone value (e.g., +3 or -3)
 
         ];
     }

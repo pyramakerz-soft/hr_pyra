@@ -24,6 +24,8 @@ import { UserDataService } from './Services/Resolvers/user-data.service';
 import { HrIssuesComponent } from './Pages/HR/hr-issues/hr-issues.component';
 import { HrSubDepartmentComponent } from './Pages/HR/hr-sub-department/hr-sub-department.component';
 import { HrSubDepartmentAddComponent } from './Pages/HR/hr-sub-department-add/hr-sub-department-add.component';
+import { ShowTimezonesComponent } from './Pages/HR/timezone/show_timzones.component';
+import { TimezoneAddEditComponent } from './Pages/HR/timezone/add_edit_timzones.component';
 
 export const routes: Routes = [
     { 
@@ -72,6 +74,10 @@ export const routes: Routes = [
 
             { path: "HRIssues", component: HrIssuesComponent, title: "HRIssues" },
             
+            { path: "ShowTimezones", component: ShowTimezonesComponent, title: "ShowTimezones" },
+            { path: "ShowTimezonesAdd", component: TimezoneAddEditComponent, title: "ShowTimezonesAdd" },
+            { path: "ShowTimezonesEdit/:id", component: TimezoneAddEditComponent, title: "ShowTimezonesEdit" },
+
 
         ]
     },

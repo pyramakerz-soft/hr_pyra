@@ -4430,6 +4430,285 @@
                 }
             }
         },
+        "/api/timezones": {
+            "get": {
+                "tags": [
+                    "Timezones"
+                ],
+                "summary": "Get all timezones",
+                "description": "Returns a list of all timezones.",
+                "operationId": "f0074e2424da99c9ba81bfb9effe4912",
+                "responses": {
+                    "200": {
+                        "description": "A list of timezones.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "required": [
+                                            "id",
+                                            "name",
+                                            "value"
+                                        ],
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Egypt"
+                                            },
+                                            "value": {
+                                                "type": "integer",
+                                                "example": 3
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Timezones"
+                ],
+                "summary": "Create a new timezone",
+                "description": "Creates a new timezone and stores it in the database.",
+                "operationId": "bda324504d6bea9f1e8158ff78c6a48f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "value"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Egypt"
+                                    },
+                                    "value": {
+                                        "type": "integer",
+                                        "example": 3
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Timezone created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "id",
+                                        "name",
+                                        "value"
+                                    ],
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Egypt"
+                                        },
+                                        "value": {
+                                            "type": "integer",
+                                            "example": 3
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    }
+                }
+            }
+        },
+        "/api/timezones/{id}": {
+            "get": {
+                "tags": [
+                    "Timezones"
+                ],
+                "summary": "Get a specific timezone by ID",
+                "description": "Returns a specific timezone based on the ID provided.",
+                "operationId": "aadbe5f5b24fe3db3a40fd60825d2fc1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Timezone ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A timezone object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "clock": {
+                                            "$ref": "#/components/schemas/ClockInOut"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Clock Data"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Timezone not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Timezones"
+                ],
+                "summary": "Update an existing timezone",
+                "description": "Updates an existing timezone's name and value.",
+                "operationId": "d7c6dfaa19531fdd7e92d59422e1d90e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Timezone ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "value"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Saudi Arabia"
+                                    },
+                                    "value": {
+                                        "type": "integer",
+                                        "example": 3
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Timezone updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "id",
+                                        "name",
+                                        "value"
+                                    ],
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Egypt"
+                                        },
+                                        "value": {
+                                            "type": "integer",
+                                            "example": 3
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Timezone not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Timezones"
+                ],
+                "summary": "Delete a timezone",
+                "description": "Deletes a specific timezone by ID.",
+                "operationId": "7f2af59674d084f4d400fb4e3b02871c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Timezone ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Timezone deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Timezone deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Timezone not found"
+                    }
+                }
+            }
+        },
         "/api/vacation/add_user_vacation": {
             "post": {
                 "tags": [
@@ -6879,6 +7158,10 @@
         {
             "name": "Roles",
             "description": "Roles"
+        },
+        {
+            "name": "Timezones",
+            "description": "Timezones"
         },
         {
             "name": "User",

@@ -6,6 +6,7 @@ use Modules\Users\Http\Controllers\ExcuseController;
 use Modules\Users\Http\Controllers\OverTimeController;
 use Modules\Users\Http\Controllers\PermissionController;
 use Modules\Users\Http\Controllers\RoleController;
+use Modules\Users\Http\Controllers\TimezoneController;
 use Modules\Users\Http\Controllers\UsersController;
 use Modules\Users\Http\Controllers\UserVacationController;
 use Modules\Users\Http\Controllers\WorkTypeController;
@@ -66,6 +67,15 @@ Route::group(['prefix' => 'vacation'], function () {
 
 
 Route::group(['middleware' => 'role:Hr|Admin'], function () {
+
+
+
+Route::get('timezones', [TimezoneController::class, 'index']);
+Route::get('timezones/{id}', [TimezoneController::class, 'show']);
+Route::post('timezones', [TimezoneController::class, 'store']);
+Route::put('timezones/{id}', [TimezoneController::class, 'update']);
+Route::delete('timezones/{id}', [TimezoneController::class, 'destroy']);
+
 
     Route::group(['prefix' => 'users'], function () {
 

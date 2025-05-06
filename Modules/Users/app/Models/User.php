@@ -79,6 +79,10 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
+    public function timezone()
+    {
+        return $this->belongsTo(Timezone::class);
+    }
 
     // Function to get employees under the given manager
     public function getManagedEmployeeIds()

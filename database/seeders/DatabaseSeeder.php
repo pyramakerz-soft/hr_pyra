@@ -51,7 +51,8 @@ class DatabaseSeeder extends Seeder
             // PermissionSeeder::class,
             // UserLocationSeeder::class,
             // ClockSeeder::class,
-            RolesSeeder::class
+            RolesSeeder::class,
+            TimezoneSeeder::class
         ]);
 
     }
