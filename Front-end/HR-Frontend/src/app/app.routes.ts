@@ -69,7 +69,7 @@ export const routes: Routes = [
             { path: "HRDepartmentEdit/:id", component: HrDepartmentAddComponent, title: "HRDepartmentEdit" },
 
             { path: "HRSubDepartment/:id", component: HrSubDepartmentComponent, title: "HRSubDepartment" },
-            { path: "HRSubDepartmentAdd", component: HrSubDepartmentAddComponent, title: "HRSubDepartmentAdd" },
+            { path: "HRSubDepartmentAdd/:deptId", component: HrSubDepartmentAddComponent, title: "HRSubDepartmentAdd" },
             { path: "HRSubDepartmentEdit/:deptId/:subDeptId", component: HrSubDepartmentAddComponent, title: "HRSubDepartmentEdit" },
 
             { path: "HRIssues", component: HrIssuesComponent, title: "HRIssues" },

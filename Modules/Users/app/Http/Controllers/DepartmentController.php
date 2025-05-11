@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Traits\ResponseTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Modules\Users\Http\Requests\Api\Department\StoreDepartmentRequest;
 use Modules\Users\Http\Requests\Api\Department\UpdateDepartmentRequest;
 use Modules\Users\Models\Department;
@@ -349,7 +350,10 @@ class DepartmentController extends Controller
             'teamlead_id' => $validatedData['teamlead_id'],
             'department_id' => $departmentId,
 
-        ])->with('teamLead')->get();
+        ]);
+        
+        Log::info('/////////');
+        Log::info( $subDepartment->id);
         User::where('id', $request->teamlead_id)->update([
             'sub_department_id' => $subDepartment->id
         ]);

@@ -82,7 +82,7 @@ this.GetSubDepartment()
 
   NavigateToAddSubDepartment() {
     this.AddButton=true;
-    this.router.navigateByUrl("/HR/HRSubDepartmentAdd");
+    this.router.navigateByUrl(`/HR/HRSubDepartmentAdd/${this.DeptId}`);
   }
 
 }

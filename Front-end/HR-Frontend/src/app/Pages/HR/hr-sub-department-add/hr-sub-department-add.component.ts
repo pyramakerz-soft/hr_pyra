@@ -39,7 +39,8 @@ export class HrSubDepartmentAddComponent {
 
     this.route.params.subscribe(params => {
       console.log(params);
-      
+   
+
       if (params['deptId'] && params['subDeptId']  ) {
         console.log('/ssss');
         
@@ -51,10 +52,18 @@ export class HrSubDepartmentAddComponent {
 
         this.GetByID();
         this.mode = "Edit"
-      }
-      else {
+      }   else
+      if (params['deptId'] ) {
+        this.DeptId=params['deptId']
+        console.log( this.DeptId);        
+
+
+        this.subDeptSer.setDeptId(this.DeptId);
+
         this.mode = "Add"
       }
+
+      
     });
 
 
