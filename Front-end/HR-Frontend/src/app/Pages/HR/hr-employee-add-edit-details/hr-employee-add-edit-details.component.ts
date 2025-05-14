@@ -36,7 +36,8 @@ export class HrEmployeeAddEditDetailsComponent {
     null, '', '', null, null, null, '', '', '', '', '', '', null, null, null, null, null, null, '',null, [], [], [], [], false
   );
 
-  regexPhone = /^(010|011|012|015)\d{8}$/;
+   regexPhone = /^\d{11,}$/;
+
   regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   regexNationalID = /^\d{14}$/;
 
@@ -78,37 +79,7 @@ export class HrEmployeeAddEditDetailsComponent {
     this.getLocations()
 
 
-    // const stringifiedEmployee = `{
-    //   "image": null,
-    //   "name": "zeyas",
-    //   "code": "11",
-    //   "department_id": null,
-    //   "sub_department_id": null,
-    //   "deparment_name": null,
-    //   "emp_type": "pos",
-    //   "phone": "01228414741",
-    //   "contact_phone": "012284147",
-    //   "email": "zizo@g.com",
-    //   "password": "111323232",
-    //   "national_id": "1222222222",
-    //   "hiring_date": "2025-04-14",
-    //   "salary": "1",
-    //   "overtime_hours": "22",
-    //   "working_hours_day": null,
-    //   "start_time": "11:47",
-    //   "end_time": "23:47",
-    //   "gender": "m",
-    //   "role": {
-    //     "id": 3,
-    //     "name": "Employee",
-    //     "Permissions": []
-    //   },
-    //   "location_id": [1, 48],
-    //   "location": [],
-    //   "work_type_id": [2, 1],
-    //   "work_type_name": [],
-    //   "work_home": false
-    // }`;
+    // const stringifiedEmployee = `{ "image":null,"name":"sdas","code":"12321","department_id":1,"sub_department_id":null,"deparment_name":null,"emp_type":"asdas","phone":"‪01117730007‬","contact_phone":"01117730007‬","email":"aanyyy@g.com","password":"111111111","national_id":"11111111111112","hiring_date":"2025-05-07","salary":"1","overtime_hours":"2","working_hours_day":12,"start_time":"10:59","end_time":"22:59","gender":"f","role":{"id":3,"name":"Employee","Permissions":[]},"location_id":[1],"location":[],"work_type_id":[3],"work_type_name":[],"work_home":false}`
     
     // this.employee = JSON.parse(stringifiedEmployee);
     
@@ -174,10 +145,8 @@ onDepartmentChange() {
 
  this.subDepartments = [];
 
- console.log(this.selectedDepartment);
  this.selectedSubDepartment=null;
 
- console.log('///ss');
  if (this.selectedDepartment) {
   this.supDeptServ.setDeptId(this.selectedDepartment);
 
@@ -186,7 +155,6 @@ onDepartmentChange() {
 }
 
 getSubDepartments(departmentId: number) {
-  console.log(departmentId);
   
  this.supDeptServ.getall (departmentId).subscribe(
    (res: any) => {
@@ -234,13 +202,8 @@ onSubDepartmentChange() {
     this.userService.getUserById(id).subscribe(
       (d: any) => {
         this.employee = d.User;
-        console.log( this.employee );
         this.selectedDepartment=this.employee.department_id
         this.selectedSubDepartment=this.employee.sub_department_id
-
-        console.log('///');
-        
-        console.log( this.employee.sub_department_id);
 
         if( this.employee.department_id){
           this.supDeptServ.setDeptId(this.employee.department_id!);
@@ -388,31 +351,28 @@ onSubDepartmentChange() {
 
   isFormValid(): boolean {
     let isValid = true;
-    console.log("Validation started.");
-  
-    console.log("Employee object:", this.employee);
+
   
     // Convert to string for saving/debugging
     const employeeStr = JSON.stringify(this.employee);
-    console.log("Stringified employee:", employeeStr);
   
     for (const key in this.employee) {
       if (this.employee.hasOwnProperty(key)) {
         const field = key as keyof AddEmployee;
   
         if (this.employee.role?.name === 'Employee') {
-          console.log("Role is 'Employee'");
   
           if (!this.selectedDepartment) {
-            console.log("selectedDepartment is missing");
             this.validationErrors['selectedDepartment' as keyof AddEmployee] = '*Department is required for Employees.';
             isValid = false;
           } else {
-            console.log("selectedDepartment is valid");
             this.validationErrors['selectedDepartment' as keyof AddEmployee] = '';
             isValid = true;
           }
         }
+
+
+
 
             // Skip validation for department_id and sub_department_id if role is not Employee
             if (this.employee.role?.name !== 'Employee' && (
@@ -420,20 +380,21 @@ onSubDepartmentChange() {
               field === "department_id" || field === "sub_department_id")) {
               continue; // Skip this field from validation
             }
-  
-            console.log(`Checking field: ${field}, value:`, this.employee[field]);
+
+    // ✅ Add validation: If role is 'Employee', department is required
+  if (this.employee.role?.name === 'Employee' && !this.selectedDepartment) {
+    this.validationErrors['department_id'] = '*Department is required for employees.';
+    isValid = false;
+  }
 
         if (!this.employee[field] && field !== "code" && field !== 'work_home' && field !== "image" &&  field !== "working_hours_day") {
-          console.log(`Field ${field} is missing`);
   
           if (this.EmployeeId !== 0) {
-            console.log("EmployeeId is not 0, skipping validation for this field.");
             continue;
           }
   
           if (field === "start_time" || field === "end_time") {
             if (!this.isFloatChecked) {
-              console.log(`${field} is required and isFloatChecked is false`);
               this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
               isValid = false;
             } else {
@@ -449,49 +410,51 @@ onSubDepartmentChange() {
           switch (field) {
             case "name":
               if (this.employee.name.length < 3) {
-                console.log("Name is too short");
                 this.validationErrors[field] = 'Name must be more than 2 characters.';
                 isValid = false;
               }
               break;
             case "code":
               if (this.employee.code.length < 1) {
-                console.log("Code is missing");
                 this.validationErrors[field] = 'Code is required.';
                 isValid = false;
               }
               break;
             case "phone":
-              if (!this.regexPhone.test(this.employee.phone)) {
-                console.log("Phone is invalid");
+              
+              const cleanedPhone = this.employee.phone.replace(/[^\d]/g, ''); // keep only digits
+
+              if (!this.regexPhone .test(cleanedPhone)) {
                 this.validationErrors[field] = 'Invalid phone number.';
                 isValid = false;
               }
+              this.employee.phone=cleanedPhone
               break;
             case "contact_phone":
-              if (!this.regexPhone.test(this.employee.contact_phone)) {
-                console.log("Contact phone is invalid");
-                this.validationErrors[field] = 'Invalid contact phone number.';
+            
+              const cleanedContactPhone = this.employee.phone.replace(/[^\d]/g, ''); // keep only digits
+
+              if (!this.regexPhone .test(cleanedContactPhone)) {
+                this.validationErrors[field] = 'Invalid phone number.';
                 isValid = false;
               }
+              this.employee.contact_phone=cleanedContactPhone
+
               break;
             case "password":
               if (this.employee.password.length < 5 && this.EmployeeId === 0) {
-                console.log("Password is too short");
                 this.validationErrors[field] = 'Password must be more than 5 characters.';
                 isValid = false;
               }
               break;
             case "email":
               if (!this.regexEmail.test(this.employee.email)) {
-                console.log("Email is invalid");
                 this.validationErrors[field] = 'Invalid email.';
                 isValid = false;
               }
               break;
             case "national_id":
               if (!this.regexNationalID.test(this.employee.national_id)) {
-                console.log("National ID is invalid");
                 this.validationErrors[field] = 'Invalid National ID.';
                 isValid = false;
               }
@@ -502,7 +465,6 @@ onSubDepartmentChange() {
     }
   
     if (!this.employee.role) {
-      console.log("Role is missing");
       this.validationErrors['role'] = '*Role is required.';
       isValid = false;
     } else {
@@ -510,10 +472,8 @@ onSubDepartmentChange() {
     }
   
     if (!this.isFloatChecked) {
-      console.log("isFloatChecked is false");
   
       if (this.employee.work_type_id.length === 0) {
-        console.log("work_type_id is empty");
         this.validationErrors['work_type_id'] = '*Work Type is required.';
         isValid = false;
       } else {
@@ -521,7 +481,6 @@ onSubDepartmentChange() {
       }
   
       if (this.employee.location_id.length === 0) {
-        console.log("location_id is empty");
         this.validationErrors['location_id'] = '*Location is required.';
         isValid = false;
       } else {
@@ -529,7 +488,6 @@ onSubDepartmentChange() {
       }
   
       if (this.employee.start_time != null && this.employee.end_time != null) {
-        console.log(`Start Time: ${this.employee.start_time}, End Time: ${this.employee.end_time}`);
         let [xHours, xMinutes] = this.employee.start_time.split(':').map(Number);
         let [yHours, yMinutes] = this.employee.end_time.split(':').map(Number);
   
@@ -541,7 +499,6 @@ onSubDepartmentChange() {
   
         const diffMilliseconds = end_timeDate.getTime() - start_timeDate.getTime();
         const diffHours = diffMilliseconds / (1000 * 60 * 60);
-        console.log(`Calculated working hours: ${diffHours}`);
   
         if (diffHours < 4) {
           isValid = false;
@@ -557,7 +514,6 @@ onSubDepartmentChange() {
       }
     }
   
-    console.log("Validation result:", isValid);
     return isValid;
   }
   
@@ -576,17 +532,13 @@ SaveEmployee() {
         this.isSaved = true;
         this.employee.department_id =this.selectedDepartment==null? null:Number(this.selectedDepartment);
         this.employee.sub_department_id =this.selectedSubDepartment==null?null: Number(this.selectedSubDepartment);
-        console.log('//ssss');
-        
-console.log('/ssss////');
 
-console.log(this.employee.role);
+
 
         // Log the payload for debugging
         console.log('Employee Payload:', this.employee);
 
         if (this.EmployeeId === 0) {
-            console.log('1');
             this.userService.createUser(this.employee).subscribe(
                 (result: any) => {
                     this.isSaved = false;
@@ -599,15 +551,14 @@ console.log(this.employee.role);
                 }
             );
         } else {
-            console.log('2');
             this.userService.updateUser(this.employee, this.EmployeeId).subscribe(
                 (result: any) => {
-                    console.log('2.5');
                     this.isSaved = false;
                     this.router.navigateByUrl("HR/HREmployee");
                 },
                 error => {
-                    console.log('3');
+                  this.isSaved = false;
+
                     console.error('Update User Error:', error); // Log the full error
                     this.handleServerErrors(error.error?.errors || {});
                 }
