@@ -46,7 +46,7 @@ class ClockOutRequest extends FormRequest
     {
 
         return [
-            'clock_out' => ['required', 'date_format:Y-m-d H:i:s'],
+            // 'clock_out' => ['required', 'date_format:Y-m-d H:i:s'],
             'latitude' => 'required_if:location_type,site|numeric|between:-90,90',
             'longitude' => 'required_if:location_type,site|numeric|between:-180,180',
         ];

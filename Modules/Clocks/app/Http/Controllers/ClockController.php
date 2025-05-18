@@ -322,36 +322,36 @@ class ClockController extends Controller
     }
 
 
-/**
- * @OA\Get(
- *     path="/api/getAbsentUser",
- *     tags={"Clock"},
- *     summary="Get Users Without Clock-In Records",
- *     description="Export an Excel file listing users who did not clock in during a given date range. If no dates are provided, today's date is used.",
- *     operationId="getAbsentUser",
- *     @OA\Parameter(
- *         name="from_day",
- *         in="query",
- *         description="Start date (YYYY-MM-DD). Defaults to today's date if not provided.",
- *         required=false,
- *         @OA\Schema(
- *             type="string",
- *             format="date",
- *             example="2025-04-01"
- *         )
- *     ),
- *     @OA\Parameter(
- *         name="to_day",
- *         in="query",
- *         description="End date (YYYY-MM-DD). Defaults to today's date if not provided.",
- *         required=false,
- *         @OA\Schema(
- *             type="string",
- *             format="date",
- *             example="2025-04-20"
- *         )
- *     ),
-    *     @OA\Parameter(
+    /**
+     * @OA\Get(
+     *     path="/api/getAbsentUser",
+     *     tags={"Clock"},
+     *     summary="Get Users Without Clock-In Records",
+     *     description="Export an Excel file listing users who did not clock in during a given date range. If no dates are provided, today's date is used.",
+     *     operationId="getAbsentUser",
+     *     @OA\Parameter(
+     *         name="from_day",
+     *         in="query",
+     *         description="Start date (YYYY-MM-DD). Defaults to today's date if not provided.",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="string",
+     *             format="date",
+     *             example="2025-04-01"
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="to_day",
+     *         in="query",
+     *         description="End date (YYYY-MM-DD). Defaults to today's date if not provided.",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="string",
+     *             format="date",
+     *             example="2025-04-20"
+     *         )
+     *     ),
+     *     @OA\Parameter(
      *         name="export",
      *         in="query",
      *         required=false,
@@ -360,54 +360,53 @@ class ClockController extends Controller
      *             type="boolean",
      *         )
      *     ),
- * 
- *     @OA\Response(
- *         response=200,
- *         description="Excel file download",
- *         @OA\JsonContent(
- *             @OA\Property(
- *                 property="status",
- *                 type="string",
- *                 example="success"
- *             ),
- *             @OA\Property(
- *                 property="message",
- *                 type="string",
- *                 example="Absent users exported successfully."
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=500,
- *         description="Internal Server Error",
- *         @OA\JsonContent(
- *             @OA\Property(property="status", type="string", example="error"),
- *             @OA\Property(property="message", type="string", example="An error occurred while exporting absent users.")
- *         )
- *     ),
- *     security={{ "bearerAuth": {} }}
- * )
- */
+     * 
+     *     @OA\Response(
+     *         response=200,
+     *         description="Excel file download",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="status",
+     *                 type="string",
+     *                 example="success"
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="Absent users exported successfully."
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="An error occurred while exporting absent users.")
+     *         )
+     *     ),
+     *     security={{ "bearerAuth": {} }}
+     * )
+     */
 
 
-     public function getAbsentUser(Request $request)
-     {
- 
-         //  return $this->returnData("data", $query->get(), "All Clocks Data");
-         if ($request->has('export')) {
+    public function getAbsentUser(Request $request)
+    {
 
-         $fromDay = $request->get('from_day');
-         $toDay = $request->get('to_day');
-         
-         return (new AbsentUsersExport(
-            $fromDay,
-            $toDay
+        //  return $this->returnData("data", $query->get(), "All Clocks Data");
+        if ($request->has('export')) {
 
-        ))
-            ->download('Absent_User.xlsx');
+            $fromDay = $request->get('from_day');
+            $toDay = $request->get('to_day');
+
+            return (new AbsentUsersExport(
+                $fromDay,
+                $toDay
+
+            ))
+                ->download('Absent_User.xlsx');
         }
-
-     }
+    }
 
 
     /**
@@ -747,7 +746,7 @@ class ClockController extends Controller
         // Get the authenticated user
         $authUser = Auth::user();
         $user_id = $authUser->id;
-        $clock_in = $request->clock_in;
+        $clock_in = Carbon::now();
 
         $arr = ['type' => 'In', 'version' => $request->version, 'lat' => $request->latitude, 'lng' => $request->longitude, 'user' => $authUser->email];
         Log::info($arr);
@@ -853,7 +852,8 @@ class ClockController extends Controller
             return $this->returnError('You are not clocked in.');
         }
         $clockIn = Carbon::parse($clock->clock_in);
-        $clockOut = Carbon::parse($request->clock_out);
+        $clockOut = Carbon::now();
+
         $this->validateClockTime($clockIn, $clockOut);
 
 

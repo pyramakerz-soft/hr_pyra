@@ -237,6 +237,8 @@ onDepartmentChange() {
 }
 
 getSubDepartments(departmentId: number) {
+    this.selectedUsers = [];
+  this.isSelectAllChecked = false;
  this.supDeptServ.getall (departmentId).subscribe(
    (res: any) => {
      this.subDepartments = res.data || res;
@@ -278,6 +280,8 @@ onSubDepartmentChange() {
 
   
   Search(){
+      this.selectedUsers = [];
+  this.isSelectAllChecked = false;
     // if(this.selectedName){
     this.userServ.SearchByNameAndDeptAndSubDep(this.selectedName,this.selectedDepartment,this.selectedSubDepartment).subscribe(
       (d: any) => {

@@ -92,8 +92,9 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                         'Is this date has vacation' =>  $emptyFeild,
 
                         'Name' => $this->user->name,
-                        'Clock In' => $clockIn ? $clockIn->format('h:iA') : '',
-                        'Clock Out' => $clockOut ? $clockOut->format('h:iA') : '',
+                        'Clock In' => $clockIn ? $clockIn->timezone('Africa/Cairo')->format('h:iA') : '',
+                        'Clock Out' => $clockOut ? $clockOut->timezone('Africa/Cairo')->format('h:iA') : '',
+
                         'Code' => $this->user->code,
                         'Department' => $this->user->department ? $clock->user->department->name : 'N/A',
                         'Location In' => $clock->location_type === "float"
@@ -125,7 +126,7 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                     'Clock In' =>  $emptyFeild,
                     'Clock Out' =>  $emptyFeild,
                     'Code' => $this->user->code,
-                    'Department' => $this->user->department->name,
+                    'Department' => $this->user->department?->name ?? $emptyFeild,
 
                     'Location In' =>  $emptyFeild,
                     'Location Out' =>  $emptyFeild,
