@@ -34,9 +34,12 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
     {
         $emptyFeild = 'N/A';
 
+
         $now = Carbon::now();
         $defaultStartDate = $now->copy()->subMonth()->day(26)->startOfDay();
         $defaultEndDate = $now->copy()->day(26)->endOfDay();
+
+        $timezoneValue = $this->user->timezone ?  $this->user->value : 3;  // Default to +3 if no timezone
 
         $startDate = $this->startDate ? Carbon::parse($this->startDate)->startOfDay() : $defaultStartDate;
         $endDate = $this->endDate ? Carbon::parse($this->endDate)->endOfDay() : $defaultEndDate;
@@ -84,6 +87,9 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                         $formattedTotal += $diff;
                     }
 
+                    $clockInFormatted = $clockIn ? $clockIn->addHours($timezoneValue)->format('h:i A') : '';
+                    $clockOutFormatted = $clockOut ? $clockOut->addHours($timezoneValue)->format('h:i A') : '';
+
                     $finalCollection->push([
                         'Date' => $formattedDate,
                         'Total Hours in That Day' =>  $emptyFeild,
@@ -92,8 +98,9 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                         'Is this date has vacation' =>  $emptyFeild,
 
                         'Name' => $this->user->name,
-                        'Clock In' => $clockIn ? $clockIn->timezone('Africa/Cairo')->format('h:iA') : '',
-                        'Clock Out' => $clockOut ? $clockOut->timezone('Africa/Cairo')->format('h:iA') : '',
+
+                        'Clock In' => $clockInFormatted,
+                        'Clock Out' => $clockOutFormatted,
 
                         'Code' => $this->user->code,
                         'Department' => $this->user->department ? $clock->user->department->name : 'N/A',

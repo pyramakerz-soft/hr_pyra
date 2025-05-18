@@ -191,51 +191,59 @@ trait ClockCalculationsHelperTrait
 
 
 
+protected function groupClockForUser($clocks)
+{
+    
+    // Ensure $clocks is paginated
+    $isPaginated = $clocks instanceof LengthAwarePaginator;
 
-    protected function groupClockForUser($clocks)
-    {
-        // Ensure $clocks is paginated
-        $isPaginated = $clocks instanceof LengthAwarePaginator;
+    // Group clocks by date
+    $groupedClocks = $clocks->groupBy(function ($clock) {
+        return Carbon::parse($clock->clock_in)->addHours(3)->toDateString(); // Apply +3 offset
+    });
 
-        // Group clocks by date
-        $groupedClocks = $clocks->groupBy(function ($clock) {
-            return Carbon::parse($clock->clock_in)->toDateString(); // Group by clock_in date
-        });
-
-        $data = [];
-        foreach ($groupedClocks as $date => $clocksForDay) {
-            if ($clocksForDay->isEmpty()) {
-                continue;
-            }
-
-            // Sort clocks by clock_in time (descending order)
-            $sortedClocks = $clocksForDay->sortByDesc(function ($clock) {
-                return Carbon::parse($clock->clock_in);
-            })->values(); // Reset array keys
-
-            // Format each clock using ClockResource
-            $formattedClocks = $sortedClocks->map(function ($clock) {
-                return (new ClockResource($clock))->toArray(request());
-            });
-
-            // Group under the respective date
-            $data[] = [
-                'Date' => $date,
-                'clocks' => $formattedClocks,
-            ];
+    $data = [];
+    foreach ($groupedClocks as $date => $clocksForDay) {
+        if ($clocksForDay->isEmpty()) {
+            continue;
         }
 
-        return [
-            'clocks' => $data,
-            'pagination' => $isPaginated ? [
-                'current_page' => $clocks->currentPage(),
-                'next_page_url' => $clocks->nextPageUrl(),
-                'previous_page_url' => $clocks->previousPageUrl(),
-                'last_page' => $clocks->lastPage(),
-                'total' => $clocks->total(),
-            ] : null,
+        // Sort clocks by adjusted clock_in time (descending)
+        $sortedClocks = $clocksForDay->sortByDesc(function ($clock) {
+            return Carbon::parse($clock->clock_in)->addHours(3);
+        })->values(); // Reset array keys
+
+        // Format each clock and apply +3 offset
+        $formattedClocks = $sortedClocks->map(function ($clock)  {
+                  $timezoneValue = $clock->user->timezone ? $clock->user->value : 3;  // Default to +3 if no timezone
+
+            $clock->clock_in = Carbon::parse($clock->clock_in)->addHours(value:  $timezoneValue )->format('Y-m-d H:i:s');
+
+            if ($clock->clock_out) {
+                $clock->clock_out = Carbon::parse($clock->clock_out)->addHours( $timezoneValue )->format('Y-m-d H:i:s');
+            }
+
+            return (new ClockResource($clock))->toArray(request());
+        });
+
+        // Group under the respective date
+        $data[] = [
+            'Date' => $date,
+            'clocks' => $formattedClocks,
         ];
     }
+
+    return [
+        'clocks' => $data,
+        'pagination' => $isPaginated ? [
+            'current_page' => $clocks->currentPage(),
+            'next_page_url' => $clocks->nextPageUrl(),
+            'previous_page_url' => $clocks->previousPageUrl(),
+            'last_page' => $clocks->lastPage(),
+            'total' => $clocks->total(),
+        ] : null,
+    ];
+}
 
 
 
