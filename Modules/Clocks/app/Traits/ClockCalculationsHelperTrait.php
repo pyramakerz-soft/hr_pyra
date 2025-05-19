@@ -215,8 +215,8 @@ trait ClockCalculationsHelperTrait
 
             // Format each clock and apply +3 offset
             $formattedClocks = $sortedClocks->map(function ($clock) {
-                //   $timezoneValue = $clock->user->timezone ? $clock->user->value : 3;  // Default to +3 if no timezone
-                $timezoneValue = 0;  // Default to +3 if no timezone
+                  $timezoneValue = $clock->user->timezone ? $clock->user->value : 3;  // Default to +3 if no timezone
+                // $timezoneValue = 0;  // Default to +3 if no timezone
 
                 $clock->clock_in = Carbon::parse($clock->clock_in)->addHours(value: $timezoneValue)->format('Y-m-d H:i:s');
 
