@@ -218,10 +218,10 @@ trait ClockCalculationsHelperTrait
                   $timezoneValue = $clock->user->timezone ? $clock->user->value : 3;  // Default to +3 if no timezone
                 // $timezoneValue = 0;  // Default to +3 if no timezone
 
-                $clock->clock_in = Carbon::parse($clock->clock_in)->addHours(value: $timezoneValue)->format('Y-m-d H:i:s');
+                $clock->clock_in = Carbon::parse($clock->clock_in)->format('Y-m-d H:i:s');
 
                 if ($clock->clock_out) {
-                    $clock->clock_out = Carbon::parse($clock->clock_out)->addHours($timezoneValue)->format('Y-m-d H:i:s');
+                    $clock->clock_out = Carbon::parse($clock->clock_out)->format('Y-m-d H:i:s');
                 }
 
                 return (new ClockResource($clock))->toArray(request());
