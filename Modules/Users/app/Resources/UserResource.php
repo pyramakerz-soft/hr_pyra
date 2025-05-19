@@ -34,10 +34,10 @@ class UserResource extends JsonResource
 
         // Format clock-in time or return empty string
 
+        $clockInTime = $clockInRecord && $clockInRecord->clock_in
+        ? Carbon::parse($clockInRecord->clock_in)->format('h:i A')
+        : '--:--';
 
-$clockInTime = $clockInRecord && $clockInRecord->clock_in
-    ? Carbon::parse($clockInRecord->clock_in)->addHours($timezoneValue)->format('h:i A')
-    : null;
       
         Log::info($this->subDepartment);
         return [

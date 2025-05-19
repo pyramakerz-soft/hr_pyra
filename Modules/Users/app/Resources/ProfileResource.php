@@ -19,6 +19,8 @@ class ProfileResource extends JsonResource
         $now = now()->setTimezone($timezone)->toDateString(); // Convert server time to Africa/Cairo
 
 
+
+
         $user_clock = $authUser->user_clocks()
             ->whereNull('clock_out') // Ensure clock_out is NULL
             ->whereNotNull('clock_in') // Ensure clock_in is NOT NULL
@@ -90,10 +92,15 @@ class ProfileResource extends JsonResource
     }
 
     // Method to get the user's clock-in time
-    private function getClockInTime($authUser)
+private function getClockInTime($authUser)
     {
+
+
+   $timezoneValue = $this->timezone ? $this->timezone->value : 3;  // Default to +3 if no timezone
+
         $user_clock = $this->getUserClock($authUser);
-        return $user_clock ? Carbon::parse($user_clock['clock_in'])->format('H:i:s') : null;
+        return $user_clock ? Carbon::parse($user_clock['clock_in'])->addHours($timezoneValue)->format('H:i:s') : null;
+        
     }
 
     // Method to calculate total hours worked
