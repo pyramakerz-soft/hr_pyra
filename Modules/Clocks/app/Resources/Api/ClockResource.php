@@ -10,12 +10,16 @@ class ClockResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+
+           $timezoneValue =  $this->user->timezone ? $this->user->timezone->value : 3;  // Default to +3 if no timezone
+
+
         // Format clock in time
-        $clockIn = $this->clock_in ? Carbon::parse($this->clock_in)->format('h:iA') : null;
+        $clockIn = $this->clock_in ? Carbon::parse($this->clock_in)->addHours($timezoneValue)->format('h:iA') : null;
 
         // Calculate clock out time and duration
         if ($this->clock_out) {
-            $clockOut = Carbon::parse($this->clock_out)->format('h:iA');
+            $clockOut = Carbon::parse($this->clock_out)->addHours($timezoneValue)->format('h:iA');
             $formattedClockOut = Carbon::parse($this->clock_out)->format('Y-m-d H:i');
             $duration = Carbon::parse($this->clock_in)->diff(Carbon::parse($this->clock_out))->format('%H:%I');
         } else {

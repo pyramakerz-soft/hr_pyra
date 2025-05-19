@@ -643,7 +643,7 @@ private function formatPagination($users)
             if (!$department) {
                 return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
             }
-        }
+        
         if ($request->sub_department_id) {
             $subDepartment = SubDepartment::find($request['sub_department_id']);
 
@@ -652,7 +652,7 @@ private function formatPagination($users)
             }
         }
 
-
+    }
         // Ensure that the department_id exists in $data before accessing it
         $departmentId = isset($request['department_id']) ? $request['department_id'] : $user->department_id;
 
