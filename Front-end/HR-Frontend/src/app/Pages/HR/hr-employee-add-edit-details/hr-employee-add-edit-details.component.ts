@@ -397,6 +397,7 @@ onSubDepartmentChange() {
             if (!this.isFloatChecked) {
               this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
               isValid = false;
+              // Don't show SweetAlert here, it will be shown in the comprehensive validation below
             } else {
               this.validationErrors[field] = '';
             }
@@ -486,8 +487,28 @@ onSubDepartmentChange() {
       } else {
         this.validationErrors['location_id'] = '';
       }
-  
-      if (this.employee.start_time != null && this.employee.end_time != null) {
+
+      // Validate start_time and end_time are provided when not float
+      if (!this.employee.start_time || !this.employee.end_time) {
+        if (!this.employee.start_time) {
+          this.validationErrors['start_time'] = '*Start time is required.';
+        }
+        if (!this.employee.end_time) {
+          this.validationErrors['end_time'] = '*End time is required.';
+        }
+        isValid = false;
+        Swal.fire({
+          icon: "error",
+          title: "Missing Time Information",
+          text: "Both start time and end time are required for non-float employees.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#FF7519",
+        });
+      } else if (this.employee.start_time && this.employee.end_time) {
+        // Clear validation errors if both times are provided
+        this.validationErrors['start_time'] = '';
+        this.validationErrors['end_time'] = '';
+
         let [xHours, xMinutes] = this.employee.start_time.split(':').map(Number);
         let [yHours, yMinutes] = this.employee.end_time.split(':').map(Number);
   
@@ -499,17 +520,46 @@ onSubDepartmentChange() {
   
         const diffMilliseconds = end_timeDate.getTime() - start_timeDate.getTime();
         const diffHours = diffMilliseconds / (1000 * 60 * 60);
-  
-        if (diffHours < 4) {
+
+        // Handle case where end time is on the next day
+        if (diffHours < 0) {
+          // Add 24 hours if end time is next day
+          const adjustedDiffHours = diffHours + 24;
+          if (adjustedDiffHours < 4) {
+            isValid = false;
+            Swal.fire({
+              icon: "warning",
+              title: "Invalid Working Hours",
+              text: "Working hours must be at least 4 hours.",
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+            });
+          } else {
+            this.employee.working_hours_day = adjustedDiffHours;
+          }
+        } else if (diffHours < 4) {
           isValid = false;
           Swal.fire({
             icon: "warning",
-            title: "Working Hours must be at least 4",
+            title: "Invalid Working Hours",
+            text: "Working hours must be at least 4 hours.",
             confirmButtonText: "OK",
             confirmButtonColor: "#FF7519",
           });
         } else {
           this.employee.working_hours_day = diffHours;
+        }
+
+        // Validate that start time is different from end time
+        if (this.employee.start_time === this.employee.end_time) {
+          isValid = false;
+          Swal.fire({
+            icon: "error",
+            title: "Invalid Time Range",
+            text: "Start time and end time cannot be the same.",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#FF7519",
+          });
         }
       }
     }
@@ -542,7 +592,15 @@ SaveEmployee() {
             this.userService.createUser(this.employee).subscribe(
                 (result: any) => {
                     this.isSaved = false;
-                    this.router.navigateByUrl("HR/HREmployee");
+                    Swal.fire({
+                        icon: "success",
+                        title: "Employee Created Successfully!",
+                        text: "The employee has been added to the system.",
+                        confirmButtonText: "OK",
+                        confirmButtonColor: "#FF7519",
+                    }).then(() => {
+                        this.router.navigateByUrl("HR/HREmployee");
+                    });
                 },
                 error => {
                     this.isSaved = false;
@@ -554,7 +612,15 @@ SaveEmployee() {
             this.userService.updateUser(this.employee, this.EmployeeId).subscribe(
                 (result: any) => {
                     this.isSaved = false;
-                    this.router.navigateByUrl("HR/HREmployee");
+                    Swal.fire({
+                        icon: "success",
+                        title: "Employee Updated Successfully!",
+                        text: "The employee information has been updated.",
+                        confirmButtonText: "OK",
+                        confirmButtonColor: "#FF7519",
+                    }).then(() => {
+                        this.router.navigateByUrl("HR/HREmployee");
+                    });
                 },
                 error => {
                   this.isSaved = false;
