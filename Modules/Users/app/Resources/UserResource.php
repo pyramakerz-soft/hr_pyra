@@ -34,8 +34,9 @@ class UserResource extends JsonResource
 
         // Format clock-in time or return empty string
 
-        $clockInTime = $clockInRecord && $clockInRecord->clock_in
-        ? Carbon::parse($clockInRecord->clock_in)->format('h:i A')
+    
+                    $clockInFormatted =$clockInRecord && $clockInRecord->clock_in
+        ? Carbon::parse($clockInRecord->clock_in)->addHours($timezoneValue)->format('h:i A')
         : '--:--';
 
       
@@ -55,7 +56,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'working_hours' => $this->user_detail->working_hours_day ?? null,    
-                'clock_in_time' => $clockInTime, // ✅ Today's clock-in time or empty
+                'clock_in_time' => $clockInFormatted, // ✅ Today's clock-in time or empty
                 'userTimeZone' => $timezoneValue,  // The timezone value (e.g., +3 or -3)
 
         ];
