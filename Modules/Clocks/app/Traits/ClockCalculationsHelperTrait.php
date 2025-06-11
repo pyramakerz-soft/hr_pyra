@@ -199,7 +199,8 @@ trait ClockCalculationsHelperTrait
 
         // Group clocks by date
         $groupedClocks = $clocks->groupBy(function ($clock) {
-            return Carbon::parse($clock->clock_in)->addHours(3)->toDateString(); // Apply +3 offset
+            $timezoneValue = $clock->user->timezone ?  $clock->user->timezone->value : 3;  // Default to +3 if no timezone
+            return Carbon::parse($clock->clock_in)->addHours(value: $timezoneValue)->toDateString(); // Apply +3 offset
         });
 
         $data = [];
@@ -215,7 +216,6 @@ trait ClockCalculationsHelperTrait
 
             // Format each clock and apply +3 offset
             $formattedClocks = $sortedClocks->map(function ($clock) {
-                  $timezoneValue = $clock->user->timezone ? $clock->user->value : 3;  // Default to +3 if no timezone
                 // $timezoneValue = 0;  // Default to +3 if no timezone
 
                 $clock->clock_in = Carbon::parse($clock->clock_in)->format('Y-m-d H:i:s');

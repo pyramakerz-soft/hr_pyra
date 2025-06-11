@@ -37,7 +37,8 @@ class User extends Authenticatable implements JWTSubject
         'image',
         'serial_number',
         'mob',
-        'sub_department_id'
+        'sub_department_id',
+        'timezone_id'
     ];
 
     /**
@@ -81,7 +82,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function timezone()
     {
-        return $this->belongsTo(Timezone::class);
+        return $this->belongsTo(Timezone::class, 'timezone_id');
     }
 
     // Function to get employees under the given manager

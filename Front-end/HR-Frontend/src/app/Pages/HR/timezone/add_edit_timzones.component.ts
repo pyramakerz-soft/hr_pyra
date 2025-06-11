@@ -36,23 +36,35 @@ export class TimezoneAddEditComponent {
       }
     });
   }
-
-  getTimezoneByID(id: number): void {
-    this.timezoneService.getTimezoneById(id).subscribe(
-      (timezone: Timezone) => {
-        this.timezone = timezone;
-      },
-      (error) => {
-        console.error('Error fetching timezone', error);
+getTimezoneByID(id: number): void {
+  this.timezoneService.getTimezoneById(id).subscribe(
+    (response: any) => {
+      console.log('Fetched timezone:', response);
+      
+      // Extract timezone from the response structure
+      if (response.result === 'true' && response.timezones) {
+        this.timezone = response.timezones;
+      } else {
+        console.error('Invalid response structure:', response);
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Failed to load timezone data',
+          text: 'Invalid timezone data received',
           confirmButtonColor: '#17253E'
         });
       }
-    );
-  }
+    },
+    (error) => {
+      console.error('Error fetching timezone', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to load timezone data',
+        confirmButtonColor: '#17253E'
+      });
+    }
+  );
+}
 
   isFormValid(): boolean {
     let isValid = true;

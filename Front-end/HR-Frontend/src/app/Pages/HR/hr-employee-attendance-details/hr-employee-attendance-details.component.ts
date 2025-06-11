@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { EmployeeDashboard } from '../../../Models/employee-dashboard';
-import { EmployeeDashService } from '../../../Services/employee-dash.service';
-import { ClockService } from '../../../Services/clock.service';
-import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { UserServiceService } from '../../../Services/user-service.service';
 import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute, Router } from '@angular/router';
+import Swal from 'sweetalert2';
 import { ClockInPopUpComponent } from '../../../Components/clock-in-pop-up/clock-in-pop-up.component';
 import { AddEmployee } from '../../../Models/add-employee';
-import Swal from 'sweetalert2';
+import { EmployeeDashboard } from '../../../Models/employee-dashboard';
+import { ClockService } from '../../../Services/clock.service';
+import { EmployeeDashService } from '../../../Services/employee-dash.service';
+import { UserServiceService } from '../../../Services/user-service.service';
 
 @Component({
   selector: 'app-hr-employee-attendance-details',
@@ -29,7 +29,7 @@ export class HrEmployeeAttendanceDetailsComponent {
   DisplayPagginationOrNot: boolean = true;
   SelectedDate: string = ""
   employee: AddEmployee = new AddEmployee(
-    null, '', '', null,null, null, '', '', '', '', '', '', null, null, null, null, null, null, '', null, [1], [], [], [], false);
+    null, null, '', '', null, null, null, '', '', '', '', '', '', null, null, null, null, null, null, '', null, [1], [], [], [], false);
 
   isDateSelected = false
   rowNumber: boolean[] = [];

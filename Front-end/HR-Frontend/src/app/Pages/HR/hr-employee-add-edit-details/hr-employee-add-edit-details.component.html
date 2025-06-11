@@ -343,5 +343,26 @@ class="mb-4 text-xs md:text-sm"
                       
             </div>
         </div>
+
+        <!-- Timezone Dropdown -->
+        <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+                Timezone
+                <span *ngIf="validationErrors['timezone_id']" class="text-red-500 ml-3 font-normal">
+                    {{ validationErrors['timezone_id'] }}
+                </span>
+            </label>
+            <select 
+                class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl"
+                [class.border-red-500]="validationErrors['timezone_id']"
+                [(ngModel)]="selectedTimezone"
+                (ngModelChange)="onTimezoneChange()"
+                name="timezone">
+                <option [ngValue]="null">-- Select Timezone --</option>
+                <option *ngFor="let timezone of timezones" [ngValue]="timezone.id">
+                    {{ timezone.name }}
+                </option>
+            </select>
+        </div>
     </div> 
 </div>

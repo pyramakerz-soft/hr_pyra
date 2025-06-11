@@ -7,11 +7,13 @@ import { AddEmployee } from '../../../Models/add-employee';
 import { AssignLocationToUser } from '../../../Models/assign-location-to-user';
 import { Department } from '../../../Models/department';
 import { RoleModel } from '../../../Models/role-model';
+import { Timezone } from '../../../Models/timeZone';
 import { WorkType } from '../../../Models/work-type';
 import { DepartmentService } from '../../../Services/department.service';
 import { LocationsService } from '../../../Services/locations.service';
 import { RolesService } from '../../../Services/roles.service';
 import { SubDepartmentService } from '../../../Services/sub-department.service';
+import { TimeZoneService } from '../../../Services/timezone.service';
 import { UserServiceService } from '../../../Services/user-service.service';
 import { WorkTypeService } from '../../../Services/work-type.service';
 
@@ -31,8 +33,9 @@ export class HrEmployeeAddEditDetailsComponent {
   imagePreview: string | ArrayBuffer | null = null;
   isSaved = false
   isFloatChecked: boolean = false;
-  
-  employee: AddEmployee = new AddEmployee(
+    timezones: Timezone[] = [];
+
+  employee: AddEmployee = new AddEmployee(null,
     null, '', '', null, null, null, '', '', '', '', '', '', null, null, null, null, null, null, '',null, [], [], [], [], false
   );
 
@@ -52,6 +55,7 @@ export class HrEmployeeAddEditDetailsComponent {
   
   selectedDepartment: number | null = null;
   selectedSubDepartment: number | null = null;
+  selectedTimezone: number | null = null;
 
 
   constructor(private route: ActivatedRoute,  
@@ -60,6 +64,7 @@ export class HrEmployeeAddEditDetailsComponent {
               public userService: UserServiceService, 
               public workTypeService: WorkTypeService,
               public locationService: LocationsService,
+              public timezoneService: TimeZoneService,
               public router: Router,
               public supDeptServ:SubDepartmentService
               
@@ -77,15 +82,30 @@ export class HrEmployeeAddEditDetailsComponent {
     this.getRoles()
     this.getWorkType()
     this.getLocations()
+this.getTimezones();
 
-
-    // const stringifiedEmployee = `{ "image":null,"name":"sdas","code":"12321","department_id":1,"sub_department_id":null,"deparment_name":null,"emp_type":"asdas","phone":"‪01117730007‬","contact_phone":"01117730007‬","email":"aanyyy@g.com","password":"111111111","national_id":"11111111111112","hiring_date":"2025-05-07","salary":"1","overtime_hours":"2","working_hours_day":12,"start_time":"10:59","end_time":"22:59","gender":"f","role":{"id":3,"name":"Employee","Permissions":[]},"location_id":[1],"location":[],"work_type_id":[3],"work_type_name":[],"work_home":false}`
+    const stringifiedEmployee = `{ "image":null,"name":"sdas","code":"12321","department_id":1,"sub_department_id":null,"deparment_name":null,"emp_type":"asdas","phone":"‪01117730007‬","contact_phone":"01117730007‬","email":"aanyyy@g.com","password":"111111111","national_id":"11111111111112","hiring_date":"2025-05-07","salary":"1","overtime_hours":"2","working_hours_day":12,"start_time":"10:59","end_time":"22:59","gender":"f","role":{"id":3,"name":"Employee","Permissions":[]},"location_id":[1],"location":[],"work_type_id":[3],"work_type_name":[],"work_home":false}`
     
-    // this.employee = JSON.parse(stringifiedEmployee);
+    this.employee = JSON.parse(stringifiedEmployee);
     
 
   }
 
+
+  getTimezones(){
+    this.timezoneService.getAllTimezones().subscribe(
+      (timezones: any) => {
+        this.timezones = timezones.data || timezones;
+      },
+      (error) => {
+        console.error('Failed to fetch timezones', error);
+      }
+    );
+  }
+
+  onTimezoneChange() {
+    this.employee.timezone_id = this.selectedTimezone;
+  }
 
   getRoles(){
     
@@ -204,6 +224,7 @@ onSubDepartmentChange() {
         this.employee = d.User;
         this.selectedDepartment=this.employee.department_id
         this.selectedSubDepartment=this.employee.sub_department_id
+        this.selectedTimezone=this.employee.timezone_id
 
         if( this.employee.department_id){
           this.supDeptServ.setDeptId(this.employee.department_id!);
@@ -346,6 +367,9 @@ onSubDepartmentChange() {
     if(field == "emp_type"){
       return "Position";
     }
+    if(field == "timezone_id"){
+      return "Timezone";
+    }
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
   }
 
@@ -387,7 +411,7 @@ onSubDepartmentChange() {
     isValid = false;
   }
 
-        if (!this.employee[field] && field !== "code" && field !== 'work_home' && field !== "image" &&  field !== "working_hours_day") {
+        if (!this.employee[field] && field !== "code" && field !== 'work_home' && field !== "image" &&  field !== "working_hours_day" && field !== "timezone_id") {
   
           if (this.EmployeeId !== 0) {
             continue;
@@ -470,6 +494,14 @@ onSubDepartmentChange() {
       isValid = false;
     } else {
       this.validationErrors['role'] = '';
+    }
+
+    // Validate timezone is required
+    if (!this.selectedTimezone) {
+      this.validationErrors['timezone_id'] = '*Timezone is required.';
+      isValid = false;
+    } else {
+      this.validationErrors['timezone_id'] = '';
     }
   
     if (!this.isFloatChecked) {
@@ -582,6 +614,7 @@ SaveEmployee() {
         this.isSaved = true;
         this.employee.department_id =this.selectedDepartment==null? null:Number(this.selectedDepartment);
         this.employee.sub_department_id =this.selectedSubDepartment==null?null: Number(this.selectedSubDepartment);
+        this.employee.timezone_id = this.selectedTimezone;
 
 
 

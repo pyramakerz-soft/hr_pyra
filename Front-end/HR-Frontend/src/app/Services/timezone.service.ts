@@ -53,7 +53,7 @@ export class TimeZoneService {
 
   // Delete a timezone
   deleteTimezone(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.baseUrl}/api/timezones/${id}`, {
+    return this.http.delete<any>(`${this.baseUrl}/timezones/${id}`, {
       headers: this.getHeaders()
     });
   }

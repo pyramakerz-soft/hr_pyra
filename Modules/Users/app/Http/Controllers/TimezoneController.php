@@ -3,6 +3,7 @@
 namespace Modules\Users\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Modules\Users\Models\Timezone;
 
@@ -10,6 +11,7 @@ use Modules\Users\Models\Timezone;
 
 class TimezoneController extends Controller
 {
+    use ResponseTrait;
     public function __construct()
     {
         // Apply the 'auth:api' middleware for token validation to all methods in this controller
