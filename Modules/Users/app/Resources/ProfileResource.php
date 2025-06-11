@@ -15,10 +15,10 @@ class ProfileResource extends JsonResource
     private function getUserClock($authUser)
     {
         // Get user's timezone offset, default to +3 if no timezone
-        $timezoneValue = $this->timezone ? $this->timezone->value : 3;
-
+        // $timezoneValue = $this->timezone ? $this->timezone->value : 3;
         // Calculate the user's current date based on their timezone
-        $now = now()->addHours($timezoneValue)->toDateString();
+        $now = now()->toDateString();
+
 
         $user_clock = $authUser->user_clocks()
             ->whereNull('clock_out') // Ensure clock_out is NULL
