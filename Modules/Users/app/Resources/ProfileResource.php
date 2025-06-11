@@ -14,17 +14,16 @@ class ProfileResource extends JsonResource
     // Helper method to get the user's active clock (without clock_out)
     private function getUserClock($authUser)
     {
-        // Set timezone to Africa/Cairo
-        $timezone = 'Africa/Cairo';
-        $now = now()->setTimezone($timezone)->toDateString(); // Convert server time to Africa/Cairo
+        // Get user's timezone offset, default to +3 if no timezone
+        $timezoneValue = $this->timezone ? $this->timezone->value : 3;
 
-
-
+        // Calculate the user's current date based on their timezone
+        $now = now()->addHours($timezoneValue)->toDateString();
 
         $user_clock = $authUser->user_clocks()
             ->whereNull('clock_out') // Ensure clock_out is NULL
             ->whereNotNull('clock_in') // Ensure clock_in is NOT NULL
-            ->whereDate('clock_in', $now) // Check based on Cairo timezone
+            ->whereDate('clock_in', $now) // Check based on user's timezone
             ->latest('clock_in') // Get the latest clock-in
             ->first();
 
@@ -42,7 +41,6 @@ class ProfileResource extends JsonResource
 
         return null;
     }
-
 
 
     // Helper method to get user clocks for the current day
@@ -92,15 +90,14 @@ class ProfileResource extends JsonResource
     }
 
     // Method to get the user's clock-in time
-private function getClockInTime($authUser)
+    private function getClockInTime($authUser)
     {
 
 
-   $timezoneValue = $this->timezone ? $this->timezone->value : 3;  // Default to +3 if no timezone
+        $timezoneValue = $this->timezone ? $this->timezone->value : 3;  // Default to +3 if no timezone
 
         $user_clock = $this->getUserClock($authUser);
         return $user_clock ? Carbon::parse($user_clock['clock_in'])->addHours($timezoneValue)->format('H:i:s') : null;
-        
     }
 
     // Method to calculate total hours worked
