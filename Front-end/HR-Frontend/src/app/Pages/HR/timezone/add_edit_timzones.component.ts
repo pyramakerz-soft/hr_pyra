@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
@@ -75,12 +75,25 @@ getTimezoneByID(id: number): void {
       isValid = false;
     }
 
-    if (!this.timezone.value) {
+    // Validation for timezone.value
+    const valueAsString = this.timezone.value !== null && this.timezone.value !== undefined
+                          ? this.timezone.value.toString()
+                          : '';
+
+    if (valueAsString.trim() === '') {
       this.validationErrors['value'] = 'Timezone value is required.';
       isValid = false;
-    } else if (!/^[+-]?\d+$/.test(this.timezone.value.toString())) {
-      this.validationErrors['value'] = 'Timezone value must be a valid number.';
+    } else if (!/^[+-]?\d+$/.test(valueAsString)) {
+      // Updated message for clarity
+      this.validationErrors['value'] = 'Timezone value must be a valid integer (e.g., -7, 0, 5).';
       isValid = false;
+    } else {
+      const numericValue = parseInt(valueAsString, 10);
+      // Added range validation
+      if (numericValue < -12 || numericValue > 14) {
+        this.validationErrors['value'] = 'Timezone value must be an integer between -12 and +14 inclusive.';
+        isValid = false;
+      }
     }
 
     return isValid;
@@ -121,6 +134,15 @@ getTimezoneByID(id: number): void {
           }
         }
       );
+    } else {
+      // Added SweetAlert for validation errors
+      const errorMessages = Object.values(this.validationErrors).filter(msg => msg).join('<br>');
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Failed',
+        html: errorMessages || 'Please correct the form errors.',
+        confirmButtonColor: '#17253E'
+      });
     }
   }
 
