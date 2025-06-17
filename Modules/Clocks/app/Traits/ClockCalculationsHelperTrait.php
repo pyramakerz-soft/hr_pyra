@@ -272,21 +272,68 @@ trait ClockCalculationsHelperTrait
 
     protected function getAddressFromCoordinates($latitude, $longitude)
     {
-        $client = new Client();
-        $url = "https://nominatim.openstreetmap.org/reverse?lat={$latitude}&lon={$longitude}&format=json";
+        $client = new Client([
+            'timeout' => 10,
+            'connect_timeout' => 5,
+        ]);
+
+        // Try OpenStreetMap Nominatim first with proper headers
+        $nominatimUrl = "https://nominatim.openstreetmap.org/reverse?lat={$latitude}&lon={$longitude}&format=json&addressdetails=1";
 
         try {
-            $response = $client->get($url, [
+            $response = $client->get($nominatimUrl, [
                 'headers' => [
-                    'User-Agent' => 'YourAppName/1.0',
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
+                    'Accept' => 'application/json',
                 ],
+                'query' => [
+                    'lat' => $latitude,
+                    'lon' => $longitude,
+                    'format' => 'json',
+                    'addressdetails' => '1',
+                    'zoom' => '18', // Higher zoom for more precise address
+                    'limit' => '1',
+                ]
             ]);
 
-            return json_decode($response->getBody()->getContents(), true);
+            $data = json_decode($response->getBody()->getContents(), true);
+
+            if ($data && isset($data['display_name'])) {
+                Log::info("Address fetched successfully from Nominatim", [
+                    'latitude' => $latitude,
+                    'longitude' => $longitude,
+                    'address' => $data['display_name']
+                ]);
+                return $data;
+            }
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            Log::warning("Nominatim API client error: " . $e->getMessage(), [
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'status_code' => $e->getResponse() ? $e->getResponse()->getStatusCode() : 'unknown'
+            ]);
         } catch (\Exception $e) {
-            Log::error("Error fetching address: " . $e->getMessage());
-            return null;
+            Log::warning("Nominatim API error: " . $e->getMessage(), [
+                'latitude' => $latitude,
+                'longitude' => $longitude
+            ]);
         }
+
+        // Fallback to a simple geocoding service or return coordinates as address
+        Log::info("Falling back to coordinate-based address", [
+            'latitude' => $latitude,
+            'longitude' => $longitude
+        ]);
+
+        return [
+            'display_name' => "Location: {$latitude}, {$longitude}",
+            'lat' => $latitude,
+            'lon' => $longitude,
+            'fallback' => true,
+            'address' => [
+                'road' => "Location: {$latitude}, {$longitude}"
+            ]
+        ];
     }
 
 
