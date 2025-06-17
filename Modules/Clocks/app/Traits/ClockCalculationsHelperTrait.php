@@ -273,54 +273,45 @@ trait ClockCalculationsHelperTrait
     protected function getAddressFromCoordinates($latitude, $longitude)
     {
         $client = new Client([
-            'timeout' => 10,
+            'timeout' => 15,
             'connect_timeout' => 5,
         ]);
 
-        // Try OpenStreetMap Nominatim first with proper headers
-        $nominatimUrl = "https://nominatim.openstreetmap.org/reverse?lat={$latitude}&lon={$longitude}&format=json&addressdetails=1";
-
-        try {
-            $response = $client->get($nominatimUrl, [
-                'headers' => [
-                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
-                    'Accept' => 'application/json',
-                ],
-                'query' => [
-                    'lat' => $latitude,
-                    'lon' => $longitude,
-                    'format' => 'json',
-                    'addressdetails' => '1',
-                    'zoom' => '18', // Higher zoom for more precise address
-                    'limit' => '1',
-                ]
-            ]);
-
-            $data = json_decode($response->getBody()->getContents(), true);
-
-            if ($data && isset($data['display_name'])) {
-                Log::info("Address fetched successfully from Nominatim", [
-                    'latitude' => $latitude,
-                    'longitude' => $longitude,
-                    'address' => $data['display_name']
-                ]);
-                return $data;
+        // Try multiple FREE geocoding services in order of preference (no API keys required)
+        $geocodingServices = [
+            'bigdatacloud' => function() use ($client, $latitude, $longitude) {
+                return $this->tryBigDataCloudGeocoding($client, $latitude, $longitude);
+            },
+            'photon' => function() use ($client, $latitude, $longitude) {
+                return $this->tryPhotonGeocoding($client, $latitude, $longitude);
+            },
+            'nominatim' => function() use ($client, $latitude, $longitude) {
+                return $this->tryNominatimGeocoding($client, $latitude, $longitude);
             }
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
-            Log::warning("Nominatim API client error: " . $e->getMessage(), [
-                'latitude' => $latitude,
-                'longitude' => $longitude,
-                'status_code' => $e->getResponse() ? $e->getResponse()->getStatusCode() : 'unknown'
-            ]);
-        } catch (\Exception $e) {
-            Log::warning("Nominatim API error: " . $e->getMessage(), [
-                'latitude' => $latitude,
-                'longitude' => $longitude
-            ]);
+        ];
+
+        foreach ($geocodingServices as $serviceName => $serviceFunction) {
+            try {
+                $result = $serviceFunction();
+                if ($result && isset($result['display_name'])) {
+                    Log::info("Address fetched successfully from {$serviceName}", [
+                        'latitude' => $latitude,
+                        'longitude' => $longitude,
+                        'address' => $result['display_name']
+                    ]);
+                    return $result;
+                }
+            } catch (\Exception $e) {
+                Log::warning("Geocoding service {$serviceName} failed: " . $e->getMessage(), [
+                    'latitude' => $latitude,
+                    'longitude' => $longitude
+                ]);
+                continue; // Try next service
+            }
         }
 
-        // Fallback to a simple geocoding service or return coordinates as address
-        Log::info("Falling back to coordinate-based address", [
+        // Final fallback to coordinate-based address
+        Log::info("All geocoding services failed, falling back to coordinate-based address", [
             'latitude' => $latitude,
             'longitude' => $longitude
         ]);
@@ -334,6 +325,108 @@ trait ClockCalculationsHelperTrait
                 'road' => "Location: {$latitude}, {$longitude}"
             ]
         ];
+    }
+
+    private function tryNominatimGeocoding($client, $latitude, $longitude)
+    {
+        // Add a delay to respect rate limits (1 request per second maximum)
+
+        $response = $client->get('https://nominatim.openstreetmap.org/reverse', [
+            'headers' => [
+                'User-Agent' => 'HRAttendanceApp/1.0',
+                'Accept' => 'application/json',
+                'Accept-Language' => 'en'
+            ],
+            'query' => [
+                'lat' => $latitude,
+                'lon' => $longitude,
+                'format' => 'json',
+                'addressdetails' => '1',
+                'zoom' => '16', // Reduced zoom level for better stability
+                'limit' => '1',
+            ]
+        ]);
+
+        $data = json_decode($response->getBody()->getContents(), true);
+        return $data && isset($data['display_name']) ? $data : null;
+    }
+
+    private function tryPhotonGeocoding($client, $latitude, $longitude)
+    {
+        // Photon - Free geocoding service by OpenStreetMap
+        $response = $client->get('https://photon.komoot.io/reverse', [
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
+            'query' => [
+                'lat' => $latitude,
+                'lon' => $longitude,
+                'limit' => '1',
+            ]
+        ]);
+
+        $data = json_decode($response->getBody()->getContents(), true);
+        
+        if ($data && isset($data['features']) && count($data['features']) > 0) {
+            $feature = $data['features'][0];
+            $properties = $feature['properties'] ?? [];
+            
+            // Build display name from available properties
+            $addressParts = [];
+            if (isset($properties['name'])) $addressParts[] = $properties['name'];
+            if (isset($properties['street'])) $addressParts[] = $properties['street'];
+            if (isset($properties['city'])) $addressParts[] = $properties['city'];
+            if (isset($properties['country'])) $addressParts[] = $properties['country'];
+            
+            return [
+                'display_name' => implode(', ', $addressParts) ?: "Location: {$latitude}, {$longitude}",
+                'lat' => $latitude,
+                'lon' => $longitude,
+                'address' => $properties
+            ];
+        }
+        
+        return null;
+    }
+
+    private function tryBigDataCloudGeocoding($client, $latitude, $longitude)
+    {
+        // BigDataCloud - Free reverse geocoding service
+        $response = $client->get('https://api.bigdatacloud.net/data/reverse-geocode-client', [
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
+            'query' => [
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'localityLanguage' => 'en',
+            ]
+        ]);
+
+        $data = json_decode($response->getBody()->getContents(), true);
+        
+        if ($data && isset($data['locality'])) {
+            // Build display name from BigDataCloud response
+            $addressParts = [];
+            if (isset($data['locality'])) $addressParts[] = $data['locality'];
+            if (isset($data['city'])) $addressParts[] = $data['city'];
+            if (isset($data['principalSubdivision'])) $addressParts[] = $data['principalSubdivision'];
+            if (isset($data['countryName'])) $addressParts[] = $data['countryName'];
+            
+            return [
+                'display_name' => implode(', ', $addressParts) ?: "Location: {$latitude}, {$longitude}",
+                'lat' => $latitude,
+                'lon' => $longitude,
+                'address' => [
+                    'road' => $data['locality'] ?? '',
+                    'city' => $data['city'] ?? '',
+                    'state' => $data['principalSubdivision'] ?? '',
+                    'country' => $data['countryName'] ?? ''
+                ]
+            ];
+        }
+        
+        return null;
     }
 
 

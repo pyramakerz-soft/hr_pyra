@@ -72,7 +72,7 @@ trait ClockInTrait
         $longitude = $request->longitude;
         $address = $this->getAddressFromCoordinates($latitude, $longitude);
 
-        $formatted_address = isset($address['address']['road']) ? $address['address']['road'] : 'Address not available';
+        $formatted_address = isset($address['display_name']) ? $address['display_name'] : 'Address not available';
 
         $clock = ClockInOut::create([
             'clock_in' => $clockIn,
@@ -157,7 +157,7 @@ trait ClockInTrait
         $latitude = $request->latitude;
         $longitude = $request->longitude;
         $address = $this->getAddressFromCoordinates($latitude, $longitude);
-        $formatted_address = isset($address['address']['road']) ? $address['address']['road'] : 'Address not available';
+        $formatted_address = isset($address['display_name']) ? $address['display_name'] : 'Address not available';
 
         $clock = ClockInOut::create([
             'clock_in' => $clockIn,

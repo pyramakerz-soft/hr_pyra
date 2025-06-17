@@ -129,7 +129,7 @@ use ClockCalculationsHelperTrait;
     {
         $addressOut = $this->getAddressFromCoordinates($latitudeOut, $longitudeOut);
 
-        $formatted_address_out = isset($addressOut['address']['road']) ? $addressOut['address']['road'] : 'Address not available';
+        $formatted_address_out = isset($addressOut['display_name']) ? $addressOut['display_name'] : 'Address not available';
 
         $clock->update([
             'clock_out' => $clockOut,
