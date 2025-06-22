@@ -61,10 +61,23 @@ export class SideBarComponent {
     }
   }
 
+  handleMenuClick(index: number, label: string): void {
+    if (this.activeIndex !== null) {
+      this.setActiveIndex(index);
+      if (label === 'Sign Out') {
+        this.signOut();
+      }
+    }
+  }
+
   setActiveIndexByRoute(currentRoute: string): void {
-    const foundIndex = this.menuItems.findIndex(item => currentRoute.includes(item.route));
+    const foundIndex = this.menuItems.findIndex(item => 
+      item.route && item.route !== '' && currentRoute.includes(item.route)
+    );
     if (foundIndex !== -1) {
       this.setActiveIndex(foundIndex);
+    } else {
+      this.activeIndex = null; // No matching route found, deselect all items
     }
   }
 

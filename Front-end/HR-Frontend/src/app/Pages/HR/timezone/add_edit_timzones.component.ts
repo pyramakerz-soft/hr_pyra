@@ -122,16 +122,29 @@ getTimezoneByID(id: number): void {
         (error) => {
           this.isSaved = false;
           console.error('Error saving timezone:', error);
+
+          let errorMessage: string = `Failed to ${this.isEditMode ? 'update' : 'create'} timezone`;
+
+          if (error.error) {
+            if (error.error.errors) {
+              this.handleValidationErrors(error.error.errors);
+              const validationMessages = Object.values(error.error.errors).flat();
+              errorMessage = validationMessages.join('<br>');
+            } else if (error.error.message) {
+              errorMessage = error.error.message;
+            } else if (typeof error.error === 'string') {
+              errorMessage = error.error;
+            }
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: `Failed to ${this.isEditMode ? 'update' : 'create'} timezone`,
+            html: errorMessage,
             confirmButtonColor: '#17253E'
           });
-          
-          if (error.error?.errors) {
-            this.handleValidationErrors(error.error.errors);
-          }
         }
       );
     } else {

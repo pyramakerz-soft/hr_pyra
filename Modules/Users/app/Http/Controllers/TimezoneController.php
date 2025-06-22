@@ -109,7 +109,7 @@ class TimezoneController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string',
+            'name' => 'required|string|unique:timezones,name',
             'value' => 'required|integer',
         ]);
 
@@ -157,7 +157,7 @@ class TimezoneController extends Controller
         $timezone = Timezone::findOrFail($id);
 
         $request->validate([
-            'name' => 'required|string',
+            'name' => 'required|string|unique:timezones,name,' . $id,
             'value' => 'required|integer',
         ]);
 

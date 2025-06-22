@@ -10,9 +10,11 @@
   
       <div
         *ngFor="let item of menuItems; let i = index"
-        class="text_Style text-lg md:text-xl font-semibold px-9 py-3 md:py-5 flex items-center space-x-4 cursor-pointer"
-        [ngClass]="{ active: activeIndex === i }"
-        (click)="setActiveIndex(i); item.label === 'Sign Out' ? signOut() : null"
+        class="text_Style text-lg md:text-xl font-semibold px-9 py-3 md:py-5 flex items-center space-x-4"
+        [ngClass]="{ active: activeIndex === i, 'cursor-pointer': activeIndex !== null }"
+
+        (click)="handleMenuClick(i, item.label)"
+        
         [routerLink]="item.label === 'Sign Out' ? null : item.route"
       >
         <i [ngClass]="item.icon"></i>
