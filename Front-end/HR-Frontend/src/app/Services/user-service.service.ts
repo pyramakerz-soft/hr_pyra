@@ -39,6 +39,7 @@ export class UserServiceService {
     formData.append('code', emp.code || '');
     formData.append('department_id', emp.department_id?.toString() || '');
     formData.append('sub_department_id', emp.sub_department_id?.toString() || '');
+    formData.append('timezone_id', emp.timezone_id?.toString() || '');
 
     formData.append('emp_type', emp.emp_type);
     formData.append('phone', emp.phone);
@@ -84,6 +85,7 @@ export class UserServiceService {
     formData.append('code', emp.code || '');
     formData.append('department_id', emp.department_id?.toString() || '');
     formData.append('sub_department_id', emp.sub_department_id?.toString() || '');
+    formData.append('timezone_id', emp.timezone_id?.toString() || '');
 
     formData.append('emp_type', emp.emp_type || '');
     formData.append('phone', emp.phone || '');

@@ -438,6 +438,7 @@ private function formatPagination($users)
             'department_id' => $request['department_id'],
 
             'sub_department_id' => $request['sub_department_id'],
+            'timezone_id' => $request['timezone_id'],
 
 
             'image' => $imageUrl,
@@ -680,6 +681,7 @@ private function formatPagination($users)
             'gender' => $request['gender'] ?? $user->gender,
             'department_id' => $departmentId,
             'sub_department_id' => $sub_department_id,
+            'timezone_id' => $request['timezone_id'] ?? $user->timezone_id,
 
             'image' => $imageUrl,
         ]);

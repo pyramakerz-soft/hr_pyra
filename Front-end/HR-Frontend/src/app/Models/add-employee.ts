@@ -2,6 +2,7 @@ import { RoleModel } from "./role-model";
 
 export class AddEmployee {
     constructor(
+        public timezone_id: number | null,
         public image: File|null|string,
         public name: string,
         public code: string,

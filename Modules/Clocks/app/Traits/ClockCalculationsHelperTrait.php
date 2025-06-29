@@ -199,7 +199,8 @@ trait ClockCalculationsHelperTrait
 
         // Group clocks by date
         $groupedClocks = $clocks->groupBy(function ($clock) {
-            return Carbon::parse($clock->clock_in)->addHours(3)->toDateString(); // Apply +3 offset
+            $timezoneValue = $clock->user->timezone ?  $clock->user->timezone->value : 3;  // Default to +3 if no timezone
+            return Carbon::parse($clock->clock_in)->addHours(value: $timezoneValue)->toDateString(); // Apply +3 offset
         });
 
         $data = [];
@@ -215,7 +216,6 @@ trait ClockCalculationsHelperTrait
 
             // Format each clock and apply +3 offset
             $formattedClocks = $sortedClocks->map(function ($clock) {
-                  $timezoneValue = $clock->user->timezone ? $clock->user->value : 3;  // Default to +3 if no timezone
                 // $timezoneValue = 0;  // Default to +3 if no timezone
 
                 $clock->clock_in = Carbon::parse($clock->clock_in)->format('Y-m-d H:i:s');
@@ -272,21 +272,161 @@ trait ClockCalculationsHelperTrait
 
     protected function getAddressFromCoordinates($latitude, $longitude)
     {
-        $client = new Client();
-        $url = "https://nominatim.openstreetmap.org/reverse?lat={$latitude}&lon={$longitude}&format=json";
+        $client = new Client([
+            'timeout' => 15,
+            'connect_timeout' => 5,
+        ]);
 
-        try {
-            $response = $client->get($url, [
-                'headers' => [
-                    'User-Agent' => 'YourAppName/1.0',
-                ],
-            ]);
+        // Try multiple FREE geocoding services in order of preference (no API keys required)
+        $geocodingServices = [
+            'bigdatacloud' => function() use ($client, $latitude, $longitude) {
+                return $this->tryBigDataCloudGeocoding($client, $latitude, $longitude);
+            },
+            'photon' => function() use ($client, $latitude, $longitude) {
+                return $this->tryPhotonGeocoding($client, $latitude, $longitude);
+            },
+            'nominatim' => function() use ($client, $latitude, $longitude) {
+                return $this->tryNominatimGeocoding($client, $latitude, $longitude);
+            }
+        ];
 
-            return json_decode($response->getBody()->getContents(), true);
-        } catch (\Exception $e) {
-            Log::error("Error fetching address: " . $e->getMessage());
-            return null;
+        foreach ($geocodingServices as $serviceName => $serviceFunction) {
+            try {
+                $result = $serviceFunction();
+                if ($result && isset($result['display_name'])) {
+                    Log::info("Address fetched successfully from {$serviceName}", [
+                        'latitude' => $latitude,
+                        'longitude' => $longitude,
+                        'address' => $result['display_name']
+                    ]);
+                    return $result;
+                }
+            } catch (\Exception $e) {
+                Log::warning("Geocoding service {$serviceName} failed: " . $e->getMessage(), [
+                    'latitude' => $latitude,
+                    'longitude' => $longitude
+                ]);
+                continue; // Try next service
+            }
         }
+
+        // Final fallback to coordinate-based address
+        Log::info("All geocoding services failed, falling back to coordinate-based address", [
+            'latitude' => $latitude,
+            'longitude' => $longitude
+        ]);
+
+        return [
+            'display_name' => "Location: {$latitude}, {$longitude}",
+            'lat' => $latitude,
+            'lon' => $longitude,
+            'fallback' => true,
+            'address' => [
+                'road' => "Location: {$latitude}, {$longitude}"
+            ]
+        ];
+    }
+
+    private function tryNominatimGeocoding($client, $latitude, $longitude)
+    {
+        // Add a delay to respect rate limits (1 request per second maximum)
+
+        $response = $client->get('https://nominatim.openstreetmap.org/reverse', [
+            'headers' => [
+                'User-Agent' => 'HRAttendanceApp/1.0',
+                'Accept' => 'application/json',
+                'Accept-Language' => 'en'
+            ],
+            'query' => [
+                'lat' => $latitude,
+                'lon' => $longitude,
+                'format' => 'json',
+                'addressdetails' => '1',
+                'zoom' => '16', // Reduced zoom level for better stability
+                'limit' => '1',
+            ]
+        ]);
+
+        $data = json_decode($response->getBody()->getContents(), true);
+        return $data && isset($data['display_name']) ? $data : null;
+    }
+
+    private function tryPhotonGeocoding($client, $latitude, $longitude)
+    {
+        // Photon - Free geocoding service by OpenStreetMap
+        $response = $client->get('https://photon.komoot.io/reverse', [
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
+            'query' => [
+                'lat' => $latitude,
+                'lon' => $longitude,
+                'limit' => '1',
+            ]
+        ]);
+
+        $data = json_decode($response->getBody()->getContents(), true);
+        
+        if ($data && isset($data['features']) && count($data['features']) > 0) {
+            $feature = $data['features'][0];
+            $properties = $feature['properties'] ?? [];
+            
+            // Build display name from available properties
+            $addressParts = [];
+            if (isset($properties['name'])) $addressParts[] = $properties['name'];
+            if (isset($properties['street'])) $addressParts[] = $properties['street'];
+            if (isset($properties['city'])) $addressParts[] = $properties['city'];
+            if (isset($properties['country'])) $addressParts[] = $properties['country'];
+            
+            return [
+                'display_name' => implode(', ', $addressParts) ?: "Location: {$latitude}, {$longitude}",
+                'lat' => $latitude,
+                'lon' => $longitude,
+                'address' => $properties
+            ];
+        }
+        
+        return null;
+    }
+
+    private function tryBigDataCloudGeocoding($client, $latitude, $longitude)
+    {
+        // BigDataCloud - Free reverse geocoding service
+        $response = $client->get('https://api.bigdatacloud.net/data/reverse-geocode-client', [
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
+            'query' => [
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'localityLanguage' => 'en',
+            ]
+        ]);
+
+        $data = json_decode($response->getBody()->getContents(), true);
+        
+        if ($data && isset($data['locality'])) {
+            // Build display name from BigDataCloud response
+            $addressParts = [];
+            if (isset($data['locality'])) $addressParts[] = $data['locality'];
+            if (isset($data['city'])) $addressParts[] = $data['city'];
+            if (isset($data['principalSubdivision'])) $addressParts[] = $data['principalSubdivision'];
+            if (isset($data['countryName'])) $addressParts[] = $data['countryName'];
+            
+            return [
+                'display_name' => implode(', ', $addressParts) ?: "Location: {$latitude}, {$longitude}",
+                'lat' => $latitude,
+                'lon' => $longitude,
+                'address' => [
+                    'road' => $data['locality'] ?? '',
+                    'city' => $data['city'] ?? '',
+                    'state' => $data['principalSubdivision'] ?? '',
+                    'country' => $data['countryName'] ?? ''
+                ]
+            ];
+        }
+        
+        return null;
     }
 
 

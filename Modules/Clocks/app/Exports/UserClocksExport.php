@@ -39,7 +39,7 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
         $defaultStartDate = $now->copy()->subMonth()->day(26)->startOfDay();
         $defaultEndDate = $now->copy()->day(26)->endOfDay();
 
-        $timezoneValue = $this->user->timezone ?  $this->user->value : 3;  // Default to +3 if no timezone
+        $timezoneValue = $this->user->timezone ?  $this->user->timezone->value : 3;  // Default to +3 if no timezone
 
         $startDate = $this->startDate ? Carbon::parse($this->startDate)->startOfDay() : $defaultStartDate;
         $endDate = $this->endDate ? Carbon::parse($this->endDate)->endOfDay() : $defaultEndDate;

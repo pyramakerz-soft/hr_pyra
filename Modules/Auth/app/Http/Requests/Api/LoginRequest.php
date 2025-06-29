@@ -24,8 +24,9 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'email'],
             'password' => ['required', 'min:6'],
-            'serial_number' => ['nullable', 'string'],
+            // 'serial_number' => ['nullable', 'string'],
+            'new_serial_number' => ['nullable', 'string'],
+
         ];
     }
-
 }

@@ -36,38 +36,44 @@ trait AuthTrait
 
 
 
+    /**
+     * Validate the new_serial_number from the request for the given user.
+     *
+     * @param Request $request
+     * @param User $user
+     * @throws \Exception
+     */
     protected function validateSerialNumber(Request $request, User $user)
     {
-        if ($request->new_serial_number) {
-
-            // Check if the serial number doesn't contain "#" (indicating an outdated version)
-            if (strpos($request->new_serial_number, '#') === false) {
-                throw new \Exception('Please update the app to the latest version to continue.', 406);
-            }
-
-            if (is_null($user->new_serial_number)) {
-                $request->validate([
-                    'serial_number' => [Rule::unique('users', 'serial_number')->ignore($user->id)],
-                ]);
-                $user->update(['serial_number' => $request->new_serial_number]);
-            }
-            // If user already has a serial number but it doesn't contain "#", update it
-            elseif (strpos($user->serial_number, '#') === false) {
-                $user->update(['serial_number' => $request->new_serial_number]);
-            }
-            // If the user's serial number is different from the request serial number, throw an error
-            elseif ($user->serial_number !== $request->new_serial_number) {
-                Log::info('SERIAL COMPRISON');
-
-                Log::info('user SERIAL '.$user->serial_number );
-                Log::info('REQUEST SERIAL '.$request->new_serial_number);
-
-                throw new \Exception('Serial number does not match', 406);
-            }
-
-            // Handle mobile verification
-
+        // Ensure new_serial_number is present in the request
+        if (!$request->has('new_serial_number') ) {
+            return;
         }
+
+        $serial = $request->new_serial_number;
+        Log::info('Serial number from request: ' . $serial);
+        Log::info($user->serial_number);
+        // // Serial number must contain '#' (indicating a valid app version)
+        // if (strpos($serial, '#') === false) {
+        //     throw new \Exception('Please update the app to the latest version to continue.', 406);
+        // }
+
+        // If user already has a serial number, check for uniqueness and match
+        if ($user->serial_number != null) {
+            // If the user's serial number is different from the request, throw error
+            if ($user->serial_number != $serial) {
+                throw new \Exception('Serial number is Wrong.', 422);
+            }
+            // If serial matches, do nothing (valid)
+            return;
+        } else {
+            // If user does not have a serial number, set it (with uniqueness check)
+            $request->validate([
+                'new_serial_number' => [Rule::unique('users', 'serial_number')],
+            ]);
+            $user->update(['serial_number' => $serial]);
+        }
+        // Optionally: Handle mobile verification here
     }
 
     protected function generateToken(Request $request, User $user)
