@@ -47,6 +47,7 @@ export class AttendenceEditComponent {
           this.data.formattedClockOut = this.data.formattedClockOut;
       }
     );
+    console.log(this.data);
   }
 
   CheckValidate() {
