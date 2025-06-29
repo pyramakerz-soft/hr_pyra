@@ -293,6 +293,8 @@ trait ClockCalculationsHelperTrait
 
     protected function updateClockRecord($clock, $clockIn, $clockOut, $duration, $lateArrive, $earlyLeave)
     {
+        $clockIn = Carbon::parse($clockIn)->subHours(3);
+        $clockOut = Carbon::parse($clockOut)->subHours(3);
         $clock->update([
             'clock_in' => $clockIn->format('Y-m-d H:i:s'),
             'clock_out' => $clockOut->format('Y-m-d H:i:s'),
