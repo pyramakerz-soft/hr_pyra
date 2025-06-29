@@ -15,7 +15,7 @@ use Modules\Clocks\Http\Controllers\ClocksController;
  *
 */
 
-Route::group(['middleware' => ['auth:api']], function () {
+Route::group(['middleware' => ['auth:api', 'role:Hr|Team leader']], function () {
 
 
 

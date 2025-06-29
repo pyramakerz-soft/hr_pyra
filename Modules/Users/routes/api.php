@@ -66,7 +66,7 @@ Route::group(['prefix' => 'vacation'], function () {
 
 
 
-Route::group(['middleware' => 'role:Hr|Admin'], function () {
+Route::group(['middleware' => 'role:Hr|Admin|Team leader'], function () {
 
 
 
