@@ -81,9 +81,9 @@ export class LoginComponent {
               localStorage.setItem("role", userResponse.User.role_name);
 
               // Navigate based on role
-              if (this.accountService.r.role_name === "Employee") {
+              if (this.accountService.r.role_name === "Employee" ||  this.accountService.r.role_name === "Team leader") {
                 this.router.navigateByUrl("employee");
-              } else if (this.accountService.r.role_name === "Hr"  ||  this.accountService.r.role_name === "Admin"  ||  this.accountService.r.role_name === "Team leader" ) {
+              } else if (this.accountService.r.role_name === "Hr"  ||  this.accountService.r.role_name === "Admin") {
                 this.router.navigateByUrl("HR");
               }
             }

@@ -14,6 +14,10 @@ export const doNotNavigateToLoginIfTokenExistsGuard: CanActivateFn = (route, sta
     router.navigateByUrl('HR');
     return false;
   }
+  else if(token != null && role === "Team leader"){
+    router.navigateByUrl('HR');
+    return false;
+  }
   else if(token != null && role === "Admin"){
     router.navigateByUrl('HR');
     return false;
