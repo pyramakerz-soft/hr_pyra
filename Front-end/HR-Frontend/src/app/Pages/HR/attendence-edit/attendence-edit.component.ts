@@ -22,6 +22,8 @@ export class AttendenceEditComponent {
   ClockInEgyptFormat: string = ""
   ClockOutEgyptFormat: string = ""
   ClockId: number = 1;
+displayClockIn: string = '';
+displayClockOut: string = '';
 
 
   FclockIn:string=""
@@ -37,17 +39,33 @@ export class AttendenceEditComponent {
     });
   }
 
+  // GetClocksById(id: number) {
+  //   this.ClockServ.GetClockByID(this.ClockId).subscribe(
+  //     (d: any) => {
+  //       this.data = d.clock
+  //       if (this.data.formattedClockIn)
+  //         this.data.formattedClockIn = this.data.formattedClockIn;
+  //       if (this.data.formattedClockOut)
+  //         this.data.formattedClockOut = this.data.formattedClockOut;
+  //     }
+  //   );
+  // }
   GetClocksById(id: number) {
-    this.ClockServ.GetClockByID(this.ClockId).subscribe(
-      (d: any) => {
-        this.data = d.clock
-        if (this.data.formattedClockIn)
-          this.data.formattedClockIn = this.data.formattedClockIn;
-        if (this.data.formattedClockOut)
-          this.data.formattedClockOut = this.data.formattedClockOut;
-      }
-    );
-  }
+  this.ClockServ.GetClockByID(this.ClockId).subscribe((d: any) => {
+    this.data = d.clock;
+    
+    if (this.data.formattedClockIn) {
+      this.data.formattedClockIn = this.data.formattedClockIn;
+      this.displayClockIn = this.convertUTCToEgyptTime(this.data.formattedClockIn);
+    }
+
+    if (this.data.formattedClockOut) {
+      this.data.formattedClockOut = this.data.formattedClockOut;
+      this.displayClockOut = this.convertUTCToEgyptTime(this.data.formattedClockOut);
+    }
+  });
+}
+
 
   CheckValidate() {
     this.data.formattedClockIn = this.data.formattedClockIn.replace("T", ' ')
@@ -106,7 +124,18 @@ export class AttendenceEditComponent {
     this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/" + this.data.userId)
 
   }
-
+convertUTCToEgyptTime(utcString: string): string {
+  const utcDate = new Date(utcString.replace(' ', 'T') + ':00Z'); // Ensure it's treated as UTC
+  return utcDate.toLocaleString('en-GB', {
+    timeZone: 'Africa/Cairo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }).replace(',', '');
+}
 
   // transformUTCToEgyptTime(utcDateTime: string): string {
   //   // Parse the input UTC datetime string to a Date object
