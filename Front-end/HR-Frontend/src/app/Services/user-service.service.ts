@@ -117,37 +117,47 @@ export class UserServiceService {
     return this.http.post<any>(this.baseURL + "/users/update_password/" + empId, body, { headers });
   }
 
-  searchByFilter(filter: string, value: string, pageNumber: number = 1): Observable<any> {
-    const token = localStorage.getItem("token");
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    
-    // Use the existing search endpoint with modified parameters
-    return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, {
-      headers,
-      params: {
-        page: pageNumber.toString(),
-        [`search_${filter}`]: value
-      }
-    });
-  }
-   SearchByNameAndDeptAndSubDep(searchTerm: string, deptId?: number | null, subId?: number | null){
-    const token = localStorage.getItem("token");
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  searchByFilter(filter: string, value: string, pageNumber: number = 1): Observable<UserModel[]> {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error('No authentication token found');
+  
+  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  
+  // Create params object with dynamic search parameter
+  const params: { [key: string]: string } = {
+    page: pageNumber.toString(),
+    [`search_${filter}`]: value
+  };
+  
+  return this.http.get<UserModel[]>(`${this.baseURL}/users/getAllUsers`, {
+    headers,
+    params
+  });
+}
 
-    let params: any = { 
-      [`search_${filter}`]: searchTerm 
-    };
+SearchByNameAndDeptAndSubDep(
+  searchTerm: string, 
+  filter: string = 'name', 
+  deptId?: number | null, 
+  subId?: number | null
+): Observable<UserModel[]> {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error('No authentication token found');
+  
+  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    if (deptId != null) {
-      params.department_id = deptId;
-    }
+  // Initialize params with search term
+  const params: { [key: string]: string | number } = {
+    [`search_${filter}`]: searchTerm
+  };
 
-    if (subId != null) {
-      params.sub_department_id = subId;
-    }
+  
 
-    return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, { headers, params });
-  }
+  return this.http.get<UserModel[]>(`${this.baseURL}/users/getAllUsers`, { 
+    headers, 
+    params 
+  });
+}
   
   getAllUsersName(){
     const token = localStorage.getItem("token");
