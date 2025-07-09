@@ -117,47 +117,27 @@ export class UserServiceService {
     return this.http.post<any>(this.baseURL + "/users/update_password/" + empId, body, { headers });
   }
 
-  searchByFilter(filter: string, value: string, pageNumber: number = 1): Observable<UserModel[]> {
-  const token = localStorage.getItem("token");
-  if (!token) throw new Error('No authentication token found');
+  SearchByNameAndDeptAndSubDep(Name: string, deptId?: number|null, subId?: number|null) {
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
   
-  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    let params: any = { search: Name };
   
-  // Create params object with dynamic search parameter
-  const params: { [key: string]: string } = {
-    page: pageNumber.toString(),
-    [`search_${filter}`]: value
-  };
+    if (deptId != null) {
+      params.department_id = deptId;
+    }
   
-  return this.http.get<UserModel[]>(`${this.baseURL}/users/getAllUsers`, {
-    headers,
-    params
-  });
-}
-
-SearchByNameAndDeptAndSubDep(
-  searchTerm: string, 
-  filter: string = 'name', 
-  deptId?: number | null, 
-  subId?: number | null
-): Observable<UserModel[]> {
-  const token = localStorage.getItem("token");
-  if (!token) throw new Error('No authentication token found');
+    if (subId != null) {
+      params.sub_department_id = subId;
+    }
+    console.log('/////');
+    
+  console.log(deptId);
+  console.log(subId);
   
-  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-  // Initialize params with search term
-  const params: { [key: string]: string | number } = {
-    [`search_${filter}`]: searchTerm
-  };
-
   
-
-  return this.http.get<UserModel[]>(`${this.baseURL}/users/getAllUsers`, { 
-    headers, 
-    params 
-  });
-}
+    return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, { headers, params });
+  }
   
   getAllUsersName(){
     const token = localStorage.getItem("token");
