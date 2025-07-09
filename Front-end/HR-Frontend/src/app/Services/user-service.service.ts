@@ -117,25 +117,35 @@ export class UserServiceService {
     return this.http.post<any>(this.baseURL + "/users/update_password/" + empId, body, { headers });
   }
 
-  SearchByNameAndDeptAndSubDep(Name: string, deptId?: number|null, subId?: number|null) {
+  searchByFilter(filter: string, value: string, pageNumber: number = 1): Observable<any> {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-  
-    let params: any = { search: Name };
-  
+    
+    // Use the existing search endpoint with modified parameters
+    return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, {
+      headers,
+      params: {
+        page: pageNumber.toString(),
+        [`search_${filter}`]: value
+      }
+    });
+  }
+   SearchByNameAndDeptAndSubDep(searchTerm: string, filter: string = 'name', deptId?: number | null, subId?: number | null) {
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    let params: any = { 
+      [`search_${filter}`]: searchTerm 
+    };
+
     if (deptId != null) {
       params.department_id = deptId;
     }
-  
+
     if (subId != null) {
       params.sub_department_id = subId;
     }
-    console.log('/////');
-    
-  console.log(deptId);
-  console.log(subId);
-  
-  
+
     return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, { headers, params });
   }
   

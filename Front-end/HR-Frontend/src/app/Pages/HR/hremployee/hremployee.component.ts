@@ -41,11 +41,22 @@ export class HREmployeeComponent {
   UsersNames: string[] = [];
   filteredUsers: string[] = [];
   isLoading: boolean = false; // Add isLoading state
-
+  searchFilter: string = 'name'; // Default search filter
+  searchValue: string = ''; // Value to search for
   isNavigateingToImportPopUp = false
 
-  ngOnInit() {
+  // Available search filters
+  searchFilters = [
+    { value: 'name', display: 'Name' },
+    { value: 'code', display: 'Code' },
+    { value: 'department', display: 'Department' },
+    { value: 'position', display: 'Position' },
+    { value: 'phone', display: 'Phone' },
+    { value: 'email', display: 'Email' },
+    { value: 'username', display: 'Username' }
+  ];
 
+  ngOnInit() {
     const savedPageNumber = localStorage.getItem('HrEmployeeCN');
     if (savedPageNumber) {
       this.CurrentPageNumber = parseInt(savedPageNumber, 10);
@@ -58,11 +69,9 @@ export class HREmployeeComponent {
     localStorage.setItem('HrLocationsCN', "1");
     localStorage.setItem('HrAttendaceCN', "1");
     localStorage.setItem('HrAttanceDetailsCN', "1");
-
-
   }
 
-   downloadExcelTemplate() {
+  downloadExcelTemplate() {
     this.isLoading = true; // Show spinner
     this.clockService.downloadAllUsersExcel().subscribe(
       (blob: Blob) => {
@@ -106,7 +115,6 @@ export class HREmployeeComponent {
     dialogRef.afterClosed().subscribe(() => {
       this.isNavigateingToImportPopUp = false;
     });
-
   }
 
   NavigateToAddEmployee() {
@@ -157,10 +165,9 @@ export class HREmployeeComponent {
     localStorage.setItem('HrEmployeeCN', this.CurrentPageNumber.toString());
   }
 
-
   Search() {
-    if (this.selectedName) {
-      this.userServ.SearchByNameAndDeptAndSubDep(this.selectedName).subscribe(
+    if (this.searchValue) {
+      this.userServ.searchByFilter(this.searchFilter, this.searchValue).subscribe(
         (d: any) => {
           this.tableData = d.data.users;
           this.PagesNumber = 1;
@@ -171,9 +178,9 @@ export class HREmployeeComponent {
     }
     else {
       this.DisplayPagginationOrNot = true;
+      this.getAllEmployees(1);
     }
   }
-
 
   getUsersName() {
     this.userServ.getAllUsersName().subscribe(
@@ -183,15 +190,12 @@ export class HREmployeeComponent {
     );
   }
 
-
   filterByName() {
-    // this.getLocationsName();
-    const query = this.selectedName.toLowerCase();
+    const query = this.searchValue.toLowerCase();
     if (query.trim() === '') {
-      // If the input is empty, call getAllLocations with the current page number
       this.getAllEmployees(this.CurrentPageNumber);
       this.DisplayPagginationOrNot = true;
-      this.filteredUsers = []; // Clear the dropdown list
+      this.filteredUsers = [];
     } else {
       this.filteredUsers = this.UsersNames;
       this.filteredUsers = this.UsersNames.filter(name =>
@@ -201,24 +205,20 @@ export class HREmployeeComponent {
   }
 
   selectUser(location: string) {
-    this.selectedName = location;
-    this.userServ.SearchByNameAndDeptAndSubDep(this.selectedName).subscribe(
+    this.searchValue = location;
+    this.userServ.searchByFilter(this.searchFilter, this.searchValue).subscribe(
       (d: any) => {
         this.tableData = d.data.users;
         this.DisplayPagginationOrNot = false;
       },
     );
-
   }
 
   resetfilteredUsers() {
     this.filteredUsers = [];
-
   }
 
-
   DeleteEmp(id: number) {
-
     Swal.fire({
       title: 'Are you sure you want to Delete This Employee?',
       icon: 'warning',
@@ -240,7 +240,6 @@ export class HREmployeeComponent {
             this.getUsersName()
           }
         );
-
       }
     });
   }

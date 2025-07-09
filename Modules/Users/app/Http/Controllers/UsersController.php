@@ -123,6 +123,7 @@ class UsersController extends Controller
     $search = $request->get('search');
     $department = $request->get('department_id');
     $subDepartment = $request->get('sub_department_id');
+    $searchColumn = $request->get('search_column', 'name'); // Default to 'name' if not specified
     $usersData = null;
 
     // Base query
@@ -141,22 +142,23 @@ class UsersController extends Controller
     // Handle export
     if ($request->has('export')) {
         $users = $usersQuery->get();
-
-        return (new UsersExport($users))
-            ->download('all_user_clocks.xlsx');
+        return (new UsersExport($users))->download('all_user_clocks.xlsx');
     }
 
     // Handle search
     if ($search) {
-        $users = $this->searchUsersByNameOrCode($search);
+        $usersQuery->where(function($query) use ($search, $searchColumn) {
+            // Search by specific column if provided
+            if ($searchColumn && $searchColumn !== 'all') {
+                $query->where($searchColumn, 'like', '%' . $search . '%');
+            } else {
+                // Default search behavior (search in name and code)
+                $query->where('name', 'like', '%' . $search . '%')
+                      ->orWhere('code', 'like', '%' . $search . '%');
+            }
+        });
 
-        // Apply department/sub-department filtering to search results
-        if ($department) {
-            $users = $users->where('department_id', $department);
-        }
-        if ($subDepartment) {
-            $users = $users->where('sub_department_id', $subDepartment);
-        }
+        $users = $usersQuery->get();
 
         $usersData = $users->isEmpty() ? null : [
             'users' => UserResource::collection($users),
@@ -165,18 +167,17 @@ class UsersController extends Controller
         // If filters are applied, fetch all users matching the filters (no pagination)
         if ($department || $subDepartment) {
             Log::info('Fetching all users without pagination');
-            $users = $usersQuery->get();  // Fetch all users without pagination
+            $users = $usersQuery->get();
             $usersData = [
                 'users' => UserResource::collection($users),
-                'pagination' => null,  // No pagination if no pagination applied
+                'pagination' => null,
             ];
         } else {
             // Otherwise, apply pagination
             $users = $usersQuery->paginate(5);
-
             $usersData = [
                 'users' => UserResource::collection($users),
-                'pagination' => $this->formatPagination($users),  // Format pagination
+                'pagination' => $this->formatPagination($users),
             ];
         }
     }
