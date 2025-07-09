@@ -27,24 +27,24 @@
 
     <!-- Search Input -->
     <div class="flex-1 relative">
-      <div class="rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-4 py-3 flex items-center">
-        <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]" (click)="Search()"></i>
-        <input type="text" [(ngModel)]="searchValue" (input)="filterByName()" (keydown.enter)="Search()"
-          [placeholder]="'Enter ' + (searchFilters.find(f => f.value === searchFilter)?.display + '...'"
-          class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full ml-2" />
-      </div>
+  <div class="rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-4 py-3 flex items-center">
+    <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]" (click)="Search()"></i>
+    <input type="text" [(ngModel)]="searchValue" (input)="filterByName()" (keydown.enter)="Search()"
+      [placeholder]="searchPlaceholder"
+      class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full ml-2" />
+  </div>
 
-      <!-- Autocomplete Dropdown (for name search only) -->
-      <div *ngIf="filteredUsers.length > 0 && searchFilter === 'name'"
-        class="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
-        <ul>
-          <li *ngFor="let user of filteredUsers" (click)="selectUser(user)"
-            class="px-4 py-2 cursor-pointer hover:bg-gray-200">
-            {{ user }}
-          </li>
-        </ul>
-      </div>
-    </div>
+  <!-- Autocomplete Dropdown (for name search only) -->
+  <div *ngIf="filteredUsers.length > 0 && searchFilter === 'name'"
+    class="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
+    <ul>
+      <li *ngFor="let user of filteredUsers" (click)="selectUser(user)"
+        class="px-4 py-2 cursor-pointer hover:bg-gray-200">
+        {{ user }}
+      </li>
+    </ul>
+  </div>
+</div>
   </div>
 
   <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">
