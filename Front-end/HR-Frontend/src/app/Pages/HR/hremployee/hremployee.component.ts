@@ -70,7 +70,10 @@ export class HREmployeeComponent {
     localStorage.setItem('HrAttendaceCN', "1");
     localStorage.setItem('HrAttanceDetailsCN', "1");
   }
-
+get searchPlaceholder(): string {
+  const filter = this.searchFilters.find(f => f.value === this.searchFilter);
+  return `Enter ${filter?.display || 'name'}...`;
+}
   downloadExcelTemplate() {
     this.isLoading = true; // Show spinner
     this.clockService.downloadAllUsersExcel().subscribe(

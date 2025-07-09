@@ -130,7 +130,7 @@ export class UserServiceService {
       }
     });
   }
-   SearchByNameAndDeptAndSubDep(searchTerm: string, filter: string = 'name', deptId?: number | null, subId?: number | null) {
+   SearchByNameAndDeptAndSubDep(searchTerm: string, deptId?: number | null, subId?: number | null){
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
