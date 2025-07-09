@@ -283,7 +283,12 @@ onSubDepartmentChange() {
       this.selectedUsers = [];
   this.isSelectAllChecked = false;
     // if(this.selectedName){
-    this.userServ.SearchByNameAndDeptAndSubDep(this.selectedName,this.selectedDepartment,this.selectedSubDepartment).subscribe(
+    // In your component
+this.userServ.SearchByNameAndDeptAndSubDep(
+  this.selectedName,
+  this.selectedDepartment?.toString(), // Convert to string
+  this.selectedSubDepartment // Convert to string
+).subscribe(
       (d: any) => {
         this.tableData = d.data.users;
         this.PagesNumber=1;
