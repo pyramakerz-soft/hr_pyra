@@ -38,6 +38,9 @@ class UserResource extends JsonResource
                     $clockInFormatted =$clockInRecord && $clockInRecord->clock_in
         ? Carbon::parse($clockInRecord->clock_in)->addHours($timezoneValue)->format('h:i A')
         : '--:--';
+                    $clockOutFormatted =$clockInRecord && $clockInRecord->clock_out
+        ? Carbon::parse($clockInRecord->clock_out)->addHours($timezoneValue)->format('h:i A')
+        : '--:--';
 
       
         Log::info($this->subDepartment);
@@ -57,6 +60,7 @@ class UserResource extends JsonResource
             'phone' => $this->phone,
             'working_hours' => $this->user_detail->working_hours_day ?? null,    
                 'clock_in_time' => $clockInFormatted, // ✅ Today's clock-in time or empty
+                'clock_out_time' => $clockOutFormatted, // ✅ Today's clock-in time or empty
                 'userTimeZone' => $timezoneValue,  // The timezone value (e.g., +3 or -3)
 
         ];
