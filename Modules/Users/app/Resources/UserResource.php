@@ -9,60 +9,74 @@ use Illuminate\Support\Facades\Log;
 
 class UserResource extends JsonResource
 {
-
     /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
      */
-
     public function toArray(Request $request): array
     {
         $timezoneValue = $this->timezone ? $this->timezone->value : 3;  // Default to +3 if no timezone
 
+        // Support date filtering
+        $from_day = $request->get('from_day');
+        $to_day   = $request->get('to_day');
+        $clockInRecord = null;
+        $clockOutRecord = null;
 
-        $today = Carbon::now()->format('Y-m-d'); // Only date, no time
-        Log::info($today);  
-        // Get the first ClockInOut record where clock_in is not null and date is today
-        $clockInRecord = $this->user_clocks()
-        ->whereDate('clock_in', $today)
-        ->whereNotNull('clock_in')
-        ->orderBy('clock_in', 'desc')
-        ->first(); // ✅ correct
-        Log::info($clockInRecord);
-        // Log::info('All Clock Records Today:', $this->user_clocks()->whereDate('clock_in', $today)->get());
+        if ($from_day && $to_day) {
+            // Filter clocks within range, get the earliest and latest
+            $clockInRecord = $this->user_clocks()
+                ->whereBetween('clock_in', [$from_day, $to_day])
+                ->whereNotNull('clock_in')
+                ->orderBy('clock_in', 'asc')
+                ->first();
 
-        // Format clock-in time or return empty string
+            $clockOutRecord = $this->user_clocks()
+                ->whereBetween('clock_in', [$from_day, $to_day])
+                ->whereNotNull('clock_out')
+                ->orderBy('clock_out', 'desc')
+                ->first();
+        } else {
+            // Default: just today
+            $today = Carbon::now()->format('Y-m-d');
+            $clockInRecord = $this->user_clocks()
+                ->whereDate('clock_in', $today)
+                ->whereNotNull('clock_in')
+                ->orderBy('clock_in', 'asc')
+                ->first();
 
-    
-                    $clockInFormatted =$clockInRecord && $clockInRecord->clock_in
-        ? Carbon::parse($clockInRecord->clock_in)->addHours($timezoneValue)->format('h:i A')
-        : '--:--';
-                    $clockOutFormatted =$clockInRecord && $clockInRecord->clock_out
-        ? Carbon::parse($clockInRecord->clock_out)->addHours($timezoneValue)->format('h:i A')
-        : '--:--';
+            $clockOutRecord = $this->user_clocks()
+                ->whereDate('clock_in', $today)
+                ->whereNotNull('clock_out')
+                ->orderBy('clock_out', 'desc')
+                ->first();
+        }
 
-      
-        Log::info($this->subDepartment);
+        $clockInFormatted = $clockInRecord && $clockInRecord->clock_in
+            ? Carbon::parse($clockInRecord->clock_in)->addHours($timezoneValue)->format('h:i A')
+            : '--:--';
+
+        $clockOutFormatted = $clockOutRecord && $clockOutRecord->clock_out
+            ? Carbon::parse($clockOutRecord->clock_out)->addHours($timezoneValue)->format('h:i A')
+            : '--:--';
+
         return [
-
             'id' => $this->id,
             'name' => $this->name,
             'code' => $this->code,
-            'department' => $this->department != null ? $this->department->name:
+            'department' => $this->department != null ? $this->department->name :
                 ($this->subDepartment != null ?
                     $this->subDepartment->name :
-
                     null),
-            "position" => $this->user_detail->emp_type ?? null,
+            'position' => $this->user_detail->emp_type ?? null,
             'role' => $this->getRoleName(),
             'email' => $this->email,
             'phone' => $this->phone,
-            'working_hours' => $this->user_detail->working_hours_day ?? null,    
-                'clock_in_time' => $clockInFormatted, // ✅ Today's clock-in time or empty
-                'clock_out_time' => $clockOutFormatted, // ✅ Today's clock-in time or empty
-                'userTimeZone' => $timezoneValue,  // The timezone value (e.g., +3 or -3)
-
+            'working_hours' => $this->user_detail->working_hours_day ?? null,
+            'clock_in_time' => $clockInFormatted,
+            'clock_out_time' => $clockOutFormatted,
+            'userTimeZone' => $timezoneValue,
         ];
     }
 }

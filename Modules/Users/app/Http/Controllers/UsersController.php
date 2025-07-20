@@ -171,22 +171,25 @@ if ($from_day && $to_day) {
         ];
     } else {
         // If filters are applied, fetch all users matching the filters (no pagination)
-        if ($department || $subDepartment) {
-            Log::info('Fetching all users without pagination');
-            $users = $usersQuery->get();  // Fetch all users without pagination
-            $usersData = [
-                'users' => UserResource::collection($users),
-                'pagination' => null,  // No pagination if no pagination applied
-            ];
-        } else {
-            // Otherwise, apply pagination
-            $users = $usersQuery->paginate(5);
+        // Remove pagination if filtering by date, department, or sub-department
+if ($department || $subDepartment || ($from_day && $to_day)) {
+    $users = $usersQuery->get();
+     $usersData = [
+        // Pass dates to UserResource!
+        'users' => UserResource::collection($users)->additional([
+            'from_day' => $from_day,
+            'to_day' => $to_day,
+        ]),
+        'pagination' => null,
+    ];
+} else {
+    $users = $usersQuery->paginate(5);
+    $usersData = [
+        'users' => UserResource::collection($users),
+        'pagination' => $this->formatPagination($users),
+    ];
+}
 
-            $usersData = [
-                'users' => UserResource::collection($users),
-                'pagination' => $this->formatPagination($users),  // Format pagination
-            ];
-        }
     }
 
     if (!$usersData) {
