@@ -5,7 +5,6 @@ namespace Modules\Users\Resources;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Log;
 
 class UserResource extends JsonResource
 {
@@ -25,29 +24,36 @@ class UserResource extends JsonResource
         $clockOutRecord = null;
 
         if ($from_day && $to_day) {
+            // Ensure we cover full day
+            $start = Carbon::parse($from_day)->startOfDay();
+            $end   = Carbon::parse($to_day)->endOfDay();
+
             // Filter clocks within range, get the earliest and latest
             $clockInRecord = $this->user_clocks()
-                ->whereBetween('clock_in', [$from_day, $to_day])
+                ->whereBetween('clock_in', [$start, $end])
                 ->whereNotNull('clock_in')
                 ->orderBy('clock_in', 'asc')
                 ->first();
 
             $clockOutRecord = $this->user_clocks()
-                ->whereBetween('clock_in', [$from_day, $to_day])
+                ->whereBetween('clock_in', [$start, $end])
                 ->whereNotNull('clock_out')
                 ->orderBy('clock_out', 'desc')
                 ->first();
         } else {
             // Default: just today
             $today = Carbon::now()->format('Y-m-d');
+            $start = Carbon::parse($today)->startOfDay();
+            $end   = Carbon::parse($today)->endOfDay();
+
             $clockInRecord = $this->user_clocks()
-                ->whereDate('clock_in', $today)
+                ->whereBetween('clock_in', [$start, $end])
                 ->whereNotNull('clock_in')
                 ->orderBy('clock_in', 'asc')
                 ->first();
 
             $clockOutRecord = $this->user_clocks()
-                ->whereDate('clock_in', $today)
+                ->whereBetween('clock_in', [$start, $end])
                 ->whereNotNull('clock_out')
                 ->orderBy('clock_out', 'desc')
                 ->first();
