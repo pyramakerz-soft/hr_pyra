@@ -89,6 +89,8 @@
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
             <input type="checkbox" [(ngModel)]="isSelectAllChecked" (change)="toggleSelectAll()" />
           </th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">#</th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Code</th>
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Employees</th>
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Department</th>
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Position</th>
@@ -114,7 +116,9 @@
             <input type="checkbox" [(ngModel)]="row.selected" 
                    (change)="onUserSelectionChange(row)" 
                    [checked]="isUserSelected(row.id)" />
-          </td>
+                  </td>
+                  <td class="py-5 px-4">{{ i+1 }}</td>
+                  <td class="py-5 px-4">{{ row.code }}</td>
           <td class="py-5 px-4">
             <button (click)="NavigateToEmployeeAttendanceDetails(row.id)">{{ row.name }}</button>
           </td>

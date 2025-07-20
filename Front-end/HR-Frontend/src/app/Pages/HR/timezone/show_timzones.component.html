@@ -8,7 +8,7 @@
     <table class="w-full md:table-fixed table-auto bg-[#FFFFFF] text-left text-[#475467]">
       <thead class="bg-[#F9FAFB] text-sm md:text-base">
         <tr>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">ID</th>
+          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">#</th>
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Timezone Name</th>
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Value</th>
           <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Actions</th>
@@ -26,7 +26,7 @@
         <tr *ngFor="let timezone of timezones; let i = index"
        
             class="border-t border-gray-300 text-xs md:text-sm">
-          <td class="py-5 px-4">{{ timezone.id }}</td>
+          <td class="py-5 px-4">{{ i++ }}</td>
           <td class="py-5 px-4">{{ timezone.name }}</td>
           <td class="py-5 px-4">{{ timezone.value }}</td>
 
