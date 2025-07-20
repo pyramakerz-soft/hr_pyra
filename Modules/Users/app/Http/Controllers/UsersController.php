@@ -141,10 +141,13 @@ class UsersController extends Controller
         $usersQuery->where('sub_department_id', $subDepartment);
     }
 if ($from_day && $to_day) {
-        $usersQuery->whereHas('user_clocks', function($query) use ($from_day, $to_day) {
-            $query->whereBetween('created_at', [$from_day, $to_day]);
-        });
-    }
+    $fromDate = Carbon::parse($from_day)->startOfDay();
+    $toDate   = Carbon::parse($to_day)->endOfDay();
+
+    $usersQuery->whereHas('user_clocks', function($query) use ($fromDate, $toDate) {
+        $query->whereBetween('created_at', [$fromDate, $toDate]);
+    });
+}
     // Handle export
     if ($request->has('export')) {
         $users = $usersQuery->get();
