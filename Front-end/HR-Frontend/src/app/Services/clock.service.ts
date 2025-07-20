@@ -24,6 +24,16 @@ export class ClockService {
 
     return this.http.post(`${this.baseUrl}/clock_in`, body, { headers, responseType: 'json' });
   }
+  exportSelectedUsers(userIds: number[], from_day?: string, to_day?: string) {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    const body = { user_ids: userIds, from_day, to_day };
+    return this.http.post(
+      `${this.baseUrl}/users/export-clocks`,
+      body,
+      { headers, responseType: 'blob' }
+    );
+  }
   
   CreateClockInByHrForOther(userId: number, location_id: number|null ,clock_in:string, location_type:string="site") {
     let body

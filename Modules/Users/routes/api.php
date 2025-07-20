@@ -86,7 +86,8 @@ Route::delete('timezones/{id}', [TimezoneController::class, 'destroy']);
         Route::post('/create_user', [UsersController::class, 'store'])->withoutMiddleware('auth:api')->name('user.store'); // Excluding middleware for this route
         Route::get('/get_user_by_id/{user}', [UsersController::class, 'show'])->name('user.show');
         Route::post('/update_password/{user}', [UsersController::class, 'updatePassword'])->name('user.updatePassword');
-
+Route::post('/exportAttendance', [UsersController::class, 'exportAttendance']);
+Route::post('/export-clocks', [UsersController::class, 'exportClocks']);
         Route::post('/import-users-from-excel', [UsersController::class, 'importUsersFromExcel']);
 
         //User Management

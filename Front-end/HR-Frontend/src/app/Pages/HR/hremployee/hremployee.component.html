@@ -89,7 +89,7 @@
           [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}"
           class="border-t border-gray-300 text-xs md:text-sm">
 
-          <td class="py-5 px-4">{{ i+1 }}</td>
+          <td class="py-5 px-4">{{ (CurrentPageNumber - 1) * 5 + i + 1 }}</td>
           <td class="py-5 px-4"><button (click)="NavigateToEmployeeDetails(row.id)">{{ row.name }}</button></td>
           <td class="py-5 px-4">{{ row.code }}</td>
           <td class="py-5 px-4">{{ row.role }}</td>

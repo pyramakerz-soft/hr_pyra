@@ -137,31 +137,26 @@ isUserSelected(userId: number): boolean {
   }
 
 
-ExportData(){
-  
-  this.selectedUsers.forEach(user => {
-    this.isLoading=true;
-    this.clockService.ExportUserDataById(user.userId, this.from_day, this.to_day).subscribe(
-      (result: Blob) => {
-        const userName = user.userName; // Get the user name from selectedUsers
-        const url = window.URL.createObjectURL(result);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${userName}_ClockIn_${this.from_day}_to_${this.to_day}.xlsx`; // Use the userName for the file name
-        a.click();
-        window.URL.revokeObjectURL(url);
-      },
+ExportData() {
+  if (this.selectedUsers.length === 0) return;
+  this.isLoading = true;
+  const ids = this.selectedUsers.map(u => u.userId);
 
-      (error) => {
-        this.isLoading=false;
-
-        console.error('Error exporting user data:', error);
-      }
-    );
-  });
-      this.isLoading=false;
-
+  this.clockService.exportSelectedUsers(ids, this.from_day, this.to_day)
+    .subscribe((result: Blob) => {
+      const url = window.URL.createObjectURL(result);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `all_user_clocks_${this.from_day || 'all'}_${this.to_day || 'all'}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      this.isLoading = false;
+    }, error => {
+      this.isLoading = false;
+      alert('Failed to export data.');
+    });
 }
+
 
 
 ExportAbsentUserData(){
@@ -195,19 +190,20 @@ ExportAbsentUserData(){
   }
 
 
-  getAllEmployees(pgNumber:number) {
-    this.CurrentPageNumber = pgNumber;
-    this.saveCurrentPageNumber();
-    this.userServ.getall(pgNumber).subscribe(
-      (d: any) => {
-        this.tableData = d.data.users;
-        this.PagesNumber = d.data.pagination?.last_page || 1; // Check for last_page and default to 1 if not available
-        this.generatePages();
-      },
-      (error) => {
-      }
-    );
-  }
+getAllEmployees(pgNumber: number, from_day: string = '', to_day: string = '') {
+  this.CurrentPageNumber = pgNumber;
+  this.saveCurrentPageNumber();
+  this.userServ.getall(pgNumber, from_day, to_day).subscribe(
+    (d: any) => {
+      this.tableData = d.data.users;
+      this.PagesNumber = d.data.pagination?.last_page || 1;
+      this.generatePages();
+    },
+    (error) => { }
+  );
+}
+
+
 
   GetAllDepartment(){
     this.departmentServ.getall().subscribe(

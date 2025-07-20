@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
+use Modules\Clocks\Exports\UserClocksExport;
 use Modules\Location\Models\Location;
 use Modules\Users\Exports\UsersExport;
 use Modules\Users\Http\Requests\Api\User\StoreUserRequest;
@@ -123,6 +124,8 @@ class UsersController extends Controller
     $search = $request->get('search');
     $department = $request->get('department_id');
     $subDepartment = $request->get('sub_department_id');
+     $from_day = $request->get('from_day');
+    $to_day = $request->get('to_day');
     $usersData = null;
 
     // Base query
@@ -137,14 +140,19 @@ class UsersController extends Controller
     if ($subDepartment) {
         $usersQuery->where('sub_department_id', $subDepartment);
     }
-
+if ($from_day && $to_day) {
+        $usersQuery->whereHas('user_clocks', function($query) use ($from_day, $to_day) {
+            $query->whereBetween('created_at', [$from_day, $to_day]);
+        });
+    }
     // Handle export
     if ($request->has('export')) {
         $users = $usersQuery->get();
 
-        return (new UsersExport($users))
+        return (new UserClocksExport($users,$from_day, $to_day))
             ->download('all_user_clocks.xlsx');
     }
+    
 
     // Handle search
     if ($search) {
@@ -186,6 +194,43 @@ class UsersController extends Controller
     }
 
     return $this->returnData("data", $usersData, "Users Data");
+}
+public function exportClocks(Request $request)
+{
+    $userIds = $request->input('user_ids', []);
+    $from_day = $request->input('from_day');
+    $to_day = $request->input('to_day');
+
+    if (empty($userIds)) {
+        return response()->json(['error' => 'No users selected.'], 400);
+    }
+
+    $users = User::with([
+        'user_clocks', 'department', 'timezone', 'excuses', 'overTimes', 'user_vacations'
+    ])->whereIn('id', $userIds)->get();
+
+    return (new UserClocksExport($users, $from_day, $to_day))
+        ->download('all_user_clocks.xlsx');
+}
+
+public function exportAttendance(Request $request)
+{
+    $userIds = $request->input('user_ids', []);
+    $from_day = $request->input('from_day');
+    $to_day = $request->input('to_day');
+
+    $usersQuery = User::query()->whereIn('id', $userIds);
+
+    // Filter attendances by date
+    if ($from_day && $to_day) {
+        $usersQuery->whereHas('user_clocks', function($query) use ($from_day, $to_day) {
+            $query->whereBetween('created_at', [$from_day, $to_day]);
+        });
+    }
+
+    $users = $usersQuery->get();
+
+    return (new UserClocksExport($users, $from_day, $to_day))->download('all_user_clocks.xlsx');
 }
 
 // Function to format pagination data

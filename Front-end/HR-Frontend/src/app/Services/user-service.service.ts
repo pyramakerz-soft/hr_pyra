@@ -16,12 +16,16 @@ export class UserServiceService {
     this.baseURL=Api.BaseUrl
 
    }
+getall(pageNumber: number, from_day?: string, to_day?: string): Observable<UserModel[]> {
+  const token = localStorage.getItem("token");
+  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-  getall(pageNumber:number): Observable<UserModel[]> {
-    const token = localStorage.getItem("token");
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers?page=${pageNumber}`, { headers });
-  }
+  let params: any = { page: pageNumber };
+  if (from_day) params.from_day = from_day;
+  if (to_day) params.to_day = to_day;
+
+  return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, { headers, params });
+}
 
   getUserById(id:number): Observable<AddEmployee> {
     const token = localStorage.getItem("token");

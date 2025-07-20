@@ -11,7 +11,7 @@
     <div
       class="rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
       <input type="date" id="from_day" [(ngModel)]="from_day"
-        class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
+        class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" (change)="getAllEmployees(1, from_day, to_day)"  />
     </div>
   </div>
   
@@ -20,7 +20,7 @@
     <div
       class="rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
       <input type="date" id="to_day" [(ngModel)]="to_day"
-        class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
+        class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" (change)="getAllEmployees(1, from_day, to_day)" />
     </div>
   </div>
   
@@ -117,7 +117,7 @@
                    (change)="onUserSelectionChange(row)" 
                    [checked]="isUserSelected(row.id)" />
                   </td>
-                  <td class="py-5 px-4">{{ i+1 }}</td>
+                  <td class="py-5 px-4">{{ (CurrentPageNumber - 1) * 5 + i + 1 }}</td>
                   <td class="py-5 px-4">{{ row.code }}</td>
           <td class="py-5 px-4">
             <button (click)="NavigateToEmployeeAttendanceDetails(row.id)">{{ row.name }}</button>
