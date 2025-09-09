@@ -34,8 +34,8 @@ class ClockResource extends JsonResource
         $locationOut = null;
 
         if ($this->location_type === 'site') {
-            $locationIn = $this->clock_in ? $this->location->address : null;
-            $locationOut = $this->clock_out ? $this->location->address : null;
+            $locationIn = ($this->clock_in && $this->location) ? $this->location->address : null;
+            $locationOut = ($this->clock_out && $this->location)  ? $this->location->address : null;
         } elseif ($this->location_type === 'float') {
             $locationIn = $this->clock_in ? $this->address_clock_in : null;
             $locationOut = $this->clock_out ? $this->address_clock_out : null;
