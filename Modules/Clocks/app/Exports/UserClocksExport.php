@@ -358,11 +358,11 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
             }
         }
         // Weekdays: no overtime until 9 hours (540 minutes)
-        if ($dailyWorkedMinutes < 540) {
+        if ($dailyWorkedMinutes < 535) {
             return 0;
         }
         // First hour granted at 9:00, then 15-min steps afterwards
-        $extraAfterNine = $dailyWorkedMinutes - 540;
+        $extraAfterNine = $dailyWorkedMinutes - 535;
         $blocks = intdiv($extraAfterNine, 15);
         return 60 + ($blocks * 15);
     }
