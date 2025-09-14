@@ -110,23 +110,7 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                     }
                 } else {
                     // No clocks in this day → add empty row
-                    $finalCollection->push([
-                        'Date' => $formattedDate,
-                        'Total Hours in That Day' =>  $emptyFeild,
-                        'Total Excuses in That Day' =>  $emptyFeild,
-                        'Total Over time in That Day' =>  $emptyFeild,
-                        'Attendance Over time in That Day' =>  '',
-                        'Excuse Deducted in That Day' =>  '',
-                        'Excuse Remaining (Policy 4h)' =>  '',
-                        'Is this date has vacation' =>  $emptyFeild,
-                        'Name' => $user->name,
-                        'Clock In' =>  $emptyFeild,
-                        'Clock Out' =>  $emptyFeild,
-                        'Code' => $user->code,
-                        'Department' => $user->department?->name ?? $emptyFeild,
-                        'Location In' =>  $emptyFeild,
-                        'Location Out' =>  $emptyFeild,
-                    ]);
+                    // do nothing here; a single daily summary row will be added below
                 }
 
                 // Daily Excuses
@@ -138,13 +122,13 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                 $accumulatedExcuses += $dailyExcuses;
 
                 // Attendance-based overtime (no separate table dependency)
-                $attendanceOvertimeMin = $this->computeAttendanceOvertimeMinutes($formattedTotal);
+                $attendanceOvertimeMin = $this->computeAttendanceOvertimeMinutes($formattedTotal, $formattedDate);
                 $dailyOverTime = $attendanceOvertimeMin;
                 $formattedOverTimes = sprintf('%02d:%02d', floor($dailyOverTime / 60), $dailyOverTime % 60);
                 $accumulatedOverTimes += $dailyOverTime;
 
                 // Attendance-based overtime from daily worked minutes
-                $attendanceOvertimeMin = $this->computeAttendanceOvertimeMinutes($formattedTotal);
+                $attendanceOvertimeMin = $this->computeAttendanceOvertimeMinutes($formattedTotal, $formattedDate);
                 $formattedAttendanceOT = sprintf('%02d:%02d', floor($attendanceOvertimeMin / 60), $attendanceOvertimeMin % 60);
                 $accumulatedAttendanceOvertime += $attendanceOvertimeMin;
 
@@ -185,6 +169,31 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                     'Location Out' =>  $lastLocOut,
                     'Attendance Over time in That Day' => $formattedAttendanceOT,
                 ]);
+
+                // Add extra rows for additional segments (only Clock In/Out shown)
+                if ($dailyClocks->count() > 1) {
+                    foreach ($dailyClocks as $seg) {
+                        $segIn = $seg->clock_in ? Carbon::parse($seg->clock_in)->addHours($timezoneValue)->format('h:i A') : '';
+                        $segOut = $seg->clock_out ? Carbon::parse($seg->clock_out)->addHours($timezoneValue)->format('h:i A') : '';
+                        $finalCollection->push([
+                            'Date' => '',
+                            'Name' =>  '',
+                            'Clock In' =>  $segIn,
+                            'Clock Out' =>  $segOut,
+                            'Code' =>  '',
+                            'Department' =>  '',
+                            'Total Hours in That Day' =>  '',
+                            'Total Over time in That Day' => '',
+                            'Excuse Deducted in That Day' => '',
+                            'Excuse Remaining (Policy 4h)' => '',
+                            'Total Excuses in That Day' =>  '',
+                            'Is this date has vacation' =>  '',
+                            'Location In' =>  '',
+                            'Location Out' =>  '',
+                            'Attendance Over time in That Day' => '',
+                        ]);
+                    }
+                }
 
                 // Empty row between days
                 $finalCollection->push([
@@ -298,18 +307,23 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
         return [];
     }
 
-    protected function computeAttendanceOvertimeMinutes(int $dailyWorkedMinutes): int
+    protected function computeAttendanceOvertimeMinutes(int $dailyWorkedMinutes, ?string $date = null): int
     {
-        // No overtime until 9 hours (540 minutes)
-        if ($dailyWorkedMinutes <= 540) {
+        // Weekend (Friday/Saturday): all worked minutes are overtime
+        if ($date) {
+            $d = Carbon::parse($date);
+            if ($d->isFriday() || $d->isSaturday()) {
+                return $dailyWorkedMinutes;
+            }
+        }
+        // Weekdays: no overtime until 9 hours (540 minutes)
+        if ($dailyWorkedMinutes < 540) {
             return 0;
         }
-        // 9h < worked <= 10h => fixed 60 minutes
-        if ($dailyWorkedMinutes <= 600) {
-            return 60;
-        }
-        // Beyond 10h => 60 minutes + every minute beyond 10 hours
-        return 60 + ($dailyWorkedMinutes - 600);
+        // First hour granted at 9:00, then 15-min steps afterwards
+        $extraAfterNine = $dailyWorkedMinutes - 540;
+        $blocks = intdiv($extraAfterNine, 15);
+        return 60 + ($blocks * 15);
     }
 
     protected function timeToMinutes(?string $time): int
@@ -322,3 +336,5 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
         return $h * 60 + $m;
     }
 }
+
+
