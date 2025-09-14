@@ -22,7 +22,14 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
 
     public function __construct($users, $startDate = null, $endDate = null)
     {
-        $this->users = $users;
+        // Normalize to a collection of User models
+        if ($users instanceof \Modules\Users\Models\User) {
+            $this->users = collect([$users]);
+        } elseif ($users instanceof \Illuminate\Support\Collection || $users instanceof \Illuminate\Database\Eloquent\Collection) {
+            $this->users = $users;
+        } else {
+            $this->users = collect(is_array($users) ? $users : [$users]);
+        }
         $this->startDate = $startDate;
         $this->endDate = $endDate;
     }
@@ -53,13 +60,20 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
             $accumulatedTotalMinutes = 0;
             $accumulatedExcuses = 0;
             $accumulatedOverTimes = 0;
+            $accumulatedAttendanceOvertime = 0;
+            $accumulatedExcuseDeducted = 0;
             $accumulatedVacation = 0;
+
+            // Excuse policy remaining bank per user across the export range
+            $excuseRemaining = 240; // minutes (4 hours)
 
             // Loop through all dates from start to end
             for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
                 $formattedDate = $date->format('Y-m-d');
                 $dailyClocks = $grouped->get($formattedDate, collect());
-                $formattedTotal = null;
+                $formattedTotal = 0; // minutes accumulator for the day
+                $maxLate = 0; // minutes
+                $maxEarly = 0; // minutes
                 if ($dailyClocks->isNotEmpty()) {
                     foreach ($dailyClocks as $clock) {
                         $clockIn = $clock->clock_in ? Carbon::parse($clock->clock_in) : null;
@@ -70,6 +84,13 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                             $accumulatedTotalMinutes +=  $diff;
                             $formattedTotal += $diff;
                         }
+                        // Track max late/early for this date
+                        $lateStr = $clock->late_arrive ?? '00:00:00';
+                        $earlyStr = $clock->early_leave ?? '00:00:00';
+                        $lateMin = $this->timeToMinutes($lateStr);
+                        $earlyMin = $this->timeToMinutes($earlyStr);
+                        if ($lateMin > $maxLate) { $maxLate = $lateMin; }
+                        if ($earlyMin > $maxEarly) { $maxEarly = $earlyMin; }
                         $clockInFormatted = $clockIn ? $clockIn->addHours($timezoneValue)->format('h:i A') : '';
                         $clockOutFormatted = $clockOut ? $clockOut->addHours($timezoneValue)->format('h:i A') : '';
                         $finalCollection->push([
@@ -77,6 +98,9 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                             'Total Hours in That Day' =>  $emptyFeild,
                             'Total Excuses in That Day' =>  $emptyFeild,
                             'Total Over time in That Day' =>  $emptyFeild,
+                            'Attendance Over time in That Day' =>  '',
+                            'Excuse Deducted in That Day' =>  '',
+                            'Excuse Remaining (Policy 4h)' =>  '',
                             'Is this date has vacation' =>  $emptyFeild,
                             'Name' => $user->name,
                             'Clock In' => $clockInFormatted,
@@ -106,6 +130,9 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                         'Total Hours in That Day' =>  $emptyFeild,
                         'Total Excuses in That Day' =>  $emptyFeild,
                         'Total Over time in That Day' =>  $emptyFeild,
+                        'Attendance Over time in That Day' =>  '',
+                        'Excuse Deducted in That Day' =>  '',
+                        'Excuse Remaining (Policy 4h)' =>  '',
                         'Is this date has vacation' =>  $emptyFeild,
                         'Name' => $user->name,
                         'Clock In' =>  $emptyFeild,
@@ -127,11 +154,24 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
 
                 // Daily OverTime
                 $dailyOverTime = $user->overTimes()->where('status', 'approved')
-                    ->whereDate('to', $formattedDate)
+                    ->whereDate('date', $formattedDate)
                     ->get()
                     ->sum(fn($excuse) => Carbon::parse($excuse->from)->diffInMinutes(Carbon::parse($excuse->to)));
                 $formattedOverTimes = sprintf('%02d:%02d', floor($dailyOverTime / 60), $dailyOverTime % 60);
                 $accumulatedOverTimes += $dailyOverTime;
+
+                // Attendance-based overtime from daily worked minutes
+                $attendanceOvertimeMin = $this->computeAttendanceOvertimeMinutes($formattedTotal);
+                $formattedAttendanceOT = sprintf('%02d:%02d', floor($attendanceOvertimeMin / 60), $attendanceOvertimeMin % 60);
+                $accumulatedAttendanceOvertime += $attendanceOvertimeMin;
+
+                // Excuse policy: deduct up to 2h per day from either late or early (not both), total cap 4h across range
+                $candidateExcuse = min(max($maxLate, $maxEarly), 120);
+                $deductToday = min($candidateExcuse, $excuseRemaining);
+                $excuseRemaining -= $deductToday;
+                $accumulatedExcuseDeducted += $deductToday;
+                $formattedDeductToday = sprintf('%02d:%02d', floor($deductToday / 60), $deductToday % 60);
+                $formattedRemaining = sprintf('%02d:%02d', floor($excuseRemaining / 60), $excuseRemaining % 60);
 
                 // Check vacation
                 $isVacation = $user->user_vacations()->where('status', 'approved')
@@ -148,6 +188,9 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                     'Total Hours in That Day' =>  $totalHoursInSpecificDay,
                     'Total Excuses in That Day' => $formattedExcuses,
                     'Total Over time in That Day' => $formattedOverTimes,
+                    'Attendance Over time in That Day' => $formattedAttendanceOT,
+                    'Excuse Deducted in That Day' => $formattedDeductToday,
+                    'Excuse Remaining (Policy 4h)' => $formattedRemaining,
                     'Is this date has vacation' => $isVacation == 0 ? 'NO' : 'YES',
                     'Name' => 'N/A',
                     'Clock In' =>  $emptyFeild,
@@ -164,6 +207,9 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                     'Total Hours in That Day' =>  '',
                     'Total Excuses in That Day' =>   '',
                     'Total Over time in That Day' => '',
+                    'Attendance Over time in That Day' => '',
+                    'Excuse Deducted in That Day' => '',
+                    'Excuse Remaining (Policy 4h)' => '',
                     'Is this date has vacation' =>   '',
                     'Name' =>  '',
                     'Clock In' =>   '',
@@ -181,6 +227,9 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                 'Total Hours in That Day' => sprintf('%02d:%02d', floor($accumulatedTotalMinutes / 60), $accumulatedTotalMinutes % 60),
                 'Total Excuses in That Day' => sprintf('%02d:%02d', floor($accumulatedExcuses / 60), $accumulatedExcuses % 60),
                 'Total Over time in That Day' => sprintf('%02d:%02d', floor($accumulatedOverTimes / 60), $accumulatedOverTimes % 60),
+                'Attendance Over time in That Day' => sprintf('%02d:%02d', floor($accumulatedAttendanceOvertime / 60), $accumulatedAttendanceOvertime % 60),
+                'Excuse Deducted in That Day' => sprintf('%02d:%02d', floor($accumulatedExcuseDeducted / 60), $accumulatedExcuseDeducted % 60),
+                'Excuse Remaining (Policy 4h)' => sprintf('%02d:%02d', floor($excuseRemaining / 60), $excuseRemaining % 60),
                 'Is this date has vacation' =>  $accumulatedVacation == '0' ? 'NO VACATIONS' : $accumulatedVacation . '  Days ',
                 'Name' => $user->name,
                 'Clock In' => $emptyFeild,
@@ -197,6 +246,9 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                 'Total Hours in That Day' =>  '',
                 'Total Excuses in That Day' =>   '',
                 'Total Over time in That Day' => '',
+                'Attendance Over time in That Day' => '',
+                'Excuse Deducted in That Day' => '',
+                'Excuse Remaining (Policy 4h)' => '',
                 'Is this date has vacation' =>   '',
                 'Name' =>  '',
                 'Clock In' =>   '',
@@ -217,6 +269,9 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
             'Total Hours in That Day',
             'Total Excuses in That Day',
             'Total Over time in That Day',
+            'Attendance Over time in That Day',
+            'Excuse Deducted in That Day',
+            'Excuse Remaining (Policy 4h)',
             'Is this date has vacation',
             'Name',
             'Clock In',
@@ -230,7 +285,7 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:L1')->applyFromArray([
+        $sheet->getStyle('A1:O1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -246,15 +301,39 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
             ]
         ]);
         // Set column widths
-        foreach (range('A', 'L') as $col) {
+        foreach (range('A', 'O') as $col) {
             $sheet->getColumnDimension($col)->setWidth(30);
         }
         $sheet->getRowDimension(1)->setRowHeight(40);
-        $sheet->setAutoFilter('A1:L1');
+        $sheet->setAutoFilter('A1:O1');
     }
 
     public function columnFormats(): array
     {
         return [];
+    }
+
+    protected function computeAttendanceOvertimeMinutes(int $dailyWorkedMinutes): int
+    {
+        // No overtime until 9 hours (540 minutes)
+        if ($dailyWorkedMinutes <= 540) {
+            return 0;
+        }
+        // 9h < worked <= 10h => fixed 60 minutes
+        if ($dailyWorkedMinutes <= 600) {
+            return 60;
+        }
+        // Beyond 10h => 60 minutes + every minute beyond 10 hours
+        return 60 + ($dailyWorkedMinutes - 600);
+    }
+
+    protected function timeToMinutes(?string $time): int
+    {
+        if (!$time) { return 0; }
+        $parts = explode(':', $time);
+        if (count($parts) < 2) { return 0; }
+        $h = (int)($parts[0] ?? 0);
+        $m = (int)($parts[1] ?? 0);
+        return $h * 60 + $m;
     }
 }
