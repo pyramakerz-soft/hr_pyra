@@ -19,7 +19,7 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
     protected $users;
     protected $startDate;
     protected $endDate;
-
+    protected $rowStyles = [];
     public function __construct($users, $startDate = null, $endDate = null)
     {
         // Normalize to a collection of User models
@@ -150,8 +150,13 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                 $totalHoursInSpecificDay = sprintf('%02d:%02d', floor($formattedTotal / 60), $formattedTotal % 60);
 
                 // Build single daily row in the requested order
-                $clockInFormatted = $earliestIn ? $earliestIn->copy()->addHours($timezoneValue)->format('h:i A') : '';
-                $clockOutFormatted = $latestOut ? $latestOut->copy()->addHours($timezoneValue)->format('h:i A') : '';
+                $hasMultipleSegments = $dailyClocks->count() > 1;
+                $clockInFormatted = $hasMultipleSegments ? '' : ($earliestIn ? $earliestIn->copy()->addHours($timezoneValue)->format('h:i A') : '');
+                $clockOutFormatted = $hasMultipleSegments ? '' : ($latestOut ? $latestOut->copy()->addHours($timezoneValue)->format('h:i A') : '');
+                // Mark row styles to apply later in styles()
+                $rowIndex = 1 + $finalCollection->count() + 1; // header + current size + this row
+                $isWeekend = Carbon::parse($formattedDate)->isFriday() || Carbon::parse($formattedDate)->isSaturday();
+                $this->rowStyles[] = ['row' => $rowIndex, 'ot' => ($attendanceOvertimeMin > 0), 'weekend' => $isWeekend, 'multi' => $hasMultipleSegments];
                 $finalCollection->push([
                     'Date' => $formattedDate,
                     'Name' => $user->name,
@@ -171,7 +176,7 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                 ]);
 
                 // Add extra rows for additional segments (only Clock In/Out shown)
-                if ($dailyClocks->count() > 1) {
+                if ($hasMultipleSegments) {
                     foreach ($dailyClocks as $seg) {
                         $segIn = $seg->clock_in ? Carbon::parse($seg->clock_in)->addHours($timezoneValue)->format('h:i A') : '';
                         $segOut = $seg->clock_out ? Carbon::parse($seg->clock_out)->addHours($timezoneValue)->format('h:i A') : '';
@@ -300,6 +305,42 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
         }
         $sheet->getRowDimension(1)->setRowHeight(40);
         $sheet->setAutoFilter('A1:O1');
+
+        // Highlight rules
+        $otColor = 'F8CBAD';      // OT: light orange
+        $weekendColor = 'BDD7EE'; // Fri/Sat: light blue
+        $multiColor = 'C6E0B4';   // Multiple segments: light green
+
+        foreach ($this->rowStyles as $mark) {
+            $r = $mark['row'] ?? null;
+            if (!$r) { continue; }
+            if (!empty($mark['ot'])) {
+                foreach (['H','O'] as $col) {
+                    $sheet->getStyle($col.$r)->applyFromArray([
+                        'fill' => [
+                            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => $otColor],
+                        ],
+                    ]);
+                }
+            }
+            if (!empty($mark['weekend'])) {
+                $sheet->getStyle('A'.$r)->applyFromArray([
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => $weekendColor],
+                    ],
+                ]);
+            }
+            if (!empty($mark['multi'])) {
+                $sheet->getStyle('C'.$r)->applyFromArray([
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => $multiColor],
+                    ],
+                ]);
+            }
+        }
     }
 
     public function columnFormats(): array
@@ -336,5 +377,7 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
         return $h * 60 + $m;
     }
 }
+
+
 
 
