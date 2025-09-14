@@ -74,7 +74,10 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                 $formattedTotal = 0; // minutes accumulator for the day
                 $maxLate = 0; // minutes
                 $maxEarly = 0; // minutes
+                $earliestIn = null; $latestOut = null; $firstLocIn = ''; $lastLocOut = '';
                 if ($dailyClocks->isNotEmpty()) {
+                    // Compute earliest/ latest and aggregate values; do not push per-entry rows
+                    $earliestIn = null; $latestOut = null; $firstLocIn = ''; $lastLocOut = '';
                     foreach ($dailyClocks as $clock) {
                         $clockIn = $clock->clock_in ? Carbon::parse($clock->clock_in) : null;
                         $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out) : null;
@@ -91,37 +94,19 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                         $earlyMin = $this->timeToMinutes($earlyStr);
                         if ($lateMin > $maxLate) { $maxLate = $lateMin; }
                         if ($earlyMin > $maxEarly) { $maxEarly = $earlyMin; }
-                        $clockInFormatted = $clockIn ? $clockIn->addHours($timezoneValue)->format('h:i A') : '';
-                        $clockOutFormatted = $clockOut ? $clockOut->addHours($timezoneValue)->format('h:i A') : '';
-                        $finalCollection->push([
-                            'Date' => $formattedDate,
-                            'Total Hours in That Day' =>  $emptyFeild,
-                            'Total Excuses in That Day' =>  $emptyFeild,
-                            'Total Over time in That Day' =>  $emptyFeild,
-                            'Attendance Over time in That Day' =>  '',
-                            'Excuse Deducted in That Day' =>  '',
-                            'Excuse Remaining (Policy 4h)' =>  '',
-                            'Is this date has vacation' =>  $emptyFeild,
-                            'Name' => $user->name,
-                            'Clock In' => $clockInFormatted,
-                            'Clock Out' => $clockOutFormatted,
-                            'Code' => $user->code,
-                            'Department' => $user->department ? $clock->user->department->name : 'N/A',
-                            'Location In' => $clock->location_type === "float"
-                                ? $clock->address_clock_in
-                                : ($clock->location_type === "home"
-                                    ? "home"
-                                    : ($clock->location_type === "site" && $clock->clock_in
-                                        ? optional($clock->location)->name
-                                        : null)),
-                            'Location Out' => $clock->location_type === "float"
-                                ? $clock->address_clock_out
-                                : ($clock->location_type === "home"
-                                    ? "home"
-                                    : ($clock->location_type === "site" && $clock->clock_out
-                                        ? optional($clock->location)->name
-                                        : null)),
-                        ]);
+
+                        if ($clockIn && (!$earliestIn || $clockIn->lt($earliestIn))) {
+                            $earliestIn = $clockIn->copy();
+                            $firstLocIn = $clock->location_type === 'float' ? ($clock->address_clock_in ?? '')
+                                : ($clock->location_type === 'home' ? 'home'
+                                    : ($clock->location_type === 'site' && $clock->clock_in ? optional($clock->location)->name : ''));
+                        }
+                        if ($clockOut && (!$latestOut || $clockOut->gt($latestOut))) {
+                            $latestOut = $clockOut->copy();
+                            $lastLocOut = $clock->location_type === 'float' ? ($clock->address_clock_out ?? '')
+                                : ($clock->location_type === 'home' ? 'home'
+                                    : ($clock->location_type === 'site' && $clock->clock_out ? optional($clock->location)->name : ''));
+                        }
                     }
                 } else {
                     // No clocks in this day → add empty row
@@ -180,81 +165,83 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
 
                 $totalHoursInSpecificDay = sprintf('%02d:%02d', floor($formattedTotal / 60), $formattedTotal % 60);
 
-                // Add summary
+                // Build single daily row in the requested order
+                $clockInFormatted = $earliestIn ? $earliestIn->copy()->addHours($timezoneValue)->format('h:i A') : '';
+                $clockOutFormatted = $latestOut ? $latestOut->copy()->addHours($timezoneValue)->format('h:i A') : '';
                 $finalCollection->push([
-                    'Date' => 'SUMMARY---->' . $formattedDate,
+                    'Date' => $formattedDate,
+                    'Name' => $user->name,
+                    'Clock In' =>  $clockInFormatted,
+                    'Clock Out' =>  $clockOutFormatted,
+                    'Code' =>  $user->code,
+                    'Department' =>  $user->department?->name ?? $emptyFeild,
                     'Total Hours in That Day' =>  $totalHoursInSpecificDay,
-                    'Total Excuses in That Day' => $formattedExcuses,
                     'Total Over time in That Day' => $formattedOverTimes,
-                    'Attendance Over time in That Day' => $formattedAttendanceOT,
                     'Excuse Deducted in That Day' => $formattedDeductToday,
                     'Excuse Remaining (Policy 4h)' => $formattedRemaining,
+                    'Total Excuses in That Day' => $formattedExcuses,
                     'Is this date has vacation' => $isVacation == 0 ? 'NO' : 'YES',
-                    'Name' => 'N/A',
-                    'Clock In' =>  $emptyFeild,
-                    'Clock Out' =>  $emptyFeild,
-                    'Code' =>  $emptyFeild,
-                    'Department' =>  $emptyFeild,
-                    'Location In' =>  $emptyFeild,
-                    'Location Out' =>  $emptyFeild,
+                    'Location In' =>  $firstLocIn,
+                    'Location Out' =>  $lastLocOut,
+                    'Attendance Over time in That Day' => $formattedAttendanceOT,
                 ]);
 
                 // Empty row between days
                 $finalCollection->push([
                     'Date' => '',
-                    'Total Hours in That Day' =>  '',
-                    'Total Excuses in That Day' =>   '',
-                    'Total Over time in That Day' => '',
-                    'Attendance Over time in That Day' => '',
-                    'Excuse Deducted in That Day' => '',
-                    'Excuse Remaining (Policy 4h)' => '',
-                    'Is this date has vacation' =>   '',
                     'Name' =>  '',
                     'Clock In' =>   '',
                     'Clock Out' =>  '',
                     'Code' =>  '',
                     'Department' =>  '',
+                    'Total Hours in That Day' =>  '',
+                    'Total Over time in That Day' => '',
+                    'Excuse Deducted in That Day' => '',
+                    'Excuse Remaining (Policy 4h)' => '',
+                    'Total Excuses in That Day' =>   '',
+                    'Is this date has vacation' =>   '',
                     'Location In' =>  '',
                     'Location Out' =>  '',
+                    'Attendance Over time in That Day' => '',
                 ]);
             }
 
             // Add the summary row for accumulated totals for this user
             $finalCollection->push([
                 'Date' => '---TOTAL for '.$user->name.'----',
-                'Total Hours in That Day' => sprintf('%02d:%02d', floor($accumulatedTotalMinutes / 60), $accumulatedTotalMinutes % 60),
-                'Total Excuses in That Day' => sprintf('%02d:%02d', floor($accumulatedExcuses / 60), $accumulatedExcuses % 60),
-                'Total Over time in That Day' => sprintf('%02d:%02d', floor($accumulatedOverTimes / 60), $accumulatedOverTimes % 60),
-                'Attendance Over time in That Day' => sprintf('%02d:%02d', floor($accumulatedAttendanceOvertime / 60), $accumulatedAttendanceOvertime % 60),
-                'Excuse Deducted in That Day' => sprintf('%02d:%02d', floor($accumulatedExcuseDeducted / 60), $accumulatedExcuseDeducted % 60),
-                'Excuse Remaining (Policy 4h)' => sprintf('%02d:%02d', floor($excuseRemaining / 60), $excuseRemaining % 60),
-                'Is this date has vacation' =>  $accumulatedVacation == '0' ? 'NO VACATIONS' : $accumulatedVacation . '  Days ',
                 'Name' => $user->name,
                 'Clock In' => $emptyFeild,
                 'Clock Out' => $emptyFeild,
                 'Code' => $user->code,
                 'Department' => $user->department?->name ?? $emptyFeild,
+                'Total Hours in That Day' => sprintf('%02d:%02d', floor($accumulatedTotalMinutes / 60), $accumulatedTotalMinutes % 60),
+                'Total Over time in That Day' => sprintf('%02d:%02d', floor($accumulatedOverTimes / 60), $accumulatedOverTimes % 60),
+                'Excuse Deducted in That Day' => sprintf('%02d:%02d', floor($accumulatedExcuseDeducted / 60), $accumulatedExcuseDeducted % 60),
+                'Excuse Remaining (Policy 4h)' => sprintf('%02d:%02d', floor($excuseRemaining / 60), $excuseRemaining % 60),
+                'Total Excuses in That Day' => sprintf('%02d:%02d', floor($accumulatedExcuses / 60), $accumulatedExcuses % 60),
+                'Is this date has vacation' =>  $accumulatedVacation == '0' ? 'NO VACATIONS' : $accumulatedVacation . '  Days ',
                 'Location In' => $emptyFeild,
                 'Location Out' => $emptyFeild,
+                'Attendance Over time in That Day' => sprintf('%02d:%02d', floor($accumulatedAttendanceOvertime / 60), $accumulatedAttendanceOvertime % 60),
             ]);
 
             // Separator between users
             $finalCollection->push([
                 'Date' => '--------------------',
-                'Total Hours in That Day' =>  '',
-                'Total Excuses in That Day' =>   '',
-                'Total Over time in That Day' => '',
-                'Attendance Over time in That Day' => '',
-                'Excuse Deducted in That Day' => '',
-                'Excuse Remaining (Policy 4h)' => '',
-                'Is this date has vacation' =>   '',
                 'Name' =>  '',
                 'Clock In' =>   '',
                 'Clock Out' =>  '',
                 'Code' =>  '',
                 'Department' =>  '',
+                'Total Hours in That Day' =>  '',
+                'Total Over time in That Day' => '',
+                'Excuse Deducted in That Day' => '',
+                'Excuse Remaining (Policy 4h)' => '',
+                'Total Excuses in That Day' =>   '',
+                'Is this date has vacation' =>   '',
                 'Location In' =>  '',
                 'Location Out' =>  '',
+                'Attendance Over time in That Day' => '',
             ]);
         }
         return $finalCollection;
@@ -264,20 +251,20 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
     {
         return [
             'Date',
-            'Total Hours in That Day',
-            'Total Excuses in That Day',
-            'Total Over time in That Day',
-            'Attendance Over time in That Day',
-            'Excuse Deducted in That Day',
-            'Excuse Remaining (Policy 4h)',
-            'Is this date has vacation',
             'Name',
             'Clock In',
             'Clock Out',
             'Code',
             'Department',
+            'Total Hours in That Day',
+            'Total Over time in That Day',
+            'Excuse Deducted in That Day',
+            'Excuse Remaining (Policy 4h)',
+            'Total Excuses in That Day',
+            'Is this date has vacation',
             'Location In',
             'Location Out',
+            'Attendance Over time in That Day',
         ];
     }
 
