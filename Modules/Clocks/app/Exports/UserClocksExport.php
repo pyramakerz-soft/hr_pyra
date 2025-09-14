@@ -152,11 +152,9 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                 $formattedExcuses = sprintf('%02d:%02d', floor($dailyExcuses / 60), $dailyExcuses % 60);
                 $accumulatedExcuses += $dailyExcuses;
 
-                // Daily OverTime
-                $dailyOverTime = $user->overTimes()->where('status', 'approved')
-                    ->whereDate('date', $formattedDate)
-                    ->get()
-                    ->sum(fn($excuse) => Carbon::parse($excuse->from)->diffInMinutes(Carbon::parse($excuse->to)));
+                // Attendance-based overtime (no separate table dependency)
+                $attendanceOvertimeMin = $this->computeAttendanceOvertimeMinutes($formattedTotal);
+                $dailyOverTime = $attendanceOvertimeMin;
                 $formattedOverTimes = sprintf('%02d:%02d', floor($dailyOverTime / 60), $dailyOverTime % 60);
                 $accumulatedOverTimes += $dailyOverTime;
 
