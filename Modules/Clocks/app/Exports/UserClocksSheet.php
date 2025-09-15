@@ -199,12 +199,7 @@ class UserClocksSheet implements FromCollection, WithHeadings, WithStyles, WithC
         }
 
         // Salary summary (interpreting salary as hourly base rate)
-        $hourly = (float)($user->salary ?? 0);
-        $otRate = (float)($user->overtime_rate ?? 1.5);
-        $baseMinutes = max(0, $accumulatedTotalMinutes - $accOT);
-        $basePay = ($baseMinutes/60) * $hourly;
-        $otPay = ($accOT/60) * $hourly * $otRate;
-        $totalPay = $basePay + $otPay;
+        $salaryMonthly = (float)($user->salary ?? 0); $workingHoursDay = (float)($user->user_detail->working_hours_day ?? 8); $hourly = $workingHoursDay > 0 ? ($salaryMonthly / 30) / $workingHoursDay : 0.0; $otRate = (float)($user->overtime_rate ?? 1.5); $otPay = ($accOT / 60) * $hourly * $otRate; $basePay = $salaryMonthly; $totalPay = $basePay + $otPay;
 
         $this->salarySummary = [
             'worked_minutes' => $accumulatedTotalMinutes,
@@ -359,3 +354,4 @@ class UserClocksSheet implements FromCollection, WithHeadings, WithStyles, WithC
         return ((int)($parts[0] ?? 0))*60 + ((int)($parts[1] ?? 0));
     }
 }
+
