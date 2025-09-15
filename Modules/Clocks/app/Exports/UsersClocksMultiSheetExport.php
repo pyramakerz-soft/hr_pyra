@@ -3,7 +3,7 @@
 namespace Modules\Clocks\Exports;
 
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
-use Maatwebsite\\Excel\\Concerns\\Exportable;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Modules\Users\Models\User;
 
 class UsersClocksMultiSheetExport implements WithMultipleSheets
