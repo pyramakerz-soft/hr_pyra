@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Clocks\Exports\UserClocksExport;
+use Modules\Clocks\Exports\UsersClocksMultiSheetExport;
 use Modules\Location\Models\Location;
 use Modules\Users\Exports\UsersExport;
 use Modules\Users\Http\Requests\Api\User\StoreUserRequest;
@@ -152,7 +153,7 @@ if ($from_day && $to_day) {
     if ($request->has('export')) {
         $users = $usersQuery->get();
 
-        return (new UserClocksExport($users,$from_day, $to_day))
+        return (new UsersClocksMultiSheetExport($users,$from_day, $to_day))
             ->download('all_user_clocks.xlsx');
     }
     
@@ -215,7 +216,7 @@ public function exportClocks(Request $request)
         'user_clocks', 'department', 'timezone', 'excuses', 'overTimes', 'user_vacations'
     ])->whereIn('id', $userIds)->get();
 
-    return (new UserClocksExport($users, $from_day, $to_day))
+    return (new UsersClocksMultiSheetExport($users, $from_day, $to_day))
         ->download('all_user_clocks.xlsx');
 }
 
@@ -236,7 +237,7 @@ public function exportAttendance(Request $request)
 
     $users = $usersQuery->get();
 
-    return (new UserClocksExport($users, $from_day, $to_day))->download('all_user_clocks.xlsx');
+    return (new UsersClocksMultiSheetExport($users, $from_day, $to_day))->download('all_user_clocks.xlsx');
 }
 
 // Function to format pagination data
