@@ -3,10 +3,13 @@
 namespace Modules\Clocks\Exports;
 
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Maatwebsite\\Excel\\Concerns\\Exportable;
 use Modules\Users\Models\User;
 
 class UsersClocksMultiSheetExport implements WithMultipleSheets
 {
+    use Exportable;
+
     protected $users;
     protected $startDate;
     protected $endDate;
@@ -33,4 +36,8 @@ class UsersClocksMultiSheetExport implements WithMultipleSheets
         return $sheets;
     }
 }
+
+
+
+
 

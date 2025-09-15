@@ -286,7 +286,7 @@ class UserClocksSheet implements FromCollection, WithHeadings, WithStyles, WithC
             if ($r <= 0) continue;
             // row numbers already target the correct data row (3 + index)
             if (!empty($mark['ot'])) {
-                foreach (['G','O'] as $col) {
+                foreach (['G','N'] as $col) {
                     $sheet->getStyle($col.$r)->applyFromArray([
                         'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => $otColor]]
                     ]);
