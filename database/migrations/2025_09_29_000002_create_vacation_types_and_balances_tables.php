@@ -23,8 +23,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('vacation_type_id')->constrained('vacation_types')->cascadeOnDelete();
             $table->year('year');
-            $table->unsignedDecimal('allocated_days', 5, 2)->default(0);
-            $table->unsignedDecimal('used_days', 5, 2)->default(0);
+            $table->decimal('allocated_days', 8, 2)->default(0);
+            $table->decimal('used_days', 8, 2)->default(0);
             $table->timestamps();
 
             $table->unique(['user_id', 'vacation_type_id', 'year']);
@@ -32,7 +32,7 @@ return new class extends Migration
 
         Schema::table('user_vacations', function (Blueprint $table) {
             $table->foreignId('vacation_type_id')->nullable()->after('user_id')->constrained('vacation_types')->nullOnDelete();
-            $table->unsignedDecimal('days_count', 5, 2)->default(0)->after('to_date');
+            $table->decimal('days_count', 8, 2)->default(0)->after('to_date');
             $table->enum('approval_of_direct', ['pending', 'approved', 'declined'])->default('pending')->after('status');
             $table->enum('approval_of_head', ['pending', 'approved', 'declined'])->default('pending')->after('approval_of_direct');
             $table->foreignId('direct_approved_by')->nullable()->after('approval_of_head')->constrained('users')->nullOnDelete();
