@@ -10,6 +10,7 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Modules\Users\Models\User;
+use Modules\Clocks\Models\UserClockOvertime;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class UserClocksExport implements FromCollection, WithHeadings, WithStyles, WithColumnFormatting
