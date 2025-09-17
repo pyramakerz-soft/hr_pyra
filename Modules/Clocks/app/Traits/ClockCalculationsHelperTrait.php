@@ -442,6 +442,11 @@ trait ClockCalculationsHelperTrait
             'late_arrive' => $lateArrive,
             'early_leave' => $earlyLeave,
         ]);
+
+        if (method_exists($this, 'recordDailyOvertime')) {
+            $this->recordDailyOvertime($clock);
+        }
+
         return $this->returnData("clock", new ClockResource($clock), "Clock Updated Successfully");
     }
     protected function updateSiteClock($request, $clock, $user)

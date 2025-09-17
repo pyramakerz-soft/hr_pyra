@@ -7,6 +7,8 @@ use App\Traits\LocationHelperTrait;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Modules\Clocks\Models\ClockInOut;
+use Modules\Clocks\Models\UserClockOvertime;
+use Modules\Clocks\Support\OvertimeCalculator;
 use Modules\Users\Models\User;
 
 trait ClockOutTrait
@@ -139,8 +141,64 @@ use ClockCalculationsHelperTrait;
             'address_clock_out' => $formatted_address_out,
         ]);
 
+        $this->recordDailyOvertime($clock);
+
         $clock->makeHidden(['location']);
 
         return $this->returnData("clock", $clock, "Clock Out Done");
+    }
+
+    protected function recordDailyOvertime(ClockInOut $clock): void
+    {
+        $clock->refresh();
+        $overtimeDate = Carbon::parse($clock->clock_in)->toDateString();
+
+        $dailyClocks = ClockInOut::where('user_id', $clock->user_id)
+            ->whereDate('clock_in', $overtimeDate)
+            ->whereNotNull('clock_out')
+            ->get();
+
+        if ($dailyClocks->isEmpty()) {
+            return;
+        }
+
+        $workedMinutes = $dailyClocks->reduce(function ($carry, ClockInOut $entry) {
+            $clockIn = Carbon::parse($entry->clock_in);
+            $clockOut = Carbon::parse($entry->clock_out);
+
+            return $carry + $clockIn->diffInMinutes($clockOut);
+        }, 0);
+
+        $overtimeMinutes = OvertimeCalculator::calculate($workedMinutes, $overtimeDate);
+
+        $criteria = [
+            'user_id' => $clock->user_id,
+            'overtime_date' => $overtimeDate,
+        ];
+
+        $existing = UserClockOvertime::where($criteria)->first();
+
+        if ($overtimeMinutes > 0) {
+            UserClockOvertime::updateOrCreate($criteria, [
+                'clock_in_out_id' => $clock->id,
+                'overtime_minutes' => $overtimeMinutes,
+            ]);
+
+            return;
+        }
+
+        if (!$existing) {
+            return;
+        }
+
+        if ($existing->approval_of_direct === 'pending' && $existing->approval_of_head === 'pending') {
+            $existing->delete();
+            return;
+        }
+
+        $existing->update([
+            'clock_in_out_id' => $clock->id,
+            'overtime_minutes' => 0,
+        ]);
     }
 }

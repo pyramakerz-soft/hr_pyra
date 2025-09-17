@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Users\Http\Controllers\DepartmentController;
 use Modules\Users\Http\Controllers\ExcuseController;
 use Modules\Users\Http\Controllers\OverTimeController;
+use Modules\Users\Http\Controllers\UserClockOvertimeController;
 use Modules\Users\Http\Controllers\PermissionController;
 use Modules\Users\Http\Controllers\RoleController;
 use Modules\Users\Http\Controllers\TimezoneController;
@@ -48,6 +49,9 @@ Route::group(['prefix' => 'overtime'], function () {
         // Route to change overtime status
         Route::post('/change_overtime_status/{overtime}', [OverTimeController::class, 'changeOvertimeStatus']);
         Route::get('/get_overtime_of_manager_employees', [OverTimeController::class, 'getOvertimeOfManagerEmployees']);
+
+        Route::get('/clock_overtime', [UserClockOvertimeController::class, 'index']);
+        Route::patch('/clock_overtime/{overtime}', [UserClockOvertimeController::class, 'updateStatus']);
     });
 });
 

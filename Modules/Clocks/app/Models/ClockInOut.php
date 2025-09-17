@@ -19,4 +19,10 @@ class ClockInOut extends Model
     {
         return $this->belongsTo(Location::class);
     }
+
+    public function overtimeEntry()
+    {
+        return $this->hasOne(UserClockOvertime::class, 'clock_in_out_id');
+    }
+
 }

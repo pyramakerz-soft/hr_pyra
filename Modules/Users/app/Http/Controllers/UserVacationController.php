@@ -9,9 +9,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Modules\Users\Http\Requests\Api\UserVacation\StoreUserVacationRequest;
-use Modules\Users\Models\Vacation;
+use Modules\Users\Enums\StatusEnum;
 use Modules\Users\Models\User;
 use Modules\Users\Models\UserVacation;
+use Modules\Users\Models\UserVacationBalance;
+use Modules\Users\Models\VacationType;
 
 /**
  * @OA\Tag(
@@ -58,14 +60,35 @@ class UserVacationController extends Controller
     public function addUserVacation(StoreUserVacationRequest $request)
     {
         $authUser = Auth::user();
-        $userVacation = UserVacation::create([
-            'to_date' => $request->input('to_date'),
-            'from_date' => $request->input('from_date'),
-            'status' => $request->input('status', 'pending'), // Default to 'pending' if not provided
+
+        $from = Carbon::parse($request->input('from_date'));
+        $to = Carbon::parse($request->input('to_date'));
+
+        if ($to->lessThan($from)) {
+            return $this->returnError('The end date cannot be before the start date', 422);
+        }
+
+        $vacationType = VacationType::findOrFail($request->input('vacation_type_id'));
+        $daysCount = $from->diffInDays($to) + 1;
+
+        $balance = $this->getOrCreateBalance($authUser, $vacationType, $from);
+
+        if ($balance->remaining_days < $daysCount) {
+            return $this->returnError('Insufficient ' . $vacationType->name . ' balance. Remaining days: ' . $balance->remaining_days, 422);
+        }
+
+        $vacation = UserVacation::create([
             'user_id' => $authUser->id,
+            'vacation_type_id' => $vacationType->id,
+            'from_date' => $from,
+            'to_date' => $to,
+            'days_count' => $daysCount,
+            'status' => StatusEnum::Pending,
+            'approval_of_direct' => StatusEnum::Pending,
+            'approval_of_head' => StatusEnum::Pending,
         ]);
 
-        return $this->returnData('Vacation', $userVacation, 'User Vacations Data');
+        return $this->returnData('Vacation', $vacation->fresh(['vacationType']), 'User Vacations Data');
     }
 
     /**
@@ -91,12 +114,17 @@ class UserVacationController extends Controller
     {
         $authUser = Auth::user();
 
-        // Fetch and paginate the user's vacations
-        $userVacations = $authUser->user_vacations()
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $perPage = (int) $request->query('per_page', 10);
+        if ($perPage < 1) {
+            $perPage = 10;
+        }
 
-        return $this->returnData('Vacation', $userVacations, 'User Vacations Data');
+        $vacations = $authUser->user_vacations()
+            ->with('vacationType')
+            ->orderByDesc('created_at')
+            ->paginate($perPage, ['*'], 'page', $request->query('page', 1));
+
+        return $this->returnData('Vacation', $vacations, 'User Vacations Data');
     }
 
     /**
@@ -139,7 +167,8 @@ class UserVacationController extends Controller
     public function changeVacationStatus(Request $request, $vacationId)
     {
         $request->validate([
-            'status' => 'required|in:pending,approved,rejected',
+            'status' => 'required|in:approved,declined',
+            'approver' => 'nullable|in:direct,head',
         ]);
 
         $vacation = UserVacation::find($vacationId);
@@ -148,19 +177,49 @@ class UserVacationController extends Controller
             return $this->returnError('Vacation not found', 404);
         }
 
-        $authUser = Auth::user();
-        $employeeIds =   $authUser->getManagedEmployeeIds();
+        $manager = Auth::user();
+        $employeeIds = $manager->getManagedEmployeeIds();
 
-        if (!in_array($vacation->user_id, $employeeIds->toArray())) {
+        if (!$employeeIds->contains($vacation->user_id)) {
             return $this->returnError('You are not authorized to update this vacation', 403);
         }
 
-        // If the user is the manager or the vacation belongs to the authenticated user
-        $vacation->status = $request->input('status');
+        $role = strtolower($manager->getRoleName() ?? '');
+        $approver = $request->input('approver');
+        if (!$approver) {
+            $approver = $role === 'team leader' ? 'direct' : 'head';
+        }
+
+        $status = $request->input('status');
+        $previousOverall = $this->statusValue($vacation->status);
+
+        if ($approver === 'direct') {
+            if (!in_array($role, ['team leader', 'admin'])) {
+                return $this->returnError('You do not have permission to approve as direct manager', 403);
+            }
+
+            $vacation->approval_of_direct = StatusEnum::from($status);
+            $vacation->direct_approved_by = $manager->id;
+        } elseif ($approver === 'head') {
+            if (!in_array($role, ['manager', 'hr', 'admin'])) {
+                return $this->returnError('You do not have permission to approve as head manager', 403);
+            }
+
+            $vacation->approval_of_head = StatusEnum::from($status);
+            $vacation->head_approved_by = $manager->id;
+        } else {
+            return $this->returnError('Invalid approver type provided', 422);
+        }
+
+        $vacation->status = $this->resolveOverallStatus($vacation);
         $vacation->save();
 
-        return $this->returnData('Vacation', $vacation, 'Vacation status updated successfully');
+        $this->syncVacationBalance($vacation, $previousOverall);
+
+        return $this->returnData('Vacation', $vacation->fresh(['user', 'vacationType']), 'Vacation status updated successfully');
     }
+
+   /**    }
 
 
    /**
@@ -193,7 +252,7 @@ class UserVacationController extends Controller
  *             type="array",
  *             @OA\Items(
  *                 type="string",
- *                 enum={"pending", "approved", "rejected", "all"},
+ *                 enum={"pending", "approved", "declined", "rejected", "all"},
  *                 example="approved"
  *             ),
  *             collectionFormat="multi"
@@ -247,58 +306,60 @@ class UserVacationController extends Controller
     {
         $manager = Auth::user();
         $employeeIds = $manager->getManagedEmployeeIds();
-    
+
         if ($employeeIds->isEmpty()) {
             return $this->returnError('No employees found under this manager', 404);
         }
-    
-        // // Define the date range (26th of previous month to 26th of current month)
-        // $currentDate = Carbon::now();
-        // if ($currentDate->day > 26) {
-        //     $startDate = $currentDate->copy()->setDay(26);
-        //     $endDate = $currentDate->copy()->addMonth()->setDay(26);
-        // } else {
-        //     $startDate = $currentDate->copy()->subMonth()->setDay(26);
-        //     $endDate = $currentDate->copy()->setDay(26);
-        // }
-    
+
+        $query = UserVacation::with(['user', 'vacationType'])
+            ->whereIn('user_id', $employeeIds);
+
         $searchTerm = request()->query('searchTerm');
-        $statusFilter = request()->query('status');
-    
-        // Build the query
-        $query = UserVacation::whereIn('user_id', $employeeIds)
-            ->with('user');
-    
-        // Filter by employee name
         if (!empty($searchTerm)) {
             $query->whereHas('user', function ($q) use ($searchTerm) {
                 $q->where('name', 'LIKE', '%' . $searchTerm . '%');
             });
         }
-    
-        // Filter by vacation status
+
+        $statusFilter = request()->query('status');
         if (!empty($statusFilter) && $statusFilter !== 'all') {
-            if (is_array($statusFilter)) {
-                $query->whereIn('status', $statusFilter);
-            } else {
-                $query->where('status', $statusFilter);
-            }
+            $statuses = is_array($statusFilter) ? $statusFilter : [$statusFilter];
+            $mappedStatuses = array_map(function ($status) {
+                $status = strtolower($status);
+                return $status === 'declined' ? StatusEnum::Rejected->value : $status;
+            }, $statuses);
+
+            $query->whereIn('status', $mappedStatuses);
         }
-    
-        // Sort by created_at descending
-        $query->orderBy('created_at', 'desc');
-    
-        // Paginate
-        $vacations = $query->paginate(6, ['*'], 'page', request()->query('page', 1));
-    
-        // Format data
-        $vacationsWithUserData = collect($vacations->items())->map(function ($vacation) {
+
+        if ($typeId = request()->query('vacation_type_id')) {
+            $query->where('vacation_type_id', $typeId);
+        }
+
+        if ($from = request()->query('from_date')) {
+            $query->whereDate('from_date', '>=', $from);
+        }
+
+        if ($to = request()->query('to_date')) {
+            $query->whereDate('to_date', '<=', $to);
+        }
+
+        $perPage = (int) request()->query('per_page', 6);
+        if ($perPage < 1) {
+            $perPage = 6;
+        }
+
+        $vacations = $query->orderByDesc('from_date')
+            ->paginate($perPage, ['*'], 'page', request()->query('page', 1));
+
+        $vacationsWithUserData = collect($vacations->items())->map(function (UserVacation $vacation) {
             return [
                 'vacation' => $vacation,
                 'user' => $vacation->user,
+                'vacation_type' => $vacation->vacationType,
             ];
         });
-    
+
         return $this->returnData('Vacations', [
             'data' => $vacationsWithUserData,
             'pagination' => [
@@ -311,5 +372,87 @@ class UserVacationController extends Controller
             ]
         ], 'Vacations for employees in the departments managed by the authenticated user');
     }
+
     
+
+    protected function getOrCreateBalance(User $user, VacationType $vacationType, Carbon $date): UserVacationBalance
+    {
+        return UserVacationBalance::firstOrCreate(
+            [
+                'user_id' => $user->id,
+                'vacation_type_id' => $vacationType->id,
+                'year' => $date->year,
+            ],
+            [
+                'allocated_days' => $vacationType->default_days ?? 0,
+                'used_days' => 0,
+            ]
+        );
+    }
+
+    protected function resolveOverallStatus(UserVacation $vacation): string
+    {
+        $direct = $this->statusValue($vacation->approval_of_direct);
+        $head = $this->statusValue($vacation->approval_of_head);
+
+        if ($direct === 'declined' || $head === 'declined') {
+            return StatusEnum::Rejected->value;
+        }
+
+        if ($direct === 'approved' && $head === 'approved') {
+            return StatusEnum::Approved->value;
+        }
+
+        return StatusEnum::Pending->value;
+    }
+
+    protected function statusValue($status): ?string
+    {
+        if ($status instanceof StatusEnum) {
+            return $status->value;
+        }
+
+        return $status ?: null;
+    }
+
+    protected function syncVacationBalance(UserVacation $vacation, ?string $previousOverall): void
+    {
+        $current = $this->statusValue($vacation->status);
+
+        if ($previousOverall === $current) {
+            return;
+        }
+
+        $balance = UserVacationBalance::where('user_id', $vacation->user_id)
+            ->where('vacation_type_id', $vacation->vacation_type_id)
+            ->where('year', Carbon::parse($vacation->from_date)->year)
+            ->first();
+
+        if (!$balance) {
+            $vacation->loadMissing('vacationType', 'user');
+            $type = $vacation->vacationType;
+            $user = $vacation->user;
+
+            if (!$type || !$user) {
+                return;
+            }
+
+            $balance = $this->getOrCreateBalance($user, $type, Carbon::parse($vacation->from_date));
+        }
+
+        $days = (float) ($vacation->days_count ?? 0);
+
+        if ($previousOverall === StatusEnum::Approved->value && $current !== StatusEnum::Approved->value) {
+            $balance->used_days = max(0, ($balance->used_days ?? 0) - $days);
+            $balance->save();
+
+            return;
+        }
+
+        if ($previousOverall !== StatusEnum::Approved->value && $current === StatusEnum::Approved->value) {
+            $balance->used_days = ($balance->used_days ?? 0) + $days;
+            $balance->save();
+        }
+    }
+
 }

@@ -22,10 +22,9 @@ class StoreUserVacationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'from_date' => 'required|date_format:Y-m-d',
-            'to_date' => 'required|date_format:Y-m-d',
-            'status' => 'nullable|in:pending,approved,rejected',
-
+            'from_date' => 'required|date',
+            'to_date' => 'required|date',
+            'vacation_type_id' => 'required|exists:vacation_types,id',
         ];
     }
 }

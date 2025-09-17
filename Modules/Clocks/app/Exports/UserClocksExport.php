@@ -52,6 +52,13 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                 ->orderBy('clock_in')
                 ->get();
 
+            $overtimeRecords = UserClockOvertime::where('user_id', $user->id)
+                ->whereBetween('overtime_date', [$startDate->toDateString(), $endDate->toDateString()])
+                ->get()
+                ->keyBy(function ($record) {
+                    return Carbon::parse($record->overtime_date)->toDateString();
+                });
+
             $grouped = $clocks->groupBy(function ($clock) {
                 return Carbon::parse($clock->clock_in)->format('Y-m-d');
             });
@@ -121,16 +128,27 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                 $formattedExcuses = sprintf('%02d:%02d', floor($dailyExcuses / 60), $dailyExcuses % 60);
                 $accumulatedExcuses += $dailyExcuses;
 
-                // Attendance-based overtime (no separate table dependency)
                 $attendanceOvertimeMin = $this->computeAttendanceOvertimeMinutes($formattedTotal, $formattedDate);
-                $dailyOverTime = $attendanceOvertimeMin;
-                $formattedOverTimes = sprintf('%02d:%02d', floor($dailyOverTime / 60), $dailyOverTime % 60);
-                $accumulatedOverTimes += $dailyOverTime;
 
-                // Attendance-based overtime from daily worked minutes
-                $attendanceOvertimeMin = $this->computeAttendanceOvertimeMinutes($formattedTotal, $formattedDate);
+                $overtimeRecord = $overtimeRecords->get($formattedDate);
+                $recordedMinutes = $overtimeRecord ? (int) $overtimeRecord->overtime_minutes : null;
+                if ($recordedMinutes === null) {
+                    $recordedMinutes = $attendanceOvertimeMin;
+                }
+
+                $formattedOverTimes = sprintf('%02d:%02d', floor($recordedMinutes / 60), $recordedMinutes % 60);
+                $accumulatedOverTimes += $recordedMinutes;
+
                 $formattedAttendanceOT = sprintf('%02d:%02d', floor($attendanceOvertimeMin / 60), $attendanceOvertimeMin % 60);
                 $accumulatedAttendanceOvertime += $attendanceOvertimeMin;
+
+                $otStatus = null;
+                if ($recordedMinutes > 0) {
+                    $statusSource = $overtimeRecord?->overall_status ?? 'pending';
+                    $otStatus = strtolower($statusSource);
+                } elseif ($attendanceOvertimeMin > 0) {
+                    $otStatus = 'pending';
+                }
 
                 // Excuse policy: deduct up to 2h per day from either late or early (not both), total cap 4h across range
                 $candidateExcuse = min(max($maxLate, $maxEarly), 120);
@@ -156,7 +174,11 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                 // Mark row styles to apply later in styles()
                 $rowIndex = 1 + $finalCollection->count() + 1; // header + current size + this row
                 $isWeekend = Carbon::parse($formattedDate)->isFriday() || Carbon::parse($formattedDate)->isSaturday();
-                $this->rowStyles[] = ['row' => $rowIndex, 'ot' => ($attendanceOvertimeMin > 0), 'weekend' => $isWeekend, 'multi' => $hasMultipleSegments];
+                $this->rowStyles[] = [
+                    'row' => $rowIndex,
+                    'ot_status' => $otStatus,
+                    'weekend' => $isWeekend,
+                ];
                 $finalCollection->push([
                     'Date' => $formattedDate,
                     'Name' => $user->name,
@@ -178,6 +200,7 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                 // Add extra rows for additional segments (only Clock In/Out shown)
                 if ($hasMultipleSegments) {
                     foreach ($dailyClocks as $seg) {
+                        $segmentRowIndex = 1 + $finalCollection->count() + 1;
                         $segIn = $seg->clock_in ? Carbon::parse($seg->clock_in)->addHours($timezoneValue)->format('h:i A') : '';
                         $segOut = $seg->clock_out ? Carbon::parse($seg->clock_out)->addHours($timezoneValue)->format('h:i A') : '';
                         $finalCollection->push([
@@ -197,6 +220,11 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                             'Location Out' =>  '',
                             'Attendance Over time in That Day' => '',
                         ]);
+
+                        $this->rowStyles[] = [
+                            'row' => $segmentRowIndex,
+                            'multi_segment' => true,
+                        ];
                     }
                 }
 
@@ -307,23 +335,32 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
         $sheet->setAutoFilter('A1:O1');
 
         // Highlight rules
-        $otColor = 'F8CBAD';      // OT: light orange
+        $otStatusColors = [
+            'pending' => 'FFF2CC',
+            'declined' => 'FFC7CE',
+            'approved' => 'F4B183',
+        ];
         $weekendColor = 'BDD7EE'; // Fri/Sat: light blue
         $multiColor = 'C6E0B4';   // Multiple segments: light green
 
         foreach ($this->rowStyles as $mark) {
             $r = $mark['row'] ?? null;
             if (!$r) { continue; }
-            if (!empty($mark['ot'])) {
-                foreach (['H','O'] as $col) {
-                    $sheet->getStyle($col.$r)->applyFromArray([
-                        'fill' => [
-                            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                            'startColor' => ['rgb' => $otColor],
-                        ],
-                    ]);
+
+            if (!empty($mark['ot_status'])) {
+                $statusKey = strtolower($mark['ot_status']);
+                if (isset($otStatusColors[$statusKey])) {
+                    foreach (['H','O'] as $col) {
+                        $sheet->getStyle($col.$r)->applyFromArray([
+                            'fill' => [
+                                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                'startColor' => ['rgb' => $otStatusColors[$statusKey]],
+                            ],
+                        ]);
+                    }
                 }
             }
+
             if (!empty($mark['weekend'])) {
                 $sheet->getStyle('A'.$r)->applyFromArray([
                     'fill' => [
@@ -332,13 +369,16 @@ class UserClocksExport implements FromCollection, WithHeadings, WithStyles, With
                     ],
                 ]);
             }
-            if (!empty($mark['multi'])) {
-                $sheet->getStyle('C'.$r)->applyFromArray([
-                    'fill' => [
-                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => $multiColor],
-                    ],
-                ]);
+
+            if (!empty($mark['multi_segment'])) {
+                foreach (['C', 'D'] as $col) {
+                    $sheet->getStyle($col.$r)->applyFromArray([
+                        'fill' => [
+                            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => $multiColor],
+                        ],
+                    ]);
+                }
             }
         }
     }
