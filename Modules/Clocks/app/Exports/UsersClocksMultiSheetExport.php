@@ -2,15 +2,18 @@
 
 namespace Modules\Clocks\Exports;
 
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\Exportable;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Modules\Clocks\Exports\Sheets\UserClocksSummarySheet;
+use Modules\Clocks\Exports\UserClocksExport;
 use Modules\Users\Models\User;
 
 class UsersClocksMultiSheetExport implements WithMultipleSheets
 {
     use Exportable;
 
-    protected $users;
+    protected Collection $users;
     protected $startDate;
     protected $endDate;
 
@@ -18,11 +21,12 @@ class UsersClocksMultiSheetExport implements WithMultipleSheets
     {
         if ($users instanceof User) {
             $this->users = collect([$users]);
-        } elseif ($users instanceof \Illuminate\Support\Collection || $users instanceof \Illuminate\Database\Eloquent\Collection) {
-            $this->users = $users;
+        } elseif ($users instanceof Collection || $users instanceof \Illuminate\Database\Eloquent\Collection) {
+            $this->users = collect($users);
         } else {
             $this->users = collect(is_array($users) ? $users : [$users]);
         }
+
         $this->startDate = $startDate;
         $this->endDate = $endDate;
     }
@@ -30,9 +34,18 @@ class UsersClocksMultiSheetExport implements WithMultipleSheets
     public function sheets(): array
     {
         $sheets = [];
+
+        $summaryExport = new UserClocksExport($this->users, $this->startDate, $this->endDate);
+        $sheets[] = new UserClocksSummarySheet($summaryExport->getSummaryRows());
+
         foreach ($this->users as $user) {
+            if (! $user instanceof User) {
+                continue;
+            }
+
             $sheets[] = new UserClocksSheet($user, $this->startDate, $this->endDate);
         }
+
         return $sheets;
     }
 }

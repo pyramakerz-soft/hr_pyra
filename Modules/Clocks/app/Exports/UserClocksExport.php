@@ -435,4 +435,20 @@ class UserClocksExport implements WithMultipleSheets
 
         return sprintf('%02d:%02d', $hours, $mins);
     }
+
+    public function getSummaryRows(): Collection
+    {
+        return $this->summaryRows;
+    }
+
+    public function getDetailedRows(): Collection
+    {
+        return $this->detailedRows;
+    }
+
+    public function getRowStyles(): array
+    {
+        return $this->rowStyles;
+    }
+
 }
