@@ -5,8 +5,8 @@ namespace Modules\Clocks\Exports;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Modules\Clocks\Exports\Sheets\UserClocksDetailedSheet;
 use Modules\Clocks\Exports\Sheets\UserClocksSummarySheet;
-use Modules\Clocks\Exports\UserClocksExport;
 use Modules\Users\Models\User;
 
 class UsersClocksMultiSheetExport implements WithMultipleSheets
@@ -43,14 +43,15 @@ class UsersClocksMultiSheetExport implements WithMultipleSheets
                 continue;
             }
 
-            $sheets[] = new UserClocksSheet($user, $this->startDate, $this->endDate);
+            $userExport = new UserClocksExport($user, $this->startDate, $this->endDate);
+            $title = trim(sprintf('%s - %s', $user->code ?? '', $user->name));
+            $sheets[] = new UserClocksDetailedSheet(
+                $userExport->getDetailedRows(),
+                $userExport->getRowStyles(),
+                $title !== '' ? $title : 'Details'
+            );
         }
 
         return $sheets;
     }
 }
-
-
-
-
-

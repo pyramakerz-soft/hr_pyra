@@ -16,11 +16,13 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
 {
     protected Collection $rows;
     protected array $rowStyles;
+    protected string $title;
 
-    public function __construct(Collection $rows, array $rowStyles)
+    public function __construct(Collection $rows, array $rowStyles, string $title = "Details")
     {
         $this->rows = $rows;
         $this->rowStyles = $rowStyles;
+        $this->title = $title;
     }
 
     public function collection(): Collection
@@ -131,6 +133,6 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
 
     public function title(): string
     {
-        return 'Details';
+        return $this->title;
     }
 }
