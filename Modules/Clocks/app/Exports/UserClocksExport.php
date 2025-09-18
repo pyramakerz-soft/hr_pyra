@@ -36,8 +36,8 @@ class UserClocksExport implements WithMultipleSheets
     public function sheets(): array
     {
         return [
-            new UserClocksDetailedSheet($this->detailedRows, $this->rowStyles),
             new UserClocksSummarySheet($this->summaryRows),
+            new UserClocksDetailedSheet($this->detailedRows, $this->rowStyles),
         ];
     }
 
