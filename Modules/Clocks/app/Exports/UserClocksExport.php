@@ -86,6 +86,10 @@ class UserClocksExport implements WithMultipleSheets
             }
 
             $timezoneValue = optional($user->timezone)->value ?? 3;
+            $department = optional($user->department);
+            $workScheduleType = strtolower($department->work_schedule_type ?? 'flexible');
+            $isFlexibleSchedule = $workScheduleType !== 'strict';
+            $worksOnSaturday = (bool) ($department?->works_on_saturday ?? false);
             $userDetail = optional($user->user_detail);
             $workingHoursDay = $userDetail->working_hours_day ?? 8;
             if ($workingHoursDay <= 0) {
@@ -128,10 +132,22 @@ class UserClocksExport implements WithMultipleSheets
             $totalVacationDays = 0;
             $totalLatenessBeyondGrace = 0;
             $totalApprovedExcuseMinutes = 0;
+            $totalApprovedExcuseMinutes = 0;
 
             for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
                 $formattedDate = $date->format('Y-m-d');
                 $dailyClocks = $grouped->get($formattedDate, collect());
+                $isVacationDay = $user->user_vacations()->where('status', 'approved')
+                    ->whereDate('from_date', '<=', $formattedDate)
+                    ->whereDate('to_date', '>=', $formattedDate)
+                    ->exists();
+
+                if ($dailyClocks->isEmpty()) {
+                    if ($isVacationDay) {
+                        $totalVacationDays++;
+                    }
+                    continue;
+                }
                 $workedMinutes = 0;
                 $earliestIn = null;
                 $latestOut = null;
@@ -174,17 +190,25 @@ class UserClocksExport implements WithMultipleSheets
                     }
                 }
 
-                $requiredMinutes = $requiredMinutesPerDay;
+                $isFriday = $date->isFriday();
+                $isSaturday = $date->isSaturday();
+                $isNonWorkingWeekend = $isFriday || ($isSaturday && ! $worksOnSaturday);
+
+                $requiredMinutes = $isNonWorkingWeekend ? 0 : $requiredMinutesPerDay;
                 $totalRequiredMinutes += $requiredMinutes;
 
                 $latenessBeyondGrace = 0;
-                if ($earliestIn) {
-                    $scheduledStart = Carbon::parse($formattedDate . ' ' . $scheduledStartTime);
-                    $diff = $scheduledStart->diffInMinutes($earliestIn, false);
-                    if ($diff > 0) {
-                        $mod = $diff % 60;
-                        if ($mod > 15) {
-                            $latenessBeyondGrace = $mod;
+                if ($earliestIn && $requiredMinutes > 0) {
+                    if ($isFlexibleSchedule) {
+                        $arrivalGraceEnd = Carbon::parse($formattedDate . ' 09:15:00');
+                        if ($earliestIn->greaterThan($arrivalGraceEnd)) {
+                            $latenessBeyondGrace = $arrivalGraceEnd->diffInMinutes($earliestIn);
+                        }
+                    } else {
+                        $scheduledStart = Carbon::parse($formattedDate . ' ' . $scheduledStartTime);
+                        $diff = $scheduledStart->diffInMinutes($earliestIn, false);
+                        if ($diff > 15) {
+                            $latenessBeyondGrace = $diff - 15;
                         }
                     }
                 }
@@ -209,11 +233,7 @@ class UserClocksExport implements WithMultipleSheets
                     $latenessBeyondGrace = 0;
                 }
 
-                $isVacation = $user->user_vacations()->where('status', 'approved')
-                    ->whereDate('from_date', '<=', $formattedDate)
-                    ->whereDate('to_date', '>=', $formattedDate)
-                    ->exists() ? 1 : 0;
-
+                $isVacation = $isVacationDay ? 1 : 0;
                 if ($isVacation) {
                     $totalVacationDays++;
                 }
@@ -277,7 +297,7 @@ class UserClocksExport implements WithMultipleSheets
 
                 $row = $entry['row_data'];
                 $row['Excuse Deducted in That Day'] = $this->formatMinutes($entry['excuse_applied_minutes']);
-                $row['Excuse Remaining (Policy 4h)'] = $this->formatMinutes($excuseMinutesRemaining);
+                $row['Excuse Remaining (Policy 4h)'] = '';
 
                 $this->detailedRows->push($row);
                 $rowNumber = 1 + $this->detailedRows->count();

@@ -7,6 +7,7 @@ use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Modules\Clocks\Exports\Sheets\UserClocksDetailedSheet;
 use Modules\Clocks\Exports\Sheets\UserClocksSummarySheet;
+use Modules\Clocks\Exports\UserClocksExport;
 use Modules\Users\Models\User;
 
 class UsersClocksMultiSheetExport implements WithMultipleSheets
