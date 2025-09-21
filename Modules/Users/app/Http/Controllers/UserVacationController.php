@@ -68,7 +68,17 @@ class UserVacationController extends Controller
             return $this->returnError('The end date cannot be before the start date', 422);
         }
 
-        $vacationType = VacationType::findOrFail($request->input('vacation_type_id'));
+        $vacationTypeId = $request->input('vacation_type_id');
+        if ($vacationTypeId) {
+            $vacationType = VacationType::findOrFail($vacationTypeId);
+        } else {
+            $defaultName = $from->greaterThan(Carbon::now()->addDays(2)->endOfDay()) ? 'اعتيادي' : 'عارضه';
+            $vacationType = VacationType::where('name', $defaultName)->first();
+            if (! $vacationType) {
+                return $this->returnError("Vacation type '{$defaultName}' is not configured", 422);
+            }
+        }
+
         $daysCount = $from->diffInDays($to) + 1;
 
         $balance = $this->getOrCreateBalance($authUser, $vacationType, $from);
@@ -171,37 +181,50 @@ class UserVacationController extends Controller
             'approver' => 'nullable|in:direct,head',
         ]);
 
-        $vacation = UserVacation::find($vacationId);
+        $vacation = UserVacation::with(['user.subDepartment', 'user.department', 'vacationType'])->find($vacationId);
 
-        if (!$vacation) {
+        if (! $vacation) {
             return $this->returnError('Vacation not found', 404);
         }
 
         $manager = Auth::user();
         $employeeIds = $manager->getManagedEmployeeIds();
 
-        if (!$employeeIds->contains($vacation->user_id)) {
+        if (! $employeeIds->contains($vacation->user_id)) {
             return $this->returnError('You are not authorized to update this vacation', 403);
         }
 
         $role = strtolower($manager->getRoleName() ?? '');
+        $teamLeadId = optional($vacation->user->subDepartment)->teamlead_id;
+        $departmentManagerId = optional($vacation->user->department)->manager_id;
+
         $approver = $request->input('approver');
-        if (!$approver) {
-            $approver = $role === 'team leader' ? 'direct' : 'head';
+        if (! $approver) {
+            if ($manager->id === $teamLeadId) {
+                $approver = 'direct';
+            } elseif ($manager->id === $departmentManagerId) {
+                $approver = 'head';
+            } elseif ($role === 'team leader') {
+                $approver = 'direct';
+            } else {
+                $approver = 'head';
+            }
         }
 
         $status = $request->input('status');
         $previousOverall = $this->statusValue($vacation->status);
 
         if ($approver === 'direct') {
-            if (!in_array($role, ['team leader', 'admin'])) {
+            $allowed = $manager->id === $teamLeadId || in_array($role, ['team leader', 'hr', 'admin']);
+            if (! $allowed) {
                 return $this->returnError('You do not have permission to approve as direct manager', 403);
             }
 
             $vacation->approval_of_direct = StatusEnum::from($status);
             $vacation->direct_approved_by = $manager->id;
         } elseif ($approver === 'head') {
-            if (!in_array($role, ['manager', 'hr', 'admin'])) {
+            $allowed = $manager->id === $departmentManagerId || in_array($role, ['manager', 'hr', 'admin']);
+            if (! $allowed) {
                 return $this->returnError('You do not have permission to approve as head manager', 403);
             }
 
@@ -211,10 +234,19 @@ class UserVacationController extends Controller
             return $this->returnError('Invalid approver type provided', 422);
         }
 
-        $vacation->status = $this->resolveOverallStatus($vacation);
+        $newOverall = $this->resolveOverallStatus($vacation);
+
+        if ($previousOverall !== StatusEnum::Approved->value && $newOverall === StatusEnum::Approved->value) {
+            $balance = $this->getOrCreateBalance($vacation->user, $vacation->vacationType, Carbon::parse($vacation->from_date));
+            if ($balance->remaining_days < ($vacation->days_count ?? 0)) {
+                return $this->returnError('Insufficient ' . $vacation->vacationType->name . ' balance. Remaining days: ' . $balance->remaining_days, 422);
+            }
+        }
+
+        $vacation->status = $newOverall;
         $vacation->save();
 
-        $this->syncVacationBalance($vacation, $previousOverall);
+        $this->syncVacationBalance($vacation->fresh(['user', 'vacationType']), $previousOverall);
 
         return $this->returnData('Vacation', $vacation->fresh(['user', 'vacationType']), 'Vacation status updated successfully');
     }
@@ -394,13 +426,16 @@ class UserVacationController extends Controller
     {
         $direct = $this->statusValue($vacation->approval_of_direct);
         $head = $this->statusValue($vacation->approval_of_head);
+        $requiresHeadApproval = (bool) optional(optional($vacation->user)->department)->manager_id;
 
         if ($direct === 'declined' || $head === 'declined') {
             return StatusEnum::Rejected->value;
         }
 
-        if ($direct === 'approved' && $head === 'approved') {
-            return StatusEnum::Approved->value;
+        if ($direct === 'approved') {
+            if (! $requiresHeadApproval || $head === 'approved' || $head === null || $head === 'pending') {
+                return StatusEnum::Approved->value;
+            }
         }
 
         return StatusEnum::Pending->value;

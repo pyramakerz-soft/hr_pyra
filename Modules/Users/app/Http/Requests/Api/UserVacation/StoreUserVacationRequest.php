@@ -24,7 +24,7 @@ class StoreUserVacationRequest extends FormRequest
         return [
             'from_date' => 'required|date',
             'to_date' => 'required|date',
-            'vacation_type_id' => 'required|exists:vacation_types,id',
+            'vacation_type_id' => 'nullable|exists:vacation_types,id',
         ];
     }
 }

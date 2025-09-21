@@ -296,6 +296,7 @@ class UserClocksExport implements WithMultipleSheets
                     'raw_deduction_minutes' => $rawDeductionMinutes,
                     'excuse_applied_minutes' => 0,
                     'chargeable_deduction_minutes' => $rawDeductionMinutes,
+                    'issue_columns' => $issueColumns,
                 ];
             }
 
@@ -331,7 +332,7 @@ class UserClocksExport implements WithMultipleSheets
                     'row' => $rowNumber,
                     'ot_status' => $entry['ot_status'],
                     'weekend' => $entry['weekend'],
-                    'issue_columns' => $hasIssue ? $issueColumns : [],
+                    'issue_columns' => $entry['issue_columns'] ?? [],
                 ];
 
                 foreach ($entry['segments'] as $segment) {
