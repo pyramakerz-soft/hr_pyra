@@ -72,7 +72,7 @@ class UserVacationController extends Controller
         if ($vacationTypeId) {
             $vacationType = VacationType::findOrFail($vacationTypeId);
         } else {
-            $defaultName = $from->greaterThan(Carbon::now()->addDays(2)->endOfDay()) ? 'اعتيادي' : 'عارضه';
+            $defaultName = $from->greaterThan(Carbon::now()->addDays(2)->endOfDay()) ? 'عارضه' : 'اعتيادي';
             $vacationType = VacationType::where('name', $defaultName)->first();
             if (! $vacationType) {
                 return $this->returnError("Vacation type '{$defaultName}' is not configured", 422);
