@@ -178,7 +178,6 @@ class UserClocksExport implements WithMultipleSheets
             $totalLatenessBeyondGrace = 0;
             $totalApprovedExcuseMinutes = 0;
             $totalIssueDays = 0;
-            $totalApprovedExcuseMinutes = 0;
 
             for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
                 $formattedDate = $date->format('Y-m-d');
@@ -302,19 +301,20 @@ class UserClocksExport implements WithMultipleSheets
                 $shortfall = max(0, $requiredMinutes - $workedMinutes);
 
                 $evaluationMetrics = [
-                    'date' => $formattedDate,
-                    'day_of_week' => strtolower($date->format('l')),
-                    'required_minutes' => $requiredMinutes,
-                    'default_daily_minutes' => $requiredMinutesPerDay,
-                    'worked_minutes' => $workedMinutes,
-                    'shortfall_minutes' => $shortfall,
-                    'lateness_minutes_actual' => $latenessMinutesActual ?? 0,
-                    'lateness_beyond_grace' => $latenessBeyondGrace,
-                    'attendance_overtime_minutes' => $attendanceOvertimeMinutes,
-                    'recorded_ot_minutes' => $recordedOtMinutes,
-                    'is_issue' => $hasIssue,
-                    'is_vacation' => (bool) $isVacation,
-                ];
+    'date' => $formattedDate,
+    'day_of_week' => strtolower($date->format('l')),
+    'required_minutes' => $requiredMinutes,
+    'default_daily_minutes' => $requiredMinutesPerDay,
+    'worked_minutes' => $workedMinutes,
+    'shortfall_minutes' => $shortfall,
+    'lateness_minutes_actual' => $latenessMinutesActual ?? 0,
+    'lateness_beyond_grace' => $latenessBeyondGrace,
+    'attendance_overtime_minutes' => $attendanceOvertimeMinutes,
+    'recorded_ot_minutes' => $recordedOtMinutes,
+    'is_issue' => $hasIssue,
+    'is_vacation' => (bool) $isVacationDay, // ✅ use the already-known flag
+];
+
 
                 $evaluation = $deductionEngine->evaluate($evaluationMetrics, $ruleState);
                 $appliedRules = $evaluation['applied_rules'] ?? [];
