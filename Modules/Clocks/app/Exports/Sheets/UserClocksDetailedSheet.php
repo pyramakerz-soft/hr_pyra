@@ -41,6 +41,8 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
             'Department',
             'Total Hours in That Day',
             'Total Over time in That Day',
+            'Plan Deduction in That Day',
+            'Deduction Details',
             'Excuse Deducted in That Day',
             'Excuse Remaining (Policy 4h)',
             'Total Excuses in That Day',
@@ -53,7 +55,7 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:O1')->applyFromArray([
+        $sheet->getStyle('A1:Q1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -69,12 +71,12 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
             ],
         ]);
 
-        foreach (range('A', 'O') as $col) {
+        foreach (range('A', 'Q') as $col) {
             $sheet->getColumnDimension($col)->setWidth(30);
         }
 
         $sheet->getRowDimension(1)->setRowHeight(40);
-        $sheet->setAutoFilter('A1:O1');
+        $sheet->setAutoFilter('A1:Q1');
 
         $otStatusColors = [
             'pending' => 'FFF2CC',
@@ -122,6 +124,27 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
                         ],
                     ]);
                 }
+            }
+
+            if (! empty($mark['deduction_color'])) {
+                $colorHex = strtoupper(ltrim($mark['deduction_color'], '#'));
+                foreach (['I', 'J'] as $col) {
+                    $sheet->getStyle($col . $rowNumber)->applyFromArray([
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => $colorHex],
+                        ],
+                    ]);
+                }
+            }
+
+            if (! empty($mark['vacation'])) {
+                $sheet->getStyle('N' . $rowNumber)->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'BDD7EE'],
+                    ],
+                ]);
             }
         }
     }

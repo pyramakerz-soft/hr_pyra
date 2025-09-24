@@ -34,14 +34,16 @@ export class DepartmentService {
   }
 
 
-  createDepartment(name: string, managerId: number ,Is_location_time :number): Observable<Department> {
+  createDepartment(name: string, managerId: number, isLocationTime: number, workScheduleType: string, worksOnSaturday: boolean): Observable<Department> {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
     const body = {
       name: name,
       manager_id: managerId,
-      is_location_time:Is_location_time
+      is_location_time: isLocationTime,
+      work_schedule_type: workScheduleType,
+      works_on_saturday: worksOnSaturday
     };
 
     return this.http.post<Department>(this.baseurl, body, { headers });
@@ -53,16 +55,17 @@ export class DepartmentService {
     return this.http.get<Department[]>(`${this.baseurl}/${ID}`, { headers });
   }
 
-  UpdateDept(ID: number ,name:string ,managerId:number ,Is_location_time :number){
+  UpdateDept(ID: number, name: string, managerId: number, isLocationTime: number, workScheduleType: string, worksOnSaturday: boolean) {
     const token = localStorage.getItem("token");
     const body = {
       name: name,
       manager_id: managerId,
-      is_location_time:Is_location_time
-
+      is_location_time: isLocationTime,
+      work_schedule_type: workScheduleType,
+      works_on_saturday: worksOnSaturday
     };
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.post<Department[]>(`${this.baseurl}/${ID}`,body, { headers });
+    return this.http.post<Department[]>(`${this.baseurl}/${ID}`, body, { headers });
 
   }
 

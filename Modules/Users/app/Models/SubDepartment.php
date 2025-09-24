@@ -5,11 +5,18 @@ namespace Modules\Users\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use Modules\Clocks\Models\DeductionPlan;
+
 class SubDepartment extends Model
 {
     use HasFactory;
 
     protected $fillable = ['name', 'department_id', 'teamlead_id'];
+
+    public function deductionPlan()
+    {
+        return $this->morphOne(DeductionPlan::class, 'planable');
+    }
 
     public function department()
     {

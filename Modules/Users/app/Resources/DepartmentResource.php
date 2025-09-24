@@ -19,6 +19,8 @@ class DepartmentResource extends JsonResource
             "id" => $this->id,
             "name" => $this->name,
             'is_location_time' => $is_location_time,
+            'work_schedule_type' => $this->work_schedule_type ?? 'flexible',
+            'works_on_saturday' => (bool) ($this->works_on_saturday ?? false),
             "manager_id" => $this->manager_id,
             'manager_name' => $this->manager ? $this->manager->name : null,
         ];

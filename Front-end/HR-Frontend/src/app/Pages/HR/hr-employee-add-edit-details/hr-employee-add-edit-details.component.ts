@@ -16,6 +16,9 @@ import { SubDepartmentService } from '../../../Services/sub-department.service';
 import { TimeZoneService } from '../../../Services/timezone.service';
 import { UserServiceService } from '../../../Services/user-service.service';
 import { WorkTypeService } from '../../../Services/work-type.service';
+import { DeductionPlan, DeductionRule, ResolvedDeductionPlan } from '../../../Models/deduction-plan';
+import { DeductionPlanService } from '../../../Services/deduction-plan.service';
+import { DeductionPlanEditor, PLAN_CONDITION_OPTIONS, PLAN_PENALTY_TYPES, PLAN_RULE_CATEGORIES, PLAN_SCOPE_OPTIONS, WEEKDAY_OPTIONS, PlanConditionOption, PlanConditionType, getConditionLabel } from '../../../Helpers/deduction-plan-editor';
 
 @Component({
   selector: 'app-hr-employee-add-edit-details',
@@ -34,6 +37,18 @@ export class HrEmployeeAddEditDetailsComponent {
   isSaved = false
   isFloatChecked: boolean = false;
     timezones: Timezone[] = [];
+
+  planEditor = new DeductionPlanEditor();
+  employeePlan: DeductionPlan = this.planEditor.plan;
+  effectivePlan?: ResolvedDeductionPlan;
+  planConditionOptions = PLAN_CONDITION_OPTIONS;
+  ruleCategories = PLAN_RULE_CATEGORIES;
+  penaltyTypes = PLAN_PENALTY_TYPES;
+  scopeOptions = PLAN_SCOPE_OPTIONS;
+  weekdayOptions = WEEKDAY_OPTIONS;
+  planLoading = false;
+  planSaving = false;
+  planEffectiveSources: Array<{ type: string; id: number | string; overwrite: boolean }> = [];
 
   employee: AddEmployee = new AddEmployee(null,
     null, '', '', null, null, null, '', '', '', '', '', '', null, null, null, null, null, null, '',null, [], [], [], [], false
@@ -66,7 +81,8 @@ export class HrEmployeeAddEditDetailsComponent {
               public locationService: LocationsService,
               public timezoneService: TimeZoneService,
               public router: Router,
-              public supDeptServ:SubDepartmentService
+              public supDeptServ:SubDepartmentService,
+              private planService: DeductionPlanService
               
             ){}
   

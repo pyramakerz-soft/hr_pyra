@@ -66,11 +66,228 @@
           <span class="ml-2 font-semibold text-xs md:text-sm text-[#3A3A3C]">Is Notify To Location Time</span>
         </div>
       </div>
+
+      <div class="grid gap-6 md:grid-cols-2">
+        <div>
+          <label class="font-semibold block mb-2 md:mb-3 text-xs md:text-sm text-[#3A3A3C]">Work Schedule Type</label>
+          <div class="flex items-center space-x-4">
+            <label class="flex items-center text-xs md:text-sm text-[#3A3A3C]">
+              <input type="radio" class="w-4 h-4 md:w-5 md:h-5" name="workScheduleType" [ngModelOptions]="{standalone: true}" [(ngModel)]="workScheduleType" value="flexible">
+              <span class="ml-2">Flexible</span>
+            </label>
+            <label class="flex items-center text-xs md:text-sm text-[#3A3A3C]">
+              <input type="radio" class="w-4 h-4 md:w-5 md:h-5" name="workScheduleType" [ngModelOptions]="{standalone: true}" [(ngModel)]="workScheduleType" value="strict">
+              <span class="ml-2">Strict</span>
+            </label>
+          </div>
+        </div>
+        <div class="flex items-center mt-2 md:mt-6">
+          <input type="checkbox" class="border border-[#E5E5EA] rounded-lg w-5 h-5 md:w-6 md:h-6" [(ngModel)]="worksOnSaturday">
+          <span class="ml-2 font-semibold text-xs md:text-sm text-[#3A3A3C]">Works on Saturday</span>
+        </div>
+      </div>
       
       
       
 
     </div>
   </div>
+
+  <div class="border border-[#ECECEC] rounded-lg p-4 md:p-8 shadow-md shadow-[#0000001F] mt-6">
+    <div class="flex items-center justify-between mb-4">
+      <p class="text-[#272D37] font-semibold text-lg md:text-xl">Deduction Plan</p>
+      <button class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg"
+        [disabled]="planSaving || planLoading || mode !== 'Edit'"
+        (click)="savePlan()">
+        {{ planSaving ? 'Saving...' : 'Save Plan' }}
+      </button>
+    </div>
+    <div *ngIf="mode !== 'Edit'" class="text-sm text-[#707070] mb-4">
+      Save the department details before configuring the plan.
+    </div>
+    <div *ngIf="planLoading" class="text-sm text-[#707070] mb-4">
+      Loading plan...
+    </div>
+    <div class="grid gap-4 md:grid-cols-2 mb-6">
+      <div>
+        <label class="block mb-2 font-semibold text-xs md:text-sm text-[#3A3A3C]">Grace Minutes</label>
+        <input type="number" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+          [ngModel]="departmentPlan.grace_minutes"
+          (ngModelChange)="updateGraceMinutes($event)"
+          [disabled]="mode !== 'Edit'">
+      </div>
+      <div class="flex items-end justify-end md:justify-start">
+        <button class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 md:py-2 px-4 md:px-5 rounded-lg"
+          type="button"
+          (click)="addRule()"
+          [disabled]="planLoading || mode !== 'Edit'">
+          Add Rule
+        </button>
+      </div>
+    </div>
+    <div *ngFor="let rule of departmentPlan.rules; let i = index; trackBy: trackRuleByIndex" class="border border-[#E5E5EA] rounded-lg p-4 md:p-6 mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <p class="font-semibold text-sm md:text-base text-[#272D37]">Rule {{ i + 1 }}</p>
+        <button type="button" class="text-[#FF7519] text-xs md:text-sm"
+          (click)="removeRule(i)"
+          [disabled]="departmentPlan.rules.length <= 1 || mode !== 'Edit'">
+          Remove
+        </button>
+      </div>
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Label</label>
+          <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+            [(ngModel)]="rule.label"
+            [ngModelOptions]="{standalone: true}"
+            [disabled]="mode !== 'Edit'">
+        </div>
+        <div>
+          <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Category</label>
+          <select class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+            [(ngModel)]="rule.category"
+            [ngModelOptions]="{standalone: true}"
+            [disabled]="mode !== 'Edit'">
+            <option *ngFor="let category of ruleCategories" [value]="category">{{ category }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Scope</label>
+          <select class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+            [(ngModel)]="rule.scope"
+            [ngModelOptions]="{standalone: true}"
+            [disabled]="mode !== 'Edit'">
+            <option *ngFor="let scope of scopeOptions" [value]="scope">{{ scope }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Penalty Type</label>
+          <select class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+            [(ngModel)]="rule.penalty.type"
+            [ngModelOptions]="{standalone: true}"
+            [disabled]="mode !== 'Edit'">
+            <option *ngFor="let penalty of penaltyTypes" [value]="penalty.value">{{ penalty.label }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Penalty Value</label>
+          <input type="number" step="0.01" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+            [(ngModel)]="rule.penalty.value"
+            [ngModelOptions]="{standalone: true}"
+            [disabled]="mode !== 'Edit'">
+        </div>
+        <div>
+          <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Penalty Unit (optional)</label>
+          <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+            [(ngModel)]="rule.penalty.unit"
+            [ngModelOptions]="{standalone: true}"
+            [disabled]="mode !== 'Edit'">
+        </div>
+        <div>
+          <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Color</label>
+          <input type="color" class="h-10 w-16 border border-[#E5E5EA] rounded"
+            [(ngModel)]="rule.color"
+            [ngModelOptions]="{standalone: true}"
+            [disabled]="mode !== 'Edit'">
+        </div>
+        <div class="flex items-center mt-4 md:mt-8">
+          <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5"
+            [(ngModel)]="rule.stop_processing"
+            [ngModelOptions]="{standalone: true}"
+            [disabled]="mode !== 'Edit'">
+          <span class="ml-2 text-xs md:text-sm text-[#3A3A3C]">Stop after this rule</span>
+        </div>
+      </div>
+      <div class="mt-4">
+        <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Notes</label>
+        <textarea rows="2" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+          [(ngModel)]="rule.notes"
+          [ngModelOptions]="{standalone: true}"
+          [disabled]="mode !== 'Edit'"></textarea>
+      </div>
+      <div class="mt-6">
+        <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Conditions</label>
+        <div class="space-y-3">
+          <div *ngFor="let condition of getConditionEntries(rule); trackBy: trackCondition" class="grid gap-3 md:grid-cols-[minmax(0,200px)_1fr_auto] items-start">
+            <div>
+              <p class="font-semibold text-xs md:text-sm text-[#3A3A3C]">{{ getConditionLabel(condition.key) }}</p>
+              <p *ngIf="getConditionHint(condition.key)" class="text-[11px] md:text-xs text-[#707070]">
+                {{ getConditionHint(condition.key) }}
+              </p>
+            </div>
+            <div>
+              <ng-container [ngSwitch]="getConditionType(condition.key)">
+                <input *ngSwitchCase="'number'" type="number" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                  [ngModel]="condition.value"
+                  (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                  [disabled]="mode !== 'Edit'">
+                <select *ngSwitchCase="'boolean'" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                  [ngModel]="condition.value === true ? 'true' : condition.value === false ? 'false' : ''"
+                  (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                  [disabled]="mode !== 'Edit'">
+                  <option value="">Choose...</option>
+                  <option value="true">True</option>
+                  <option value="false">False</option>
+                </select>
+                <select *ngSwitchCase="'weekday'" multiple class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                  [ngModel]="asArray(condition.value)"
+                  (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                  [disabled]="mode !== 'Edit'">
+                  <option *ngFor="let day of weekdayOptions" [ngValue]="day.value">{{ day.label }}</option>
+                </select>
+                <input *ngSwitchDefault type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                  [ngModel]="condition.value"
+                  (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                  [disabled]="mode !== 'Edit'">
+              </ng-container>
+            </div>
+            <div class="flex justify-end">
+              <button type="button" class="text-[#FF7519] text-xs md:text-sm"
+                (click)="removeCondition(i, condition.key)"
+                [disabled]="mode !== 'Edit'">
+                Remove
+              </button>
+            </div>
+          </div>
+          <div *ngIf="getConditionEntries(rule).length === 0" class="text-xs md:text-sm text-[#707070]">
+            No conditions added. Rule applies whenever the employee triggers it.
+          </div>
+        </div>
+        <div class="mt-4 flex flex-col md:flex-row md:items-center gap-3">
+          <select class="border border-[#E5E5EA] rounded-lg w-full md:w-auto p-2 md:p-3 text-xs md:text-base"
+            [ngModel]="getSelectedCondition(i)"
+            (ngModelChange)="onSelectCondition(i, $event)"
+            [disabled]="mode !== 'Edit'">
+            <option [ngValue]="null">Add condition...</option>
+            <option *ngFor="let option of getAvailableConditionOptions(rule)" [ngValue]="option.key">{{ option.label }}</option>
+          </select>
+          <button type="button" class="bg-[#17253E] text-white font-semibold text-xs md:text-sm py-2 md:py-2 px-4 md:px-5 rounded-lg"
+            (click)="addSelectedCondition(i)"
+            [disabled]="mode !== 'Edit' || !getSelectedCondition(i)">
+            Add
+          </button>
+        </div>
+        <div class="mt-2 flex flex-col md:flex-row md:items-center gap-3">
+          <input type="text" class="border border-[#E5E5EA] rounded-lg w-full md:w-1/3 p-2 md:p-3 text-xs md:text-base"
+            placeholder="Custom key"
+            [ngModel]="getCustomDraft(i).key"
+            (ngModelChange)="updateCustomDraftKey(i, $event)"
+            [disabled]="mode !== 'Edit'">
+          <input type="text" class="border border-[#E5E5EA] rounded-lg w-full md:flex-1 p-2 md:p-3 text-xs md:text-base"
+            placeholder="Custom value"
+            [ngModel]="getCustomDraft(i).value"
+            (ngModelChange)="updateCustomDraftValue(i, $event)"
+            [disabled]="mode !== 'Edit'">
+          <button type="button" class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 md:py-2 px-4 md:px-5 rounded-lg"
+            (click)="addCustomCondition(i)"
+            [disabled]="mode !== 'Edit' || !getCustomDraft(i).key">
+            Add Custom
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 
 </div>

@@ -12,6 +12,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Modules\Clocks\Models\ClockInOut;
 use Modules\Clocks\Models\OverTimeInOut;
 use Modules\Clocks\Models\UserClockOvertime;
+use Modules\Clocks\Models\DeductionPlan;
 use Modules\Location\Models\Location;
 use Modules\Users\Models\UserVacationBalance;
 use Spatie\Permission\Traits\HasRoles;
@@ -176,6 +177,11 @@ class User extends Authenticatable implements JWTSubject
     }
 
 
+
+    public function deductionPlan()
+    {
+        return $this->morphOne(DeductionPlan::class, 'planable');
+    }
 
     public function user_detail()
     {

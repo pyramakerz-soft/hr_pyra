@@ -8,8 +8,11 @@ use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Modules\Clocks\Exports\Sheets\UserClocksDetailedSheet;
 use Modules\Clocks\Exports\Sheets\UserClocksSummarySheet;
+use Modules\Clocks\Exports\Sheets\UserClocksPlanSheet;
 use Modules\Clocks\Models\UserClockOvertime;
 use Modules\Users\Models\User;
+use Modules\Clocks\Support\DeductionPlanResolver;
+use Modules\Clocks\Support\DeductionRuleEngine;
 
 class UserClocksExport implements WithMultipleSheets
 {
@@ -21,13 +24,29 @@ class UserClocksExport implements WithMultipleSheets
 
     protected Collection $detailedRows;
     protected Collection $summaryRows;
+    protected Collection $planRows;
     protected array $rowStyles = [];
+    protected array $ruleLegend = [];
+    protected array $defaultCategoryColors = [
+        'lateness' => 'FFC7CE',
+        'deduction' => 'FFC7CE',
+        'shortfall' => 'FFC7CE',
+        'default_shortfall' => 'FFC7CE',
+        'overtime' => 'C6EFCE',
+        'vacation' => 'BDD7EE',
+        'issue' => 'FCE4D6',
+        'bonus' => 'C6EFCE',
+        'other' => 'D9D9D9',
+    ];
 
     public function __construct($users, $startDate = null, $endDate = null)
     {
         $this->users = $this->normalizeUsers($users);
         $this->startDate = $startDate;
         $this->endDate = $endDate;
+
+        $this->planRows = collect();
+        $this->ruleLegend = [];
 
         $this->prepareData();
     }
@@ -36,6 +55,7 @@ class UserClocksExport implements WithMultipleSheets
     {
         return [
             new UserClocksSummarySheet($this->summaryRows),
+            new UserClocksPlanSheet($this->planRows, $this->ruleLegend),
             new UserClocksDetailedSheet($this->detailedRows, $this->rowStyles),
         ];
     }
@@ -59,7 +79,17 @@ class UserClocksExport implements WithMultipleSheets
     {
         $this->detailedRows = collect();
         $this->summaryRows = collect();
+        $this->planRows = collect();
         $this->rowStyles = [];
+        $this->ruleLegend = [
+            'deduction' => $this->defaultCategoryColors['deduction'],
+            'overtime' => $this->defaultCategoryColors['overtime'],
+            'vacation' => $this->defaultCategoryColors['vacation'],
+            'issue' => $this->defaultCategoryColors['issue'],
+            'other' => $this->defaultCategoryColors['other'],
+        ];
+
+        $planResolver = new DeductionPlanResolver();
 
         $overallTotals = [
             'required_minutes' => 0,
@@ -84,6 +114,20 @@ class UserClocksExport implements WithMultipleSheets
         foreach ($this->users as $user) {
             if (! $user instanceof User) {
                 continue;
+            }
+
+            $resolvedPlan = $planResolver->resolveForUser($user);
+            $deductionEngine = new DeductionRuleEngine($resolvedPlan);
+            $planGraceMinutes = $resolvedPlan['grace_minutes'] ?? 15;
+            $ruleState = [];
+            $userPlanRowStart = $this->planRows->count();
+
+            foreach ($resolvedPlan['rules'] as $planRule) {
+                $categoryKey = $planRule['category'] ?? 'other';
+                $color = ltrim($planRule['color'] ?? '', '#');
+                if ($color !== '') {
+                    $this->ruleLegend[$categoryKey] = strtoupper($color);
+                }
             }
 
             $timezoneValue = optional($user->timezone)->value ?? 3;
@@ -221,18 +265,23 @@ class UserClocksExport implements WithMultipleSheets
                 }
 
                 $latenessBeyondGrace = 0;
+                $latenessMinutesActual = 0;
                 if ($earliestIn && $requiredMinutes > 0) {
                     if ($isFlexibleSchedule) {
-                        $arrivalGraceEnd = Carbon::parse($formattedDate . ' 09:15:00');
-                        if ($earliestIn->greaterThan($arrivalGraceEnd)) {
-                            $latenessBeyondGrace = $arrivalGraceEnd->diffInMinutes($earliestIn);
-                        }
+                        $baselineStart = Carbon::parse($formattedDate . ' 09:00:00');
                     } else {
-                        $scheduledStart = Carbon::parse($formattedDate . ' ' . $scheduledStartTime);
-                        $diff = $scheduledStart->diffInMinutes($earliestIn, false);
-                        if ($diff > 15) {
-                            $latenessBeyondGrace = $diff - 15;
-                        }
+                        $baselineStart = Carbon::parse($formattedDate . ' ' . $scheduledStartTime);
+                    }
+
+                    $graceEnd = $baselineStart->copy()->addMinutes($planGraceMinutes);
+
+                    $diffActual = $baselineStart->diffInMinutes($earliestIn, false);
+                    if ($diffActual > 0) {
+                        $latenessMinutesActual = $diffActual;
+                    }
+
+                    if ($earliestIn->greaterThan($graceEnd)) {
+                        $latenessBeyondGrace = $graceEnd->diffInMinutes($earliestIn);
                     }
                 }
 
@@ -251,12 +300,70 @@ class UserClocksExport implements WithMultipleSheets
                 }
 
                 $shortfall = max(0, $requiredMinutes - $workedMinutes);
-                $rawDeductionMinutes = $shortfall > 15 ? $shortfall : 0;
+
+                $evaluationMetrics = [
+                    'date' => $formattedDate,
+                    'day_of_week' => strtolower($date->format('l')),
+                    'required_minutes' => $requiredMinutes,
+                    'default_daily_minutes' => $requiredMinutesPerDay,
+                    'worked_minutes' => $workedMinutes,
+                    'shortfall_minutes' => $shortfall,
+                    'lateness_minutes_actual' => $latenessMinutesActual ?? 0,
+                    'lateness_beyond_grace' => $latenessBeyondGrace,
+                    'attendance_overtime_minutes' => $attendanceOvertimeMinutes,
+                    'recorded_ot_minutes' => $recordedOtMinutes,
+                    'is_issue' => $hasIssue,
+                    'is_vacation' => (bool) $isVacation,
+                ];
+
+                $evaluation = $deductionEngine->evaluate($evaluationMetrics, $ruleState);
+                $appliedRules = $evaluation['applied_rules'] ?? [];
+                $planMonetaryDeduction = $evaluation['monetary_amount'] ?? 0.0;
+                $rawDeductionMinutes = $hasIssue ? 0 : (int) ($evaluation['deduction_minutes'] ?? 0);
+
                 if ($hasIssue) {
-                    $rawDeductionMinutes = 0;
                     $latenessBeyondGrace = 0;
                 } elseif ($rawDeductionMinutes === 0) {
                     $latenessBeyondGrace = 0;
+                }
+
+                $deductionDetailSummary = collect($appliedRules)
+                    ->map(function (array $rule) {
+                        $minutes = $rule['deduction_minutes'] ?? 0;
+                        $label = $rule['label'] ?? 'Rule';
+
+                        return $label . ' (' . $this->formatMinutes($minutes) . ')';
+                    })
+                    ->implode('; ');
+
+                if (! empty($appliedRules)) {
+                    foreach ($appliedRules as $rule) {
+                        $categoryKey = $rule['category'] ?? 'other';
+                        $color = $rule['color'] ?? null;
+
+                        if ($color) {
+                            $this->ruleLegend[$categoryKey] = strtoupper(ltrim($color, '#'));
+                        } elseif (! isset($this->ruleLegend[$categoryKey])) {
+                            $this->ruleLegend[$categoryKey] = $this->defaultCategoryColors[$categoryKey] ?? $this->defaultCategoryColors['other'];
+                        }
+
+                        $this->planRows->push([
+                            'Employee' => $user->name,
+                            'Code' => $user->code,
+                            'Department' => $user->department?->name ?? 'N/A',
+                            'Date' => $formattedDate,
+                            'Category' => ucfirst(str_replace('_', ' ', $rule['category'] ?? 'other')),
+                            'Rule' => $rule['label'] ?? '',
+                            'Deduction Minutes' => $rule['deduction_minutes'] ?? 0,
+                            'Deduction HH:MM' => $this->formatMinutes($rule['deduction_minutes'] ?? 0),
+                            'Monetary Amount' => $rule['monetary_amount'] ?? null,
+                            'Notes' => $rule['notes'] ?? null,
+                            'Source' => is_array($rule['source'] ?? null) ? ($rule['source']['type'] ?? null) : null,
+                            'Color' => $rule['color'] ?? ($this->defaultCategoryColors[$rule['category'] ?? 'other'] ?? $this->defaultCategoryColors['other']),
+                        ]);
+                    }
+                } else {
+                    $deductionDetailSummary = '';
                 }
 
                 $isVacation = $isVacationDay ? 1 : 0;
@@ -280,6 +387,8 @@ class UserClocksExport implements WithMultipleSheets
                         'Department' => $user->department?->name ?? 'N/A',
                         'Total Hours in That Day' => $this->formatMinutes($workedMinutes),
                         'Total Over time in That Day' => $this->formatMinutes($recordedOtMinutes),
+                        'Plan Deduction in That Day' => $this->formatMinutes($rawDeductionMinutes),
+                        'Deduction Details' => $deductionDetailSummary,
                         'Excuse Deducted in That Day' => '',
                         'Excuse Remaining (Policy 4h)' => '',
                         'Total Excuses in That Day' => $this->formatMinutes($dailyExcuseMinutes),
@@ -296,6 +405,11 @@ class UserClocksExport implements WithMultipleSheets
                     'raw_deduction_minutes' => $rawDeductionMinutes,
                     'excuse_applied_minutes' => 0,
                     'chargeable_deduction_minutes' => $rawDeductionMinutes,
+                    'deduction_rules' => $appliedRules,
+                    'deduction_detail' => $deductionDetailSummary,
+                    'plan_monetary_amount' => $planMonetaryDeduction,
+                    'deduction_color' => $appliedRules[0]['color'] ?? null,
+                    'is_vacation' => $isVacation === 1,
                     'issue_columns' => $issueColumns,
                 ];
             }
@@ -333,6 +447,9 @@ class UserClocksExport implements WithMultipleSheets
                     'ot_status' => $entry['ot_status'],
                     'weekend' => $entry['weekend'],
                     'issue_columns' => $entry['issue_columns'] ?? [],
+                    'deduction_color' => $entry['deduction_color'] ?? null,
+                    'deduction_rules' => $entry['deduction_rules'] ?? [],
+                    'vacation' => $entry['is_vacation'] ?? false,
                 ];
 
                 foreach ($entry['segments'] as $segment) {
@@ -345,6 +462,8 @@ class UserClocksExport implements WithMultipleSheets
                         'Department' => '',
                         'Total Hours in That Day' => '',
                         'Total Over time in That Day' => '',
+                        'Plan Deduction in That Day' => '',
+                        'Deduction Details' => '',
                         'Excuse Deducted in That Day' => '',
                         'Excuse Remaining (Policy 4h)' => '',
                         'Total Excuses in That Day' => '',
@@ -372,6 +491,8 @@ class UserClocksExport implements WithMultipleSheets
                 'Department' => $user->department?->name ?? 'N/A',
                 'Total Hours in That Day' => $this->formatMinutes($totalWorkedMinutes),
                 'Total Over time in That Day' => $this->formatMinutes($totalRecordedOtMinutes),
+                'Plan Deduction in That Day' => $this->formatMinutes($totalRawDeductionMinutes),
+                'Deduction Details' => '',
                 'Excuse Deducted in That Day' => $this->formatMinutes($totalExcuseMinutesApplied),
                 'Excuse Remaining (Policy 4h)' => $this->formatMinutes(max(0, $excuseMinutesRemaining)),
                 'Total Excuses in That Day' => $this->formatMinutes($totalApprovedExcuseMinutes),
@@ -390,6 +511,8 @@ class UserClocksExport implements WithMultipleSheets
                 'Department' => '',
                 'Total Hours in That Day' => '',
                 'Total Over time in That Day' => '',
+                'Plan Deduction in That Day' => '',
+                'Deduction Details' => '',
                 'Excuse Deducted in That Day' => '',
                 'Excuse Remaining (Policy 4h)' => '',
                 'Total Excuses in That Day' => '',
@@ -398,6 +521,23 @@ class UserClocksExport implements WithMultipleSheets
                 'Location Out' => '',
                 'Attendance Over time in That Day' => '',
             ]);
+
+            if ($this->planRows->count() === $userPlanRowStart) {
+                $this->planRows->push([
+                    'Employee' => $user->name,
+                    'Code' => $user->code,
+                    'Department' => $user->department?->name ?? 'N/A',
+                    'Date' => '',
+                    'Category' => 'No Conditions',
+                    'Rule' => 'No deduction rules triggered',
+                    'Deduction Minutes' => 0,
+                    'Deduction HH:MM' => '00:00',
+                    'Monetary Amount' => null,
+                    'Notes' => '',
+                    'Source' => '',
+                    'Color' => $this->defaultCategoryColors['other'],
+                ]);
+            }
 
             $hourlyRate = $userDetail->hourly_rate;
             $overtimeRate = $userDetail->overtime_hourly_rate;

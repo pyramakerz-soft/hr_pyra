@@ -71,6 +71,40 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
             ],
         ]);
 
+        $lastRow = $sheet->getHighestRow();
+        if ($lastRow >= 2) {
+            $sheet->getStyle('E2:F' . $lastRow)->applyFromArray([
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'C6EFCE'],
+                ],
+            ]);
+            $sheet->getStyle('G2:G' . $lastRow)->applyFromArray([
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'FFC7CE'],
+                ],
+            ]);
+            $sheet->getStyle('I2:I' . $lastRow)->applyFromArray([
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'FFC7CE'],
+                ],
+            ]);
+            $sheet->getStyle('J2:J' . $lastRow)->applyFromArray([
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'FCE4D6'],
+                ],
+            ]);
+            $sheet->getStyle('K2:K' . $lastRow)->applyFromArray([
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'BDD7EE'],
+                ],
+            ]);
+        }
+
         foreach ($this->rows as $index => $row) {
             if (($row['Employee'] ?? null) === 'TOTAL') {
                 $rowNumber = $index + 2;

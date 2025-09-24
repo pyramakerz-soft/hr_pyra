@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Clocks\Http\Controllers\ClockController;
 use Modules\Clocks\Http\Controllers\ClocksController;
+use Modules\Clocks\Http\Controllers\DeductionPlanController;
 
 /*
  *--------------------------------------------------------------------------
@@ -18,6 +19,14 @@ use Modules\Clocks\Http\Controllers\ClocksController;
 Route::group(['middleware' => ['auth:api', 'role:Hr|Team leader']], function () {
 
 
+    Route::prefix('deduction-plans')->group(function () {
+        Route::get('department/{department}', [DeductionPlanController::class, 'showDepartment']);
+        Route::post('department/{department}', [DeductionPlanController::class, 'upsertDepartment']);
+        Route::get('sub-department/{subDepartment}', [DeductionPlanController::class, 'showSubDepartment']);
+        Route::post('sub-department/{subDepartment}', [DeductionPlanController::class, 'upsertSubDepartment']);
+        Route::get('user/{user}', [DeductionPlanController::class, 'showUser']);
+        Route::post('user/{user}', [DeductionPlanController::class, 'upsertUser']);
+    });
 
     //Clocks Management
 
