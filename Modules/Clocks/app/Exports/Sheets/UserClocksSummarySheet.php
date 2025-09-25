@@ -49,6 +49,7 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
             'OT Pay',
             'Gross Pay',
             'Deduction Amount',
+            'Plan Deduction Amount',
             'Net Pay',
             'Notes',
         ];
@@ -56,7 +57,7 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:T1')->applyFromArray([
+        $sheet->getStyle('A1:U1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -108,7 +109,7 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
         foreach ($this->rows as $index => $row) {
             if (($row['Employee'] ?? null) === 'TOTAL') {
                 $rowNumber = $index + 2;
-                $sheet->getStyle('A' . $rowNumber . ':T' . $rowNumber)->applyFromArray([
+                $sheet->getStyle('A' . $rowNumber . ':U' . $rowNumber)->applyFromArray([
                     'font' => [
                         'bold' => true,
                     ],
@@ -134,6 +135,7 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
             'Q' => NumberFormat::FORMAT_NUMBER_00,
             'R' => NumberFormat::FORMAT_NUMBER_00,
             'S' => NumberFormat::FORMAT_NUMBER_00,
+            'T' => NumberFormat::FORMAT_NUMBER_00,
         ];
     }
 
