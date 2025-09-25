@@ -158,7 +158,9 @@ class UserClocksExport implements WithMultipleSheets
                 $workingHoursDay = 8;
             }
             $requiredMinutesPerDay = (int) round($workingHoursDay * 60);
-            $scheduledStartTime = $userDetail->start_time ?? '08:00:00';
+            $scheduledStartTime = $userDetail->start_time
+                ?? ($department?->start_time ?? null)
+                ?? '08:00:00';
 
             $now = Carbon::now();
             $defaultStartDate = $now->copy()->subMonth()->day(26)->startOfDay();
@@ -284,10 +286,13 @@ class UserClocksExport implements WithMultipleSheets
                 $latenessMinutesActual = 0;
                 if ($earliestIn && $requiredMinutes > 0) {
                     if ($isFlexibleSchedule) {
-                        $baselineStart = Carbon::parse($formattedDate . ' 09:00:00');
+                        $flexibleStartTime = $department->flexible_start_time ?? null;
+                        $startTimeString = $flexibleStartTime ?: ($scheduledStartTime ?? '09:00:00');
                     } else {
-                        $baselineStart = Carbon::parse($formattedDate . ' ' . $scheduledStartTime);
+                        $startTimeString = $scheduledStartTime ?? '08:00:00';
                     }
+
+                    $baselineStart = Carbon::parse($formattedDate . ' ' . $startTimeString);
 
                     $graceEnd = $baselineStart->copy()->addMinutes($planGraceMinutes);
 
