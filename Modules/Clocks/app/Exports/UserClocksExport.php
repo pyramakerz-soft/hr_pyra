@@ -116,6 +116,16 @@ class UserClocksExport implements WithMultipleSheets
                 continue;
             }
 
+            $user->loadMissing(['work_types']);
+            $userWorkTypes = $user->work_types
+                ->pluck('name')
+                ->map(function ($name) {
+                    return is_string($name) ? strtolower($name) : $name;
+                })
+                ->filter()
+                ->values()
+                ->all();
+
             $resolvedPlan = $planResolver->resolveForUser($user);
             $deductionEngine = new DeductionRuleEngine($resolvedPlan);
             $planGraceMinutes = $resolvedPlan['grace_minutes'] ?? 15;
@@ -300,6 +310,16 @@ class UserClocksExport implements WithMultipleSheets
 
                 $shortfall = max(0, $requiredMinutes - $workedMinutes);
 
+                $dailyLocationTypes = $dailyClocks
+                    ->pluck('location_type')
+                    ->filter()
+                    ->map(function ($type) {
+                        return is_string($type) ? strtolower($type) : $type;
+                    })
+                    ->unique()
+                    ->values()
+                    ->all();
+
                 $evaluationMetrics = [
     'date' => $formattedDate,
     'day_of_week' => strtolower($date->format('l')),
@@ -313,6 +333,8 @@ class UserClocksExport implements WithMultipleSheets
     'recorded_ot_minutes' => $recordedOtMinutes,
     'is_issue' => $hasIssue,
     'is_vacation' => (bool) $isVacationDay, // ✅ use the already-known flag
+    'location_types' => $dailyLocationTypes,
+    'user_work_types' => $userWorkTypes,
 ];
 
 

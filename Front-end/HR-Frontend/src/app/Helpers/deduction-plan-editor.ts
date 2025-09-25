@@ -59,6 +59,10 @@ export const PLAN_CONDITION_OPTIONS: PlanConditionOption[] = [
   { key: 'is_vacation', label: 'Is vacation day', type: 'boolean' },
   { key: 'day_of_week_in', label: 'Day of week is', type: 'weekday' },
   { key: 'date_equals', label: 'Date equals', type: 'string' },
+  { key: 'location_type_in', label: 'Location type is', type: 'string', hint: 'Applies when any recorded clock matches selected location types.' },
+  { key: 'location_type_not_in', label: 'Location type is not', type: 'string', hint: 'Skips days that include the selected location types.' },
+  { key: 'work_type_in', label: 'Employee work type is', type: 'string', hint: 'Matches assigned work types (e.g. site, home).' },
+  { key: 'work_type_not_in', label: 'Employee work type is not', type: 'string', hint: 'Skips employees with any of these work types.' },
 ];
 
 export function buildDefaultRule(): DeductionRule {
@@ -103,6 +107,8 @@ export function cloneRule(rule: DeductionRule): DeductionRule {
 export function clonePlan(plan?: DeductionPlan): DeductionPlan {
   const cloned: DeductionPlan = {
     overwrite: !!plan?.overwrite,
+    overwrite_dep: !!plan?.overwrite_dep,
+    overwrite_subdep: !!plan?.overwrite_subdep,
     grace_minutes: plan?.grace_minutes ?? 15,
     rules: Array.isArray(plan?.rules) && plan!.rules.length
       ? plan!.rules.map((rule) => cloneRule(rule))
@@ -163,6 +169,18 @@ export function coerceConditionValue(key: string, rawValue: any): any {
       }
       return [];
     default:
+      if (['location_type_in', 'location_type_not_in', 'work_type_in', 'work_type_not_in'].includes(key)) {
+        if (Array.isArray(rawValue)) {
+          return rawValue.map((value) => String(value).trim().toLowerCase()).filter((value) => value.length > 0);
+        }
+        if (typeof rawValue === 'string') {
+          return rawValue
+            .split(',')
+            .map((value) => value.trim().toLowerCase())
+            .filter((value) => value.length > 0);
+        }
+        return [];
+      }
       return rawValue ?? '';
   }
 }
@@ -187,6 +205,18 @@ export function defaultValueForCondition(key: string): any {
     case 'weekday':
       return ['monday'];
     default:
+      if (key === 'location_type_in') {
+        return ['site'];
+      }
+      if (key === 'location_type_not_in') {
+        return ['home'];
+      }
+      if (key === 'work_type_in') {
+        return ['site'];
+      }
+      if (key === 'work_type_not_in') {
+        return ['home'];
+      }
       return '';
   }
 }
@@ -240,6 +270,14 @@ export class DeductionPlanEditor {
 
   setOverwrite(value: boolean): void {
     this.plan.overwrite = !!value;
+  }
+
+  setOverwriteDepartment(value: boolean): void {
+    this.plan.overwrite_dep = !!value;
+  }
+
+  setOverwriteSubDepartment(value: boolean): void {
+    this.plan.overwrite_subdep = !!value;
   }
 
   getConditionEntries(rule: DeductionRule): Array<{ key: string; value: any }> {

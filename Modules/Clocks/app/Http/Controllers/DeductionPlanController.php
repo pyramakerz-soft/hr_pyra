@@ -146,8 +146,12 @@ class DeductionPlanController extends Controller
 
         if ($supportsOverwrite) {
             $payload['overwrite'] = (bool) (Arr::get($data, 'overwrite', false));
+            $payload['overwrite_dep'] = (bool) (Arr::get($data, 'overwrite_dep', false));
+            $payload['overwrite_subdep'] = (bool) (Arr::get($data, 'overwrite_subdep', false));
         } else {
             $payload['overwrite'] = false;
+            $payload['overwrite_dep'] = false;
+            $payload['overwrite_subdep'] = false;
         }
 
         return $payload;

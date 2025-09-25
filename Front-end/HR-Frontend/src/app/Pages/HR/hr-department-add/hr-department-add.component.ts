@@ -39,6 +39,12 @@ export class HrDepartmentAddComponent {
   weekdayOptions = WEEKDAY_OPTIONS;
   planLoading = false;
   planSaving = false;
+  showPlanEditor = false;
+  locationTypeOptions = [
+    { value: 'site', label: 'On Site' },
+    { value: 'home', label: 'Home' },
+    { value: 'float', label: 'Float' },
+  ];
 
   DeptNameError: string = ""; 
   ManagerError: string = ""; 
@@ -237,6 +243,27 @@ UpdateDepartment(){
     this.departmentPlan = this.planEditor.plan;
   }
 
+  togglePlanSection(): void {
+    if (this.mode !== 'Edit') {
+      Swal.fire({
+        text: 'Save the department details before configuring a plan.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#FF7519',
+      });
+      return;
+    }
+
+    this.showPlanEditor = !this.showPlanEditor;
+  }
+
+  isLocationTypeCondition(key: string): boolean {
+    return key === 'location_type_in' || key === 'location_type_not_in';
+  }
+
+  isWorkTypeCondition(key: string): boolean {
+    return key === 'work_type_in' || key === 'work_type_not_in';
+  }
+
   addRule(): void {
     this.planEditor.addRule();
   }
@@ -343,6 +370,7 @@ UpdateDepartment(){
       next: (plan) => {
         this.initializePlan(plan);
         this.planLoading = false;
+        this.showPlanEditor = true;
       },
       error: () => {
         this.planLoading = false;
@@ -392,4 +420,3 @@ UpdateDepartment(){
     return item.key;
   }
 }
-

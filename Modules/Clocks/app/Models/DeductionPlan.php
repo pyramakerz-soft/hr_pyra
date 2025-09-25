@@ -11,12 +11,16 @@ class DeductionPlan extends Model
 
     protected $fillable = [
         'overwrite',
+        'overwrite_dep',
+        'overwrite_subdep',
         'grace_minutes',
         'rules',
     ];
 
     protected $casts = [
         'overwrite' => 'boolean',
+        'overwrite_dep' => 'boolean',
+        'overwrite_subdep' => 'boolean',
         'grace_minutes' => 'integer',
         'rules' => 'array',
     ];

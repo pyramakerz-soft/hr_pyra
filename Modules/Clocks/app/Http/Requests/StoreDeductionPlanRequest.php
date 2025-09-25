@@ -15,6 +15,8 @@ class StoreDeductionPlanRequest extends FormRequest
     {
         return [
             'overwrite' => 'sometimes|boolean',
+            'overwrite_dep' => 'sometimes|boolean',
+            'overwrite_subdep' => 'sometimes|boolean',
             'grace_minutes' => 'nullable|integer|min:0|max:1440',
             'rules' => 'nullable|array',
             'rules.*.label' => 'required_with:rules|string|max:255',

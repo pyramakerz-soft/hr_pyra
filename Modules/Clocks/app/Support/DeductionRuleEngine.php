@@ -219,6 +219,40 @@ class DeductionRuleEngine
                         return false;
                     }
                     break;
+                case 'location_type_in':
+                    $allowedLocations = array_filter(array_map('strtolower', Arr::wrap($value)));
+                    $actualLocations = array_filter(array_map('strtolower', (array) ($metrics['location_types'] ?? [])));
+                    if (empty($allowedLocations)) {
+                        return false;
+                    }
+                    if (empty($actualLocations) || empty(array_intersect($allowedLocations, $actualLocations))) {
+                        return false;
+                    }
+                    break;
+                case 'location_type_not_in':
+                    $blockedLocations = array_filter(array_map('strtolower', Arr::wrap($value)));
+                    $actualLocations = array_filter(array_map('strtolower', (array) ($metrics['location_types'] ?? [])));
+                    if (! empty($blockedLocations) && ! empty(array_intersect($blockedLocations, $actualLocations))) {
+                        return false;
+                    }
+                    break;
+                case 'work_type_in':
+                    $allowedWorkTypes = array_filter(array_map('strtolower', Arr::wrap($value)));
+                    $userWorkTypes = array_filter(array_map('strtolower', (array) ($metrics['user_work_types'] ?? [])));
+                    if (empty($allowedWorkTypes)) {
+                        return false;
+                    }
+                    if (empty($userWorkTypes) || empty(array_intersect($allowedWorkTypes, $userWorkTypes))) {
+                        return false;
+                    }
+                    break;
+                case 'work_type_not_in':
+                    $blockedWorkTypes = array_filter(array_map('strtolower', Arr::wrap($value)));
+                    $userWorkTypes = array_filter(array_map('strtolower', (array) ($metrics['user_work_types'] ?? [])));
+                    if (! empty($blockedWorkTypes) && ! empty(array_intersect($blockedWorkTypes, $userWorkTypes))) {
+                        return false;
+                    }
+                    break;
                 default:
                     // Unknown condition keys are ignored to keep rules forward compatible.
                     break;
