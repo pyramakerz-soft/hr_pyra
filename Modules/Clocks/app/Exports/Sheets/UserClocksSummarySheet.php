@@ -6,21 +6,26 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles, WithColumnFormatting, WithTitle, ShouldAutoSize
+class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles, WithColumnFormatting, WithTitle, ShouldAutoSize, WithEvents
 {
     protected Collection $rows;
+    protected array $sheetLinks;
 
-    public function __construct(Collection $rows)
+    public function __construct(Collection $rows, array $sheetLinks = [])
     {
         $this->rows = $rows;
+        $this->sheetLinks = $sheetLinks;
     }
 
     public function collection(): Collection
@@ -136,6 +141,38 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
             'R' => NumberFormat::FORMAT_NUMBER_00,
             'S' => NumberFormat::FORMAT_NUMBER_00,
             'T' => NumberFormat::FORMAT_NUMBER_00,
+        ];
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+
+                foreach ($this->rows->values() as $index => $row) {
+                    $employee = $row['Employee'] ?? null;
+                    $targetSheet = $employee && isset($this->sheetLinks[$employee])
+                        ? $this->sheetLinks[$employee]
+                        : null;
+
+                    if (! $targetSheet) {
+                        continue;
+                    }
+
+                    $rowNumber = $index + 2;
+                    $cellRef = 'A' . $rowNumber;
+                    $quotedSheet = str_replace("'", "''", $targetSheet);
+
+                    $sheet->getCell($cellRef)->getHyperlink()->setUrl("sheet://'" . $quotedSheet . "'!A1");
+                    $sheet->getStyle($cellRef)->applyFromArray([
+                        'font' => [
+                            'color' => ['rgb' => Color::COLOR_BLUE],
+                            'underline' => 'single',
+                        ],
+                    ]);
+                }
+            },
         ];
     }
 

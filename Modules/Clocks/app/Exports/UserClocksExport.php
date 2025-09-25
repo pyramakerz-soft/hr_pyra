@@ -74,6 +74,11 @@ class UserClocksExport implements WithMultipleSheets
         return $this->detailedRows;
     }
 
+    public function getAggregatedRows(): Collection
+    {
+        return $this->aggregatedRows;
+    }
+
     public function getRowStyles(): array
     {
         return $this->rowStyles;
@@ -147,18 +152,20 @@ class UserClocksExport implements WithMultipleSheets
                 }
             }
 
-            $timezoneValue = optional($user->timezone)->value ?? 3;
+            $userTimezoneName = optional($user->timezone)->name ?? 'Africa/Cairo';
             $department = optional($user->department);
             $workScheduleType = strtolower($department->work_schedule_type ?? 'flexible');
             $isFlexibleSchedule = $workScheduleType !== 'strict';
             $worksOnSaturday = (bool) ($department?->works_on_saturday ?? false);
             $userDetail = optional($user->user_detail);
-            $workingHoursDay = $userDetail->working_hours_day ?? 8;
+            $workingHoursDay = (float) ($userDetail->working_hours_day ?? 8);
             if ($workingHoursDay <= 0) {
                 $workingHoursDay = 8;
             }
             $requiredMinutesPerDay = (int) round($workingHoursDay * 60);
             $scheduledStartTime = $userDetail->start_time
+                ?? optional($user->subDepartment)->flexible_start_time
+                ?? ($department?->flexible_start_time ?? null)
                 ?? ($department?->start_time ?? null)
                 ?? '08:00:00';
 
@@ -166,8 +173,12 @@ class UserClocksExport implements WithMultipleSheets
             $defaultStartDate = $now->copy()->subMonth()->day(26)->startOfDay();
             $defaultEndDate = $now->copy()->day(26)->endOfDay();
 
-            $startDate = $this->startDate ? Carbon::parse($this->startDate)->startOfDay() : $defaultStartDate->copy();
-            $endDate = $this->endDate ? Carbon::parse($this->endDate)->endOfDay() : $defaultEndDate->copy();
+            $startDate = $this->startDate
+                ? Carbon::parse($this->startDate, $userTimezoneName)->startOfDay()->setTimezone('UTC')
+                : $defaultStartDate->copy();
+            $endDate = $this->endDate
+                ? Carbon::parse($this->endDate, $userTimezoneName)->endOfDay()->setTimezone('UTC')
+                : $defaultEndDate->copy();
 
             $clocks = $user->user_clocks()
                 ->whereBetween('clock_in', [$startDate, $endDate])
@@ -181,8 +192,10 @@ class UserClocksExport implements WithMultipleSheets
                     return Carbon::parse($record->overtime_date)->toDateString();
                 });
 
-            $grouped = $clocks->groupBy(function ($clock) {
-                return Carbon::parse($clock->clock_in)->format('Y-m-d');
+            $grouped = $clocks->groupBy(function ($clock) use ($userTimezoneName) {
+                return Carbon::parse($clock->clock_in, 'UTC')
+                    ->setTimezone($userTimezoneName)
+                    ->format('Y-m-d');
             });
 
             $dailyEntries = [];
@@ -199,7 +212,8 @@ class UserClocksExport implements WithMultipleSheets
             $totalIssueDays = 0;
 
             for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
-                $formattedDate = $date->format('Y-m-d');
+                $localDate = $date->copy()->setTimezone($userTimezoneName);
+                $formattedDate = $localDate->format('Y-m-d');
                 $dailyClocks = $grouped->get($formattedDate, collect());
                 $isVacationDay = $user->user_vacations()->where('status', 'approved')
                     ->whereDate('from_date', '<=', $formattedDate)
@@ -223,8 +237,8 @@ class UserClocksExport implements WithMultipleSheets
 
                 if ($dailyClocks->isNotEmpty()) {
                     foreach ($dailyClocks as $clock) {
-                        $clockIn = $clock->clock_in ? Carbon::parse($clock->clock_in) : null;
-                        $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out) : null;
+                        $clockIn = $clock->clock_in ? Carbon::parse($clock->clock_in, 'UTC') : null;
+                        $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out, 'UTC') : null;
 
                         if ($clockIn && $clockOut) {
                             $diff = $clockIn->diffInMinutes($clockOut);
@@ -264,14 +278,14 @@ class UserClocksExport implements WithMultipleSheets
                         }
 
                         $segments[] = [
-                            'in' => $clockIn ? $clockIn->copy()->addHours($timezoneValue)->format('h:i A') : '',
-                            'out' => $clockOut ? $clockOut->copy()->addHours($timezoneValue)->format('h:i A') : '',
+                            'in' => $clockIn ? $clockIn->copy()->setTimezone($userTimezoneName)->format('h:i A') : '',
+                            'out' => $clockOut ? $clockOut->copy()->setTimezone($userTimezoneName)->format('h:i A') : '',
                         ];
                     }
                 }
 
-                $isFriday = $date->isFriday();
-                $isSaturday = $date->isSaturday();
+                $isFriday = $localDate->isFriday();
+                $isSaturday = $localDate->isSaturday();
                 $isNonWorkingWeekend = $isFriday || ($isSaturday && ! $worksOnSaturday);
 
                 $requiredMinutes = $isNonWorkingWeekend ? 0 : $requiredMinutesPerDay;
@@ -286,13 +300,15 @@ class UserClocksExport implements WithMultipleSheets
                 $latenessMinutesActual = 0;
                 if ($earliestIn && $requiredMinutes > 0) {
                     if ($isFlexibleSchedule) {
-                        $flexibleStartTime = $department->flexible_start_time ?? null;
+                        $flexibleStartTime = optional($user->subDepartment)->flexible_start_time
+                            ?? ($department->flexible_start_time ?? null);
                         $startTimeString = $flexibleStartTime ?: ($scheduledStartTime ?? '09:00:00');
                     } else {
                         $startTimeString = $scheduledStartTime ?? '08:00:00';
                     }
 
-                    $baselineStart = Carbon::parse($formattedDate . ' ' . $startTimeString);
+                    $baselineStart = Carbon::parse($formattedDate . ' ' . $startTimeString, $userTimezoneName)
+                        ->setTimezone('UTC');
 
                     $graceEnd = $baselineStart->copy()->addMinutes($planGraceMinutes);
 
@@ -334,7 +350,7 @@ class UserClocksExport implements WithMultipleSheets
 
                 $evaluationMetrics = [
     'date' => $formattedDate,
-    'day_of_week' => strtolower($date->format('l')),
+    'day_of_week' => strtolower($localDate->format('l')),
     'required_minutes' => $requiredMinutes,
     'default_daily_minutes' => $requiredMinutesPerDay,
     'worked_minutes' => $workedMinutes,
@@ -416,8 +432,8 @@ class UserClocksExport implements WithMultipleSheets
                     'row_data' => [
                         'Date' => $formattedDate,
                         'Name' => $user->name,
-                        'Clock In' => $dailyClocks->count() > 1 ? '' : ($earliestIn ? $earliestIn->copy()->addHours($timezoneValue)->format('h:i A') : ''),
-                        'Clock Out' => $dailyClocks->count() > 1 ? '' : ($latestOut ? $latestOut->copy()->addHours($timezoneValue)->format('h:i A') : ''),
+                        'Clock In' => $dailyClocks->count() > 1 ? '' : ($earliestIn ? $earliestIn->copy()->setTimezone($userTimezoneName)->format('h:i A') : ''),
+                        'Clock Out' => $dailyClocks->count() > 1 ? '' : ($latestOut ? $latestOut->copy()->setTimezone($userTimezoneName)->format('h:i A') : ''),
                         'Code' => $user->code,
                         'Department' => $user->department?->name ?? 'N/A',
                         'Total Hours in That Day' => $this->formatMinutes($workedMinutes),
