@@ -113,6 +113,7 @@ export function clonePlan(plan?: DeductionPlan): DeductionPlan {
     rules: Array.isArray(plan?.rules) && plan!.rules.length
       ? plan!.rules.map((rule) => cloneRule(rule))
       : [buildDefaultRule()],
+    sources: plan?.sources ? [...plan.sources] : undefined,
   };
 
   return cloned;

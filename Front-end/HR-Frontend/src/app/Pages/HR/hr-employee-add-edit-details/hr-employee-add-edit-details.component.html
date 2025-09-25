@@ -431,7 +431,7 @@ class="mb-4 text-xs md:text-sm"
             [ngModel]="employeePlan.overwrite_dep"
             [ngModelOptions]="{standalone: true}"
             (ngModelChange)="onOverwriteDepartmentChange($event)"
-            [disabled]="!canEditPlan || planSaving || planLoading || employeePlan.overwrite">
+            [disabled]="!canEditPlan || planSaving || planLoading || !!employeePlan.overwrite">
           Override department rules
         </label>
         <label class="flex items-center">
@@ -439,7 +439,7 @@ class="mb-4 text-xs md:text-sm"
             [ngModel]="employeePlan.overwrite_subdep"
             [ngModelOptions]="{standalone: true}"
             (ngModelChange)="onOverwriteSubDepartmentChange($event)"
-            [disabled]="!canEditPlan || planSaving || planLoading || employeePlan.overwrite">
+            [disabled]="!canEditPlan || planSaving || planLoading || !!employeePlan.overwrite">
           Override sub-department rules
         </label>
       </div>
@@ -568,7 +568,7 @@ class="mb-4 text-xs md:text-sm"
                           [ngModel]="asArray(condition.value)"
                           (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
                           [disabled]="!canEditPlan || planSaving || planLoading">
-                          <option *ngFor="let work of workTypes" [ngValue]="work.name?.toLowerCase()">{{ work.name }}</option>
+                        <option *ngFor="let work of workTypes" [ngValue]="(work.name || '').toLowerCase()">{{ work.name }}</option>
                         </select>
                       </ng-container>
                       <ng-template #defaultStringField>

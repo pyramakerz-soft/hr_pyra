@@ -24,6 +24,7 @@ export interface DeductionPlan {
   overwrite_subdep?: boolean;
   grace_minutes?: number | null;
   rules: DeductionRule[];
+  sources?: DeductionPlanSource[];
 }
 
 export interface DeductionPlanSource {

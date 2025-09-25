@@ -238,14 +238,15 @@ UpdateDepartment(){
       }
     );
   } else {
-    this.SaveButton=false;
+    this.SaveButton = false;
     Swal.fire({
-      text: "No manager found with the selected name",
-      confirmButtonText: "OK",
-      confirmButtonColor: "#FF7519",
-
+      text: 'No manager found with the selected name',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#FF7519',
     });
-  
+  }
+
+  }
 
   private initializePlan(plan?: DeductionPlan): void {
     this.planEditor.setPlan(plan);
