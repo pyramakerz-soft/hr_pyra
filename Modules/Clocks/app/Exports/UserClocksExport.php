@@ -841,7 +841,16 @@ class UserClocksExport implements WithMultipleSheets
             ->get();
 
         foreach ($excuses as $excuse) {
-            $statusKey = strtolower($excuse->status ?? 'pending');
+            $status = $excuse->status ?? 'pending';
+
+            if ($status instanceof \UnitEnum) {
+                $status = method_exists($status, 'value') ? $status->value : $status->name;
+            }
+
+            $statusKey = is_string($status) ? strtolower($status) : 'pending';
+            if (! in_array($statusKey, $this->excuseStatusOrder, true)) {
+                $statusKey = 'pending';
+            }
             if (! isset($stats[$statusKey])) {
                 $stats[$statusKey] = ['count' => 0, 'minutes' => 0];
             }
