@@ -245,8 +245,8 @@ class UserClocksExport implements WithMultipleSheets
 
                 if ($dailyClocks->isNotEmpty()) {
                     foreach ($dailyClocks as $clock) {
-                        $clockIn = $clock->clock_in ? Carbon::parse($clock->clock_in, $userTimezoneName)->setTimezone('UTC') : null;
-                        $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out, $userTimezoneName)->setTimezone('UTC') : null;
+                        $clockIn = $clock->clock_in ? Carbon::parse($clock->clock_in, 'UTC') : null;
+                        $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out, 'UTC') : null;
 
                         if ($clockIn && $clockOut) {
                             $diff = $clockIn->diffInMinutes($clockOut);
