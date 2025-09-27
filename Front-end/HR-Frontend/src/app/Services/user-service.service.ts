@@ -16,13 +16,19 @@ export class UserServiceService {
     this.baseURL=Api.BaseUrl
 
    }
-getall(pageNumber: number, from_day?: string, to_day?: string): Observable<UserModel[]> {
+getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDepartments?: boolean }): Observable<UserModel[]> {
   const token = localStorage.getItem("token");
   const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-  let params: any = { page: pageNumber };
+  let params: any = {};
+  if (!options?.allDepartments) {
+    params.page = pageNumber;
+  }
   if (from_day) params.from_day = from_day;
   if (to_day) params.to_day = to_day;
+  if (options?.allDepartments) {
+    params.all_departments = true;
+  }
 
   return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, { headers, params });
 }
@@ -121,7 +127,7 @@ getall(pageNumber: number, from_day?: string, to_day?: string): Observable<UserM
     return this.http.post<any>(this.baseURL + "/users/update_password/" + empId, body, { headers });
   }
 
-  SearchByNameAndDeptAndSubDep(Name: string, deptId?: number|null, subId?: number|null) {
+  SearchByNameAndDeptAndSubDep(Name: string, deptId?: number|null, subId?: number|null, options?: { allDepartments?: boolean }) {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
   
@@ -134,8 +140,11 @@ getall(pageNumber: number, from_day?: string, to_day?: string): Observable<UserM
     if (subId != null) {
       params.sub_department_id = subId;
     }
+    if (options?.allDepartments) {
+      params.all_departments = true;
+    }
     console.log('/////');
-    
+
   console.log(deptId);
   console.log(subId);
   
