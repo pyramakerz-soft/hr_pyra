@@ -239,7 +239,7 @@ export class HrAttendanceComponent {
     this.selectedUsers = [];
     this.isSelectAllChecked = false;
     const isAllDepartments = this.isAllDepartmentsSelected();
-    const departmentId = isAllDepartments ? null : this.selectedDepartment;
+    const departmentId = this.getNumericDepartmentId();
     const subDepartmentId = isAllDepartments ? null : this.selectedSubDepartment;
     this.userServ.SearchByNameAndDeptAndSubDep(
       this.selectedName,
@@ -287,10 +287,12 @@ export class HrAttendanceComponent {
   selectUser(location: string) {
     this.selectedName = location;
     const isAllDepartments = this.isAllDepartmentsSelected();
+    const departmentId = this.getNumericDepartmentId();
+    const subDepartmentId = isAllDepartments ? null : this.selectedSubDepartment;
     this.userServ.SearchByNameAndDeptAndSubDep(
       this.selectedName,
-      isAllDepartments ? null : this.selectedDepartment,
-      isAllDepartments ? null : this.selectedSubDepartment,
+      departmentId,
+      subDepartmentId,
       isAllDepartments ? { allDepartments: true } : undefined
     ).subscribe(
       (d: any) => {
@@ -353,5 +355,9 @@ export class HrAttendanceComponent {
 
   private isAllDepartmentsSelected(): boolean {
     return this.selectedDepartment === this.allDepartmentsValue;
+  }
+
+  private getNumericDepartmentId(): number | null {
+    return typeof this.selectedDepartment === 'number' ? this.selectedDepartment : null;
   }
 }
