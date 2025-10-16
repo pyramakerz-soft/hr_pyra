@@ -187,10 +187,46 @@ class UserClocksExport implements WithMultipleSheets
                     ->whereDate('to_date', '>=', $formattedDate)
                     ->exists();
 
+                // Handle days without clock entries
                 if ($dailyClocks->isEmpty()) {
                     if ($isVacationDay) {
                         $totalVacationDays++;
                     }
+                    
+                    // Add entry for days without clock data
+                    $dailyEntries[] = [
+                        'row_data' => [
+                            'Date' => $formattedDate,
+                            'Name' => $user->name,
+                            'Clock In' => '',
+                            'Clock Out' => '',
+                            'Code' => $user->code,
+                            'Department' => $user->department?->name ?? 'N/A',
+                            'Total Hours in That Day' => '00:00',
+                            'Total Over time in That Day' => '00:00',
+                            'Plan Deduction in That Day' => '00:00',
+                            'Deduction Details' => '',
+                            'Excuse Deducted in That Day' => '00:00',
+                            'Excuse Remaining (Policy 4h)' => '',
+                            'Total Excuses in That Day' => '00:00',
+                            'Is this date has vacation' => $isVacationDay ? 'YES' : 'NO',
+                            'Location In' => '',
+                            'Location Out' => '',
+                            'Attendance Over time in That Day' => '00:00',
+                        ],
+                        'segments' => [],
+                        'weekend' => $date->isFriday() || $date->isSaturday(),
+                        'ot_status' => null,
+                        'raw_deduction_minutes' => 0,
+                        'excuse_applied_minutes' => 0,
+                        'chargeable_deduction_minutes' => 0,
+                        'deduction_rules' => [],
+                        'deduction_detail' => '',
+                        'plan_monetary_amount' => 0,
+                        'deduction_color' => null,
+                        'is_vacation' => $isVacationDay,
+                        'issue_columns' => [],
+                    ];
                     continue;
                 }
 
