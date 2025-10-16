@@ -365,4 +365,270 @@ class="mb-4 text-xs md:text-sm"
             </select>
         </div>
     </div> 
+
+  <div class="border border-[#ECECEC] rounded-lg p-4 md:p-8 shadow-md shadow-[#0000001F] mt-6">
+    <div class="flex items-center justify-between mb-4">
+      <p class="text-[#272D37] font-semibold text-lg md:text-xl">Deduction Plan</p>
+      <div class="flex items-center space-x-2">
+        <button type="button"
+          class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 px-4 md:px-5 rounded-lg"
+          (click)="togglePlanSection()">
+          {{ showPlanEditor ? 'Hide Rules' : 'Manage Rules' }}
+        </button>
+        <button type="button"
+          class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 px-4 md:px-5 rounded-lg"
+          [disabled]="!showPlanEditor || !canEditPlan || planSaving || planLoading"
+          (click)="savePlan()">
+          {{ planSaving ? 'Saving...' : 'Save Plan' }}
+        </button>
+      </div>
+    </div>
+    <div *ngIf="!canEditPlan" class="text-sm text-[#707070] mb-4">
+      Save the employee details before configuring a deduction plan.
+    </div>
+    <div *ngIf="planLoading" class="text-sm text-[#707070] mb-4">
+      Loading plan...
+    </div>
+    <div *ngIf="!planLoading && planEffectiveSources.length > 0" class="border border-[#E5E5EA] rounded-lg bg-[#F9FAFB] p-4 mb-4 text-xs md:text-sm text-[#3A3A3C]">
+      <p class="font-semibold mb-2">Currently applied sources</p>
+      <ul class="list-disc pl-5 space-y-1">
+        <li *ngFor="let source of planEffectiveSources">{{ formatSourceLabel(source) }}</li>
+      </ul>
+      <p class="mt-3 text-[#707070]">
+        Active grace minutes: {{ effectivePlan?.grace_minutes ?? employeePlan.grace_minutes ?? 15 }}
+      </p>
+    </div>
+    <ng-container *ngIf="showPlanEditor">
+      <div class="grid gap-4 md:grid-cols-2 mb-6">
+        <div>
+          <label class="block mb-2 font-semibold text-xs md:text-sm text-[#3A3A3C]">Grace Minutes</label>
+          <input type="number" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+            [ngModel]="employeePlan.grace_minutes"
+            [ngModelOptions]="{standalone: true}"
+            (ngModelChange)="updateGraceMinutes($event)"
+            [disabled]="!canEditPlan || planSaving || planLoading">
+        </div>
+        <div class="flex items-end justify-end md:justify-start">
+          <button type="button"
+            class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 md:py-2 px-4 md:px-5 rounded-lg"
+            (click)="addRule()"
+            [disabled]="!canEditPlan || planSaving || planLoading">
+            Add Rule
+          </button>
+        </div>
+      </div>
+      <div class="grid gap-4 md:grid-cols-3 mb-6 text-xs md:text-sm text-[#3A3A3C]">
+        <label class="flex items-center">
+          <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5 mr-2"
+            [ngModel]="employeePlan.overwrite"
+            [ngModelOptions]="{standalone: true}"
+            (ngModelChange)="onOverwriteAllChange($event)"
+            [disabled]="!canEditPlan || planSaving || planLoading">
+          Overwrite all upstream plans
+        </label>
+        <label class="flex items-center">
+          <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5 mr-2"
+            [ngModel]="employeePlan.overwrite_dep"
+            [ngModelOptions]="{standalone: true}"
+            (ngModelChange)="onOverwriteDepartmentChange($event)"
+            [disabled]="!canEditPlan || planSaving || planLoading || !!employeePlan.overwrite">
+          Override department rules
+        </label>
+        <label class="flex items-center">
+          <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5 mr-2"
+            [ngModel]="employeePlan.overwrite_subdep"
+            [ngModelOptions]="{standalone: true}"
+            (ngModelChange)="onOverwriteSubDepartmentChange($event)"
+            [disabled]="!canEditPlan || planSaving || planLoading || !!employeePlan.overwrite">
+          Override sub-department rules
+        </label>
+      </div>
+      <div *ngFor="let rule of employeePlan.rules; let i = index; trackBy: trackRuleByIndex" class="border border-[#E5E5EA] rounded-lg p-4 md:p-6 mb-4">
+        <div class="flex items-center justify-between mb-3">
+          <p class="font-semibold text-sm md:text-base text-[#272D37]">Rule {{ i + 1 }}</p>
+          <button type="button" class="text-[#FF7519] text-xs md:text-sm"
+            (click)="removeRule(i)"
+            [disabled]="employeePlan.rules.length <= 1 || !canEditPlan || planSaving || planLoading">
+            Remove
+          </button>
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+          <div>
+            <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Label</label>
+            <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+              [(ngModel)]="rule.label"
+              [ngModelOptions]="{standalone: true}"
+              [disabled]="!canEditPlan || planSaving || planLoading">
+          </div>
+          <div>
+            <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Category</label>
+            <select class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+              [(ngModel)]="rule.category"
+              [ngModelOptions]="{standalone: true}"
+              [disabled]="!canEditPlan || planSaving || planLoading">
+              <option *ngFor="let category of ruleCategories" [value]="category">{{ category }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Scope</label>
+            <select class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+              [(ngModel)]="rule.scope"
+              [ngModelOptions]="{standalone: true}"
+              [disabled]="!canEditPlan || planSaving || planLoading">
+              <option *ngFor="let scope of scopeOptions" [value]="scope">{{ scope }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Penalty Type</label>
+            <select class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+              [(ngModel)]="rule.penalty.type"
+              [ngModelOptions]="{standalone: true}"
+              [disabled]="!canEditPlan || planSaving || planLoading">
+              <option *ngFor="let penalty of penaltyTypes" [value]="penalty.value">{{ penalty.label }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Penalty Value</label>
+            <input type="number" step="0.01" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+              [(ngModel)]="rule.penalty.value"
+              [ngModelOptions]="{standalone: true}"
+              [disabled]="!canEditPlan || planSaving || planLoading">
+          </div>
+          <div>
+            <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Penalty Unit (optional)</label>
+            <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+              [(ngModel)]="rule.penalty.unit"
+              [ngModelOptions]="{standalone: true}"
+              [disabled]="!canEditPlan || planSaving || planLoading">
+          </div>
+          <div>
+            <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Color</label>
+            <input type="color" class="h-10 w-16 border border-[#E5E5EA] rounded"
+              [(ngModel)]="rule.color"
+              [ngModelOptions]="{standalone: true}"
+              [disabled]="!canEditPlan || planSaving || planLoading">
+          </div>
+          <div class="flex items-center mt-4 md:mt-8">
+            <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5"
+              [(ngModel)]="rule.stop_processing"
+              [ngModelOptions]="{standalone: true}"
+              [disabled]="!canEditPlan || planSaving || planLoading">
+            <span class="ml-2 text-xs md:text-sm text-[#3A3A3C]">Stop after this rule</span>
+          </div>
+        </div>
+        <div class="mt-4">
+          <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Notes</label>
+          <textarea rows="2" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+            [(ngModel)]="rule.notes"
+            [ngModelOptions]="{standalone: true}"
+            [disabled]="!canEditPlan || planSaving || planLoading"></textarea>
+        </div>
+        <div class="mt-6">
+          <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Conditions</label>
+          <div class="space-y-3">
+            <div *ngFor="let condition of getConditionEntries(rule); trackBy: trackCondition" class="grid gap-3 md:grid-cols-[minmax(0,200px)_1fr_auto] items-start">
+              <div>
+                <p class="font-semibold text-xs md:text-sm text-[#3A3A3C]">{{ getConditionLabel(condition.key) }}</p>
+                <p *ngIf="getConditionHint(condition.key)" class="text-[11px] md:text-xs text-[#707070]">
+                  {{ getConditionHint(condition.key) }}
+                </p>
+              </div>
+              <div>
+                <ng-container [ngSwitch]="getConditionType(condition.key)">
+                  <input *ngSwitchCase="'number'" type="number" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                    [ngModel]="condition.value"
+                    (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                    [disabled]="!canEditPlan || planSaving || planLoading">
+                  <select *ngSwitchCase="'boolean'" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                    [ngModel]="condition.value === true ? 'true' : condition.value === false ? 'false' : ''"
+                    (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                    [disabled]="!canEditPlan || planSaving || planLoading">
+                    <option value="">Choose...</option>
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                  </select>
+                  <select *ngSwitchCase="'weekday'" multiple class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                    [ngModel]="asArray(condition.value)"
+                    (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                    [disabled]="!canEditPlan || planSaving || planLoading">
+                    <option *ngFor="let day of weekdayOptions" [ngValue]="day.value">{{ day.label }}</option>
+                  </select>
+                  <ng-container *ngSwitchDefault>
+                    <ng-container *ngIf="isLocationTypeCondition(condition.key); else stringConditionField">
+                      <select multiple class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                        [ngModel]="asArray(condition.value)"
+                        (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                        [disabled]="!canEditPlan || planSaving || planLoading">
+                        <option *ngFor="let option of locationTypeOptions" [ngValue]="option.value">{{ option.label }}</option>
+                      </select>
+                    </ng-container>
+                    <ng-template #stringConditionField>
+                      <ng-container *ngIf="isWorkTypeCondition(condition.key); else defaultStringField">
+                        <select multiple class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                          [ngModel]="asArray(condition.value)"
+                          (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                          [disabled]="!canEditPlan || planSaving || planLoading">
+                        <option *ngFor="let work of workTypes" [ngValue]="(work.name || '').toLowerCase()">{{ work.name }}</option>
+                        </select>
+                      </ng-container>
+                      <ng-template #defaultStringField>
+                        <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                          [ngModel]="condition.value"
+                          (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                          [disabled]="!canEditPlan || planSaving || planLoading">
+                      </ng-template>
+                    </ng-template>
+                  </ng-container>
+                </ng-container>
+              </div>
+              <button type="button" class="text-[#FF7519] text-xs md:text-sm"
+                (click)="removeCondition(i, condition.key)"
+                [disabled]="!canEditPlan || planSaving || planLoading">
+                Remove
+              </button>
+            </div>
+          </div>
+          <div class="mt-4">
+            <div class="flex flex-col md:flex-row md:items-center gap-3">
+              <select class="border border-[#E5E5EA] rounded-lg p-2 md:p-3 text-xs md:text-sm"
+                [ngModel]="getSelectedCondition(i)"
+                [ngModelOptions]="{standalone: true}"
+                (ngModelChange)="onSelectCondition(i, $event)"
+                [disabled]="!canEditPlan || planSaving || planLoading">
+                <option [ngValue]="null">Choose condition...</option>
+                <option *ngFor="let option of getAvailableConditionOptions(rule)" [ngValue]="option.key">{{ option.label }}</option>
+              </select>
+              <button type="button" class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 px-4 rounded-lg"
+                (click)="addSelectedCondition(i)"
+                [disabled]="!canEditPlan || planSaving || planLoading || !getSelectedCondition(i)">
+                Add Condition
+              </button>
+            </div>
+          </div>
+          <div class="mt-4">
+            <p class="font-semibold text-xs md:text-sm text-[#3A3A3C] mb-2">Custom condition</p>
+            <div class="grid gap-3 md:grid-cols-[minmax(0,150px)_1fr_auto] items-center">
+              <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                [ngModel]="getCustomDraft(i).key"
+                [ngModelOptions]="{standalone: true}"
+                (ngModelChange)="updateCustomDraftKey(i, $event)"
+                placeholder="Key"
+                [disabled]="!canEditPlan || planSaving || planLoading">
+              <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                [ngModel]="getCustomDraft(i).value"
+                [ngModelOptions]="{standalone: true}"
+                (ngModelChange)="updateCustomDraftValue(i, $event)"
+                placeholder="Value"
+                [disabled]="!canEditPlan || planSaving || planLoading">
+              <button type="button" class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 px-4 rounded-lg"
+                (click)="addCustomCondition(i)"
+                [disabled]="!canEditPlan || planSaving || planLoading || !getCustomDraft(i).key">
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
 </div>

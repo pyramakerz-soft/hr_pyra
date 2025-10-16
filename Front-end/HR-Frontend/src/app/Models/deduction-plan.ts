@@ -20,10 +20,21 @@ export interface DeductionRule {
 
 export interface DeductionPlan {
   overwrite?: boolean;
+  overwrite_dep?: boolean;
+  overwrite_subdep?: boolean;
   grace_minutes?: number | null;
   rules: DeductionRule[];
+  sources?: DeductionPlanSource[];
+}
+
+export interface DeductionPlanSource {
+  type: string;
+  id: number | string;
+  overwrite: boolean;
+  overwrite_dep?: boolean;
+  overwrite_subdep?: boolean;
 }
 
 export interface ResolvedDeductionPlan extends DeductionPlan {
-  sources?: Array<{ type: string; id: number | string; overwrite: boolean }>;
+  sources?: DeductionPlanSource[];
 }

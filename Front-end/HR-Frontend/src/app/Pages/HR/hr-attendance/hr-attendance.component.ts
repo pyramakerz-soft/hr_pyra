@@ -52,9 +52,10 @@ export class HrAttendanceComponent {
   ];
   years: number[] = [];
   subDepartments: any[] = [];
-  selectedDepartment: number | null = null;
+  selectedDepartment: number | 'all' | null = null;
   selectedSubDepartment: number | null = null;
   tableData: UserModel[] = [];
+  readonly allDepartmentsValue = 'all';
 
   constructor(
     public router: Router,
@@ -184,7 +185,12 @@ export class HrAttendanceComponent {
     this.isSelectAllChecked = false;
     this.subDepartments = [];
     this.selectedSubDepartment = null;
-    if (this.selectedDepartment) {
+    if (this.isAllDepartmentsSelected()) {
+      this.loadAllDepartmentsUsers();
+      return;
+    }
+
+    if (typeof this.selectedDepartment === 'number') {
       this.supDeptServ.setDeptId(this.selectedDepartment);
       this.getSubDepartments(this.selectedDepartment);
       this.Search();
@@ -232,7 +238,15 @@ export class HrAttendanceComponent {
   Search() {
     this.selectedUsers = [];
     this.isSelectAllChecked = false;
-    this.userServ.SearchByNameAndDeptAndSubDep(this.selectedName, this.selectedDepartment, this.selectedSubDepartment).subscribe(
+    const isAllDepartments = this.isAllDepartmentsSelected();
+    const departmentId = this.getNumericDepartmentId();
+    const subDepartmentId = isAllDepartments ? null : this.selectedSubDepartment;
+    this.userServ.SearchByNameAndDeptAndSubDep(
+      this.selectedName,
+      departmentId,
+      subDepartmentId,
+      isAllDepartments ? { allDepartments: true } : undefined
+    ).subscribe(
       (d: any) => {
         this.tableData = d.data.users;
         this.PagesNumber = 1;
@@ -256,8 +270,12 @@ export class HrAttendanceComponent {
   filterByName() {
     const query = this.selectedName.toLowerCase();
     if (query.trim() === '') {
-      this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
-      this.DisplayPagginationOrNot = true;
+      if (this.isAllDepartmentsSelected()) {
+        this.loadAllDepartmentsUsers();
+      } else {
+        this.DisplayPagginationOrNot = true;
+        this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
+      }
       this.filteredUsers = [];
     } else {
       this.filteredUsers = this.UsersNames.filter(name =>
@@ -268,7 +286,15 @@ export class HrAttendanceComponent {
 
   selectUser(location: string) {
     this.selectedName = location;
-    this.userServ.SearchByNameAndDeptAndSubDep(this.selectedName).subscribe(
+    const isAllDepartments = this.isAllDepartmentsSelected();
+    const departmentId = this.getNumericDepartmentId();
+    const subDepartmentId = isAllDepartments ? null : this.selectedSubDepartment;
+    this.userServ.SearchByNameAndDeptAndSubDep(
+      this.selectedName,
+      departmentId,
+      subDepartmentId,
+      isAllDepartments ? { allDepartments: true } : undefined
+    ).subscribe(
       (d: any) => {
         this.tableData = d.data.users;
         this.DisplayPagginationOrNot = false;
@@ -312,5 +338,26 @@ export class HrAttendanceComponent {
 
   saveCurrentPageNumber() {
     localStorage.setItem('HrAttendaceCN', this.CurrentPageNumber.toString());
+  }
+
+  private loadAllDepartmentsUsers() {
+    this.CurrentPageNumber = 1;
+    this.userServ.getall(1, this.from_day, this.to_day, { allDepartments: true }).subscribe(
+      (d: any) => {
+        this.tableData = d.data.users;
+        this.PagesNumber = 1;
+        this.DisplayPagginationOrNot = false;
+        this.generatePages();
+      },
+      (error) => {}
+    );
+  }
+
+  private isAllDepartmentsSelected(): boolean {
+    return this.selectedDepartment === this.allDepartmentsValue;
+  }
+
+  private getNumericDepartmentId(): number | null {
+    return typeof this.selectedDepartment === 'number' ? this.selectedDepartment : null;
   }
 }

@@ -13,6 +13,10 @@ class Department extends Model
   
     protected $guarded = [];
 
+    protected $casts = [
+        'flexible_start_time' => 'string',
+    ];
+
 
 
     public function deductionPlan()

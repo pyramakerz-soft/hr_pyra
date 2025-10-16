@@ -69,11 +69,18 @@
   <div class="border border-[#ECECEC] rounded-lg p-4 md:p-8 shadow-md shadow-[#0000001F] mt-6">
     <div class="flex items-center justify-between mb-4">
       <p class="text-[#272D37] font-semibold text-lg md:text-xl">Deduction Plan</p>
-      <button class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg"
-        [disabled]="planSaving || planLoading || mode !== 'Edit'"
-        (click)="savePlan()">
-        {{ planSaving ? 'Saving...' : 'Save Plan' }}
-      </button>
+      <div class="flex items-center space-x-2">
+        <button type="button"
+          class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 px-4 md:px-5 rounded-lg"
+          (click)="togglePlanSection()">
+          {{ showPlanEditor ? 'Hide Rules' : 'Manage Rules' }}
+        </button>
+        <button class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg"
+          [disabled]="planSaving || planLoading || mode !== 'Edit' || !showPlanEditor"
+          (click)="savePlan()">
+          {{ planSaving ? 'Saving...' : 'Save Plan' }}
+        </button>
+      </div>
     </div>
     <div *ngIf="mode !== 'Edit'" class="text-sm text-[#707070] mb-4">
       Save the sub-department details before configuring the plan.
@@ -81,33 +88,34 @@
     <div *ngIf="planLoading" class="text-sm text-[#707070] mb-4">
       Loading plan...
     </div>
-    <div class="grid gap-4 md:grid-cols-2 mb-6">
-      <div>
-        <label class="block mb-2 font-semibold text-xs md:text-sm text-[#3A3A3C]">Grace Minutes</label>
-        <input type="number" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-          [ngModel]="subDepartmentPlan.grace_minutes"
-          (ngModelChange)="updateGraceMinutes($event)"
-          [disabled]="mode !== 'Edit'">
+    <div *ngIf="showPlanEditor">
+      <div class="grid gap-4 md:grid-cols-2 mb-6">
+        <div>
+          <label class="block mb-2 font-semibold text-xs md:text-sm text-[#3A3A3C]">Grace Minutes</label>
+          <input type="number" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+            [ngModel]="subDepartmentPlan.grace_minutes"
+            (ngModelChange)="updateGraceMinutes($event)"
+            [disabled]="mode !== 'Edit'">
+        </div>
+        <div class="flex items-end justify-end md:justify-start">
+          <button class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 md:py-2 px-4 md:px-5 rounded-lg"
+            type="button"
+            (click)="addRule()"
+            [disabled]="planLoading || mode !== 'Edit'">
+            Add Rule
+          </button>
+        </div>
       </div>
-      <div class="flex items-end justify-end md:justify-start">
-        <button class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 md:py-2 px-4 md:px-5 rounded-lg"
-          type="button"
-          (click)="addRule()"
-          [disabled]="planLoading || mode !== 'Edit'">
-          Add Rule
-        </button>
+      <div class="mb-6">
+        <label class="flex items-center text-xs md:text-sm text-[#3A3A3C] font-semibold">
+          <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5 mr-2"
+            [ngModel]="subDepartmentPlan.overwrite"
+            (ngModelChange)="onOverwriteChange($event)"
+            [disabled]="mode !== 'Edit'">
+          Overwrite parent department plan
+        </label>
       </div>
-    </div>
-    <div class="mb-6">
-      <label class="flex items-center text-xs md:text-sm text-[#3A3A3C] font-semibold">
-        <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5 mr-2"
-          [ngModel]="subDepartmentPlan.overwrite"
-          (ngModelChange)="onOverwriteChange($event)"
-          [disabled]="mode !== 'Edit'">
-        Overwrite parent department plan
-      </label>
-    </div>
-    <div *ngFor="let rule of subDepartmentPlan.rules; let i = index; trackBy: trackRuleByIndex" class="border border-[#E5E5EA] rounded-lg p-4 md:p-6 mb-4">
+      <div *ngFor="let rule of subDepartmentPlan.rules; let i = index; trackBy: trackRuleByIndex" class="border border-[#E5E5EA] rounded-lg p-4 md:p-6 mb-4">
       <div class="flex items-center justify-between mb-3">
         <p class="font-semibold text-sm md:text-base text-[#272D37]">Rule {{ i + 1 }}</p>
         <button type="button" class="text-[#FF7519] text-xs md:text-sm"
@@ -217,10 +225,31 @@
                   [disabled]="mode !== 'Edit'">
                   <option *ngFor="let day of weekdayOptions" [ngValue]="day.value">{{ day.label }}</option>
                 </select>
-                <input *ngSwitchDefault type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-                  [ngModel]="condition.value"
-                  (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
-                  [disabled]="mode !== 'Edit'">
+                <ng-container *ngSwitchDefault>
+                  <ng-container *ngIf="isLocationTypeCondition(condition.key); else subDeptWorkTypeCondition">
+                    <select multiple class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                      [ngModel]="asArray(condition.value)"
+                      (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                      [disabled]="mode !== 'Edit'">
+                      <option *ngFor="let option of locationTypeOptions" [ngValue]="option.value">{{ option.label }}</option>
+                    </select>
+                  </ng-container>
+                  <ng-template #subDeptWorkTypeCondition>
+                    <ng-container *ngIf="isWorkTypeCondition(condition.key); else subDeptStringCondition">
+                      <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                        [ngModel]="asArray(condition.value).join(', ')"
+                        (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                        placeholder="Comma-separated work types"
+                        [disabled]="mode !== 'Edit'">
+                    </ng-container>
+                    <ng-template #subDeptStringCondition>
+                      <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                        [ngModel]="condition.value"
+                        (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                        [disabled]="mode !== 'Edit'">
+                    </ng-template>
+                  </ng-template>
+                </ng-container>
               </ng-container>
             </div>
             <div class="flex justify-end">

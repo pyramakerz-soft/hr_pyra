@@ -57,10 +57,19 @@ export class DeductionPlanService {
       );
   }
 
-  saveUserPlan(userId: number, plan: DeductionPlan): Observable<DeductionPlan> {
+  saveUserPlan(userId: number, plan: DeductionPlan): Observable<{ plan: DeductionPlan; effective_plan?: ResolvedDeductionPlan }> {
     return this.http
       .post<any>(`${this.baseUrl}/user/${userId}`, this.preparePayload(plan), { headers: this.getHeaders() })
-      .pipe(map((response) => this.extractPlan(response)));
+      .pipe(
+        map((response) => {
+          const savedPlan = this.extractPlan(response);
+          const effective = this.extractPlan<ResolvedDeductionPlan>(response, 'effective_plan');
+          return {
+            plan: savedPlan,
+            effective_plan: effective,
+          };
+        })
+      );
   }
 
   private getHeaders(): HttpHeaders {
@@ -122,6 +131,8 @@ export class DeductionPlanService {
 
     if (supportsOverwrite) {
       payload.overwrite = !!plan.overwrite;
+      payload.overwrite_dep = !!plan.overwrite_dep;
+      payload.overwrite_subdep = !!plan.overwrite_subdep;
     }
 
     return payload;

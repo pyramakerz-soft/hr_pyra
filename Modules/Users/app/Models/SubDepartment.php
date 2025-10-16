@@ -11,7 +11,11 @@ class SubDepartment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'department_id', 'teamlead_id'];
+    protected $fillable = ['name', 'department_id', 'teamlead_id', 'flexible_start_time'];
+
+    protected $casts = [
+        'flexible_start_time' => 'string',
+    ];
 
     public function deductionPlan()
     {

@@ -67,6 +67,7 @@
             [(ngModel)]="selectedDepartment"
             (change)="onDepartmentChange()">
             <option [ngValue]="null" disabled>Select Department</option>
+            <option [ngValue]="allDepartmentsValue">All Departments</option>
             <option *ngFor="let dept of departments" [ngValue]="dept.id">{{ dept.name }}</option>
           </select>
   

@@ -16,7 +16,7 @@ import { SubDepartmentService } from '../../../Services/sub-department.service';
 import { TimeZoneService } from '../../../Services/timezone.service';
 import { UserServiceService } from '../../../Services/user-service.service';
 import { WorkTypeService } from '../../../Services/work-type.service';
-import { DeductionPlan, DeductionRule, ResolvedDeductionPlan } from '../../../Models/deduction-plan';
+import { DeductionPlan, DeductionPlanSource, DeductionRule, ResolvedDeductionPlan } from '../../../Models/deduction-plan';
 import { DeductionPlanService } from '../../../Services/deduction-plan.service';
 import { DeductionPlanEditor, PLAN_CONDITION_OPTIONS, PLAN_PENALTY_TYPES, PLAN_RULE_CATEGORIES, PLAN_SCOPE_OPTIONS, WEEKDAY_OPTIONS, PlanConditionOption, PlanConditionType, getConditionLabel } from '../../../Helpers/deduction-plan-editor';
 
@@ -48,7 +48,14 @@ export class HrEmployeeAddEditDetailsComponent {
   weekdayOptions = WEEKDAY_OPTIONS;
   planLoading = false;
   planSaving = false;
-  planEffectiveSources: Array<{ type: string; id: number | string; overwrite: boolean }> = [];
+  planEffectiveSources: DeductionPlanSource[] = [];
+  showPlanEditor = false;
+  canEditPlan = false;
+  locationTypeOptions = [
+    { value: 'site', label: 'On Site' },
+    { value: 'home', label: 'Home' },
+    { value: 'float', label: 'Float' },
+  ];
 
   employee: AddEmployee = new AddEmployee(null,
     null, '', '', null, null, null, '', '', '', '', '', '', null, null, null, null, null, null, '',null, [], [], [], [], false
@@ -90,7 +97,11 @@ export class HrEmployeeAddEditDetailsComponent {
     this.route.params.subscribe(params => {
       if (params['Id']) {
         this.EmployeeId = +params['Id'];
+        this.canEditPlan = true;
         this.getEmployeeByID(this.EmployeeId)
+        this.loadPlan();
+      } else {
+        this.canEditPlan = false;
       }
     });
 
@@ -624,7 +635,262 @@ onSubDepartmentChange() {
       }
     }
   }
-  
+
+  togglePlanSection(): void {
+    if (!this.ensurePlanEditable()) {
+      return;
+    }
+
+    this.showPlanEditor = !this.showPlanEditor;
+  }
+
+  loadPlan(): void {
+    if (!this.ensurePlanEditable(false) || !this.EmployeeId) {
+      return;
+    }
+
+    this.planLoading = true;
+    this.planService.getUserPlan(this.EmployeeId).subscribe({
+      next: ({ plan, effective_plan }) => {
+        this.initializePlan(plan, effective_plan);
+        this.planLoading = false;
+      },
+      error: () => {
+        this.planLoading = false;
+      }
+    });
+  }
+
+  initializePlan(plan: DeductionPlan, effective?: ResolvedDeductionPlan): void {
+    this.planEditor.setPlan(plan);
+    this.employeePlan = this.planEditor.plan;
+    this.effectivePlan = effective;
+    this.planEffectiveSources = effective?.sources ?? plan?.sources ?? [];
+    if (!this.showPlanEditor && this.canEditPlan) {
+      this.showPlanEditor = true;
+    }
+  }
+
+  addRule(): void {
+    if (!this.ensurePlanEditable()) {
+      return;
+    }
+    this.planEditor.addRule();
+  }
+
+  removeRule(index: number): void {
+    if (!this.ensurePlanEditable()) {
+      return;
+    }
+    this.planEditor.removeRule(index);
+  }
+
+  updateGraceMinutes(value: any): void {
+    if (!this.ensurePlanEditable()) {
+      return;
+    }
+    this.planEditor.updateGraceMinutes(value);
+  }
+
+  getConditionEntries(rule: DeductionRule): Array<{ key: string; value: any }> {
+    return this.planEditor.getConditionEntries(rule);
+  }
+
+  getConditionLabel(key: string): string {
+    return getConditionLabel(key);
+  }
+
+  getConditionHint(key: string): string | undefined {
+    return this.planConditionOptions.find((option) => option.key === key)?.hint;
+  }
+
+  getConditionType(key: string): PlanConditionType {
+    return this.planConditionOptions.find((option) => option.key === key)?.type ?? 'string';
+  }
+
+  getAvailableConditionOptions(rule: DeductionRule): PlanConditionOption[] {
+    return this.planEditor.getAvailableConditionOptions(rule);
+  }
+
+  onSelectCondition(ruleIndex: number, key: string | null): void {
+    this.planEditor.setSelectedCondition(ruleIndex, key);
+  }
+
+  addSelectedCondition(ruleIndex: number): void {
+    if (!this.ensurePlanEditable()) {
+      return;
+    }
+    this.planEditor.addSelectedCondition(ruleIndex);
+  }
+
+  removeCondition(ruleIndex: number, key: string): void {
+    if (!this.ensurePlanEditable()) {
+      return;
+    }
+    this.planEditor.removeCondition(ruleIndex, key);
+  }
+
+  onConditionValueChange(ruleIndex: number, key: string, value: any): void {
+    if (!this.ensurePlanEditable()) {
+      return;
+    }
+    this.planEditor.updateConditionValue(ruleIndex, key, value);
+  }
+
+  getSelectedCondition(ruleIndex: number): string | null {
+    return this.planEditor.selectedConditions[ruleIndex] ?? null;
+  }
+
+  getCustomDraft(ruleIndex: number): { key: string; value: string } {
+    return this.planEditor.getCustomDraft(ruleIndex);
+  }
+
+  updateCustomDraftKey(ruleIndex: number, value: string): void {
+    this.planEditor.getCustomDraft(ruleIndex).key = value;
+  }
+
+  updateCustomDraftValue(ruleIndex: number, value: string): void {
+    this.planEditor.getCustomDraft(ruleIndex).value = value;
+  }
+
+  addCustomCondition(ruleIndex: number): void {
+    if (!this.ensurePlanEditable()) {
+      return;
+    }
+    this.planEditor.addCustomCondition(ruleIndex);
+  }
+
+  asArray(value: any): string[] {
+    if (Array.isArray(value)) {
+      return value;
+    }
+
+    if (value === null || value === undefined || value === '') {
+      return [];
+    }
+
+    return [value];
+  }
+
+  onOverwriteAllChange(value: boolean): void {
+    if (!this.ensurePlanEditable()) {
+      return;
+    }
+
+    this.planEditor.setOverwrite(value);
+    this.employeePlan = this.planEditor.plan;
+
+    if (value) {
+      this.planEditor.setOverwriteDepartment(true);
+      this.planEditor.setOverwriteSubDepartment(true);
+    }
+  }
+
+  onOverwriteDepartmentChange(value: boolean): void {
+    if (!this.ensurePlanEditable()) {
+      return;
+    }
+
+    this.planEditor.setOverwriteDepartment(value);
+    this.employeePlan = this.planEditor.plan;
+
+    if (!value && this.employeePlan.overwrite) {
+      this.planEditor.setOverwrite(false);
+    }
+  }
+
+  onOverwriteSubDepartmentChange(value: boolean): void {
+    if (!this.ensurePlanEditable()) {
+      return;
+    }
+
+    this.planEditor.setOverwriteSubDepartment(value);
+    this.employeePlan = this.planEditor.plan;
+
+    if (!value && this.employeePlan.overwrite) {
+      this.planEditor.setOverwrite(false);
+    }
+  }
+
+  savePlan(): void {
+    if (!this.ensurePlanEditable()) {
+      return;
+    }
+
+    this.planSaving = true;
+    this.planService.saveUserPlan(this.EmployeeId, this.planEditor.plan).subscribe({
+      next: ({ plan, effective_plan }) => {
+        this.initializePlan(plan, effective_plan);
+        this.planSaving = false;
+        Swal.fire({
+          icon: 'success',
+          text: 'Employee deduction plan saved successfully.',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#17253E',
+        });
+      },
+      error: () => {
+        this.planSaving = false;
+        Swal.fire({
+          icon: 'error',
+          text: 'Failed to save the deduction plan. Please try again later.',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#FF7519',
+        });
+      },
+    });
+  }
+
+  trackRuleByIndex(index: number): number {
+    return index;
+  }
+
+  trackCondition(_index: number, item: { key: string }): string {
+    return item.key;
+  }
+
+  isLocationTypeCondition(key: string): boolean {
+    return key === 'location_type_in' || key === 'location_type_not_in';
+  }
+
+  isWorkTypeCondition(key: string): boolean {
+    return key === 'work_type_in' || key === 'work_type_not_in';
+  }
+
+  formatSourceLabel(source: DeductionPlanSource): string {
+    const base = `${source.type}`;
+    if (source.overwrite) {
+      return `${base} (overwrites all)`;
+    }
+
+    const overrides: string[] = [];
+    if (source.overwrite_dep) {
+      overrides.push('department');
+    }
+    if (source.overwrite_subdep) {
+      overrides.push('sub-department');
+    }
+
+    if (overrides.length === 0) {
+      return base;
+    }
+
+    return `${base} (overrides ${overrides.join(' & ')})`;
+  }
+
+  private ensurePlanEditable(showAlert: boolean = true): boolean {
+    const editable = this.canEditPlan && this.EmployeeId > 0;
+    if (!editable && showAlert) {
+      Swal.fire({
+        text: 'Save the employee details before configuring a deduction plan.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#FF7519',
+      });
+    }
+
+    return editable;
+  }
+
 SaveEmployee() {
     if (this.isFormValid()) {
         this.isSaved = true;

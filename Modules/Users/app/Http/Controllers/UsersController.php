@@ -125,30 +125,35 @@ class UsersController extends Controller
     $search = $request->get('search');
     $department = $request->get('department_id');
     $subDepartment = $request->get('sub_department_id');
-     $from_day = $request->get('from_day');
+    $from_day = $request->get('from_day');
     $to_day = $request->get('to_day');
+    $isAllDepartmentsValue = $department === 'all';
+    $allDepartments = $isAllDepartmentsValue || filter_var($request->get('all_departments'), FILTER_VALIDATE_BOOLEAN);
     $usersData = null;
 
     // Base query
     $usersQuery = User::query();
 
     // Filter by department
-    if ($department) {
+    $hasDepartmentFilter = !is_null($department) && $department !== '' && !$isAllDepartmentsValue;
+    if ($hasDepartmentFilter) {
         $usersQuery->where('department_id', $department);
     }
 
     // Filter by sub-department
-    if ($subDepartment) {
+    $hasSubDepartmentFilter = !is_null($subDepartment) && $subDepartment !== '';
+    if ($hasSubDepartmentFilter) {
         $usersQuery->where('sub_department_id', $subDepartment);
     }
-if ($from_day && $to_day) {
-    $fromDate = Carbon::parse($from_day)->startOfDay();
-    $toDate   = Carbon::parse($to_day)->endOfDay();
 
-    $usersQuery->whereHas('user_clocks', function($query) use ($fromDate, $toDate) {
-        $query->whereBetween('created_at', [$fromDate, $toDate]);
-    });
-}
+    if ($from_day && $to_day) {
+        $fromDate = Carbon::parse($from_day)->startOfDay();
+        $toDate   = Carbon::parse($to_day)->endOfDay();
+
+        $usersQuery->whereHas('user_clocks', function($query) use ($fromDate, $toDate) {
+            $query->whereBetween('created_at', [$fromDate, $toDate]);
+        });
+    }
     // Handle export
     if ($request->has('export')) {
         $users = $usersQuery->get();
@@ -163,36 +168,38 @@ if ($from_day && $to_day) {
         $users = $this->searchUsersByNameOrCode($search);
 
         // Apply department/sub-department filtering to search results
-        if ($department) {
+        if ($hasDepartmentFilter) {
             $users = $users->where('department_id', $department);
         }
-        if ($subDepartment) {
+        if ($hasSubDepartmentFilter) {
             $users = $users->where('sub_department_id', $subDepartment);
         }
 
         $usersData = $users->isEmpty() ? null : [
             'users' => UserResource::collection($users),
+            'pagination' => null,
         ];
     } else {
         // If filters are applied, fetch all users matching the filters (no pagination)
-        // Remove pagination if filtering by date, department, or sub-department
-if ($department || $subDepartment || ($from_day && $to_day)) {
-    $users = $usersQuery->get();
-     $usersData = [
-        // Pass dates to UserResource!
-        'users' => UserResource::collection($users)->additional([
-            'from_day' => $from_day,
-            'to_day' => $to_day,
-        ]),
-        'pagination' => null,
-    ];
-} else {
-    $users = $usersQuery->paginate(5);
-    $usersData = [
-        'users' => UserResource::collection($users),
-        'pagination' => $this->formatPagination($users),
-    ];
-}
+        // Remove pagination if filtering by date, department, sub-department, or requesting all departments
+        $shouldReturnAllUsers = $allDepartments || $hasDepartmentFilter || $hasSubDepartmentFilter || ($from_day && $to_day);
+        if ($shouldReturnAllUsers) {
+            $users = $usersQuery->get();
+            $usersData = [
+                // Pass dates to UserResource!
+                'users' => UserResource::collection($users)->additional([
+                    'from_day' => $from_day,
+                    'to_day' => $to_day,
+                ]),
+                'pagination' => null,
+            ];
+        } else {
+            $users = $usersQuery->paginate(5);
+            $usersData = [
+                'users' => UserResource::collection($users),
+                'pagination' => $this->formatPagination($users),
+            ];
+        }
 
     }
 

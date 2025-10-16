@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Modules\Clocks\Exports\Sheets\UserClocksAggregatedSheet;
 use Modules\Clocks\Exports\Sheets\UserClocksDetailedSheet;
 use Modules\Clocks\Exports\Sheets\UserClocksSummarySheet;
 use Modules\Clocks\Exports\Sheets\UserClocksPlanSheet;
@@ -25,6 +26,7 @@ class UserClocksExport implements WithMultipleSheets
     protected Collection $detailedRows;
     protected Collection $summaryRows;
     protected Collection $planRows;
+    protected Collection $aggregatedRows;
     protected array $rowStyles = [];
     protected array $ruleLegend = [];
     protected array $defaultCategoryColors = [
@@ -38,6 +40,7 @@ class UserClocksExport implements WithMultipleSheets
         'bonus' => 'C6EFCE',
         'other' => 'D9D9D9',
     ];
+    protected array $excuseStatusOrder = ['approved', 'pending', 'rejected'];
 
     public function __construct($users, $startDate = null, $endDate = null)
     {
@@ -46,6 +49,7 @@ class UserClocksExport implements WithMultipleSheets
         $this->endDate = $endDate;
 
         $this->planRows = collect();
+        $this->aggregatedRows = collect();
         $this->ruleLegend = [];
 
         $this->prepareData();
@@ -57,6 +61,7 @@ class UserClocksExport implements WithMultipleSheets
             new UserClocksSummarySheet($this->summaryRows),
             new UserClocksPlanSheet($this->planRows, $this->ruleLegend),
             new UserClocksDetailedSheet($this->detailedRows, $this->rowStyles),
+            new UserClocksAggregatedSheet($this->aggregatedRows),
         ];
     }
 
@@ -70,6 +75,11 @@ class UserClocksExport implements WithMultipleSheets
         return $this->detailedRows;
     }
 
+    public function getAggregatedRows(): Collection
+    {
+        return $this->aggregatedRows;
+    }
+
     public function getRowStyles(): array
     {
         return $this->rowStyles;
@@ -80,6 +90,7 @@ class UserClocksExport implements WithMultipleSheets
         $this->detailedRows = collect();
         $this->summaryRows = collect();
         $this->planRows = collect();
+        $this->aggregatedRows = collect();
         $this->rowStyles = [];
         $this->ruleLegend = [
             'deduction' => $this->defaultCategoryColors['deduction'],
@@ -109,6 +120,14 @@ class UserClocksExport implements WithMultipleSheets
             'net_pay' => 0.0,
             'excuse_tokens_used' => 0,
             'lateness_beyond_grace_minutes' => 0,
+            'plan_monetary_amount' => 0.0,
+            'worked_days' => 0,
+            'approved_excuse_count' => 0,
+            'approved_excuse_minutes' => 0,
+            'pending_excuse_count' => 0,
+            'pending_excuse_minutes' => 0,
+            'rejected_excuse_count' => 0,
+            'rejected_excuse_minutes' => 0,
         ];
 
         foreach ($this->users as $user) {
@@ -116,10 +135,21 @@ class UserClocksExport implements WithMultipleSheets
                 continue;
             }
 
+            $user->loadMissing(['work_types']);
+            $userWorkTypes = $user->work_types
+                ->pluck('name')
+                ->map(function ($name) {
+                    return is_string($name) ? strtolower($name) : $name;
+                })
+                ->filter()
+                ->values()
+                ->all();
+
             $resolvedPlan = $planResolver->resolveForUser($user);
             $deductionEngine = new DeductionRuleEngine($resolvedPlan);
             $planGraceMinutes = $resolvedPlan['grace_minutes'] ?? 15;
             $ruleState = [];
+            $totalPlanMonetaryAmount = 0.0;
             $userPlanRowStart = $this->planRows->count();
 
             foreach ($resolvedPlan['rules'] as $planRule) {
@@ -130,25 +160,33 @@ class UserClocksExport implements WithMultipleSheets
                 }
             }
 
-            $timezoneValue = optional($user->timezone)->value ?? 3;
+            $userTimezoneName = optional($user->timezone)->name ?? 'Africa/Cairo';
             $department = optional($user->department);
             $workScheduleType = strtolower($department->work_schedule_type ?? 'flexible');
             $isFlexibleSchedule = $workScheduleType !== 'strict';
             $worksOnSaturday = (bool) ($department?->works_on_saturday ?? false);
             $userDetail = optional($user->user_detail);
-            $workingHoursDay = $userDetail->working_hours_day ?? 8;
+            $workingHoursDay = (float) ($userDetail->working_hours_day ?? 8);
             if ($workingHoursDay <= 0) {
                 $workingHoursDay = 8;
             }
             $requiredMinutesPerDay = (int) round($workingHoursDay * 60);
-            $scheduledStartTime = $userDetail->start_time ?? '08:00:00';
+            $scheduledStartTime = $userDetail->start_time
+                ?? optional($user->subDepartment)->flexible_start_time
+                ?? ($department?->flexible_start_time ?? null)
+                ?? ($department?->start_time ?? null)
+                ?? '08:00:00';
 
             $now = Carbon::now();
             $defaultStartDate = $now->copy()->subMonth()->day(26)->startOfDay();
             $defaultEndDate = $now->copy()->day(26)->endOfDay();
 
-            $startDate = $this->startDate ? Carbon::parse($this->startDate)->startOfDay() : $defaultStartDate->copy();
-            $endDate = $this->endDate ? Carbon::parse($this->endDate)->endOfDay() : $defaultEndDate->copy();
+            $startDate = $this->startDate
+                ? Carbon::parse($this->startDate, $userTimezoneName)->startOfDay()->setTimezone('UTC')
+                : $defaultStartDate->copy();
+            $endDate = $this->endDate
+                ? Carbon::parse($this->endDate, $userTimezoneName)->endOfDay()->setTimezone('UTC')
+                : $defaultEndDate->copy();
 
             $clocks = $user->user_clocks()
                 ->whereBetween('clock_in', [$startDate, $endDate])
@@ -162,8 +200,9 @@ class UserClocksExport implements WithMultipleSheets
                     return Carbon::parse($record->overtime_date)->toDateString();
                 });
 
-            $grouped = $clocks->groupBy(function ($clock) {
-                return Carbon::parse($clock->clock_in)->format('Y-m-d');
+            $grouped = $clocks->groupBy(function ($clock) use ($userTimezoneName) {
+                return Carbon::parse($clock->clock_in, $userTimezoneName)
+                    ->format('Y-m-d');
             });
 
             $dailyEntries = [];
@@ -178,9 +217,11 @@ class UserClocksExport implements WithMultipleSheets
             $totalLatenessBeyondGrace = 0;
             $totalApprovedExcuseMinutes = 0;
             $totalIssueDays = 0;
+            $totalWorkedDays = 0;
 
             for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
-                $formattedDate = $date->format('Y-m-d');
+                $localDate = $date->copy()->setTimezone($userTimezoneName);
+                $formattedDate = $localDate->format('Y-m-d');
                 $dailyClocks = $grouped->get($formattedDate, collect());
                 $isVacationDay = $user->user_vacations()->where('status', 'approved')
                     ->whereDate('from_date', '<=', $formattedDate)
@@ -240,8 +281,8 @@ class UserClocksExport implements WithMultipleSheets
 
                 if ($dailyClocks->isNotEmpty()) {
                     foreach ($dailyClocks as $clock) {
-                        $clockIn = $clock->clock_in ? Carbon::parse($clock->clock_in) : null;
-                        $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out) : null;
+                        $clockIn = $clock->clock_in ? Carbon::parse($clock->clock_in, 'UTC') : null;
+                        $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out, 'UTC') : null;
 
                         if ($clockIn && $clockOut) {
                             $diff = $clockIn->diffInMinutes($clockOut);
@@ -281,14 +322,14 @@ class UserClocksExport implements WithMultipleSheets
                         }
 
                         $segments[] = [
-                            'in' => $clockIn ? $clockIn->copy()->addHours($timezoneValue)->format('h:i A') : '',
-                            'out' => $clockOut ? $clockOut->copy()->addHours($timezoneValue)->format('h:i A') : '',
+                            'in' => $clockIn ? $clockIn->copy()->setTimezone($userTimezoneName)->format('h:i A') : '',
+                            'out' => $clockOut ? $clockOut->copy()->setTimezone($userTimezoneName)->format('h:i A') : '',
                         ];
                     }
                 }
 
-                $isFriday = $date->isFriday();
-                $isSaturday = $date->isSaturday();
+                $isFriday = $localDate->isFriday();
+                $isSaturday = $localDate->isSaturday();
                 $isNonWorkingWeekend = $isFriday || ($isSaturday && ! $worksOnSaturday);
 
                 $requiredMinutes = $isNonWorkingWeekend ? 0 : $requiredMinutesPerDay;
@@ -303,10 +344,15 @@ class UserClocksExport implements WithMultipleSheets
                 $latenessMinutesActual = 0;
                 if ($earliestIn && $requiredMinutes > 0) {
                     if ($isFlexibleSchedule) {
-                        $baselineStart = Carbon::parse($formattedDate . ' 09:00:00');
+                        $flexibleStartTime = optional($user->subDepartment)->flexible_start_time
+                            ?? ($department->flexible_start_time ?? null);
+                        $startTimeString = $flexibleStartTime ?: ($scheduledStartTime ?? '09:00:00');
                     } else {
-                        $baselineStart = Carbon::parse($formattedDate . ' ' . $scheduledStartTime);
+                        $startTimeString = $scheduledStartTime ?? '08:00:00';
                     }
+
+                    $baselineStart = Carbon::parse($formattedDate . ' ' . $startTimeString, $userTimezoneName)
+                        ->setTimezone('UTC');
 
                     $graceEnd = $baselineStart->copy()->addMinutes($planGraceMinutes);
 
@@ -336,9 +382,19 @@ class UserClocksExport implements WithMultipleSheets
 
                 $shortfall = max(0, $requiredMinutes - $workedMinutes);
 
+                $dailyLocationTypes = $dailyClocks
+                    ->pluck('location_type')
+                    ->filter()
+                    ->map(function ($type) {
+                        return is_string($type) ? strtolower($type) : $type;
+                    })
+                    ->unique()
+                    ->values()
+                    ->all();
+
                 $evaluationMetrics = [
     'date' => $formattedDate,
-    'day_of_week' => strtolower($date->format('l')),
+    'day_of_week' => strtolower($localDate->format('l')),
     'required_minutes' => $requiredMinutes,
     'default_daily_minutes' => $requiredMinutesPerDay,
     'worked_minutes' => $workedMinutes,
@@ -349,12 +405,15 @@ class UserClocksExport implements WithMultipleSheets
     'recorded_ot_minutes' => $recordedOtMinutes,
     'is_issue' => $hasIssue,
     'is_vacation' => (bool) $isVacationDay, // ✅ use the already-known flag
+    'location_types' => $dailyLocationTypes,
+    'user_work_types' => $userWorkTypes,
 ];
 
 
                 $evaluation = $deductionEngine->evaluate($evaluationMetrics, $ruleState);
                 $appliedRules = $evaluation['applied_rules'] ?? [];
                 $planMonetaryDeduction = $evaluation['monetary_amount'] ?? 0.0;
+                $totalPlanMonetaryAmount += $planMonetaryDeduction;
                 $rawDeductionMinutes = $hasIssue ? 0 : (int) ($evaluation['deduction_minutes'] ?? 0);
 
                 if ($hasIssue) {
@@ -407,6 +466,10 @@ class UserClocksExport implements WithMultipleSheets
                     $totalVacationDays++;
                 }
 
+                if ($workedMinutes > 0) {
+                    $totalWorkedDays++;
+                }
+
                 $totalWorkedMinutes += $workedMinutes;
                 $totalRecordedOtMinutes += $recordedOtMinutes;
                 $totalAttendanceOtMinutes += $attendanceOvertimeMinutes;
@@ -417,8 +480,8 @@ class UserClocksExport implements WithMultipleSheets
                     'row_data' => [
                         'Date' => $formattedDate,
                         'Name' => $user->name,
-                        'Clock In' => $dailyClocks->count() > 1 ? '' : ($earliestIn ? $earliestIn->copy()->addHours($timezoneValue)->format('h:i A') : ''),
-                        'Clock Out' => $dailyClocks->count() > 1 ? '' : ($latestOut ? $latestOut->copy()->addHours($timezoneValue)->format('h:i A') : ''),
+                        'Clock In' => $dailyClocks->count() > 1 ? '' : ($earliestIn ? $earliestIn->copy()->setTimezone($userTimezoneName)->format('h:i A') : ''),
+                        'Clock Out' => $dailyClocks->count() > 1 ? '' : ($latestOut ? $latestOut->copy()->setTimezone($userTimezoneName)->format('h:i A') : ''),
                         'Code' => $user->code,
                         'Department' => $user->department?->name ?? 'N/A',
                         'Total Hours in That Day' => $this->formatMinutes($workedMinutes),
@@ -476,6 +539,12 @@ class UserClocksExport implements WithMultipleSheets
                 $row['Excuse Deducted in That Day'] = $this->formatMinutes($entry['excuse_applied_minutes']);
                 $row['Excuse Remaining (Policy 4h)'] = '';
 
+                $aggregatedRow = $row;
+                $aggregatedRow['Plan Monetary Amount'] = $entry['plan_monetary_amount'] !== null
+                    ? round($entry['plan_monetary_amount'], 2)
+                    : null;
+                $this->aggregatedRows->push($aggregatedRow);
+
                 $this->detailedRows->push($row);
                 $rowNumber = 1 + $this->detailedRows->count();
                 $this->rowStyles[] = [
@@ -509,6 +578,27 @@ class UserClocksExport implements WithMultipleSheets
                         'Attendance Over time in That Day' => '',
                     ]);
 
+                    $this->aggregatedRows->push([
+                        'Date' => '',
+                        'Name' => '',
+                        'Clock In' => $segment['in'],
+                        'Clock Out' => $segment['out'],
+                        'Code' => '',
+                        'Department' => '',
+                        'Total Hours in That Day' => '',
+                        'Total Over time in That Day' => '',
+                        'Plan Deduction in That Day' => '',
+                        'Deduction Details' => '',
+                        'Excuse Deducted in That Day' => '',
+                        'Excuse Remaining (Policy 4h)' => '',
+                        'Total Excuses in That Day' => '',
+                        'Is this date has vacation' => '',
+                        'Location In' => '',
+                        'Location Out' => '',
+                        'Attendance Over time in That Day' => '',
+                        'Plan Monetary Amount' => null,
+                    ]);
+
                     $rowNumber = 1 + $this->detailedRows->count();
                     $this->rowStyles[] = [
                         'row' => $rowNumber,
@@ -538,6 +628,27 @@ class UserClocksExport implements WithMultipleSheets
                 'Attendance Over time in That Day' => $this->formatMinutes($totalAttendanceOtMinutes),
             ]);
 
+            $this->aggregatedRows->push([
+                'Date' => '---TOTAL for ' . $user->name . '----',
+                'Name' => $user->name,
+                'Clock In' => 'N/A',
+                'Clock Out' => 'N/A',
+                'Code' => $user->code,
+                'Department' => $user->department?->name ?? 'N/A',
+                'Total Hours in That Day' => $this->formatMinutes($totalWorkedMinutes),
+                'Total Over time in That Day' => $this->formatMinutes($totalRecordedOtMinutes),
+                'Plan Deduction in That Day' => $this->formatMinutes($totalRawDeductionMinutes),
+                'Deduction Details' => '',
+                'Excuse Deducted in That Day' => $this->formatMinutes($totalExcuseMinutesApplied),
+                'Excuse Remaining (Policy 4h)' => $this->formatMinutes(max(0, $excuseMinutesRemaining)),
+                'Total Excuses in That Day' => $this->formatMinutes($totalApprovedExcuseMinutes),
+                'Is this date has vacation' => $totalVacationDays === 0 ? 'NO VACATIONS' : $totalVacationDays . ' Days',
+                'Location In' => 'N/A',
+                'Location Out' => 'N/A',
+                'Attendance Over time in That Day' => $this->formatMinutes($totalAttendanceOtMinutes),
+                'Plan Monetary Amount' => round($totalPlanMonetaryAmount, 2),
+            ]);
+
             $this->detailedRows->push([
                 'Date' => '--------------------',
                 'Name' => '',
@@ -558,6 +669,27 @@ class UserClocksExport implements WithMultipleSheets
                 'Attendance Over time in That Day' => '',
             ]);
 
+            $this->aggregatedRows->push([
+                'Date' => '--------------------',
+                'Name' => '',
+                'Clock In' => '',
+                'Clock Out' => '',
+                'Code' => '',
+                'Department' => '',
+                'Total Hours in That Day' => '',
+                'Total Over time in That Day' => '',
+                'Plan Deduction in That Day' => '',
+                'Deduction Details' => '',
+                'Excuse Deducted in That Day' => '',
+                'Excuse Remaining (Policy 4h)' => '',
+                'Total Excuses in That Day' => '',
+                'Is this date has vacation' => '',
+                'Location In' => '',
+                'Location Out' => '',
+                'Attendance Over time in That Day' => '',
+                'Plan Monetary Amount' => null,
+            ]);
+
             if ($this->planRows->count() === $userPlanRowStart) {
                 $this->planRows->push([
                     'Employee' => $user->name,
@@ -574,6 +706,9 @@ class UserClocksExport implements WithMultipleSheets
                     'Color' => $this->defaultCategoryColors['other'],
                 ]);
             }
+
+            $excuseStats = $this->collectExcuseStats($user, $startDate->copy(), $endDate->copy(), $userTimezoneName);
+            $excuseSummaryForNotes = $this->summarizeExcuseStatsForNotes($excuseStats);
 
             $hourlyRate = $userDetail->hourly_rate;
             $overtimeRate = $userDetail->overtime_hourly_rate;
@@ -594,24 +729,30 @@ class UserClocksExport implements WithMultipleSheets
             $netPay = $grossPay - ($deductionAmount ?? 0);
 
             $notes = sprintf(
-                'Required %s, worked %s, shortfall beyond grace %s. Late beyond grace not recouped: %s. Excuse tokens used: %d. Chargeable deduction %s.',
+                'Required %s, worked %s, shortfall beyond grace %s. Late beyond grace not recouped: %s. Excuse tokens used: %d. Chargeable deduction %s. Plan deduction amount %.2f. Excuses summary: %s.',
                 $this->formatMinutes($totalRequiredMinutes),
                 $this->formatMinutes($totalWorkedMinutes),
                 $this->formatMinutes($totalRawDeductionMinutes),
                 $this->formatMinutes($totalLatenessBeyondGrace),
                 $excuseTokensUsed,
-                $this->formatMinutes($totalChargeableDeductionMinutes)
+                $this->formatMinutes($totalChargeableDeductionMinutes),
+                round($totalPlanMonetaryAmount, 2),
+                $excuseSummaryForNotes
             );
 
             $this->summaryRows->push([
                 'Employee' => $user->name,
                 'Code' => $user->code,
                 'Department' => $user->department?->name ?? 'N/A',
+                'Total Days Worked' => $totalWorkedDays,
                 'Total Worked Hours' => $this->formatMinutes($totalWorkedMinutes),
                 'Total OT Hours' => $this->formatMinutes($totalRecordedOtMinutes),
                 'Total Attendance OT Hours' => $this->formatMinutes($totalAttendanceOtMinutes),
                 'Raw Deduction Hours' => $this->formatMinutes($totalRawDeductionMinutes),
                 'Excuse Hours Used' => $this->formatMinutes($totalExcuseMinutesApplied),
+                'Approved Excuses' => $this->formatExcuseStat($excuseStats['approved'] ?? []),
+                'Pending Excuses' => $this->formatExcuseStat($excuseStats['pending'] ?? []),
+                'Rejected Excuses' => $this->formatExcuseStat($excuseStats['rejected'] ?? []),
                 'Chargeable Deduction Hours' => $this->formatMinutes($totalChargeableDeductionMinutes),
                 'Issue Days' => $totalIssueDays,
                 'Vacation Days' => $totalVacationDays,
@@ -622,6 +763,7 @@ class UserClocksExport implements WithMultipleSheets
                 'OT Pay' => $otPay !== null ? round($otPay, 2) : null,
                 'Gross Pay' => $grossPay !== 0.0 ? round($grossPay, 2) : null,
                 'Deduction Amount' => $deductionAmount !== null ? round($deductionAmount, 2) : null,
+                'Plan Deduction Amount' => $totalPlanMonetaryAmount !== 0.0 ? round($totalPlanMonetaryAmount, 2) : null,
                 'Net Pay' => $netPay !== 0.0 ? round($netPay, 2) : null,
                 'Notes' => $notes,
             ]);
@@ -639,33 +781,48 @@ class UserClocksExport implements WithMultipleSheets
             $overallTotals['ot_pay'] += $otPay !== null ? $otPay : 0.0;
             $overallTotals['gross_pay'] += $grossPay;
             $overallTotals['deduction_amount'] += $deductionAmount !== null ? $deductionAmount : 0.0;
+            $overallTotals['plan_monetary_amount'] += $totalPlanMonetaryAmount;
             $overallTotals['net_pay'] += $netPay;
             $overallTotals['excuse_tokens_used'] += $excuseTokensUsed;
             $overallTotals['lateness_beyond_grace_minutes'] += $totalLatenessBeyondGrace;
             $overallTotals['issue_days'] = ($overallTotals['issue_days'] ?? 0) + $totalIssueDays;
+            $overallTotals['worked_days'] += $totalWorkedDays;
+            foreach ($this->excuseStatusOrder as $statusKey) {
+                $statusStats = $excuseStats[$statusKey] ?? ['count' => 0, 'minutes' => 0];
+                $overallTotals[$statusKey . '_excuse_count'] += $statusStats['count'] ?? 0;
+                $overallTotals[$statusKey . '_excuse_minutes'] += $statusStats['minutes'] ?? 0;
+            }
         }
 
         if ($this->summaryRows->isNotEmpty()) {
+            $overallExcuseStats = $this->buildOverallExcuseStats($overallTotals);
+            $overallExcuseSummary = $this->summarizeExcuseStatsForNotes($overallExcuseStats);
             $notes = sprintf(
-                'Required %s, worked %s, shortfall beyond grace %s. Late beyond grace not recouped: %s. Excuse tokens used across all employees: %d. Chargeable deduction %s. Issue days: %d.',
+                'Required %s, worked %s, shortfall beyond grace %s. Late beyond grace not recouped: %s. Excuse tokens used across all employees: %d. Chargeable deduction %s. Plan deduction amount %.2f. Issue days: %d. Excuses summary: %s.',
                 $this->formatMinutes($overallTotals['required_minutes']),
                 $this->formatMinutes($overallTotals['worked_minutes']),
                 $this->formatMinutes($overallTotals['raw_deduction_minutes']),
                 $this->formatMinutes($overallTotals['lateness_beyond_grace_minutes']),
                 $overallTotals['excuse_tokens_used'],
                 $this->formatMinutes($overallTotals['chargeable_deduction_minutes']),
-                $overallTotals['issue_days'] ?? 0
+                round($overallTotals['plan_monetary_amount'], 2),
+                $overallTotals['issue_days'] ?? 0,
+                $overallExcuseSummary
             );
 
             $this->summaryRows->push([
                 'Employee' => 'TOTAL',
                 'Code' => '',
                 'Department' => '',
+                'Total Days Worked' => $overallTotals['worked_days'],
                 'Total Worked Hours' => $this->formatMinutes($overallTotals['worked_minutes']),
                 'Total OT Hours' => $this->formatMinutes($overallTotals['recorded_ot_minutes']),
                 'Total Attendance OT Hours' => $this->formatMinutes($overallTotals['attendance_ot_minutes']),
                 'Raw Deduction Hours' => $this->formatMinutes($overallTotals['raw_deduction_minutes']),
                 'Excuse Hours Used' => $this->formatMinutes($overallTotals['excuse_minutes']),
+                'Approved Excuses' => $this->formatExcuseStat($overallExcuseStats['approved']),
+                'Pending Excuses' => $this->formatExcuseStat($overallExcuseStats['pending']),
+                'Rejected Excuses' => $this->formatExcuseStat($overallExcuseStats['rejected']),
                 'Chargeable Deduction Hours' => $this->formatMinutes($overallTotals['chargeable_deduction_minutes']),
                 'Issue Days' => $overallTotals['issue_days'] ?? 0,
                 'Vacation Days' => $overallTotals['vacation_days'],
@@ -676,6 +833,7 @@ class UserClocksExport implements WithMultipleSheets
                 'OT Pay' => $overallTotals['ot_pay'] !== 0.0 ? round($overallTotals['ot_pay'], 2) : null,
                 'Gross Pay' => $overallTotals['gross_pay'] !== 0.0 ? round($overallTotals['gross_pay'], 2) : null,
                 'Deduction Amount' => $overallTotals['deduction_amount'] !== 0.0 ? round($overallTotals['deduction_amount'], 2) : null,
+                'Plan Deduction Amount' => $overallTotals['plan_monetary_amount'] !== 0.0 ? round($overallTotals['plan_monetary_amount'], 2) : null,
                 'Net Pay' => $overallTotals['net_pay'] !== 0.0 ? round($overallTotals['net_pay'], 2) : null,
                 'Notes' => $notes,
             ]);
@@ -693,6 +851,101 @@ class UserClocksExport implements WithMultipleSheets
         }
 
         return collect(is_array($users) ? $users : [$users]);
+    }
+
+    protected function buildOverallExcuseStats(array $overallTotals): array
+    {
+        $stats = $this->initializeExcuseStats();
+
+        foreach ($this->excuseStatusOrder as $status) {
+            $stats[$status]['count'] = $overallTotals[$status . '_excuse_count'] ?? 0;
+            $stats[$status]['minutes'] = $overallTotals[$status . '_excuse_minutes'] ?? 0;
+        }
+
+        return $stats;
+    }
+
+    protected function collectExcuseStats(User $user, Carbon $startDate, Carbon $endDate, string $timezone): array
+    {
+        $stats = $this->initializeExcuseStats();
+
+        $localStart = $startDate->copy()->setTimezone($timezone)->startOfDay();
+        $localEnd = $endDate->copy()->setTimezone($timezone)->endOfDay();
+
+        $excuses = $user->excuses()
+            ->whereBetween('date', [$localStart->toDateString(), $localEnd->toDateString()])
+            ->get();
+
+        foreach ($excuses as $excuse) {
+            $status = $excuse->status ?? 'pending';
+
+            if ($status instanceof \UnitEnum) {
+                $status = method_exists($status, 'value') ? $status->value : $status->name;
+            }
+
+            $statusKey = is_string($status) ? strtolower($status) : 'pending';
+            if (! in_array($statusKey, $this->excuseStatusOrder, true)) {
+                $statusKey = 'pending';
+            }
+            if (! isset($stats[$statusKey])) {
+                $stats[$statusKey] = ['count' => 0, 'minutes' => 0];
+            }
+
+            $from = $excuse->from ? Carbon::parse($excuse->from) : null;
+            $to = $excuse->to ? Carbon::parse($excuse->to) : null;
+            $minutes = 0;
+
+            if ($from && $to) {
+                $diff = $from->diffInMinutes($to, false);
+                $minutes = $diff > 0 ? $diff : 0;
+            }
+
+            $stats[$statusKey]['count']++;
+            $stats[$statusKey]['minutes'] += $minutes;
+        }
+
+        return $stats;
+    }
+
+    protected function formatExcuseStat(array $stat): ?string
+    {
+        $count = (int) ($stat['count'] ?? 0);
+        $minutes = (int) ($stat['minutes'] ?? 0);
+
+        if ($count === 0 && $minutes === 0) {
+            return null;
+        }
+
+        return sprintf('%d (%s)', $count, $this->formatMinutes($minutes));
+    }
+
+    protected function summarizeExcuseStatsForNotes(array $stats): string
+    {
+        $parts = [];
+
+        foreach ($this->excuseStatusOrder as $status) {
+            $count = (int) ($stats[$status]['count'] ?? 0);
+            $minutes = (int) ($stats[$status]['minutes'] ?? 0);
+
+            if ($count === 0 && $minutes === 0) {
+                continue;
+            }
+
+            $parts[] = sprintf('%s %d (%s)', ucfirst($status), $count, $this->formatMinutes($minutes));
+        }
+
+        return $parts ? implode(', ', $parts) : 'No excuses recorded';
+    }
+
+    protected function initializeExcuseStats(): array
+    {
+        $stats = [];
+
+        foreach ($this->excuseStatusOrder as $status) {
+            $stats[$status] = ['count' => 0, 'minutes' => 0];
+        }
+
+        return $stats;
     }
 
     protected function computeAttendanceOvertimeMinutes(int $dailyWorkedMinutes, ?string $date = null): int

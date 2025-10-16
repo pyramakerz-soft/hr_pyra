@@ -5,6 +5,7 @@ namespace Modules\Clocks\Exports;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Modules\Clocks\Exports\Sheets\UserClocksAggregatedSheet;
 use Modules\Clocks\Exports\Sheets\UserClocksDetailedSheet;
 use Modules\Clocks\Exports\Sheets\UserClocksSummarySheet;
 use Modules\Clocks\Exports\UserClocksExport;
@@ -36,8 +37,19 @@ class UsersClocksMultiSheetExport implements WithMultipleSheets
     {
         $sheets = [];
 
+        $sheetTitles = [];
+        foreach ($this->users as $user) {
+            if (! $user instanceof User) {
+                continue;
+            }
+
+            $title = trim(sprintf('%s - %s', $user->code ?? '', $user->name));
+            $sheetTitles[$user->name] = $title !== '' ? $title : 'Details';
+        }
+
         $summaryExport = new UserClocksExport($this->users, $this->startDate, $this->endDate);
-        $sheets[] = new UserClocksSummarySheet($summaryExport->getSummaryRows());
+        $sheets[] = new UserClocksSummarySheet($summaryExport->getSummaryRows(), $sheetTitles);
+        $sheets[] = new UserClocksAggregatedSheet($summaryExport->getAggregatedRows());
 
         foreach ($this->users as $user) {
             if (! $user instanceof User) {
@@ -45,11 +57,13 @@ class UsersClocksMultiSheetExport implements WithMultipleSheets
             }
 
             $userExport = new UserClocksExport($user, $this->startDate, $this->endDate);
-            $title = trim(sprintf('%s - %s', $user->code ?? '', $user->name));
+            $title = $sheetTitles[$user->name] ?? trim(sprintf('%s - %s', $user->code ?? '', $user->name));
+            $title = $title !== '' ? $title : 'Details';
+
             $sheets[] = new UserClocksDetailedSheet(
                 $userExport->getDetailedRows(),
                 $userExport->getRowStyles(),
-                $title !== '' ? $title : 'Details'
+                $title
             );
         }
 
