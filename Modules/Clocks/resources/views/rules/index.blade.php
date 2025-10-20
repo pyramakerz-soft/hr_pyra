@@ -15,9 +15,10 @@
         }
 
         .rm-app {
-            max-width: 1400px;
+            width: 100%;
+            max-width: none;
             margin: 0 auto;
-            padding: 36px 40px 72px;
+            padding: 32px 48px 72px;
         }
 
         .rm-hero {
@@ -42,8 +43,9 @@
 
         .rm-content {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-            gap: 28px;
+            grid-template-columns: minmax(520px, 1.1fr) minmax(480px, 1fr);
+            gap: 32px;
+            align-items: flex-start;
         }
 
         .rm-card {
@@ -215,6 +217,51 @@
             background: rgba(80, 107, 255, 0.06);
         }
 
+        table.rm-table tr.is-selected {
+            background: rgba(80, 107, 255, 0.12);
+        }
+
+        .template-row {
+            cursor: pointer;
+        }
+
+        .rm-template-details {
+            margin-top: 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(210, 220, 255, 0.85);
+            background: rgba(245, 248, 255, 0.9);
+            padding: 20px 22px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .rm-template-details h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #121c36;
+        }
+
+        .rm-template-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .rm-template-meta span {
+            background: rgba(79, 97, 255, 0.12);
+            color: #2f45d7;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .rm-template-details pre {
+            margin: 0;
+            max-height: 200px;
+        }
+
         .rm-empty {
             padding: 28px;
             text-align: center;
@@ -248,6 +295,12 @@
             border-color: #506bff;
             background: linear-gradient(135deg, rgba(80, 107, 255, 0.12), rgba(50, 73, 255, 0.18));
             box-shadow: 0 12px 22px rgba(50, 73, 255, 0.12);
+        }
+
+        .rm-step.is-complete {
+            border-color: rgba(80, 107, 255, 0.3);
+            background: rgba(226, 232, 255, 0.6);
+            opacity: 0.8;
         }
 
         .rm-step span:first-child {
@@ -563,6 +616,18 @@
 
                 <div id="template-list" class="rm-table-wrapper"></div>
 
+                <div id="template-details" class="rm-template-details" hidden>
+                    <div>
+                        <h3 id="template-details-name">Template Name</h3>
+                        <p id="template-details-description" style="margin:6px 0 0; color:#4b5563; font-size:13px;">Description</p>
+                    </div>
+                    <div class="rm-template-meta" id="template-details-meta"></div>
+                    <details class="advanced-toggle" open>
+                        <summary>Rule definition preview</summary>
+                        <pre id="template-details-json"></pre>
+                    </details>
+                </div>
+
                 <div id="template-form-container" class="rm-collapse" hidden>
                     <hr style="margin: 24px 0; border: none; border-top: 1px solid rgba(226, 232, 255, 0.8);">
                     <div class="rm-section-heading" style="margin-bottom: 16px;">
@@ -803,18 +868,26 @@
             const templateSearchInput = root.querySelector('#template-search');
             const templateFormContainer = root.querySelector('#template-form-container');
             const templateForm = root.querySelector('#template-form');
-            const templateFormTitle = root.querySelector('#template-form-title');
-            const templateIdInput = root.querySelector('#template-id');
-            const templateNameInput = root.querySelector('#template-name');
-            const templateKeyInput = root.querySelector('#template-key');
-            const templateCategoryInput = root.querySelector('#template-category');
-            const templateScopeInput = root.querySelector('#template-scope');
-            const templateActiveInput = root.querySelector('#template-active');
-            const templateDescriptionInput = root.querySelector('#template-description');
-            const templateRuleInput = root.querySelector('#template-rule');
-            const templateNewBtn = root.querySelector('#btn-new-template');
-            const templateCancelBtn = root.querySelector('#btn-cancel-template');
-            const templateSaveBtn = root.querySelector('#btn-save-template');
+           const templateFormTitle = root.querySelector('#template-form-title');
+           const templateIdInput = root.querySelector('#template-id');
+           const templateNameInput = root.querySelector('#template-name');
+           const templateKeyInput = root.querySelector('#template-key');
+           const templateCategoryInput = root.querySelector('#template-category');
+           const templateScopeInput = root.querySelector('#template-scope');
+           const templateActiveInput = root.querySelector('#template-active');
+           const templateDescriptionInput = root.querySelector('#template-description');
+           const templateRuleInput = root.querySelector('#template-rule');
+           const templateNewBtn = root.querySelector('#btn-new-template');
+           const templateCancelBtn = root.querySelector('#btn-cancel-template');
+           const templateSaveBtn = root.querySelector('#btn-save-template');
+           const templateDetailsPanel = root.querySelector('#template-details');
+           const templateDetailsName = root.querySelector('#template-details-name');
+           const templateDetailsDescription = root.querySelector('#template-details-description');
+           const templateDetailsMeta = root.querySelector('#template-details-meta');
+           const templateDetailsJson = root.querySelector('#template-details-json');
+            const stepScopeCard = root.querySelector('#step-scope');
+            const stepTargetCard = root.querySelector('#step-target');
+            const stepPlanCard = root.querySelector('#step-plan');
 
             const scopeRadios = root.querySelectorAll('input[name="scope"]');
             const departmentSelect = root.querySelector('#department-select');
@@ -880,7 +953,8 @@
                     overwrite_subdep: false
                 },
                 loadingPlan: false,
-                templateFormMode: 'create'
+                templateFormMode: 'create',
+                selectedTemplateKey: null
             };
 
             state.templates.forEach((template) => {
@@ -985,7 +1059,7 @@
 
             function penaltyLabel(penalty) {
                 if (!penalty || typeof penalty !== 'object') {
-                    return '—';
+                    return '-';
                 }
                 const type = penalty.type || 'fixed_minutes';
                 const value = penalty.value !== undefined && penalty.value !== null ? penalty.value : '';
@@ -995,7 +1069,7 @@
 
             function formatWhenValue(when) {
                 if (!when || (Array.isArray(when) && when.length === 0) || (typeof when === 'object' && Object.keys(when).length === 0)) {
-                    return '—';
+                    return '-';
                 }
                 try {
                     return JSON.stringify(when);
@@ -1127,7 +1201,7 @@
                     })
                     .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
                     .forEach((user) => {
-                        const codeSuffix = user.code ? ` · ${user.code}` : '';
+                        const codeSuffix = user.code ? ` Â· ${user.code}` : '';
                         options.push(`<option value="${escapeHtml(user.id)}">${escapeHtml(user.name || '')}${escapeHtml(codeSuffix)}</option>`);
                     });
 
@@ -1148,6 +1222,17 @@
                 setTimeout(() => toast.classList.remove('toast-visible'), 3200);
             }
 
+            function setStepperStage(stage) {
+                const steps = [stepScopeCard, stepTargetCard, stepPlanCard];
+                steps.forEach((step, index) => {
+                    if (!step) {
+                        return;
+                    }
+                    step.classList.toggle('is-active', stage === index + 1);
+                    step.classList.toggle('is-complete', stage > index + 1);
+                });
+            }
+
             function renderTemplateList() {
                 const filter = templateSearchInput.value ? templateSearchInput.value.trim().toLowerCase() : '';
                 const templates = [...state.templates].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -1162,6 +1247,10 @@
                         return haystack.includes(filter);
                     })
                     : templates;
+
+                if (!filtered.some((template) => template.key === state.selectedTemplateKey)) {
+                    state.selectedTemplateKey = filtered.length ? filtered[0].key : null;
+                }
 
                 if (filtered.length === 0) {
                     templateList.innerHTML = `
@@ -1179,14 +1268,14 @@
                         : '<span class="rm-status rm-status--muted">Inactive</span>';
 
                     return `
-                        <tr class="template-row" data-id="${escapeHtml(template.id)}" data-key="${escapeHtml(template.key)}">
+                        <tr class="template-row ${state.selectedTemplateKey === template.key ? 'is-selected' : ''}" data-id="${escapeHtml(template.id)}" data-key="${escapeHtml(template.key)}">
                             <td style="width: 36%;">
                                 <div style="font-weight: 700; color:#111b35;">${escapeHtml(template.name)}</div>
-                                <div style="margin-top:6px; color:#6b7280; font-size:12px;">${escapeHtml(template.description || '—')}</div>
+                                <div style="margin-top:6px; color:#6b7280; font-size:12px;">${escapeHtml(template.description || '-')}</div>
                             </td>
                             <td>${escapeHtml(template.key)}</td>
-                            <td>${escapeHtml(template.category || '—')}</td>
-                            <td>${escapeHtml(template.scope || '—')}</td>
+                            <td>${escapeHtml(template.category || '-')}</td>
+                            <td>${escapeHtml(template.scope || '-')}</td>
                             <td>${activeBadge}</td>
                             <td>${definitions.length}</td>
                             <td style="width: 150px;">
@@ -1217,6 +1306,41 @@
                         </table>
                     </div>
                 `;
+
+                renderTemplateDetails();
+            }
+
+            function renderTemplateDetails() {
+                if (!templateDetailsPanel) {
+                    return;
+                }
+
+                const template = state.selectedTemplateKey ? templateKeyMap.get(state.selectedTemplateKey) : null;
+                if (!template) {
+                    templateDetailsPanel.hidden = true;
+                    templateDetailsName.textContent = '';
+                    templateDetailsDescription.textContent = '';
+                    templateDetailsMeta.innerHTML = '';
+                    templateDetailsJson.textContent = '';
+                    return;
+                }
+
+                templateDetailsPanel.hidden = false;
+                templateDetailsName.textContent = template.name || 'Template';
+                templateDetailsDescription.textContent = template.description || 'No description provided.';
+
+                const definitionsCount = normalizeTemplateRuleDefinitions(template.rule).length;
+
+                const metaChips = [
+                    template.key ? `<span>Key: ${escapeHtml(template.key)}</span>` : '',
+                    template.category ? `<span>Category: ${escapeHtml(template.category)}</span>` : '',
+                    template.scope ? `<span>Scope: ${escapeHtml(template.scope)}</span>` : '',
+                    `<span>Status: ${template.is_active ? 'Active' : 'Inactive'}</span>`,
+                    `<span>Rules: ${definitionsCount}</span>`
+                ].filter(Boolean);
+
+                templateDetailsMeta.innerHTML = metaChips.join('');
+                templateDetailsJson.textContent = stringifyJson(template.rule) || '{}';
             }
             function updateTemplateSelectOptions() {
                 if (!builderTemplateSelect) {
@@ -1324,6 +1448,7 @@
                         }
                         templateKeyMap.set(template.key, template);
                         templateIdMap.set(template.id, template);
+                        state.selectedTemplateKey = template.key;
                         renderTemplateList();
                         updateTemplateSelectOptions();
                     }
@@ -1368,6 +1493,9 @@
                     state.templates = state.templates.filter((item) => item.id !== Number(id));
                     templateKeyMap.delete(template && template.key ? template.key : '');
                     templateIdMap.delete(Number(id));
+                    if (template && state.selectedTemplateKey === template.key) {
+                        state.selectedTemplateKey = null;
+                    }
                     renderTemplateList();
                     updateTemplateSelectOptions();
                     showToast('Template deleted.');
@@ -1515,6 +1643,9 @@
                     overwrite_subdep: false
                 };
 
+                setPlanLoading(false);
+                setStepperStage(1);
+
                 if (planSummary) {
                     planSummary.hidden = true;
                     planSummary.innerHTML = '';
@@ -1580,12 +1711,12 @@
                 const rows = planRules.map((rule, index) => `
                     <tr>
                         <td>${index + 1}</td>
-                        <td>${escapeHtml(rule.label || '—')}</td>
-                        <td>${escapeHtml(rule.category || '—')}</td>
+                        <td>${escapeHtml(rule.label || '-')}</td>
+                        <td>${escapeHtml(rule.category || '-')}</td>
                         <td>${escapeHtml(rule.template_key || 'Custom')}</td>
                         <td>${penaltyLabel(rule.penalty)}</td>
                         <td>${formatWhenValue(rule.when)}</td>
-                        <td>${escapeHtml(rule.notes || '—')}</td>
+                        <td>${escapeHtml(rule.notes || '-')}</td>
                     </tr>
                 `).join('');
 
@@ -1595,12 +1726,12 @@
                     const effectiveRows = effectivePlan.rules.map((rule, index) => `
                         <tr>
                             <td>${index + 1}</td>
-                            <td>${escapeHtml(rule.label || '—')}</td>
-                            <td>${escapeHtml(rule.category || '—')}</td>
+                            <td>${escapeHtml(rule.label || '-')}</td>
+                            <td>${escapeHtml(rule.category || '-')}</td>
                             <td>${escapeHtml(rule.source && rule.source.type ? rule.source.type : 'Plan')}</td>
                             <td>${penaltyLabel(rule.penalty)}</td>
                             <td>${formatWhenValue(rule.when)}</td>
-                            <td>${escapeHtml(rule.notes || '—')}</td>
+                            <td>${escapeHtml(rule.notes || '-')}</td>
                         </tr>
                     `).join('');
 
@@ -1830,6 +1961,7 @@
 
             function applyPlanResponse(payload) {
                 setPlanLoading(false);
+                setStepperStage(3);
 
                 state.plan = payload.plan || null;
                 state.planable = payload.planable || null;
@@ -1902,6 +2034,7 @@
                     clearPlanDisplay();
                     return;
                 }
+                setStepperStage(2);
                 fetchPlan(target.scope, target.id);
             }
 
@@ -2190,6 +2323,7 @@
             }
 
             function initialize() {
+                setStepperStage(1);
                 renderTemplateList();
                 updateTemplateSelectOptions();
                 populateDepartmentSelect(departmentSelect, false);
@@ -2205,6 +2339,15 @@
                 templateForm.addEventListener('submit', submitTemplateForm);
 
                 templateList.addEventListener('click', (event) => {
+                    const rowForSelect = event.target.closest('tr.template-row');
+                    if (rowForSelect) {
+                        const key = rowForSelect.dataset.key || null;
+                        if (key && state.selectedTemplateKey !== key) {
+                            state.selectedTemplateKey = key;
+                            renderTemplateList();
+                        }
+                    }
+
                     const button = event.target.closest('button[data-action]');
                     if (!button) {
                         return;
@@ -2323,3 +2466,5 @@
         })();
     </script>
 @endsection
+
+
