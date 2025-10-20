@@ -289,6 +289,13 @@
             border: 1px solid rgba(213, 221, 255, 0.9);
             border-radius: 16px;
             padding: 14px 16px;
+            cursor: pointer;
+            transition: transform 0.12s ease, box-shadow 0.18s ease;
+        }
+
+        .rm-step:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 20px rgba(80, 107, 255, 0.12);
         }
 
         .rm-step.is-active {
@@ -617,15 +624,23 @@
                 <div id="template-list" class="rm-table-wrapper"></div>
 
                 <div id="template-details" class="rm-template-details" hidden>
-                    <div>
-                        <h3 id="template-details-name">Template Name</h3>
-                        <p id="template-details-description" style="margin:6px 0 0; color:#4b5563; font-size:13px;">Description</p>
+                    <div id="template-details-empty">
+                        <h3 style="margin:0 0 8px; font-size:16px; font-weight:700; color:#1f2a4a;">Need to inspect a template?</h3>
+                        <p style="margin:0; font-size:13px; color:#4b5563;">Click any template row to view its metadata, JSON definition, and quick assignment tips.</p>
                     </div>
-                    <div class="rm-template-meta" id="template-details-meta"></div>
-                    <details class="advanced-toggle" open>
-                        <summary>Rule definition preview</summary>
-                        <pre id="template-details-json"></pre>
-                    </details>
+
+                    <div id="template-details-filled" hidden>
+                        <div>
+                            <h3 id="template-details-name">Template Name</h3>
+                            <p id="template-details-description" style="margin:6px 0 0; color:#4b5563; font-size:13px;">Description</p>
+                        </div>
+                        <div class="rm-template-meta" id="template-details-meta"></div>
+                        <details class="advanced-toggle" open>
+                            <summary>Rule definition preview</summary>
+                            <pre id="template-details-json"></pre>
+                        </details>
+                        <p style="margin:0; font-size:12px; color:#6b7280;">Tip: after selecting a template, choose a target on the right and use “Add Template” to include it in the active plan.</p>
+                    </div>
                 </div>
 
                 <div id="template-form-container" class="rm-collapse" hidden>
@@ -713,7 +728,7 @@
                     </div>
                 </div>
 
-                <div class="rm-fieldset rm-grid rm-grid--two" style="margin-bottom: 10px;">
+                <div id="scope-section" class="rm-fieldset rm-grid rm-grid--two" style="margin-bottom: 10px;">
                     <label class="rm-radio-pill">
                         <input type="radio" name="scope" value="department" checked> Department
                     </label>
@@ -880,14 +895,19 @@
            const templateNewBtn = root.querySelector('#btn-new-template');
            const templateCancelBtn = root.querySelector('#btn-cancel-template');
            const templateSaveBtn = root.querySelector('#btn-save-template');
-           const templateDetailsPanel = root.querySelector('#template-details');
-           const templateDetailsName = root.querySelector('#template-details-name');
-           const templateDetailsDescription = root.querySelector('#template-details-description');
-           const templateDetailsMeta = root.querySelector('#template-details-meta');
-           const templateDetailsJson = root.querySelector('#template-details-json');
+            const templateDetailsPanel = root.querySelector('#template-details');
+            const templateDetailsEmpty = root.querySelector('#template-details-empty');
+            const templateDetailsFilled = root.querySelector('#template-details-filled');
+            const templateDetailsName = root.querySelector('#template-details-name');
+            const templateDetailsDescription = root.querySelector('#template-details-description');
+            const templateDetailsMeta = root.querySelector('#template-details-meta');
+            const templateDetailsJson = root.querySelector('#template-details-json');
             const stepScopeCard = root.querySelector('#step-scope');
             const stepTargetCard = root.querySelector('#step-target');
             const stepPlanCard = root.querySelector('#step-plan');
+            const scopeSection = root.querySelector('#scope-section');
+            const targetSection = root.querySelector('#target-selectors');
+            const planSection = root.querySelector('#plan-container');
 
             const scopeRadios = root.querySelectorAll('input[name="scope"]');
             const departmentSelect = root.querySelector('#department-select');
@@ -954,7 +974,8 @@
                 },
                 loadingPlan: false,
                 templateFormMode: 'create',
-                selectedTemplateKey: null
+                selectedTemplateKey: null,
+                currentStage: 1
             };
 
             state.templates.forEach((template) => {
@@ -1222,14 +1243,39 @@
                 setTimeout(() => toast.classList.remove('toast-visible'), 3200);
             }
 
-            function setStepperStage(stage) {
+            function scrollToElement(element) {
+                if (!element) {
+                    return;
+                }
+                try {
+                    element.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                } catch (_) {
+                    element.scrollIntoView();
+                }
+            }
+
+            function setStepperStage(stage, options = {}) {
+                const { soft = false } = options;
+                const normalizedStage = Math.min(Math.max(stage, 1), 3);
+                if (!state.currentStage || state.currentStage < 1) {
+                    state.currentStage = 1;
+                }
+                if (!soft) {
+                    state.currentStage = Math.max(normalizedStage, state.currentStage);
+                }
+                const activeStage = soft ? normalizedStage : state.currentStage;
+                const completedThreshold = state.currentStage;
                 const steps = [stepScopeCard, stepTargetCard, stepPlanCard];
                 steps.forEach((step, index) => {
                     if (!step) {
                         return;
                     }
-                    step.classList.toggle('is-active', stage === index + 1);
-                    step.classList.toggle('is-complete', stage > index + 1);
+                    const stepNumber = index + 1;
+                    step.classList.toggle('is-active', activeStage === stepNumber);
+                    step.classList.toggle('is-complete', completedThreshold > stepNumber);
                 });
             }
 
@@ -1317,15 +1363,25 @@
 
                 const template = state.selectedTemplateKey ? templateKeyMap.get(state.selectedTemplateKey) : null;
                 if (!template) {
-                    templateDetailsPanel.hidden = true;
-                    templateDetailsName.textContent = '';
-                    templateDetailsDescription.textContent = '';
-                    templateDetailsMeta.innerHTML = '';
-                    templateDetailsJson.textContent = '';
+                    if (templateDetailsPanel) {
+                        templateDetailsPanel.hidden = false;
+                    }
+                    if (templateDetailsEmpty) {
+                        templateDetailsEmpty.hidden = false;
+                    }
+                    if (templateDetailsFilled) {
+                        templateDetailsFilled.hidden = true;
+                    }
                     return;
                 }
 
                 templateDetailsPanel.hidden = false;
+                if (templateDetailsEmpty) {
+                    templateDetailsEmpty.hidden = true;
+                }
+                if (templateDetailsFilled) {
+                    templateDetailsFilled.hidden = false;
+                }
                 templateDetailsName.textContent = template.name || 'Template';
                 templateDetailsDescription.textContent = template.description || 'No description provided.';
 
@@ -1643,6 +1699,7 @@
                     overwrite_subdep: false
                 };
 
+                state.currentStage = 1;
                 setPlanLoading(false);
                 setStepperStage(1);
 
@@ -2332,6 +2389,27 @@
                 populateSubDepartmentSelect(subDeptSelect, null, false);
                 populateSubDepartmentSelect(userSubDepartmentFilter, null, true);
                 populateUserSelect();
+
+                if (stepScopeCard) {
+                    stepScopeCard.addEventListener('click', () => {
+                        setStepperStage(1, { soft: true });
+                        scrollToElement(scopeSection);
+                    });
+                }
+
+                if (stepTargetCard) {
+                    stepTargetCard.addEventListener('click', () => {
+                        setStepperStage(2, { soft: true });
+                        scrollToElement(targetSection);
+                    });
+                }
+
+                if (stepPlanCard) {
+                    stepPlanCard.addEventListener('click', () => {
+                        setStepperStage(3, { soft: true });
+                        scrollToElement(planSection);
+                    });
+                }
 
                 templateSearchInput.addEventListener('input', renderTemplateList);
                 templateNewBtn.addEventListener('click', () => openTemplateForm('create'));
