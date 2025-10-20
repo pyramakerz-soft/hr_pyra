@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Clocks\Http\Controllers\ClockController;
 use Modules\Clocks\Http\Controllers\ClocksController;
 use Modules\Clocks\Http\Controllers\DeductionPlanController;
+use Modules\Clocks\Http\Controllers\DeductionRuleTemplateController;
 
 /*
  *--------------------------------------------------------------------------
@@ -26,6 +27,14 @@ Route::group(['middleware' => ['auth:api', 'role:Hr|Team leader']], function () 
         Route::post('sub-department/{subDepartment}', [DeductionPlanController::class, 'upsertSubDepartment']);
         Route::get('user/{user}', [DeductionPlanController::class, 'showUser']);
         Route::post('user/{user}', [DeductionPlanController::class, 'upsertUser']);
+    });
+
+    Route::prefix('deduction-rule-templates')->group(function () {
+        Route::get('/', [DeductionRuleTemplateController::class, 'index']);
+        Route::post('/', [DeductionRuleTemplateController::class, 'store']);
+        Route::get('{template}', [DeductionRuleTemplateController::class, 'show']);
+        Route::put('{template}', [DeductionRuleTemplateController::class, 'update']);
+        Route::delete('{template}', [DeductionRuleTemplateController::class, 'destroy']);
     });
 
     //Clocks Management

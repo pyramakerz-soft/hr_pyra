@@ -5,6 +5,7 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use Illuminate\Database\Seeder;
+use Modules\Clocks\Database\Seeders\DeductionRuleTemplateSeeder;
 // use Modules\Location\Database\Seeders\LocationSeeder;
 // use Modules\Location\Database\Seeders\UserLocationSeeder;
 // use Modules\Users\Database\Seeders\DepartmentSeeder;
@@ -51,6 +52,7 @@ class DatabaseSeeder extends Seeder
             // PermissionSeeder::class,
             // UserLocationSeeder::class,
             // ClockSeeder::class,
+            DeductionRuleTemplateSeeder::class,
             RolesSeeder::class,
             TimezoneSeeder::class
         ]);

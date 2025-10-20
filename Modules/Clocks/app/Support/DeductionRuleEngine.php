@@ -34,12 +34,15 @@ class DeductionRuleEngine
         $rules = $this->plan['rules'] ?? [];
 
         foreach ($rules as $rule) {
-            if (! $this->ruleMatches($rule, $metrics, $state, $dailyOccurrence)) {
+            $category = $rule['category'] ?? 'other';
+            $currentOccurrence = ($state['category_occurrence'][$category] ?? 0) + ($dailyOccurrence[$category] ?? 0) + 1;
+
+            if (! $this->ruleMatches($rule, $metrics, $state, $dailyOccurrence, $currentOccurrence, $category)) {
                 continue;
             }
 
             $penalty = $rule['penalty'] ?? [];
-            $deductionMinutes = $this->penaltyToMinutes($penalty, $metrics);
+            $deductionMinutes = $this->penaltyToMinutes($penalty, $metrics, $currentOccurrence);
             $monetaryAmount = null;
 
             if (($penalty['type'] ?? null) === 'amount') {
@@ -53,13 +56,18 @@ class DeductionRuleEngine
                 'deduction_minutes' => max(0, (int) round($deductionMinutes)),
                 'monetary_amount' => $monetaryAmount,
                 'color' => $this->resolveColor($rule),
-                'notes' => $rule['notes'] ?? null,
+                'notes' => $this->renderNotes($rule['notes'] ?? null, $metrics, $currentOccurrence),
                 'source' => $rule['source'] ?? null,
                 'penalty' => $penalty,
+                'occurrence' => $currentOccurrence,
+                'template_key' => $rule['template_key'] ?? null,
+                'template_id' => $rule['template_id'] ?? null,
+                'meta' => isset($rule['meta']) && is_array($rule['meta'])
+                    ? $rule['meta']
+                    : null,
             ];
 
-            $categoryKey = $rule['category'] ?? 'other';
-            $dailyOccurrence[$categoryKey] = ($dailyOccurrence[$categoryKey] ?? 0) + 1;
+            $dailyOccurrence[$category] = ($dailyOccurrence[$category] ?? 0) + 1;
 
             if (! empty($rule['stop_processing'])) {
                 break;
@@ -100,14 +108,12 @@ class DeductionRuleEngine
         return $shortfall;
     }
 
-    protected function ruleMatches(array $rule, array $metrics, array $state, array $dailyOccurrence): bool
+    protected function ruleMatches(array $rule, array $metrics, array $state, array $dailyOccurrence, int $currentOccurrence, string $category): bool
     {
         $when = $rule['when'] ?? [];
         if (! is_array($when)) {
             return true;
         }
-
-        $category = $rule['category'] ?? 'other';
 
         foreach ($when as $key => $value) {
             switch ($key) {
@@ -118,6 +124,16 @@ class DeductionRuleEngine
                     break;
                 case 'minutes_late_lte':
                     if (($metrics['lateness_minutes_actual'] ?? 0) > (float) $value) {
+                        return false;
+                    }
+                    break;
+                case 'minutes_late_gt':
+                    if (($metrics['lateness_minutes_actual'] ?? 0) <= (float) $value) {
+                        return false;
+                    }
+                    break;
+                case 'minutes_late_lt':
+                    if (($metrics['lateness_minutes_actual'] ?? 0) >= (float) $value) {
                         return false;
                     }
                     break;
@@ -159,15 +175,33 @@ class DeductionRuleEngine
                     break;
                 case 'occurrence_number':
                     $target = (int) $value;
-                    $current = ($state['category_occurrence'][$category] ?? 0) + ($dailyOccurrence[$category] ?? 0) + 1;
-                    if ($current !== $target) {
+                    if ($currentOccurrence !== $target) {
                         return false;
                     }
                     break;
                 case 'occurrence_every':
                     $every = max(1, (int) $value);
-                    $current = ($state['category_occurrence'][$category] ?? 0) + ($dailyOccurrence[$category] ?? 0) + 1;
-                    if ($current % $every !== 0) {
+                    if ($currentOccurrence % $every !== 0) {
+                        return false;
+                    }
+                    break;
+                case 'occurrence_gte':
+                    if ($currentOccurrence < (int) $value) {
+                        return false;
+                    }
+                    break;
+                case 'occurrence_gt':
+                    if ($currentOccurrence <= (int) $value) {
+                        return false;
+                    }
+                    break;
+                case 'occurrence_lte':
+                    if ($currentOccurrence > (int) $value) {
+                        return false;
+                    }
+                    break;
+                case 'occurrence_lt':
+                    if ($currentOccurrence >= (int) $value) {
                         return false;
                     }
                     break;
@@ -241,7 +275,7 @@ class DeductionRuleEngine
         return true;
     }
 
-    protected function penaltyToMinutes(array $penalty, array $metrics): int
+    protected function penaltyToMinutes(array $penalty, array $metrics, int $occurrence = 1): int
     {
         $type = $penalty['type'] ?? 'fixed_minutes';
         $value = $penalty['value'] ?? null;
@@ -261,6 +295,12 @@ class DeductionRuleEngine
             case 'percentage_shortfall':
                 $shortfall = (float) ($metrics['shortfall_minutes'] ?? 0);
                 return (int) round($shortfall * ((float) ($value ?? 0) / 100));
+            case 'lateness_actual':
+            case 'lateness_minutes':
+            case 'lateness_minutes_actual':
+                return max(0, (int) round($metrics['lateness_minutes_actual'] ?? 0));
+            case 'lateness_beyond_grace':
+                return max(0, (int) round($metrics['lateness_beyond_grace'] ?? 0));
             case 'fixed_minutes':
             default:
                 return (int) round((float) ($value ?? 0));
@@ -277,5 +317,39 @@ class DeductionRuleEngine
         $category = $rule['category'] ?? 'other';
 
         return $this->defaultCategoryColors[$category] ?? $this->defaultCategoryColors['other'];
+    }
+
+    protected function renderNotes($notes, array $metrics, int $occurrence): ?string
+    {
+        if ($notes === null) {
+            return null;
+        }
+
+        if (! is_string($notes)) {
+            return $notes;
+        }
+
+        $resolved = preg_replace_callback('/\{\{\s*metrics\.([a-z0-9_]+)\s*\}\}/i', function ($matches) use ($metrics) {
+            $key = $matches[1] ?? null;
+            if (! $key) {
+                return '';
+            }
+
+            $value = Arr::get($metrics, $key);
+
+            if (is_array($value)) {
+                return implode(', ', array_map(static function ($item) {
+                    return is_scalar($item) ? (string) $item : json_encode($item);
+                }, $value));
+            }
+
+            return is_scalar($value) ? (string) $value : '';
+        }, $notes);
+
+        $resolved = preg_replace_callback('/\{\{\s*occurrence\s*\}\}/i', static function () use ($occurrence) {
+            return (string) max(0, $occurrence);
+        }, $resolved);
+
+        return $resolved;
     }
 }
