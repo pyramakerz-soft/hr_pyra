@@ -7,383 +7,540 @@
         }
 
         body {
-            background-color: #f6f8fb;
-        }
-
-        .rules-wrapper {
-            font-family: 'Figtree', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            padding: 32px;
-            max-width: 1440px;
-            margin: 0 auto;
-            color: #1f2937;
-        }
-
-        .rules-header h1 {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .rules-header p {
+            background: linear-gradient(145deg, #f5f7ff 0%, #eef1ff 50%, #f9fbff 100%);
+            min-height: 100vh;
             margin: 0;
-            color: #4b5563;
+            font-family: 'Figtree', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: #0f172a;
         }
 
-        .rules-grid {
-            display: grid;
-            gap: 24px;
-            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-            margin-top: 32px;
+        .rm-app {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 36px 40px 72px;
         }
 
-        .panel {
-            background-color: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-            padding: 24px;
+        .rm-hero {
             display: flex;
             flex-direction: column;
-            min-height: 520px;
+            gap: 12px;
+            margin-bottom: 28px;
         }
 
-        .panel h2 {
+        .rm-hero h1 {
+            font-size: 34px;
+            font-weight: 700;
+            margin: 0;
+            color: #111827;
+        }
+
+        .rm-hero p {
+            margin: 0;
+            font-size: 16px;
+            color: #5f6b7f;
+        }
+
+        .rm-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 28px;
+        }
+
+        .rm-card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 24px;
+            padding: 28px 30px;
+            box-shadow: 0 25px 45px rgba(26, 40, 74, 0.08);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            min-height: 620px;
+        }
+
+        .rm-section-heading {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 22px;
+        }
+
+        .rm-section-heading h2 {
+            margin: 0;
             font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 4px;
+            font-weight: 700;
+            color: #0f172a;
         }
 
-        .panel > p.subtitle {
-            margin-top: 0;
-            margin-bottom: 16px;
+        .rm-section-heading p {
+            margin: 0;
+            font-size: 14px;
             color: #6b7280;
         }
 
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.18s ease;
-            font-family: inherit;
-            font-size: 14px;
+        .rm-toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
         }
 
-        .btn-primary {
-            background-color: #2563eb;
-            color: #ffffff;
-        }
-
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
-
-        .btn-secondary {
-            background-color: #e5e7eb;
-            color: #1f2937;
-        }
-
-        .btn-secondary:hover {
-            background-color: #d1d5db;
-        }
-
-        .btn-danger {
-            background-color: #f87171;
-            color: #ffffff;
-        }
-
-        .btn-danger:hover {
-            background-color: #ef4444;
-        }
-
-        .btn-icon {
-            padding: 6px;
-            border-radius: 6px;
-            width: 30px;
-            height: 30px;
-        }
-
-        input[type="text"],
-        input[type="search"],
-        input[type="number"],
-        textarea,
-        select {
-            border-radius: 8px;
-            border: 1px solid #d1d5db;
-            padding: 9px 12px;
+        .rm-control {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid #d4d9e8;
+            background: #f8faff;
+            padding: 12px 14px;
             font-size: 14px;
             font-family: inherit;
-            background-color: #ffffff;
-            transition: border-color 0.16s ease, box-shadow 0.16s ease;
+            color: #0f172a;
+            transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
         }
 
-        input[type="text"]:focus,
-        input[type="search"]:focus,
-        input[type="number"]:focus,
-        textarea:focus,
-        select:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        .rm-control:focus {
+            border-color: #4c6fff;
+            background: #ffffff;
             outline: none;
+            box-shadow: 0 0 0 4px rgba(76, 111, 255, 0.18);
         }
 
-        textarea {
-            min-height: 100px;
+        textarea.rm-control {
+            min-height: 110px;
             resize: vertical;
         }
 
-        .form-grid {
-            display: grid;
-            gap: 12px;
+        select.rm-control {
+            appearance: none;
+            background-image: linear-gradient(45deg, transparent 50%, #4c6fff 50%), linear-gradient(135deg, #4c6fff 50%, transparent 50%);
+            background-position: calc(100% - 16px) calc(50% + 3px), calc(100% - 12px) calc(50% + 3px), 100% 0;
+            background-size: 6px 6px, 6px 6px, 2.5em 2.5em;
+            background-repeat: no-repeat;
         }
 
-        .form-grid.two {
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        select.rm-control:focus {
+            background-image: linear-gradient(45deg, transparent 50%, #3249ff 50%), linear-gradient(135deg, #3249ff 50%, transparent 50%);
         }
 
-        label {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            color: #374151;
+        .rm-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 12px;
+            border: none;
+            padding: 11px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            background: #e3e8ff;
+            color: #273267;
+            cursor: pointer;
+            transition: transform 0.16s ease, box-shadow 0.18s ease, background 0.16s ease;
         }
 
-        table {
+        .rm-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(79, 97, 255, 0.16);
+        }
+
+        .rm-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .rm-btn--primary {
+            background: linear-gradient(135deg, #506bff 0%, #3249ff 100%);
+            color: #ffffff;
+        }
+
+        .rm-btn--ghost {
+            background: rgba(240, 244, 255, 0.7);
+            color: #415088;
+        }
+
+        .rm-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .rm-status--success {
+            background: rgba(34, 197, 94, 0.12);
+            color: #15803d;
+        }
+
+        .rm-status--muted {
+            background: rgba(148, 163, 184, 0.14);
+            color: #475569;
+        }
+
+        .rm-table-wrapper {
+            border: 1px solid rgba(226, 232, 255, 0.75);
+            border-radius: 18px;
+            background: rgba(248, 250, 255, 0.8);
+            overflow: hidden;
+            flex: 1;
+        }
+
+        table.rm-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
         }
 
-        th,
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #e5e7eb;
+        table.rm-table th,
+        table.rm-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(231, 236, 255, 0.75);
             text-align: left;
             vertical-align: top;
         }
 
-        th {
-            font-weight: 600;
-            color: #374151;
+        table.rm-table th {
+            font-weight: 700;
+            color: #1d2a49;
+            background: rgba(227, 233, 255, 0.45);
         }
 
-        tr:last-child td {
+        table.rm-table tr:last-child td {
             border-bottom: none;
         }
 
-        .template-row {
-            cursor: pointer;
+        table.rm-table tbody tr:hover {
+            background: rgba(80, 107, 255, 0.06);
         }
 
-        .template-row:hover {
-            background-color: rgba(37, 99, 235, 0.05);
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 2px 8px;
-            font-size: 11px;
-            border-radius: 999px;
-            font-weight: 600;
-        }
-
-        .badge-success {
-            background-color: rgba(34, 197, 94, 0.15);
-            color: #15803d;
-        }
-
-        .badge-muted {
-            background-color: rgba(148, 163, 184, 0.2);
-            color: #475569;
-        }
-
-        .empty-state {
-            padding: 24px;
-            border: 1px dashed #cbd5f5;
-            border-radius: 12px;
+        .rm-empty {
+            padding: 28px;
             text-align: center;
+            border: 1px dashed rgba(170, 182, 218, 0.8);
+            border-radius: 18px;
             color: #6b7280;
             font-size: 14px;
+            background: rgba(248, 250, 255, 0.6);
         }
 
-        .stepper {
+        .rm-stepper {
             display: flex;
-            gap: 16px;
+            gap: 10px;
             margin-bottom: 16px;
+            flex-wrap: wrap;
         }
 
-        .stepper .step {
+        .rm-step {
             flex: 1;
+            min-width: 180px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid #e5e7eb;
-            background-color: #f9fafc;
+            gap: 12px;
+            background: rgba(235, 239, 255, 0.8);
+            border: 1px solid rgba(213, 221, 255, 0.9);
+            border-radius: 16px;
+            padding: 14px 16px;
         }
 
-        .step.active {
-            border-color: #2563eb;
-            background-color: rgba(37, 99, 235, 0.08);
+        .rm-step.is-active {
+            border-color: #506bff;
+            background: linear-gradient(135deg, rgba(80, 107, 255, 0.12), rgba(50, 73, 255, 0.18));
+            box-shadow: 0 12px 22px rgba(50, 73, 255, 0.12);
         }
 
-        .step-number {
-            width: 24px;
-            height: 24px;
-            border-radius: 999px;
+        .rm-step span:first-child {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(80, 107, 255, 0.18);
+            color: #3249ff;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
             font-weight: 600;
-            color: #1d4ed8;
-            background-color: #dbeafe;
-        }
-
-        .plan-summary {
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 16px;
-            background-color: #f8fafc;
-            margin-bottom: 20px;
-        }
-
-        .plan-summary h3 {
-            margin: 0 0 12px;
-            font-size: 15px;
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .rule-card {
-            border: 1px solid #dbe2f3;
-            border-radius: 12px;
-            padding: 16px;
-            background-color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            position: relative;
-        }
-
-        .rule-card[data-mode="template"] {
-            border-color: rgba(37, 99, 235, 0.35);
-            background-color: rgba(37, 99, 235, 0.03);
-        }
-
-        .rule-card[data-mode="custom"] {
-            border-color: rgba(20, 184, 166, 0.3);
-            background-color: rgba(20, 184, 166, 0.04);
-        }
-
-        .rule-card__header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .rule-card__title {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .rule-card__title strong {
-            font-size: 15px;
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .rule-card__title span {
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .rule-card__actions {
-            display: flex;
-            gap: 6px;
-        }
-
-        .rule-description {
             font-size: 13px;
-            color: #4b5563;
-            margin: 0;
         }
 
-        .toast {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            padding: 14px 20px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 500;
-            color: #ffffff;
-            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.15);
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(12px);
-            transition: opacity 0.18s ease, transform 0.18s ease;
-        }
-
-        .toast.toast-visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .toast-success {
-            background-color: #16a34a;
-        }
-
-        .toast-error {
-            background-color: #dc2626;
-        }
-
-        .plan-loading {
-            padding: 16px;
-            border-radius: 12px;
-            background-color: #f1f5f9;
-            color: #475569;
-            font-size: 14px;
-            display: flex;
+        .rm-fieldset {
+            margin-bottom: 18px;
+            display: grid;
             gap: 12px;
+        }
+
+        .rm-radio-pill {
+            display: inline-flex;
             align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: rgba(232, 236, 255, 0.6);
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374155;
+            cursor: pointer;
         }
 
-        .spinner {
-            width: 18px;
-            height: 18px;
-            border: 3px solid rgba(37, 99, 235, 0.25);
-            border-top-color: #2563eb;
+        .rm-radio-pill input {
+            accent-color: #506bff;
+        }
+
+        .rm-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .rm-grid.rm-grid--two {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+
+        .rm-grid.rm-grid--three {
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        }
+
+        label.rm-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .rm-plan {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            flex: 1;
+        }
+
+        .rm-loading {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-radius: 14px;
+            padding: 16px 18px;
+            background: rgba(226, 232, 255, 0.65);
+            color: #425086;
+            font-size: 14px;
+            border: 1px solid rgba(208, 218, 255, 0.9);
+        }
+
+        .rm-spinner {
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            border: 3px solid rgba(80, 107, 255, 0.25);
+            border-top-color: #4c6fff;
+            animation: rm-spin 0.85s linear infinite;
         }
 
-        @keyframes spin {
+        @keyframes rm-spin {
             to {
                 transform: rotate(360deg);
             }
         }
 
-        @media (max-width: 900px) {
-            .rules-grid {
+        .rm-plan-summary {
+            border-radius: 18px;
+            background: rgba(248, 250, 255, 0.85);
+            border: 1px solid rgba(220, 228, 255, 0.9);
+            padding: 20px 22px;
+        }
+
+        .rm-plan-summary h3 {
+            margin: 0 0 16px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #202c49;
+        }
+
+        .rm-chip-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .rm-chip {
+            background: rgba(79, 97, 255, 0.12);
+            color: #3249ff;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        table.rm-plan-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        table.rm-plan-table th,
+        table.rm-plan-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(221, 227, 255, 0.8);
+            text-align: left;
+        }
+
+        table.rm-plan-table th {
+            font-weight: 700;
+            color: #1d2a49;
+            background: rgba(228, 233, 255, 0.5);
+        }
+
+        table.rm-plan-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .rm-builder-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .rm-builder-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .rule-card {
+            border-radius: 18px;
+            border: 1px solid rgba(214, 220, 255, 0.9);
+            background: rgba(250, 251, 255, 0.95);
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .rule-card[data-mode="template"] {
+            border-color: rgba(92, 115, 255, 0.45);
+            background: linear-gradient(135deg, rgba(82, 107, 255, 0.08), rgba(239, 241, 255, 0.2));
+        }
+
+        .rule-card[data-mode="custom"] {
+            border-color: rgba(20, 184, 166, 0.35);
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.08), rgba(236, 253, 245, 0.2));
+        }
+
+        .rule-card__header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .rule-card__title {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .rule-card__title strong {
+            font-size: 15px;
+            color: #111b35;
+        }
+
+        .rule-card__title span {
+            font-size: 12px;
+            color: #51608e;
+            font-weight: 600;
+        }
+
+        .rule-card__actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .rule-card__actions .rm-btn {
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        details.advanced-toggle {
+            border-top: 1px dashed rgba(200, 210, 255, 0.6);
+            padding-top: 14px;
+        }
+
+        details.advanced-toggle summary {
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #3249ff;
+            list-style: none;
+        }
+
+        details.advanced-toggle summary::-webkit-details-marker {
+            display: none;
+        }
+
+        pre {
+            border-radius: 14px;
+            background: #10172a;
+            color: #dbeafe;
+            padding: 12px;
+            font-size: 12px;
+            overflow: auto;
+        }
+
+        .rm-align-end {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .rm-toast {
+            position: fixed;
+            right: 32px;
+            bottom: 32px;
+            padding: 16px 22px;
+            border-radius: 16px;
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.18);
+            color: #ffffff;
+            font-weight: 600;
+            background: #22c55e;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(14px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 2000;
+        }
+
+        .rm-toast.toast-error {
+            background: #ef4444;
+        }
+
+        .rm-toast.toast-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .rm-app {
+                padding: 28px 18px 56px;
+            }
+
+            .rm-card {
+                padding: 22px 20px;
+            }
+
+            .rm-content {
                 grid-template-columns: 1fr;
+            }
+
+            .rm-step {
+                min-width: unset;
             }
         }
     </style>
 
-    <div class="rules-wrapper" id="rule-management">
-        <header class="rules-header">
+    <div class="rm-app" id="rule-management">
+        <header class="rm-hero">
             <h1>Deduction Rules Management</h1>
             <p>
                 Maintain reusable deduction rule templates and assign them to departments, sub-departments, or individual
@@ -391,233 +548,229 @@
             </p>
         </header>
 
-        <div class="rules-grid">
-            <section class="panel" id="templates-panel">
-                <h2>Rule Templates Library</h2>
-                <p class="subtitle">
-                    Templates define reusable deduction logic. Create once, adjust when needed, and reuse everywhere.
-                </p>
-
-                <div class="template-actions">
-                    <input type="search" id="template-search" placeholder="Search by name, key, or description...">
-                    <button type="button" class="btn btn-primary" id="btn-new-template">
-                        + New Template
-                    </button>
+        <div class="rm-content">
+            <section class="rm-card rm-card--templates">
+                <div class="rm-section-heading">
+                    <h2>Rule Templates Library</h2>
+                    <p>Templates define reusable deduction logic. Create once, adjust when needed, and reuse everywhere.</p>
                 </div>
 
-                <div id="template-list" class="template-list"></div>
+                <div class="rm-toolbar">
+                    <input id="template-search" type="search" class="rm-control"
+                        placeholder="Search by name, key, or description..." autocomplete="off">
+                    <button type="button" class="rm-btn rm-btn--primary" id="btn-new-template">+ New Template</button>
+                </div>
 
-                <div id="template-form-container" class="template-form" hidden>
-                    <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
-                    <h3 id="template-form-title" style="margin-top: 0; font-size: 18px; font-weight: 600;">
-                        Create Template
-                    </h3>
-                    <form id="template-form" class="form-grid" autocomplete="off">
+                <div id="template-list" class="rm-table-wrapper"></div>
+
+                <div id="template-form-container" class="rm-collapse" hidden>
+                    <hr style="margin: 24px 0; border: none; border-top: 1px solid rgba(226, 232, 255, 0.8);">
+                    <div class="rm-section-heading" style="margin-bottom: 16px;">
+                        <h2 id="template-form-title">Create Template</h2>
+                        <p>Define the reusable rule configuration that HR can apply anywhere.</p>
+                    </div>
+                    <form id="template-form" class="rm-grid rm-grid--two" autocomplete="off">
                         <input type="hidden" id="template-id">
-                        <div class="form-grid two">
-                            <label>
-                                Display Name
-                                <input type="text" id="template-name" placeholder="Academic Late Policy" required>
-                            </label>
-                            <label>
-                                Unique Key
-                                <input type="text" id="template-key" placeholder="academic_late" required>
-                            </label>
-                            <label>
-                                Category
-                                <input type="text" id="template-category" placeholder="lateness" required>
-                            </label>
-                            <label>
-                                Scope
-                                <input type="text" id="template-scope" placeholder="daily" required>
-                            </label>
-                            <label>
-                                Active?
-                                <select id="template-active">
-                                    <option value="1">Yes</option>
-                                    <option value="0">No (keep for later)</option>
-                                </select>
-                            </label>
-                        </div>
-                        <label>
+                        <label class="rm-field">
+                            Display Name
+                            <input type="text" id="template-name" class="rm-control" placeholder="Academic Late Policy"
+                                required>
+                        </label>
+                        <label class="rm-field">
+                            Unique Key
+                            <input type="text" id="template-key" class="rm-control" placeholder="academic_late_policy"
+                                required>
+                        </label>
+                        <label class="rm-field">
+                            Category
+                            <input type="text" id="template-category" class="rm-control" placeholder="lateness" required>
+                        </label>
+                        <label class="rm-field">
+                            Scope
+                            <input type="text" id="template-scope" class="rm-control" placeholder="daily" required>
+                        </label>
+                        <label class="rm-field">
+                            Active?
+                            <select id="template-active" class="rm-control">
+                                <option value="1">Yes</option>
+                                <option value="0">No (keep for later)</option>
+                            </select>
+                        </label>
+                        <label class="rm-field" style="grid-column: 1 / -1;">
                             Description
-                            <textarea id="template-description" placeholder="Short explanation for HR colleagues"></textarea>
+                            <textarea id="template-description" class="rm-control"
+                                placeholder="Short explanation for HR colleagues"></textarea>
                         </label>
-                        <label>
+                        <label class="rm-field" style="grid-column: 1 / -1;">
                             Rule Definition (JSON)
-                            <textarea id="template-rule" placeholder='Example: { "label": "Late", "when": {"minutes_late_gte": 1}, "penalty": {"type": "fixed_minutes", "value": 30} }' required></textarea>
+                            <textarea id="template-rule" class="rm-control" required
+                                placeholder='Example: { "label": "Late", "when": {"minutes_late_gte": 1}, "penalty": {"type": "fixed_minutes", "value": 30} }'></textarea>
                         </label>
-                        <p class="muted" style="font-size: 12px; margin-top: -6px;">
-                            Accepts either a single rule object or an array of rule objects. Each rule supports the same fields used by the engine (label, when, penalty, notes, meta, etc).
+                        <p style="grid-column: 1 / -1; margin: -6px 0 0; font-size: 12px; color: #6b7280;">
+                            Accepts either a single rule object or an array of rule objects. Each rule supports the same fields used by
+                            the engine (label, when, penalty, notes, meta, etc.).
                         </p>
-                        <div style="display:flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
-                            <button type="button" class="btn btn-secondary" id="btn-cancel-template">Cancel</button>
-                            <button type="submit" class="btn btn-primary" id="btn-save-template">Save Template</button>
+                        <div style="grid-column: 1 / -1; display:flex; gap:12px; justify-content:flex-end;">
+                            <button type="button" class="rm-btn rm-btn--ghost" id="btn-cancel-template">Cancel</button>
+                            <button type="submit" class="rm-btn rm-btn--primary" id="btn-save-template">Save Template</button>
                         </div>
                     </form>
                 </div>
             </section>
 
-            <section class="panel" id="assignment-panel">
-                <h2>Assign Rules &amp; Manage Overrides</h2>
-                <p class="subtitle">
-                    Choose a scope, pick the target, inspect inherited rules, and curate the plan that should apply.
-                </p>
+            <section class="rm-card rm-card--assign">
+                <div class="rm-section-heading">
+                    <h2>Assign Rules &amp; Manage Overrides</h2>
+                    <p>Choose a scope, pick the target, inspect inherited rules, and curate the plan that should apply.</p>
+                </div>
 
-                <div class="stepper">
-                    <div class="step active" id="step-scope">
-                        <span class="step-number">1</span>
+                <div class="rm-stepper">
+                    <div class="rm-step is-active" id="step-scope">
+                        <span>1</span>
                         <div>
-                            <div style="font-weight: 600;">Select Scope</div>
-                            <div class="muted" style="font-size: 12px;">Department, Sub-Department, or Employee</div>
+                            <strong>Select Scope</strong>
+                            <div style="font-size: 12px; color:#5f708c;">Department, Sub-department, or Employee</div>
                         </div>
                     </div>
-                    <div class="step" id="step-target">
-                        <span class="step-number">2</span>
+                    <div class="rm-step" id="step-target">
+                        <span>2</span>
                         <div>
-                            <div style="font-weight: 600;">Choose Target</div>
-                            <div class="muted" style="font-size: 12px;">Who should receive these rules?</div>
+                            <strong>Choose Target</strong>
+                            <div style="font-size: 12px; color:#5f708c;">Who should receive these rules?</div>
                         </div>
                     </div>
-                    <div class="step" id="step-plan">
-                        <span class="step-number">3</span>
+                    <div class="rm-step" id="step-plan">
+                        <span>3</span>
                         <div>
-                            <div style="font-weight: 600;">Craft Plan</div>
-                            <div class="muted" style="font-size: 12px;">Review inheritance &amp; publish overrides</div>
+                            <strong>Craft Plan</strong>
+                            <div style="font-size: 12px; color:#5f708c;">Review inheritance &amp; publish overrides</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="form-grid two" style="margin-bottom: 12px;">
-                    <label style="flex-direction: row; align-items: center; gap: 8px;">
-                        <input type="radio" name="scope" value="department" checked>
-                        Department
+                <div class="rm-fieldset rm-grid rm-grid--two" style="margin-bottom: 10px;">
+                    <label class="rm-radio-pill">
+                        <input type="radio" name="scope" value="department" checked> Department
                     </label>
-                    <label style="flex-direction: row; align-items: center; gap: 8px;">
-                        <input type="radio" name="scope" value="sub-department">
-                        Sub-Department
+                    <label class="rm-radio-pill">
+                        <input type="radio" name="scope" value="sub-department"> Sub-Department
                     </label>
-                    <label style="flex-direction: row; align-items: center; gap: 8px;">
-                        <input type="radio" name="scope" value="user">
-                        Employee
+                    <label class="rm-radio-pill">
+                        <input type="radio" name="scope" value="user"> Employee
                     </label>
                 </div>
 
-                <div class="form-grid" id="target-selectors">
-                    <div class="target target-department" data-scope="department">
-                        <label>
+                <div class="rm-grid" id="target-selectors">
+                    <div class="rm-grid rm-grid--one target target-department" data-scope="department">
+                        <label class="rm-field">
                             Department
-                            <select id="department-select">
+                            <select id="department-select" class="rm-control">
                                 <option value="">Select a department...</option>
                             </select>
                         </label>
                     </div>
 
-                    <div class="target target-sub" data-scope="sub-department" hidden>
-                        <label>
+                    <div class="rm-grid rm-grid--two target target-sub" data-scope="sub-department" hidden>
+                        <label class="rm-field">
                             Department (filter)
-                            <select id="sub-department-parent">
+                            <select id="sub-department-parent" class="rm-control">
                                 <option value="">All departments...</option>
                             </select>
                         </label>
-                        <label>
+                        <label class="rm-field">
                             Sub-Department
-                            <select id="sub-department-select">
+                            <select id="sub-department-select" class="rm-control">
                                 <option value="">Select a sub-department...</option>
                             </select>
                         </label>
                     </div>
 
-                    <div class="target target-user" data-scope="user" hidden>
-                        <label>
+                    <div class="rm-grid rm-grid--three target target-user" data-scope="user" hidden>
+                        <label class="rm-field">
                             Department (filter)
-                            <select id="user-department-filter">
+                            <select id="user-department-filter" class="rm-control">
                                 <option value="">All departments...</option>
                             </select>
                         </label>
-                        <label>
+                        <label class="rm-field">
                             Sub-Department (filter)
-                            <select id="user-sub-department-filter">
+                            <select id="user-sub-department-filter" class="rm-control">
                                 <option value="">All sub-departments...</option>
                             </select>
                         </label>
-                        <label>
+                        <label class="rm-field">
                             Employee
-                            <select id="user-select">
+                            <select id="user-select" class="rm-control">
                                 <option value="">Select an employee...</option>
                             </select>
                         </label>
                     </div>
                 </div>
 
-                <div id="plan-container">
-                    <div id="plan-loading" class="plan-loading" hidden>
-                        <span class="spinner" aria-hidden="true"></span>
+                <div id="plan-container" class="rm-plan">
+                    <div id="plan-loading" class="rm-loading" hidden>
+                        <span class="rm-spinner" aria-hidden="true"></span>
                         Loading plan details...
                     </div>
 
-                    <div id="plan-summary" class="plan-summary" hidden></div>
+                    <div id="plan-summary" class="rm-plan-summary" hidden></div>
 
-                    <div id="builder-section" hidden>
-                        <div class="rule-builder">
-                            <div class="rule-builder-controls" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-                                <label style="flex:1;">
-                                    Add template rule
-                                    <select id="builder-template-select">
-                                        <option value="">Select a template...</option>
-                                    </select>
-                                </label>
-                                <button type="button" class="btn btn-secondary" id="btn-add-template-rule">
-                                    Add Template
-                                </button>
-                                <button type="button" class="btn btn-secondary" id="btn-add-custom-rule">
-                                    Add Custom Rule
-                                </button>
-                            </div>
+                    <div id="builder-section" class="rm-builder" hidden>
+                        <div class="rm-builder-toolbar">
+                            <label class="rm-field" style="flex:1; min-width:220px;">
+                                Add template rule
+                                <select id="builder-template-select" class="rm-control">
+                                    <option value="">Select a template...</option>
+                                </select>
+                            </label>
+                            <button type="button" class="rm-btn rm-btn--ghost" id="btn-add-template-rule">Add Template</button>
+                            <button type="button" class="rm-btn rm-btn--ghost" id="btn-add-custom-rule">Add Custom Rule</button>
+                        </div>
 
-                            <div class="form-grid two" id="plan-settings">
-                                <label>
-                                    Grace Minutes
-                                    <input type="number" id="plan-grace-minutes" min="0" max="1440" placeholder="defaults to 15">
+                        <div class="rm-grid rm-grid--three" id="plan-settings" style="margin-top: 16px;">
+                            <label class="rm-field">
+                                Grace Minutes
+                                <input type="number" id="plan-grace-minutes" class="rm-control" min="0" max="1440"
+                                    placeholder="defaults to 15">
+                            </label>
+                            <label class="rm-field" id="overwrite-all-container" hidden>
+                                <span>Overwrite inherited rules?</span>
+                                <label style="display:flex; align-items:center; gap:10px; font-size:13px; font-weight:600; color:#4a5a84;">
+                                    <input type="checkbox" id="plan-overwrite">
+                                    Enable overwrite mode
                                 </label>
-                                <label id="overwrite-all-container" hidden style="align-items: flex-start;">
-                                    <span>
-                                        <input type="checkbox" id="plan-overwrite" style="margin-right: 8px;">
-                                        <strong>Overwrite inherited rules?</strong>
-                                    </span>
+                            </label>
+                            <label class="rm-field" id="overwrite-dep-container" hidden>
+                                <span>Ignore department plan</span>
+                                <label style="display:flex; align-items:center; gap:10px; font-size:13px; font-weight:600; color:#4a5a84;">
+                                    <input type="checkbox" id="plan-overwrite-dep">
+                                    Ignore department-level rules
                                 </label>
-                                <label id="overwrite-dep-container" hidden style="align-items: flex-start;">
-                                    <span>
-                                        <input type="checkbox" id="plan-overwrite-dep" style="margin-right: 8px;">
-                                        <strong>Ignore department plan</strong>
-                                    </span>
+                            </label>
+                            <label class="rm-field" id="overwrite-subdep-container" hidden>
+                                <span>Ignore sub-department plan</span>
+                                <label style="display:flex; align-items:center; gap:10px; font-size:13px; font-weight:600; color:#4a5a84;">
+                                    <input type="checkbox" id="plan-overwrite-subdep">
+                                    Ignore sub-department-level rules
                                 </label>
-                                <label id="overwrite-subdep-container" hidden style="align-items: flex-start;">
-                                    <span>
-                                        <input type="checkbox" id="plan-overwrite-subdep" style="margin-right: 8px;">
-                                        <strong>Ignore sub-department plan</strong>
-                                    </span>
-                                </label>
-                            </div>
+                            </label>
+                        </div>
 
-                            <div id="builder-rules"></div>
+                        <div id="builder-rules" class="rm-builder-stack"></div>
 
-                            <div class="rules-empty-plan" id="builder-empty" hidden>
-                                No rules yet. Add template or custom rules to craft this plan.
-                            </div>
+                        <div id="builder-empty" class="rm-empty" hidden>
+                            No rules yet. Add template or custom rules to craft this plan.
+                        </div>
 
-                            <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:12px;">
-                                <button type="button" class="btn btn-primary" id="btn-save-plan">
-                                    Save Plan
-                                </button>
-                            </div>
+                        <div class="rm-align-end">
+                            <button type="button" class="rm-btn rm-btn--primary" id="btn-save-plan">Save Plan</button>
                         </div>
                     </div>
                 </div>
             </section>
         </div>
 
-        <div class="toast" id="rule-toast"></div>
+        <div class="rm-toast" id="rule-toast"></div>
     </div>
 
     <script>
@@ -688,6 +841,7 @@
             const overwriteAllCheckbox = root.querySelector('#plan-overwrite');
             const overwriteDepCheckbox = root.querySelector('#plan-overwrite-dep');
             const overwriteSubDepCheckbox = root.querySelector('#plan-overwrite-subdep');
+
             const toast = root.querySelector('#rule-toast');
 
             const penaltyTypes = [
@@ -726,7 +880,6 @@
                     overwrite_subdep: false
                 },
                 loadingPlan: false,
-                savingPlan: false,
                 templateFormMode: 'create'
             };
 
@@ -739,7 +892,10 @@
                 const subs = Array.isArray(department.sub_departments)
                     ? department.sub_departments
                     : (department.subDepartments || []);
-                departmentMap.set(department.id, { ...department, subDepartments: subs });
+                departmentMap.set(department.id, {
+                    ...department,
+                    subDepartments: subs
+                });
                 subs.forEach((sub) => {
                     subDepartmentMap.set(sub.id, sub);
                 });
@@ -791,7 +947,7 @@
                 if (trimmed.startsWith('#')) {
                     return trimmed.toUpperCase();
                 }
-                if (/^[0-9a-fA-F]{6}$/u.test(trimmed)) {
+                if (/^[0-9a-fA-F]{6}$/.test(trimmed)) {
                     return `#${trimmed.toUpperCase()}`;
                 }
                 return trimmed;
@@ -829,7 +985,7 @@
 
             function penaltyLabel(penalty) {
                 if (!penalty || typeof penalty !== 'object') {
-                    return 'â€”';
+                    return '—';
                 }
                 const type = penalty.type || 'fixed_minutes';
                 const value = penalty.value !== undefined && penalty.value !== null ? penalty.value : '';
@@ -839,7 +995,7 @@
 
             function formatWhenValue(when) {
                 if (!when || (Array.isArray(when) && when.length === 0) || (typeof when === 'object' && Object.keys(when).length === 0)) {
-                    return 'â€”';
+                    return '—';
                 }
                 try {
                     return JSON.stringify(when);
@@ -955,13 +1111,13 @@
                     return;
                 }
 
-                const deptFilter = userDepartmentFilter.value ? Number(userDepartmentFilter.value) : null;
+                const departmentFilter = userDepartmentFilter.value ? Number(userDepartmentFilter.value) : null;
                 const subFilter = userSubDepartmentFilter.value ? Number(userSubDepartmentFilter.value) : null;
 
                 const options = ['<option value="">Select an employee...</option>'];
                 [...userMap.values()]
                     .filter((user) => {
-                        if (deptFilter && Number(user.department_id) !== deptFilter) {
+                        if (departmentFilter && Number(user.department_id) !== departmentFilter) {
                             return false;
                         }
                         if (subFilter && Number(user.sub_department_id) !== subFilter) {
@@ -971,7 +1127,7 @@
                     })
                     .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
                     .forEach((user) => {
-                        const codeSuffix = user.code ? ` Â· ${user.code}` : '';
+                        const codeSuffix = user.code ? ` · ${user.code}` : '';
                         options.push(`<option value="${escapeHtml(user.id)}">${escapeHtml(user.name || '')}${escapeHtml(codeSuffix)}</option>`);
                     });
 
@@ -984,8 +1140,10 @@
                 }
 
                 toast.textContent = message;
-                toast.classList.remove('toast-success', 'toast-error', 'toast-visible');
-                toast.classList.add(type === 'error' ? 'toast-error' : 'toast-success');
+                toast.classList.remove('toast-error', 'toast-visible');
+                if (type === 'error') {
+                    toast.classList.add('toast-error');
+                }
                 requestAnimationFrame(() => toast.classList.add('toast-visible'));
                 setTimeout(() => toast.classList.remove('toast-visible'), 3200);
             }
@@ -1007,7 +1165,7 @@
 
                 if (filtered.length === 0) {
                     templateList.innerHTML = `
-                        <div class="empty-state">
+                        <div class="rm-empty">
                             No templates yet. Create your first shared rule template to get started.
                         </div>
                     `;
@@ -1017,24 +1175,24 @@
                 const rows = filtered.map((template) => {
                     const definitions = normalizeTemplateRuleDefinitions(template.rule);
                     const activeBadge = template.is_active
-                        ? '<span class="badge badge-success">Active</span>'
-                        : '<span class="badge badge-muted">Inactive</span>';
+                        ? '<span class="rm-status rm-status--success">Active</span>'
+                        : '<span class="rm-status rm-status--muted">Inactive</span>';
 
                     return `
                         <tr class="template-row" data-id="${escapeHtml(template.id)}" data-key="${escapeHtml(template.key)}">
-                            <td style="width: 34%;">
-                                <div style="font-weight: 600;">${escapeHtml(template.name)}</div>
-                                <div class="muted" style="font-size: 12px;">${escapeHtml(template.description || 'â€”')}</div>
+                            <td style="width: 36%;">
+                                <div style="font-weight: 700; color:#111b35;">${escapeHtml(template.name)}</div>
+                                <div style="margin-top:6px; color:#6b7280; font-size:12px;">${escapeHtml(template.description || '—')}</div>
                             </td>
                             <td>${escapeHtml(template.key)}</td>
-                            <td>${escapeHtml(template.category || 'â€”')}</td>
-                            <td>${escapeHtml(template.scope || 'â€”')}</td>
+                            <td>${escapeHtml(template.category || '—')}</td>
+                            <td>${escapeHtml(template.scope || '—')}</td>
                             <td>${activeBadge}</td>
                             <td>${definitions.length}</td>
-                            <td style="width: 120px;">
-                                <div style="display:flex; gap: 6px; justify-content:flex-end;">
-                                    <button type="button" class="btn btn-secondary btn-icon" data-action="edit-template" title="Edit">Edit</button>
-                                    <button type="button" class="btn btn-danger btn-icon" data-action="delete-template" title="Delete">Del</button>
+                            <td style="width: 150px;">
+                                <div style="display:flex; gap:8px; justify-content:flex-end;">
+                                    <button type="button" class="rm-btn rm-btn--ghost" data-action="edit-template">Edit</button>
+                                    <button type="button" class="rm-btn rm-btn--primary" style="background:#f87171" data-action="delete-template">Delete</button>
                                 </div>
                             </td>
                         </tr>
@@ -1042,23 +1200,24 @@
                 }).join('');
 
                 templateList.innerHTML = `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Key</th>
-                                <th>Category</th>
-                                <th>Scope</th>
-                                <th>Status</th>
-                                <th># Rules</th>
-                                <th style="text-align:right;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                    </table>
+                    <div class="rm-table-wrapper">
+                        <table class="rm-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Key</th>
+                                    <th>Category</th>
+                                    <th>Scope</th>
+                                    <th>Status</th>
+                                    <th># Rules</th>
+                                    <th style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
                 `;
             }
-
             function updateTemplateSelectOptions() {
                 if (!builderTemplateSelect) {
                     return;
@@ -1109,7 +1268,6 @@
                 templateScopeInput.value = 'daily';
                 templateActiveInput.value = '1';
             }
-
             async function submitTemplateForm(event) {
                 event.preventDefault();
                 const mode = state.templateFormMode;
@@ -1186,9 +1344,8 @@
                 }
 
                 const template = templateIdMap.get(Number(id));
-                const label = template ? template.name : 'this template';
 
-                if (!confirm(`Delete ${label}? This cannot be undone.`)) {
+                if (!confirm(`Delete ${template ? template.name : 'this template'}? This cannot be undone.`)) {
                     return;
                 }
 
@@ -1218,7 +1375,6 @@
                     showToast(error.message || 'Unexpected error while deleting template.', 'error');
                 }
             }
-
             function createBuilderRuleFromPlan(rule) {
                 if (rule && rule.template_key && templateKeyMap.has(rule.template_key)) {
                     const template = templateKeyMap.get(rule.template_key);
@@ -1336,14 +1492,13 @@
                     }
                 };
             }
-
             function setPlanLoading(isLoading) {
                 state.loadingPlan = isLoading;
                 if (planLoading) {
                     planLoading.hidden = !isLoading;
                 }
-                if (builderSection && !isLoading) {
-                    builderSection.hidden = !state.plan;
+                if (builderSection && isLoading) {
+                    builderSection.hidden = true;
                 }
             }
 
@@ -1410,27 +1565,27 @@
                 const metadataBadges = [];
 
                 if (state.plan.grace_minutes !== undefined && state.plan.grace_minutes !== null) {
-                    metadataBadges.push(`<span>Grace: ${escapeHtml(state.plan.grace_minutes)}</span>`);
+                    metadataBadges.push(`<span class="rm-chip">Grace: ${escapeHtml(state.plan.grace_minutes)}</span>`);
                 }
                 if (state.plan.overwrite) {
-                    metadataBadges.push('<span>Overwrites parent rules</span>');
+                    metadataBadges.push('<span class="rm-chip">Overwrites parent rules</span>');
                 }
                 if (state.plan.overwrite_dep) {
-                    metadataBadges.push('<span>Ignores department plan</span>');
+                    metadataBadges.push('<span class="rm-chip">Ignores department plan</span>');
                 }
                 if (state.plan.overwrite_subdep) {
-                    metadataBadges.push('<span>Ignores sub-department plan</span>');
+                    metadataBadges.push('<span class="rm-chip">Ignores sub-department plan</span>');
                 }
 
                 const rows = planRules.map((rule, index) => `
                     <tr>
                         <td>${index + 1}</td>
-                        <td>${escapeHtml(rule.label || 'â€”')}</td>
-                        <td>${escapeHtml(rule.category || 'â€”')}</td>
+                        <td>${escapeHtml(rule.label || '—')}</td>
+                        <td>${escapeHtml(rule.category || '—')}</td>
                         <td>${escapeHtml(rule.template_key || 'Custom')}</td>
                         <td>${penaltyLabel(rule.penalty)}</td>
                         <td>${formatWhenValue(rule.when)}</td>
-                        <td>${escapeHtml(rule.notes || 'â€”')}</td>
+                        <td>${escapeHtml(rule.notes || '—')}</td>
                     </tr>
                 `).join('');
 
@@ -1440,19 +1595,19 @@
                     const effectiveRows = effectivePlan.rules.map((rule, index) => `
                         <tr>
                             <td>${index + 1}</td>
-                            <td>${escapeHtml(rule.label || 'â€”')}</td>
-                            <td>${escapeHtml(rule.category || 'â€”')}</td>
+                            <td>${escapeHtml(rule.label || '—')}</td>
+                            <td>${escapeHtml(rule.category || '—')}</td>
                             <td>${escapeHtml(rule.source && rule.source.type ? rule.source.type : 'Plan')}</td>
                             <td>${penaltyLabel(rule.penalty)}</td>
                             <td>${formatWhenValue(rule.when)}</td>
-                            <td>${escapeHtml(rule.notes || 'â€”')}</td>
+                            <td>${escapeHtml(rule.notes || '—')}</td>
                         </tr>
                     `).join('');
 
                     effectiveSection = `
-                        <div style="margin-top:18px;">
+                        <div style="margin-top: 18px;">
                             <h3>Effective Rules (after inheritance)</h3>
-                            <table>
+                            <table class="rm-plan-table">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -1472,11 +1627,11 @@
 
                 planSummary.hidden = false;
                 planSummary.innerHTML = `
-                    <div class="plan-meta" ${metadataBadges.length === 0 ? 'hidden' : ''}>
+                    <div class="rm-chip-row" ${metadataBadges.length === 0 ? 'hidden' : ''}>
                         ${metadataBadges.join('')}
                     </div>
                     <h3>Plan Rules</h3>
-                    <table>
+                    <table class="rm-plan-table">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -1493,7 +1648,6 @@
                     ${effectiveSection}
                 `;
             }
-
             function renderBuilder() {
                 if (!builderRulesContainer) {
                     return;
@@ -1531,60 +1685,58 @@
                             <div class="rule-card" data-id="${escapeHtml(rule.id)}" data-mode="template">
                                 <div class="rule-card__header">
                                     <div class="rule-card__title">
-                                        <span class="badge badge-primary">Template</span>
+                                        <span class="rm-chip">Template</span>
                                         <strong>${escapeHtml(rule.templateRecord.name || 'Template')}</strong>
                                         <span>${escapeHtml(sequenceLabel)}</span>
                                     </div>
                                     <div class="rule-card__actions">
-                                        <button type="button" class="btn btn-secondary btn-icon" data-action="move-up" title="Move up">Up</button>
-                                        <button type="button" class="btn btn-secondary btn-icon" data-action="move-down" title="Move down">Down</button>
-                                        <button type="button" class="btn btn-danger btn-icon" data-action="remove" title="Remove">Remove</button>
+                                        <button type="button" class="rm-btn" data-action="move-up" title="Move up">Up</button>
+                                        <button type="button" class="rm-btn" data-action="move-down" title="Move down">Down</button>
+                                        <button type="button" class="rm-btn rm-btn--primary" style="background:#f87171" data-action="remove" title="Remove">Remove</button>
                                     </div>
                                 </div>
-                                <p class="rule-description">${escapeHtml(rule.templateRecord.description || 'Reusable rule')}</p>
-                                <div class="form-grid two">
-                                    <label>
+                                <p style="margin:0; font-size:13px; color:#4b5563;">${escapeHtml(rule.templateRecord.description || 'Reusable rule')}</p>
+                                <div class="rm-grid rm-grid--three">
+                                    <label class="rm-field">
                                         Notes Override
-                                        <textarea data-field="overrides.notes" placeholder="Optional notes shown on export">${escapeHtml(rule.overrides.notes)}</textarea>
+                                        <textarea class="rm-control" data-field="overrides.notes" placeholder="Optional notes shown on export">${escapeHtml(rule.overrides.notes)}</textarea>
                                     </label>
-                                    <label>
+                                    <label class="rm-field">
                                         Color (hex without #)
-                                        <input type="text" data-field="overrides.color" placeholder="e.g. FFC7CE" value="${escapeHtml(rule.overrides.color ? rule.overrides.color.replace('#', '') : '')}">
+                                        <input class="rm-control" data-field="overrides.color" placeholder="e.g. FFC7CE" value="${escapeHtml(rule.overrides.color ? rule.overrides.color.replace('#', '') : '')}">
                                     </label>
-                                    <label>
+                                    <label class="rm-field">
                                         Penalty Type
-                                        <select data-field="overrides.penaltyType">${penaltyOptions}</select>
+                                        <select class="rm-control" data-field="overrides.penaltyType">${penaltyOptions}</select>
                                     </label>
-                                    <label>
+                                    <label class="rm-field">
                                         Penalty Value
-                                        <input type="number" step="0.01" data-field="overrides.penaltyValue" value="${escapeHtml(rule.overrides.penaltyValue)}" placeholder="Leave blank to reuse template value">
+                                        <input class="rm-control" type="number" step="0.01" data-field="overrides.penaltyValue" value="${escapeHtml(rule.overrides.penaltyValue)}" placeholder="Leave blank to reuse template value">
                                     </label>
-                                    <label>
+                                    <label class="rm-field">
                                         Penalty Unit
-                                        <input type="text" data-field="overrides.penaltyUnit" value="${escapeHtml(rule.overrides.penaltyUnit)}" placeholder="Optional unit label">
+                                        <input class="rm-control" data-field="overrides.penaltyUnit" value="${escapeHtml(rule.overrides.penaltyUnit)}" placeholder="Optional unit label">
                                     </label>
-                                    <label>
+                                    <label class="rm-field">
                                         Stop Processing
-                                        <select data-field="overrides.stopProcessing">${stopOptions}</select>
+                                        <select class="rm-control" data-field="overrides.stopProcessing">${stopOptions}</select>
                                     </label>
                                 </div>
                                 <details class="advanced-toggle">
                                     <summary>Advanced Overrides</summary>
-                                    <div class="form-grid">
-                                        <label>
+                                    <div class="rm-grid">
+                                        <label class="rm-field">
                                             Condition Override (JSON)
-                                            <textarea data-field="overrides.whenJson" placeholder="Leave empty to inherit template conditions">${escapeHtml(whenPlaceholder)}</textarea>
+                                            <textarea class="rm-control" data-field="overrides.whenJson" placeholder="Leave empty to inherit template conditions">${escapeHtml(whenPlaceholder)}</textarea>
                                         </label>
-                                        <label>
+                                        <label class="rm-field">
                                             Meta Override (JSON)
-                                            <textarea data-field="overrides.metaJson" placeholder="Leave empty to inherit template metadata">${escapeHtml(metaPlaceholder)}</textarea>
+                                            <textarea class="rm-control" data-field="overrides.metaJson" placeholder="Leave empty to inherit template metadata">${escapeHtml(metaPlaceholder)}</textarea>
                                         </label>
-                                        <div>
-                                            <details>
-                                                <summary>Original Template Rule</summary>
-                                                <pre>${escapeHtml(definitionPreview)}</pre>
-                                            </details>
-                                        </div>
+                                        <details>
+                                            <summary style="cursor:pointer; color:#4c6fff;">View original template rule</summary>
+                                            <pre>${escapeHtml(definitionPreview)}</pre>
+                                        </details>
                                     </div>
                                 </details>
                             </div>
@@ -1603,64 +1755,64 @@
                         <div class="rule-card" data-id="${escapeHtml(rule.id)}" data-mode="custom">
                             <div class="rule-card__header">
                                 <div class="rule-card__title">
-                                    <span class="badge badge-success">Custom</span>
+                                    <span class="rm-chip" style="background:rgba(20, 184, 166, 0.18); color:#0f766e;">Custom</span>
                                     <strong>${escapeHtml(rule.data.label || 'Untitled Custom Rule')}</strong>
                                 </div>
                                 <div class="rule-card__actions">
-                                    <button type="button" class="btn btn-secondary btn-icon" data-action="move-up" title="Move up">Up</button>
-                                    <button type="button" class="btn btn-secondary btn-icon" data-action="move-down" title="Move down">Down</button>
-                                    <button type="button" class="btn btn-secondary btn-icon" data-action="duplicate" title="Duplicate">Duplicate</button>
-                                    <button type="button" class="btn btn-danger btn-icon" data-action="remove" title="Remove">Remove</button>
+                                    <button type="button" class="rm-btn" data-action="move-up" title="Move up">Up</button>
+                                    <button type="button" class="rm-btn" data-action="move-down" title="Move down">Down</button>
+                                    <button type="button" class="rm-btn" data-action="duplicate" title="Duplicate">Duplicate</button>
+                                    <button type="button" class="rm-btn rm-btn--primary" style="background:#f87171" data-action="remove" title="Remove">Remove</button>
                                 </div>
                             </div>
-                            <div class="form-grid two">
-                                <label>
+                            <div class="rm-grid rm-grid--three">
+                                <label class="rm-field">
                                     Label
-                                    <input type="text" data-field="data.label" value="${escapeHtml(rule.data.label)}" placeholder="Display label">
+                                    <input class="rm-control" data-field="data.label" value="${escapeHtml(rule.data.label)}" placeholder="Display label">
                                 </label>
-                                <label>
+                                <label class="rm-field">
                                     Category
-                                    <input type="text" data-field="data.category" value="${escapeHtml(rule.data.category)}" placeholder="e.g. lateness">
+                                    <input class="rm-control" data-field="data.category" value="${escapeHtml(rule.data.category)}" placeholder="e.g. lateness">
                                 </label>
-                                <label>
+                                <label class="rm-field">
                                     Scope
-                                    <input type="text" data-field="data.scope" value="${escapeHtml(rule.data.scope)}" placeholder="daily">
+                                    <input class="rm-control" data-field="data.scope" value="${escapeHtml(rule.data.scope)}" placeholder="daily">
                                 </label>
-                                <label>
+                                <label class="rm-field">
                                     Penalty Type
-                                    <select data-field="data.penaltyType">${penaltyOptions}</select>
+                                    <select class="rm-control" data-field="data.penaltyType">${penaltyOptions}</select>
                                 </label>
-                                <label>
+                                <label class="rm-field">
                                     Penalty Value
-                                    <input type="number" step="0.01" data-field="data.penaltyValue" value="${escapeHtml(rule.data.penaltyValue)}">
+                                    <input class="rm-control" type="number" step="0.01" data-field="data.penaltyValue" value="${escapeHtml(rule.data.penaltyValue)}">
                                 </label>
-                                <label>
+                                <label class="rm-field">
                                     Penalty Unit
-                                    <input type="text" data-field="data.penaltyUnit" value="${escapeHtml(rule.data.penaltyUnit)}">
+                                    <input class="rm-control" data-field="data.penaltyUnit" value="${escapeHtml(rule.data.penaltyUnit)}">
                                 </label>
-                                <label>
+                                <label class="rm-field">
                                     Stop Processing
-                                    <select data-field="data.stop_processing">${stopOptions}</select>
+                                    <select class="rm-control" data-field="data.stop_processing">${stopOptions}</select>
                                 </label>
-                                <label>
+                                <label class="rm-field">
                                     Notes
-                                    <textarea data-field="data.notes" placeholder="Optional notes">${escapeHtml(rule.data.notes)}</textarea>
+                                    <textarea class="rm-control" data-field="data.notes" placeholder="Optional notes">${escapeHtml(rule.data.notes)}</textarea>
                                 </label>
-                                <label>
+                                <label class="rm-field">
                                     Color (hex without #)
-                                    <input type="text" data-field="data.color" value="${escapeHtml(rule.data.color ? rule.data.color.replace('#', '') : '')}">
+                                    <input class="rm-control" data-field="data.color" value="${escapeHtml(rule.data.color ? rule.data.color.replace('#', '') : '')}">
                                 </label>
                             </div>
                             <details class="advanced-toggle">
                                 <summary>Advanced Settings</summary>
-                                <div class="form-grid">
-                                    <label>
+                                <div class="rm-grid">
+                                    <label class="rm-field">
                                         Conditions (JSON)
-                                        <textarea data-field="data.whenJson">${escapeHtml(rule.data.whenJson)}</textarea>
+                                        <textarea class="rm-control" data-field="data.whenJson">${escapeHtml(rule.data.whenJson)}</textarea>
                                     </label>
-                                    <label>
+                                    <label class="rm-field">
                                         Meta (JSON)
-                                        <textarea data-field="data.metaJson">${escapeHtml(rule.data.metaJson)}</textarea>
+                                        <textarea class="rm-control" data-field="data.metaJson">${escapeHtml(rule.data.metaJson)}</textarea>
                                     </label>
                                 </div>
                             </details>
@@ -1670,14 +1822,15 @@
 
                 builderRulesContainer.innerHTML = cards;
             }
-
             function initializeBuilderFromPlan() {
-                const rules = state.plan && Array.isArray(state.plan.rules) ? state.plan.rules : [];
-                state.builderRules = rules.map((item) => createBuilderRuleFromPlan(item));
+                const planRules = state.plan && Array.isArray(state.plan.rules) ? state.plan.rules : [];
+                state.builderRules = planRules.map((rule) => createBuilderRuleFromPlan(rule));
                 renderBuilder();
             }
 
             function applyPlanResponse(payload) {
+                setPlanLoading(false);
+
                 state.plan = payload.plan || null;
                 state.planable = payload.planable || null;
                 state.context = payload.context || null;
@@ -1868,7 +2021,6 @@
 
                 return payload;
             }
-
             async function savePlan() {
                 const target = getSelectedTarget();
                 if (!target) {
