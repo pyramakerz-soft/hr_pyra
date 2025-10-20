@@ -18,8 +18,7 @@ use Modules\Clocks\Http\Controllers\RulesPageController;
 Route::group([], function () {
 });
 
-Route::middleware(['web', 'auth', 'role:Hr|Team leader'])
-    ->prefix('clocks')
+Route::prefix('clocks')
     ->name('clocks.')
     ->group(function () {
         Route::get('rules', [RulesPageController::class, 'index'])->name('rules.index');
