@@ -126,6 +126,7 @@ export class HrAttendanceComponent {
   ExportData() {
     if (this.selectedUsers.length === 0) return;
     this.isLoading = true;
+    const ids = this.selectedUsers.map(u => u.userId);
 
     this.clockService.exportSelectedUsers(ids, this.from_day, this.to_day)
       .subscribe((result: Blob) => {
@@ -142,13 +143,10 @@ export class HrAttendanceComponent {
   }
 
   ExportAbsentUserData() {
-    if (this.selectedUsers.length === 0) {
-      return;
-    }
     this.isLoading = true;
 
-    this.clockService.ExportAbsentUserData(this.from_day, this.to_day).subscribe(
-      (result: Blob) => {
+    this.clockService.ExportAbsentUserData(this.from_day, this.to_day)
+      .subscribe((result: Blob) => {
         const url = window.URL.createObjectURL(result);
         const anchor = document.createElement('a');
         anchor.href = url;
@@ -156,30 +154,10 @@ export class HrAttendanceComponent {
         anchor.click();
         window.URL.revokeObjectURL(url);
         this.isLoading = false;
-      },
-      () => {
+      }, () => {
         this.isLoading = false;
       },
     );
-  }
-
-  ExportAbsentUserData() {
-    if (this.selectedUsers.length === 0) return;
-    this.isLoading = true;
-    const ids = this.selectedUsers.map(u => u.userId);
-
-    this.clockService.exportAbsentUsers(ids, this.from_day, this.to_day)
-      .subscribe((result: Blob) => {
-        const url = window.URL.createObjectURL(result);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `absent_users_${this.from_day || 'all'}_${this.to_day || 'all'}.xlsx`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        this.isLoading = false;
-      }, () => {
-        this.isLoading = false;
-      });
   }
 
   NavigateToEmployeeAttendanceDetails(EmpId: number) {

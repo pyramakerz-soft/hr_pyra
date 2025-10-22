@@ -88,7 +88,7 @@
           <label class="flex items-center gap-2 cursor-pointer">
             <input type="checkbox"
                    [checked]="areAllSubDepartmentsSelected()"
-                   (change)="toggleAllSubDepartments($event.target?.checked ?? false)" />
+                   (change)="toggleAllSubDepartments($any($event.target).checked)" />
             Select All
           </label>
         </div>
@@ -98,7 +98,7 @@
                  (click)="$event.stopPropagation()">
             <input type="checkbox"
                    [checked]="selectedSubDepartmentIds.includes(sub.id)"
-                   (change)="onSubDepartmentToggle(sub.id, $event.target?.checked ?? false)" />
+                   (change)="onSubDepartmentToggle(sub.id, $any($event.target).checked)" />
             {{ sub.name }}
           </label>
         </div>
