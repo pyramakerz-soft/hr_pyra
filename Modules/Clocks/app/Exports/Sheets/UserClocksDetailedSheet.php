@@ -146,6 +146,18 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
                     ],
                 ]);
             }
+
+            if (! empty($mark['header_row'])) {
+                $sheet->getStyle('A' . $rowNumber . ':Q' . $rowNumber)->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'E2EFDA'],
+                    ],
+                ]);
+            }
         }
     }
 

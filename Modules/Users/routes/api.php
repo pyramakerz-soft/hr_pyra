@@ -11,6 +11,7 @@ use Modules\Users\Http\Controllers\TimezoneController;
 use Modules\Users\Http\Controllers\UsersController;
 use Modules\Users\Http\Controllers\UserVacationController;
 use Modules\Users\Http\Controllers\WorkTypeController;
+use Modules\Users\Http\Controllers\CustomVacationController;
 
 /*
  *--------------------------------------------------------------------------
@@ -118,6 +119,8 @@ Route::post('/export-clocks', [UsersController::class, 'exportClocks']);
     Route::apiResource('work_types', WorkTypeController::class)->except('update'); //HR role
     Route::get('employees_workTypes_percentage', [WorkTypeController::class, 'getEmployeesWorkTypesPercentage']); //HR role
     Route::get('users/workTypes', [WorkTypeController::class, 'getWorkTypeAssignedToUser'])->name('users.usersWorkTypes'); //HR role
+
+    Route::apiResource('custom-vacations', CustomVacationController::class);
 
     //Department Management
     Route::post('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update'); //HR role

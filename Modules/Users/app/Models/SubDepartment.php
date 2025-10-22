@@ -37,6 +37,11 @@ class SubDepartment extends Model
         return $this->belongsToMany(User::class, 'users');
     }
 
+    public function customVacations()
+    {
+        return $this->belongsToMany(CustomVacation::class, 'custom_vacation_sub_department')->withTimestamps();
+    }
+
     public function employees()
     {
         return $this->belongsToMany(User::class, 'users')

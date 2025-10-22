@@ -51,6 +51,7 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
             'Chargeable Deduction Hours',
             'Issue Days',
             'Vacation Days',
+            'Vacation Days Left',
             'Base Salary',
             'Hourly Rate',
             'Worked Pay',
@@ -66,7 +67,7 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:Y1')->applyFromArray([
+        $sheet->getStyle('A1:Z1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -137,7 +138,7 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
                     'startColor' => ['rgb' => 'FCE4D6'],
                 ],
             ]);
-            $sheet->getStyle('O2:O' . $lastRow)->applyFromArray([
+            $sheet->getStyle('O2:P' . $lastRow)->applyFromArray([
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
                     'startColor' => ['rgb' => 'BDD7EE'],
@@ -148,7 +149,7 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
         foreach ($this->rows as $index => $row) {
             if (($row['Employee'] ?? null) === 'TOTAL') {
                 $rowNumber = $index + 2;
-                $sheet->getStyle('A' . $rowNumber . ':Y' . $rowNumber)->applyFromArray([
+                $sheet->getStyle('A' . $rowNumber . ':Z' . $rowNumber)->applyFromArray([
                     'font' => [
                         'bold' => true,
                     ],
@@ -176,6 +177,7 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
             'V' => NumberFormat::FORMAT_NUMBER_00,
             'W' => NumberFormat::FORMAT_NUMBER_00,
             'X' => NumberFormat::FORMAT_NUMBER_00,
+            'Y' => NumberFormat::FORMAT_NUMBER_00,
         ];
     }
 

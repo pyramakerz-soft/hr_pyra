@@ -34,6 +34,11 @@ class Department extends Model
         return $this->hasMany(SubDepartment::class);
     }
 
+    public function customVacations()
+    {
+        return $this->belongsToMany(CustomVacation::class, 'custom_vacation_department')->withTimestamps();
+    }
+
     public function employees()
     {
         return User::where(function ($query) {
