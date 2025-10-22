@@ -145,9 +145,10 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
     });
 
     group.valueChanges.subscribe(() => {
-      const allocated = parseFloat(group.get('allocated_days')?.value ?? 0);
+      const allocatedRaw = group.get('allocated_days')?.value;
+      const allocated = Number(allocatedRaw ?? 0);
       const usedRaw = group.get('used_days')?.value;
-      const used = usedRaw === '' || usedRaw === null ? 0 : parseFloat(usedRaw);
+      const used = Number(usedRaw ?? 0);
       const remaining = Number.isFinite(allocated - used) ? allocated - used : 0;
       group.get('remaining_days')?.setValue(remaining, { emitEvent: false });
     });
@@ -250,7 +251,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
         vacation_type_id: Number(raw.vacation_type_id),
         year: raw.year ? Number(raw.year) : this.currentYear,
         allocated_days: Number(raw.allocated_days ?? 0),
-        used_days: raw.used_days === '' || raw.used_days === null ? 0 : Number(raw.used_days),
+        used_days: Number(raw.used_days ?? 0),
       };
     }).filter(balance => balance.vacation_type_id);
 

@@ -2,12 +2,12 @@
   <header class="dialog-header">
     <div>
       <h2 class="dialog-title">
-        {{ profile?.user.name || 'Employee Profile' }}
+        {{ profile?.user?.name || 'Employee Profile' }}
       </h2>
       <p class="dialog-subtitle" *ngIf="profile">
-        Code: {{ profile.user.code || 'N/A' }} |
-        Department: {{ profile.user.department || 'N/A' }} |
-        Sub Department: {{ profile.user.sub_department || 'N/A' }}
+        Code: {{ profile?.user?.code || 'N/A' }} |
+        Department: {{ profile?.user?.department || 'N/A' }} |
+        Sub Department: {{ profile?.user?.sub_department || 'N/A' }}
       </p>
     </div>
     <button type="button" class="close-btn" (click)="close()">×</button>
@@ -93,7 +93,7 @@
           </label>
           <label class="form-field">
             <span>Remaining</span>
-            <input type="number" formControlName="remaining_days" disabled />
+            <input type="number" formControlName="remaining_days" [disabled]="true" />
           </label>
         </div>
       </div>
@@ -118,4 +118,3 @@
     <p>Loading employee profile...</p>
   </div>
 </ng-template>
-
