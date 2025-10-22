@@ -17,7 +17,7 @@ export class UserServiceService {
     this.baseURL=Api.BaseUrl
 
    }
-getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDepartments?: boolean; departmentId?: number | 'none'; subDepartmentId?: number | null; }): Observable<UserModel[]> {
+getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDepartments?: boolean; departmentId?: number | 'none'; subDepartmentIds?: number[]; }): Observable<UserModel[]> {
   const token = localStorage.getItem("token");
   const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
@@ -33,8 +33,8 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
   if (options?.departmentId !== undefined && options.departmentId !== null) {
     params.department_id = options.departmentId;
   }
-  if (options?.subDepartmentId !== undefined && options.subDepartmentId !== null) {
-    params.sub_department_id = options.subDepartmentId;
+  if (options?.subDepartmentIds && options.subDepartmentIds.length > 0) {
+    params.sub_department_ids = options.subDepartmentIds.join(',');
   }
 
   return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, { headers, params });
@@ -134,7 +134,7 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     return this.http.post<any>(this.baseURL + "/users/update_password/" + empId, body, { headers });
   }
 
-  SearchByNameAndDeptAndSubDep(Name: string, deptId?: number | 'none' | null, subId?: number | null, options?: { allDepartments?: boolean }) {
+  SearchByNameAndDeptAndSubDep(Name: string, deptId?: number | 'none' | null, subIds?: number[] | null, options?: { allDepartments?: boolean }) {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
   
@@ -144,8 +144,8 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
       params.department_id = deptId;
     }
   
-    if (subId != null && deptId !== 'none') {
-      params.sub_department_id = subId;
+    if (subIds && subIds.length > 0 && deptId !== 'none') {
+      params.sub_department_ids = subIds.join(',');
     }
     if (options?.allDepartments) {
       params.all_departments = true;

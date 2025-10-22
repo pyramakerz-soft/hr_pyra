@@ -225,3 +225,38 @@
   color: #475467;
 }
 
+
+.form-grid.compact {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.type-field select {
+  min-width: 180px;
+}
+
+.year-chip-display {
+  align-self: end;
+  background: #17253e0d;
+  border-radius: 9999px;
+  padding: 0.45rem 0.9rem;
+  font-weight: 600;
+  color: #17253E;
+  border: 1px solid #CBD5F5;
+  text-align: center;
+}
+
+.remaining-indicator {
+  align-self: end;
+  font-weight: 600;
+  color: #0F6B3E;
+  background: #E6F6ED;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #C3E2D1;
+}
+
+.link-btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+

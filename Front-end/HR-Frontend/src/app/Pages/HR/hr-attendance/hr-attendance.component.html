@@ -73,14 +73,37 @@
           </select>
   
     <!-- Sub-Department Dropdown -->
-    <select *ngIf="subDepartments.length > 0"
-            class="border border-[#D0D5DD] rounded-md px-3 py-2 w-full md:w-auto"
-            [(ngModel)]="selectedSubDepartment"
-            (change)="onSubDepartmentChange()">
-            <option [ngValue]="null" disabled>Select Sub Department</option>
-      <option *ngFor="let sub of subDepartments" [value]="sub.id">{{ sub.name }}</option>
-
-    </select>
+    <div *ngIf="subDepartments.length > 0" class="relative w-full md:w-auto">
+      <div class="border border-[#D0D5DD] rounded-md px-3 py-2 bg-white"
+           (click)="toggleSubDepartmentDropdown($event)">
+        <span *ngIf="selectedSubDepartmentIds.length === 0" class="text-[#667085]">Select Sub Departments</span>
+        <span *ngIf="selectedSubDepartmentIds.length > 0" class="font-medium text-[#17253E]">
+          {{ selectedSubDepartmentIds.length }} selected
+        </span>
+      </div>
+      <div *ngIf="isSubDepartmentDropdownOpen"
+           class="absolute z-20 mt-1 w-full max-h-60 overflow-y-auto bg-white border border-[#D0D5DD] rounded-md shadow-lg"
+           (click)="$event.stopPropagation()">
+        <div class="px-3 py-2 border-b text-sm text-[#475467]">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox"
+                   [checked]="areAllSubDepartmentsSelected()"
+                   (change)="toggleAllSubDepartments($event.target?.checked ?? false)" />
+            Select All
+          </label>
+        </div>
+        <div class="py-2 max-h-48 overflow-y-auto">
+          <label class="flex items-center gap-2 px-3 py-1 text-sm text-[#475467] hover:bg-[#F2F4F7] cursor-pointer"
+                 *ngFor="let sub of subDepartments"
+                 (click)="$event.stopPropagation()">
+            <input type="checkbox"
+                   [checked]="selectedSubDepartmentIds.includes(sub.id)"
+                   (change)="onSubDepartmentToggle(sub.id, $event.target?.checked ?? false)" />
+            {{ sub.name }}
+          </label>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">

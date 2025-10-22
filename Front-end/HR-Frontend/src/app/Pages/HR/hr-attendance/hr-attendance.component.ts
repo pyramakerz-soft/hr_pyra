@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { Department } from '../../../Models/department';
@@ -53,7 +53,10 @@ export class HrAttendanceComponent {
   years: number[] = [];
   subDepartments: any[] = [];
   selectedDepartment: number | 'all' | 'none' | null = null;
-  selectedSubDepartment: number | null = null;
+  selectedSubDepartmentIds: number[] = [];
+  pendingSubDepartmentIds: number[] = [];
+  isSubDepartmentDropdownOpen = false;
+
   tableData: UserModel[] = [];
   readonly allDepartmentsValue = 'all';
   readonly noDepartmentValue = 'none';
@@ -134,29 +137,28 @@ export class HrAttendanceComponent {
         a.click();
         window.URL.revokeObjectURL(url);
         this.isLoading = false;
-      }, error => {
+      }, (error) => {
         this.isLoading = false;
-        alert('Failed to export data.');
       });
   }
 
   ExportAbsentUserData() {
+    if (this.selectedUsers.length === 0) return;
     this.isLoading = true;
-    this.clockService.ExportAbsentUserData(this.from_day, this.to_day).subscribe(
-      (result: Blob) => {
+    const ids = this.selectedUsers.map(u => u.userId);
+
+    this.clockService.exportAbsentUsers(ids, this.from_day, this.to_day)
+      .subscribe((result: Blob) => {
         const url = window.URL.createObjectURL(result);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `absent_users.xlsx`;
+        a.download = `absent_users_${this.from_day || 'all'}_${this.to_day || 'all'}.xlsx`;
         a.click();
         window.URL.revokeObjectURL(url);
-      },
-      (error) => {
         this.isLoading = false;
-        console.error('Error exporting user data:', error);
-      }
-    );
-    this.isLoading = false;
+      }, (error) => {
+        this.isLoading = false;
+      });
   }
 
   NavigateToEmployeeAttendanceDetails(EmpId: number) {
@@ -167,15 +169,19 @@ export class HrAttendanceComponent {
     const departmentIdParam = params.get('departmentId');
     const noDepartmentParam = params.get('noDepartment');
     const allDepartmentsParam = params.get('allDepartments');
+    const subDepartmentParam = params.get('sub_department_ids');
+
+    const parsedSubIds = this.parseIdList(subDepartmentParam);
 
     if (departmentIdParam) {
       const parsedId = Number(departmentIdParam);
       if (!Number.isNaN(parsedId)) {
         this.selectedDepartment = parsedId;
-        this.selectedSubDepartment = null;
+        this.selectedSubDepartmentIds = [];
+        this.pendingSubDepartmentIds = parsedSubIds;
         this.subDepartments = [];
         this.supDeptServ.setDeptId(parsedId);
-        this.getSubDepartments(parsedId);
+        this.getSubDepartments(parsedId, true);
         this.CurrentPageNumber = 1;
         return;
       }
@@ -183,7 +189,8 @@ export class HrAttendanceComponent {
 
     if (noDepartmentParam === '1') {
       this.selectedDepartment = this.noDepartmentValue;
-      this.selectedSubDepartment = null;
+      this.selectedSubDepartmentIds = [];
+      this.pendingSubDepartmentIds = [];
       this.subDepartments = [];
       this.CurrentPageNumber = 1;
       return;
@@ -191,26 +198,30 @@ export class HrAttendanceComponent {
 
     if (allDepartmentsParam === '1') {
       this.selectedDepartment = this.allDepartmentsValue;
-      this.selectedSubDepartment = null;
+      this.selectedSubDepartmentIds = [];
+      this.pendingSubDepartmentIds = [];
       this.subDepartments = [];
       this.CurrentPageNumber = 1;
+      return;
     }
+
+    this.pendingSubDepartmentIds = [];
   }
 
   getAllEmployees(pgNumber: number, from_day: string = '', to_day: string = '') {
     this.CurrentPageNumber = pgNumber;
     this.saveCurrentPageNumber();
     const departmentFilter = this.getDepartmentFilterValue();
-    const options: { allDepartments?: boolean; departmentId?: number | 'none'; subDepartmentId?: number | null } = {};
+    const options: { allDepartments?: boolean; departmentId?: number | 'none'; subDepartmentIds?: number[] } = {};
 
     if (this.isAllDepartmentsSelected()) {
       options.allDepartments = true;
-    } else if (departmentFilter === this.noDepartmentValue) {
+    } else if (this.isNoDepartmentSelected()) {
       options.departmentId = this.noDepartmentValue;
-    } else if (typeof departmentFilter === 'number') {
+    } else if (departmentFilter !== null) {
       options.departmentId = departmentFilter;
-      if (this.selectedSubDepartment != null) {
-        options.subDepartmentId = this.selectedSubDepartment;
+      if (this.selectedSubDepartmentIds.length > 0) {
+        options.subDepartmentIds = [...this.selectedSubDepartmentIds];
       }
     }
 
@@ -237,11 +248,14 @@ export class HrAttendanceComponent {
   }
 
   onDepartmentChange() {
-    this.selectedUsers = []
+    this.selectedUsers = [];
     this.isSelectAllChecked = false;
     this.subDepartments = [];
-    this.selectedSubDepartment = null;
+    this.selectedSubDepartmentIds = [];
+    this.pendingSubDepartmentIds = [];
+    this.isSubDepartmentDropdownOpen = false;
     this.CurrentPageNumber = 1;
+
     if (this.isAllDepartmentsSelected()) {
       this.loadAllDepartmentsUsers();
       return;
@@ -254,18 +268,30 @@ export class HrAttendanceComponent {
 
     if (typeof this.selectedDepartment === 'number') {
       this.supDeptServ.setDeptId(this.selectedDepartment);
-      this.getSubDepartments(this.selectedDepartment);
+      this.getSubDepartments(this.selectedDepartment, true);
+    } else {
+      this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
     }
-
-    this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
   }
 
-  getSubDepartments(departmentId: number) {
+  getSubDepartments(departmentId: number, triggerFilter = false) {
     this.selectedUsers = [];
     this.isSelectAllChecked = false;
     this.supDeptServ.getall(departmentId).subscribe(
       (res: any) => {
         this.subDepartments = res.data || res;
+        const availableIds = this.subDepartments.map((sub: any) => Number(sub.id));
+
+        if (this.pendingSubDepartmentIds.length > 0) {
+          this.selectedSubDepartmentIds = this.pendingSubDepartmentIds.filter(id => availableIds.includes(id));
+          this.pendingSubDepartmentIds = [];
+        } else {
+          this.selectedSubDepartmentIds = this.selectedSubDepartmentIds.filter(id => availableIds.includes(id));
+        }
+
+        if (triggerFilter || this.selectedSubDepartmentIds.length > 0) {
+          this.applySubDepartmentFilter();
+        }
       },
       (err) => {
         console.error('Failed to fetch sub-departments', err);
@@ -273,28 +299,42 @@ export class HrAttendanceComponent {
     );
   }
 
-  onSubDepartmentChange() {
-    this.selectedUsers = []
-    this.isSelectAllChecked = false;
-    this.Search();
+  toggleSubDepartmentDropdown(event: Event) {
+    event.stopPropagation();
+    this.isSubDepartmentDropdownOpen = !this.isSubDepartmentDropdownOpen;
   }
 
-  generatePages() {
-    this.pages = [];
-    for (let i = 1; i <= this.PagesNumber; i++) {
-      this.pages.push(i);
+  onSubDepartmentToggle(id: number, checked: boolean) {
+    const numericId = Number(id);
+    if (checked) {
+      if (!this.selectedSubDepartmentIds.includes(numericId)) {
+        this.selectedSubDepartmentIds.push(numericId);
+      }
+    } else {
+      this.selectedSubDepartmentIds = this.selectedSubDepartmentIds.filter(existing => existing !== numericId);
     }
+
+    this.applySubDepartmentFilter();
   }
 
-  getNextPage() {
-    this.CurrentPageNumber++;
-    this.saveCurrentPageNumber();
-    this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
+  toggleAllSubDepartments(selectAll: boolean) {
+    if (selectAll) {
+      this.selectedSubDepartmentIds = this.subDepartments.map((sub: any) => Number(sub.id));
+    } else {
+      this.selectedSubDepartmentIds = [];
+    }
+
+    this.applySubDepartmentFilter();
   }
 
-  getPrevPage() {
-    this.CurrentPageNumber--;
-    this.saveCurrentPageNumber();
+  areAllSubDepartmentsSelected(): boolean {
+    return this.subDepartments.length > 0 && this.selectedSubDepartmentIds.length === this.subDepartments.length;
+  }
+
+  applySubDepartmentFilter() {
+    this.selectedUsers = [];
+    this.isSelectAllChecked = false;
+    this.CurrentPageNumber = 1;
     this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
   }
 
@@ -303,14 +343,15 @@ export class HrAttendanceComponent {
     this.isSelectAllChecked = false;
     const isAllDepartments = this.isAllDepartmentsSelected();
     const departmentFilter = this.getDepartmentFilterValue();
-    const subDepartmentId =
+    const subDepartmentIds =
       isAllDepartments || departmentFilter === this.noDepartmentValue
-        ? null
-        : this.selectedSubDepartment;
+        ? []
+        : this.selectedSubDepartmentIds;
+
     this.userServ.SearchByNameAndDeptAndSubDep(
       this.selectedName,
       departmentFilter,
-      subDepartmentId,
+      subDepartmentIds,
       isAllDepartments ? { allDepartments: true } : undefined
     ).subscribe(
       (d: any) => {
@@ -354,14 +395,14 @@ export class HrAttendanceComponent {
     this.selectedName = location;
     const isAllDepartments = this.isAllDepartmentsSelected();
     const departmentFilter = this.getDepartmentFilterValue();
-    const subDepartmentId =
+    const subDepartmentIds =
       isAllDepartments || departmentFilter === this.noDepartmentValue
-        ? null
-        : this.selectedSubDepartment;
+        ? []
+        : this.selectedSubDepartmentIds;
     this.userServ.SearchByNameAndDeptAndSubDep(
       this.selectedName,
       departmentFilter,
-      subDepartmentId,
+      subDepartmentIds,
       isAllDepartments ? { allDepartments: true } : undefined
     ).subscribe(
       (d: any) => {
@@ -410,6 +451,9 @@ export class HrAttendanceComponent {
   }
 
   private loadAllDepartmentsUsers() {
+    this.selectedSubDepartmentIds = [];
+    this.pendingSubDepartmentIds = [];
+    this.isSubDepartmentDropdownOpen = false;
     this.CurrentPageNumber = 1;
     this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
   }
@@ -437,5 +481,20 @@ export class HrAttendanceComponent {
   private getNumericDepartmentId(): number | null {
     return typeof this.selectedDepartment === 'number' ? this.selectedDepartment : null;
   }
-}
 
+  private parseIdList(value: string | null): number[] {
+    if (!value) {
+      return [];
+    }
+
+    return value
+      .split(',')
+      .map(part => Number(part.trim()))
+      .filter(id => !Number.isNaN(id));
+  }
+
+  @HostListener('document:click')
+  closeSubDepartmentDropdown() {
+    this.isSubDepartmentDropdownOpen = false;
+  }
+}

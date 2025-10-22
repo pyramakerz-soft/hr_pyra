@@ -125,6 +125,28 @@ class UsersController extends Controller
     $search = $request->get('search');
     $department = $request->get('department_id');
     $subDepartment = $request->get('sub_department_id');
+    $subDepartmentIdsInput = $request->input('sub_department_ids');
+    $parsedSubDepartmentIds = collect();
+
+    if (is_array($subDepartmentIdsInput)) {
+        $parsedSubDepartmentIds = collect($subDepartmentIdsInput);
+    } elseif (is_string($subDepartmentIdsInput)) {
+        $parsedSubDepartmentIds = collect(explode(',', $subDepartmentIdsInput));
+    }
+
+    if ($subDepartment !== null && $subDepartment !== '') {
+        $parsedSubDepartmentIds->push($subDepartment);
+    }
+
+    $parsedSubDepartmentIds = $parsedSubDepartmentIds
+        ->map(function ($id) {
+            return is_numeric($id) ? (int) $id : null;
+        })
+        ->filter(function ($id) {
+            return $id !== null;
+        })
+        ->unique()
+        ->values();
     $from_day = $request->get('from_day');
     $to_day = $request->get('to_day');
     $isAllDepartmentsValue = $department === 'all';
@@ -144,9 +166,9 @@ class UsersController extends Controller
     }
 
     // Filter by sub-department
-    $hasSubDepartmentFilter = !is_null($subDepartment) && $subDepartment !== '' && ! $isNoDepartmentValue;
+    $hasSubDepartmentFilter = $parsedSubDepartmentIds->isNotEmpty() && ! $isNoDepartmentValue;
     if ($hasSubDepartmentFilter) {
-        $usersQuery->where('sub_department_id', $subDepartment);
+        $usersQuery->whereIn('sub_department_id', $parsedSubDepartmentIds->all());
     }
 
     if ($from_day && $to_day) {
@@ -179,7 +201,7 @@ class UsersController extends Controller
             $users = $users->where('department_id', $department);
         }
         if ($hasSubDepartmentFilter) {
-            $users = $users->where('sub_department_id', $subDepartment);
+            $users = $users->whereIn('sub_department_id', $parsedSubDepartmentIds->all());
         }
 
         $usersData = $users->isEmpty() ? null : [
@@ -189,7 +211,7 @@ class UsersController extends Controller
     } else {
         // If filters are applied, fetch all users matching the filters (no pagination)
         // Remove pagination if filtering by date, department, sub-department, or requesting all departments
-    $shouldReturnAllUsers = $allDepartments || $hasDepartmentFilter || $isNoDepartmentValue || $hasSubDepartmentFilter || ($from_day && $to_day);
+        $shouldReturnAllUsers = $allDepartments || $hasDepartmentFilter || $isNoDepartmentValue || $hasSubDepartmentFilter || ($from_day && $to_day);
         if ($shouldReturnAllUsers) {
             $users = $usersQuery->get();
             $usersData = [
@@ -1374,3 +1396,4 @@ private function formatPagination($users)
         }
     }
 }
+

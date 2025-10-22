@@ -12,9 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule        ->command('check:clock_outs')->dailyAt('23:59:59');
-        ->command('vacations:accrue-monthly')->monthlyOn(1, '01:00');
-
+        $schedule->command('check:clock_outs')->dailyAt('23:59:59');
+        $schedule->command('vacations:accrue-monthly')->monthlyOn(1, '01:00');
     }
 
     /**

@@ -26,29 +26,17 @@
       </div>
     </div>
   </section>
+  <section class="dialog-section" *ngIf="!profile?.vacation_balances?.length">
+    <h3 class="section-title">Current Balances</h3>
+    <p class="muted">No recorded balances yet.</p>
+  </section>
 
   <section class="dialog-section">
     <h3 class="section-title">Payroll &amp; Contract</h3>
-    <div class="form-grid" [formGroup]="detailGroup">
-      <label class="form-field">
-        <span>Salary</span>
-        <input type="number" formControlName="salary" placeholder="0.00" />
-      </label>
-      <label class="form-field">
-        <span>Hourly Rate</span>
-        <input type="number" formControlName="hourly_rate" placeholder="0.00" />
-      </label>
-      <label class="form-field">
-        <span>OT Rate</span>
-        <input type="number" formControlName="overtime_hourly_rate" placeholder="0.00" />
-      </label>
+    <div class="form-grid compact" [formGroup]="detailGroup">
       <label class="form-field">
         <span>Working Hours / Day</span>
         <input type="number" formControlName="working_hours_day" placeholder="0" />
-      </label>
-      <label class="form-field">
-        <span>Allowed OT Hours</span>
-        <input type="number" formControlName="overtime_hours" placeholder="0" />
       </label>
       <label class="form-field">
         <span>Start Time</span>
@@ -72,7 +60,7 @@
   <section class="dialog-section">
     <header class="section-header">
       <h3 class="section-title">Vacation Balances</h3>
-      <button type="button" class="link-btn" (click)="addBalance()">+ Add balance</button>
+      <button type="button" class="link-btn" (click)="addBalance()" [disabled]="!canAddMoreBalances()">+ Add balance</button>
     </header>
 
     <div class="vacation-list" [formArrayName]="'balances'">
@@ -84,7 +72,7 @@
           <button type="button" class="link-btn danger" (click)="removeBalance(i)">Remove</button>
         </div>
         <div class="vacation-grid">
-          <label class="form-field">
+          <label class="form-field type-field">
             <span>Vacation Type</span>
             <select formControlName="vacation_type_id">
               <option [ngValue]="null">Select type</option>
@@ -94,10 +82,6 @@
             </select>
           </label>
           <label class="form-field">
-            <span>Year</span>
-            <input type="number" formControlName="year" />
-          </label>
-          <label class="form-field">
             <span>Allocated Days</span>
             <input type="number" formControlName="allocated_days" />
           </label>
@@ -105,10 +89,12 @@
             <span>Used Days</span>
             <input type="number" formControlName="used_days" />
           </label>
-          <label class="form-field">
-            <span>Remaining</span>
-            <input type="number" formControlName="remaining_days" [disabled]="true" />
-          </label>
+          <div class="year-chip-display">
+            Year: {{ currentYear }}
+          </div>
+          <div class="remaining-indicator">
+            Remaining: {{ balance.get('remaining_days')?.value | number:'1.2-2' }}
+          </div>
         </div>
       </div>
 

@@ -16,6 +16,7 @@ class UserVacationBalance extends Model
         'allocated_days',
         'used_days',
         'last_accrued_at',
+        'last_accrued_at',
     ];
 
     protected $casts = [
