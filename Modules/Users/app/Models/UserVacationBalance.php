@@ -37,6 +37,11 @@ class UserVacationBalance extends Model
         return $this->belongsTo(VacationType::class, 'vacation_type_id');
     }
 
+    public function vacationType()
+    {
+        return $this->belongsTo(VacationType::class, 'vacation_type_id');
+    }
+
     public function scopeForYear($query, int $year)
     {
         return $query->where('year', $year);

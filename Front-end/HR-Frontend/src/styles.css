@@ -49,3 +49,24 @@
 }
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.cdk-global-overlay-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px;
+}
+
+.employee-hr-profile-dialog-panel {
+  max-width: min(900px, 95vw) !important;
+  width: 100% !important;
+}
+
+
+.employee-hr-profile-dialog-panel .mat-mdc-dialog-surface {
+  width: 100% !important;
+  max-width: min(900px, 95vw) !important;
+  border-radius: 16px;
+  padding: 0;
+}
+
