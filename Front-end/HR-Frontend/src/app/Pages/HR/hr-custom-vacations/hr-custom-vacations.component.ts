@@ -308,4 +308,24 @@ export class HrCustomVacationsComponent implements OnInit {
 
     return 'An unexpected error occurred. Please try again.';
   }
+
+  formatDepartmentNames(vacation: CustomVacation): string {
+    if (!vacation || !Array.isArray(vacation.departments)) {
+      return '';
+    }
+    return vacation.departments
+      .filter(dept => !!dept?.name)
+      .map(dept => dept.name)
+      .join(', ');
+  }
+
+  formatSubDepartmentNames(vacation: CustomVacation): string {
+    if (!vacation || !Array.isArray(vacation.sub_departments)) {
+      return '';
+    }
+    return vacation.sub_departments
+      .filter(sub => !!sub?.name)
+      .map(sub => sub.name)
+      .join(', ');
+  }
 }

@@ -176,10 +176,10 @@
             </td>
             <td class="px-4 py-2 space-y-1">
               <div *ngIf="vacation.departments?.length" class="text-xs text-gray-600">
-                Departments: {{ vacation.departments.map(d => d.name).join(', ') }}
+                Departments: {{ formatDepartmentNames(vacation) }}
               </div>
               <div *ngIf="vacation.sub_departments?.length" class="text-xs text-gray-600">
-                Sub departments: {{ vacation.sub_departments.map(sd => sd.name).join(', ') }}
+                Sub departments: {{ formatSubDepartmentNames(vacation) }}
               </div>
               <div *ngIf="!vacation.departments?.length && !vacation.sub_departments?.length" class="text-xs text-gray-500">
                 Applies globally
@@ -224,4 +224,3 @@
     </div>
   </section>
 </div>
-
