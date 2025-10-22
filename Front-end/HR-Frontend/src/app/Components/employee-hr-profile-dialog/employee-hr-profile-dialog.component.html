@@ -1,35 +1,38 @@
 <div class="dialog-container" *ngIf="!isLoading; else loadingTpl">
   <header class="dialog-header">
-    <div>
+    <div *ngIf="profile as profileData">
       <h2 class="dialog-title">
-        {{ profile?.user?.name || 'Employee Profile' }}
+        {{ profileData.user.name || 'Employee Profile' }}
       </h2>
-      <p class="dialog-subtitle" *ngIf="profile">
-        Code: {{ profile?.user?.code || 'N/A' }} |
-        Department: {{ profile?.user?.department || 'N/A' }} |
-        Sub Department: {{ profile?.user?.sub_department || 'N/A' }}
+      <p class="dialog-subtitle">
+        Code: {{ profileData.user.code ?? 'N/A' }} |
+        Department: {{ profileData.user.department ?? 'N/A' }} |
+        Sub Department: {{ profileData.user.sub_department ?? 'N/A' }}
       </p>
     </div>
-    <button type="button" class="close-btn" (click)="close()">√ó</button>
+    <button type="button" class="close-btn" (click)="close()">◊</button>
   </header>
 
-  <section class="dialog-section" *ngIf="profile?.vacation_balances?.length">
+  <section class="dialog-section" *ngIf="profile?.vacation_balances?.length; else noBalancesTpl">
     <h3 class="section-title">Current Balances</h3>
     <div class="balance-summary">
       <div class="balance-pill" *ngFor="let balance of profile?.vacation_balances">
         <strong>{{ balance.vacation_type_name || 'Vacation' }}</strong>
         <span>
-          Remaining: {{ (balance.remaining_days ?? 0) | number:'1.2-2' }} /
-          Allocated: {{ (balance.allocated_days ?? 0) | number:'1.2-2' }} /
-          Used: {{ (balance.used_days ?? 0) | number:'1.2-2' }} ({{ balance.year }})
+          Remaining: {{ balance.remaining_days | number:'1.2-2' }} /
+          Allocated: {{ balance.allocated_days | number:'1.2-2' }} /
+          Used: {{ balance.used_days | number:'1.2-2' }} ({{ balance.year }})
         </span>
       </div>
     </div>
   </section>
-  <section class="dialog-section" *ngIf="!profile?.vacation_balances?.length">
-    <h3 class="section-title">Current Balances</h3>
-    <p class="muted">No recorded balances yet.</p>
-  </section>
+
+  <ng-template #noBalancesTpl>
+    <section class="dialog-section">
+      <h3 class="section-title">Current Balances</h3>
+      <p class="muted">No recorded balances yet.</p>
+    </section>
+  </ng-template>
 
   <section class="dialog-section">
     <h3 class="section-title">Payroll &amp; Contract</h3>
@@ -63,7 +66,7 @@
       <button type="button" class="link-btn" (click)="addBalance()" [disabled]="!canAddMoreBalances()">+ Add balance</button>
     </header>
 
-    <div class="vacation-list" [formArrayName]="'balances'">
+    <div class="vacation-list" formArrayName="balances">
       <div class="vacation-card" *ngFor="let balance of balances.controls; let i = index" [formGroupName]="i">
         <div class="vacation-card-header">
           <span class="vacation-card-title">
@@ -75,7 +78,7 @@
           <label class="form-field type-field">
             <span>Vacation Type</span>
             <select formControlName="vacation_type_id">
-              <option [ngValue]="null">Select type</option>
+              <option [ngValue]="null" disabled>Select type</option>
               <option *ngFor="let option of availableVacationTypes(i)" [ngValue]="option.id">
                 {{ option.name }}
               </option>
@@ -99,7 +102,7 @@
       </div>
 
       <p class="muted" *ngIf="balances.length === 0">
-        No vacation balances assigned. Use ‚ÄúAdd balance‚Äù to configure allowances.
+        No vacation balances assigned. Use ìAdd balanceî to configure allowances.
       </p>
     </div>
   </section>

@@ -166,6 +166,14 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
     return this.vacationTypeOptions.filter((option) => !selectedIds.includes(option.id));
   }
 
+  getVacationTypeName(vacationTypeId: number | null | undefined): string {
+    if (!vacationTypeId) {
+      return '';
+    }
+
+    const match = this.vacationTypeOptions.find((option) => option.id === vacationTypeId);
+    return match ? match.name : '';
+  }
   canAddMoreBalances(): boolean {
     return this.availableVacationTypes().length > 0;
   }

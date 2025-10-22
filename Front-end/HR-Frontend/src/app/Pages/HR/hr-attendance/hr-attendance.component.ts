@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
@@ -126,7 +126,6 @@ export class HrAttendanceComponent {
   ExportData() {
     if (this.selectedUsers.length === 0) return;
     this.isLoading = true;
-    const ids = this.selectedUsers.map(u => u.userId);
 
     this.clockService.exportSelectedUsers(ids, this.from_day, this.to_day)
       .subscribe((result: Blob) => {
@@ -137,9 +136,31 @@ export class HrAttendanceComponent {
         a.click();
         window.URL.revokeObjectURL(url);
         this.isLoading = false;
-      }, (error) => {
+      }, () => {
         this.isLoading = false;
       });
+  }
+
+  ExportAbsentUserData() {
+    if (this.selectedUsers.length === 0) {
+      return;
+    }
+    this.isLoading = true;
+
+    this.clockService.ExportAbsentUserData(this.from_day, this.to_day).subscribe(
+      (result: Blob) => {
+        const url = window.URL.createObjectURL(result);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `absent_users_${this.from_day || 'all'}_${this.to_day || 'all'}.xlsx`;
+        anchor.click();
+        window.URL.revokeObjectURL(url);
+        this.isLoading = false;
+      },
+      () => {
+        this.isLoading = false;
+      },
+    );
   }
 
   ExportAbsentUserData() {
@@ -156,7 +177,7 @@ export class HrAttendanceComponent {
         a.click();
         window.URL.revokeObjectURL(url);
         this.isLoading = false;
-      }, (error) => {
+      }, () => {
         this.isLoading = false;
       });
   }
@@ -235,7 +256,7 @@ export class HrAttendanceComponent {
         this.PagesNumber = hasPagination ? lastPage : 1;
         this.generatePages();
       },
-      (error) => { }
+      () => { }
     );
   }
 
@@ -361,7 +382,7 @@ export class HrAttendanceComponent {
         this.DisplayPagginationOrNot = false;
         this.generatePages();
       },
-      (error) => {}
+      () => {}
     );
   }
 
@@ -370,7 +391,7 @@ export class HrAttendanceComponent {
       (d: any) => {
         this.UsersNames = d.usersNames;
       },
-      (error) => {}
+      () => {}
     );
   }
 
@@ -409,7 +430,7 @@ export class HrAttendanceComponent {
         this.tableData = d.data.users;
         this.DisplayPagginationOrNot = false;
       },
-      (error) => {}
+      () => {}
     );
   }
 
@@ -493,8 +514,35 @@ export class HrAttendanceComponent {
       .filter(id => !Number.isNaN(id));
   }
 
+    generatePages() {
+    this.pages = [];
+    for (let i = 1; i <= this.PagesNumber; i++) {
+      this.pages.push(i);
+    }
+  }
+
+  getNextPage() {
+    if (this.CurrentPageNumber < this.PagesNumber) {
+      this.CurrentPageNumber++;
+      this.saveCurrentPageNumber();
+      this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
+    }
+  }
+
+  getPrevPage() {
+    if (this.CurrentPageNumber > 1) {
+      this.CurrentPageNumber--;
+      this.saveCurrentPageNumber();
+      this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
+    }
+  }
+
   @HostListener('document:click')
   closeSubDepartmentDropdown() {
     this.isSubDepartmentDropdownOpen = false;
   }
 }
+
+
+
+
