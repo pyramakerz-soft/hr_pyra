@@ -128,6 +128,7 @@ class UsersController extends Controller
     $from_day = $request->get('from_day');
     $to_day = $request->get('to_day');
     $isAllDepartmentsValue = $department === 'all';
+    $isNoDepartmentValue = $department === 'none';
     $allDepartments = $isAllDepartmentsValue || filter_var($request->get('all_departments'), FILTER_VALIDATE_BOOLEAN);
     $usersData = null;
 
@@ -135,13 +136,15 @@ class UsersController extends Controller
     $usersQuery = User::query();
 
     // Filter by department
-    $hasDepartmentFilter = !is_null($department) && $department !== '' && !$isAllDepartmentsValue;
-    if ($hasDepartmentFilter) {
+    $hasDepartmentFilter = !is_null($department) && $department !== '' && ! $isAllDepartmentsValue && ! $isNoDepartmentValue;
+    if ($isNoDepartmentValue) {
+        $usersQuery->whereNull('department_id');
+    } elseif ($hasDepartmentFilter) {
         $usersQuery->where('department_id', $department);
     }
 
     // Filter by sub-department
-    $hasSubDepartmentFilter = !is_null($subDepartment) && $subDepartment !== '';
+    $hasSubDepartmentFilter = !is_null($subDepartment) && $subDepartment !== '' && ! $isNoDepartmentValue;
     if ($hasSubDepartmentFilter) {
         $usersQuery->where('sub_department_id', $subDepartment);
     }
@@ -168,7 +171,11 @@ class UsersController extends Controller
         $users = $this->searchUsersByNameOrCode($search);
 
         // Apply department/sub-department filtering to search results
-        if ($hasDepartmentFilter) {
+        if ($isNoDepartmentValue) {
+            $users = $users->filter(function ($user) {
+                return $user->department_id === null;
+            });
+        } elseif ($hasDepartmentFilter) {
             $users = $users->where('department_id', $department);
         }
         if ($hasSubDepartmentFilter) {
@@ -182,7 +189,7 @@ class UsersController extends Controller
     } else {
         // If filters are applied, fetch all users matching the filters (no pagination)
         // Remove pagination if filtering by date, department, sub-department, or requesting all departments
-        $shouldReturnAllUsers = $allDepartments || $hasDepartmentFilter || $hasSubDepartmentFilter || ($from_day && $to_day);
+    $shouldReturnAllUsers = $allDepartments || $hasDepartmentFilter || $isNoDepartmentValue || $hasSubDepartmentFilter || ($from_day && $to_day);
         if ($shouldReturnAllUsers) {
             $users = $usersQuery->get();
             $usersData = [

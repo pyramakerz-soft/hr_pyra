@@ -1,0 +1,121 @@
+<div class="dialog-container" *ngIf="!isLoading; else loadingTpl">
+  <header class="dialog-header">
+    <div>
+      <h2 class="dialog-title">
+        {{ profile?.user.name || 'Employee Profile' }}
+      </h2>
+      <p class="dialog-subtitle" *ngIf="profile">
+        Code: {{ profile.user.code || 'N/A' }} |
+        Department: {{ profile.user.department || 'N/A' }} |
+        Sub Department: {{ profile.user.sub_department || 'N/A' }}
+      </p>
+    </div>
+    <button type="button" class="close-btn" (click)="close()">×</button>
+  </header>
+
+  <section class="dialog-section">
+    <h3 class="section-title">Payroll &amp; Contract</h3>
+    <div class="form-grid" [formGroup]="detailGroup">
+      <label class="form-field">
+        <span>Salary</span>
+        <input type="number" formControlName="salary" placeholder="0.00" />
+      </label>
+      <label class="form-field">
+        <span>Hourly Rate</span>
+        <input type="number" formControlName="hourly_rate" placeholder="0.00" />
+      </label>
+      <label class="form-field">
+        <span>OT Rate</span>
+        <input type="number" formControlName="overtime_hourly_rate" placeholder="0.00" />
+      </label>
+      <label class="form-field">
+        <span>Working Hours / Day</span>
+        <input type="number" formControlName="working_hours_day" placeholder="0" />
+      </label>
+      <label class="form-field">
+        <span>Allowed OT Hours</span>
+        <input type="number" formControlName="overtime_hours" placeholder="0" />
+      </label>
+      <label class="form-field">
+        <span>Start Time</span>
+        <input type="time" formControlName="start_time" />
+      </label>
+      <label class="form-field">
+        <span>End Time</span>
+        <input type="time" formControlName="end_time" />
+      </label>
+      <label class="form-field">
+        <span>Employment Type</span>
+        <input type="text" formControlName="emp_type" placeholder="Full-time" />
+      </label>
+      <label class="form-field">
+        <span>Hiring Date</span>
+        <input type="date" formControlName="hiring_date" />
+      </label>
+    </div>
+  </section>
+
+  <section class="dialog-section">
+    <header class="section-header">
+      <h3 class="section-title">Vacation Balances</h3>
+      <button type="button" class="link-btn" (click)="addBalance()">+ Add balance</button>
+    </header>
+
+    <div class="vacation-list" [formArrayName]="'balances'">
+      <div class="vacation-card" *ngFor="let balance of balances.controls; let i = index" [formGroupName]="i">
+        <div class="vacation-card-header">
+          <span class="vacation-card-title">
+            {{ getVacationTypeName(balance.get('vacation_type_id')?.value) || 'New balance' }}
+          </span>
+          <button type="button" class="link-btn danger" (click)="removeBalance(i)">Remove</button>
+        </div>
+        <div class="vacation-grid">
+          <label class="form-field">
+            <span>Vacation Type</span>
+            <select formControlName="vacation_type_id">
+              <option [ngValue]="null" disabled>Select type</option>
+              <option *ngFor="let option of availableVacationTypes(i)" [ngValue]="option.id">
+                {{ option.name }}
+              </option>
+            </select>
+          </label>
+          <label class="form-field">
+            <span>Year</span>
+            <input type="number" formControlName="year" />
+          </label>
+          <label class="form-field">
+            <span>Allocated Days</span>
+            <input type="number" formControlName="allocated_days" />
+          </label>
+          <label class="form-field">
+            <span>Used Days</span>
+            <input type="number" formControlName="used_days" />
+          </label>
+          <label class="form-field">
+            <span>Remaining</span>
+            <input type="number" formControlName="remaining_days" disabled />
+          </label>
+        </div>
+      </div>
+
+      <p class="muted" *ngIf="balances.length === 0">
+        No vacation balances assigned. Use “Add balance” to configure allowances.
+      </p>
+    </div>
+  </section>
+
+  <footer class="dialog-actions">
+    <button type="button" class="btn secondary" (click)="close()">Cancel</button>
+    <button type="button" class="btn primary" (click)="save()" [disabled]="isSaving">
+      {{ isSaving ? 'Saving...' : 'Save Changes' }}
+    </button>
+  </footer>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading employee profile...</p>
+  </div>
+</ng-template>
+

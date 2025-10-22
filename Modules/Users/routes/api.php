@@ -11,6 +11,7 @@ use Modules\Users\Http\Controllers\TimezoneController;
 use Modules\Users\Http\Controllers\UsersController;
 use Modules\Users\Http\Controllers\UserVacationController;
 use Modules\Users\Http\Controllers\WorkTypeController;
+use Modules\Users\Http\Controllers\HrUserProfileController;
 use Modules\Users\Http\Controllers\CustomVacationController;
 
 /*
@@ -111,6 +112,10 @@ Route::post('/export-clocks', [UsersController::class, 'exportClocks']);
 
     });
 
+    Route::group(['prefix' => 'hr', 'middleware' => 'role:Hr|Admin'], function () {
+        Route::get('/users/{user}/profile', [HrUserProfileController::class, 'show']);
+        Route::put('/users/{user}/profile', [HrUserProfileController::class, 'update']);
+    });
 
 
 

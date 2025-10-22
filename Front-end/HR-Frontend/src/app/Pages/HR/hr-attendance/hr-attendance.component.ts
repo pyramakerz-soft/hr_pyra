@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { Department } from '../../../Models/department';
 import { UserModel } from '../../../Models/user-model';
 import { ClockService } from '../../../Services/clock.service';
@@ -52,13 +52,15 @@ export class HrAttendanceComponent {
   ];
   years: number[] = [];
   subDepartments: any[] = [];
-  selectedDepartment: number | 'all' | null = null;
+  selectedDepartment: number | 'all' | 'none' | null = null;
   selectedSubDepartment: number | null = null;
   tableData: UserModel[] = [];
   readonly allDepartmentsValue = 'all';
+  readonly noDepartmentValue = 'none';
 
   constructor(
     public router: Router,
+    private route: ActivatedRoute,
     public userServ: UserServiceService,
     public UserClocksService: ClockService,
     private clockService: ClockService,
@@ -73,7 +75,11 @@ export class HrAttendanceComponent {
     } else {
       this.CurrentPageNumber = 1;
     }
-    this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
+    this.route.queryParamMap.subscribe((params) => {
+      this.applyQueryParams(params);
+      this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
+    });
+
     this.getUsersName();
     this.GetAllDepartment();
     this.populateYears();
@@ -157,15 +163,65 @@ export class HrAttendanceComponent {
     this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/" + EmpId)
   }
 
+  private applyQueryParams(params: ParamMap): void {
+    const departmentIdParam = params.get('departmentId');
+    const noDepartmentParam = params.get('noDepartment');
+    const allDepartmentsParam = params.get('allDepartments');
+
+    if (departmentIdParam) {
+      const parsedId = Number(departmentIdParam);
+      if (!Number.isNaN(parsedId)) {
+        this.selectedDepartment = parsedId;
+        this.selectedSubDepartment = null;
+        this.subDepartments = [];
+        this.supDeptServ.setDeptId(parsedId);
+        this.getSubDepartments(parsedId);
+        this.CurrentPageNumber = 1;
+        return;
+      }
+    }
+
+    if (noDepartmentParam === '1') {
+      this.selectedDepartment = this.noDepartmentValue;
+      this.selectedSubDepartment = null;
+      this.subDepartments = [];
+      this.CurrentPageNumber = 1;
+      return;
+    }
+
+    if (allDepartmentsParam === '1') {
+      this.selectedDepartment = this.allDepartmentsValue;
+      this.selectedSubDepartment = null;
+      this.subDepartments = [];
+      this.CurrentPageNumber = 1;
+    }
+  }
+
   getAllEmployees(pgNumber: number, from_day: string = '', to_day: string = '') {
     this.CurrentPageNumber = pgNumber;
     this.saveCurrentPageNumber();
-    this.userServ.getall(pgNumber, from_day, to_day).subscribe(
+    const departmentFilter = this.getDepartmentFilterValue();
+    const options: { allDepartments?: boolean; departmentId?: number | 'none'; subDepartmentId?: number | null } = {};
+
+    if (this.isAllDepartmentsSelected()) {
+      options.allDepartments = true;
+    } else if (departmentFilter === this.noDepartmentValue) {
+      options.departmentId = this.noDepartmentValue;
+    } else if (typeof departmentFilter === 'number') {
+      options.departmentId = departmentFilter;
+      if (this.selectedSubDepartment != null) {
+        options.subDepartmentId = this.selectedSubDepartment;
+      }
+    }
+
+    this.userServ.getall(pgNumber, from_day, to_day, options).subscribe(
       (d: any) => {
         this.tableData = d.data.users;
-        // Hide pagination if no pagination field or if date filtering applied
-        this.DisplayPagginationOrNot = !!d.data.pagination && !(from_day && to_day);
-        this.PagesNumber = d.data.pagination?.last_page || 1;
+        const pagination = d.data.pagination;
+        const lastPage = pagination?.last_page ?? 1;
+        const hasPagination = !!pagination && !(options.allDepartments || (from_day && to_day));
+        this.DisplayPagginationOrNot = hasPagination;
+        this.PagesNumber = hasPagination ? lastPage : 1;
         this.generatePages();
       },
       (error) => { }
@@ -185,16 +241,23 @@ export class HrAttendanceComponent {
     this.isSelectAllChecked = false;
     this.subDepartments = [];
     this.selectedSubDepartment = null;
+    this.CurrentPageNumber = 1;
     if (this.isAllDepartmentsSelected()) {
       this.loadAllDepartmentsUsers();
+      return;
+    }
+
+    if (this.isNoDepartmentSelected()) {
+      this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
       return;
     }
 
     if (typeof this.selectedDepartment === 'number') {
       this.supDeptServ.setDeptId(this.selectedDepartment);
       this.getSubDepartments(this.selectedDepartment);
-      this.Search();
     }
+
+    this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
   }
 
   getSubDepartments(departmentId: number) {
@@ -239,11 +302,14 @@ export class HrAttendanceComponent {
     this.selectedUsers = [];
     this.isSelectAllChecked = false;
     const isAllDepartments = this.isAllDepartmentsSelected();
-    const departmentId = this.getNumericDepartmentId();
-    const subDepartmentId = isAllDepartments ? null : this.selectedSubDepartment;
+    const departmentFilter = this.getDepartmentFilterValue();
+    const subDepartmentId =
+      isAllDepartments || departmentFilter === this.noDepartmentValue
+        ? null
+        : this.selectedSubDepartment;
     this.userServ.SearchByNameAndDeptAndSubDep(
       this.selectedName,
-      departmentId,
+      departmentFilter,
       subDepartmentId,
       isAllDepartments ? { allDepartments: true } : undefined
     ).subscribe(
@@ -287,11 +353,14 @@ export class HrAttendanceComponent {
   selectUser(location: string) {
     this.selectedName = location;
     const isAllDepartments = this.isAllDepartmentsSelected();
-    const departmentId = this.getNumericDepartmentId();
-    const subDepartmentId = isAllDepartments ? null : this.selectedSubDepartment;
+    const departmentFilter = this.getDepartmentFilterValue();
+    const subDepartmentId =
+      isAllDepartments || departmentFilter === this.noDepartmentValue
+        ? null
+        : this.selectedSubDepartment;
     this.userServ.SearchByNameAndDeptAndSubDep(
       this.selectedName,
-      departmentId,
+      departmentFilter,
       subDepartmentId,
       isAllDepartments ? { allDepartments: true } : undefined
     ).subscribe(
@@ -342,22 +411,31 @@ export class HrAttendanceComponent {
 
   private loadAllDepartmentsUsers() {
     this.CurrentPageNumber = 1;
-    this.userServ.getall(1, this.from_day, this.to_day, { allDepartments: true }).subscribe(
-      (d: any) => {
-        this.tableData = d.data.users;
-        this.PagesNumber = 1;
-        this.DisplayPagginationOrNot = false;
-        this.generatePages();
-      },
-      (error) => {}
-    );
+    this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
   }
 
   private isAllDepartmentsSelected(): boolean {
     return this.selectedDepartment === this.allDepartmentsValue;
   }
 
+  private isNoDepartmentSelected(): boolean {
+    return this.selectedDepartment === this.noDepartmentValue;
+  }
+
+  private getDepartmentFilterValue(): number | 'none' | null {
+    if (this.isAllDepartmentsSelected()) {
+      return null;
+    }
+
+    if (this.isNoDepartmentSelected()) {
+      return this.noDepartmentValue;
+    }
+
+    return this.getNumericDepartmentId();
+  }
+
   private getNumericDepartmentId(): number | null {
     return typeof this.selectedDepartment === 'number' ? this.selectedDepartment : null;
   }
 }
+

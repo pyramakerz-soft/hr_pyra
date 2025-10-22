@@ -110,6 +110,9 @@
           <td class="py-5 px-4">{{ row.name }}</td>
           <td class="py-5 px-4">
             <div class="px-2">
+              <button (click)="openHrProfileDialog(row.id)" title="HR Profile">
+                <i class="fa-solid fa-address-card text-[#17253E] mr-2 w-3 md:w-4"></i>
+              </button>
               <button (click)="NavigateToEditEmployee(row.id)">
                 <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
               </button>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
 import Chart from 'chart.js/auto';
 import { ChartsService } from '../../../Services/charts.service';
 
@@ -13,6 +13,7 @@ import { ChartsService } from '../../../Services/charts.service';
 })
 export class DonutChartComponent {
   @Input() Year: Number = 0;
+  @Output() segmentSelected = new EventEmitter<string>();
   baseColor = '#135DCB';
   data:any = [];
   labels:any = [];
@@ -170,5 +171,9 @@ export class DonutChartComponent {
         }
       }
     )
+  }
+
+  onSegmentClick(label: string): void {
+    this.segmentSelected.emit(label);
   }
 }

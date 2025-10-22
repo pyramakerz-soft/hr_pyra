@@ -9,6 +9,7 @@ import { UserModel } from '../../../Models/user-model';
 import { UserServiceService } from '../../../Services/user-service.service';
 import Swal from 'sweetalert2';
 import { ClockService } from '../../../Services/clock.service';
+import { EmployeeHrProfileDialogComponent } from '../../../Components/employee-hr-profile-dialog/employee-hr-profile-dialog.component';
 
 interface data {
   Name: string,
@@ -242,6 +243,14 @@ export class HREmployeeComponent {
         );
 
       }
+    });
+  }
+
+  openHrProfileDialog(userId: number) {
+    this.dialog.open(EmployeeHrProfileDialogComponent, {
+      data: { userId },
+      width: '900px',
+      maxWidth: '95vw',
     });
   }
 }

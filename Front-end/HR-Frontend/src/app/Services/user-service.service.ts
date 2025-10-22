@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { AddEmployee } from '../Models/add-employee';
 import { UserModel } from '../Models/user-model';
 import { ApiService } from './api.service';
+import { HrUserProfile, HrUserProfileUpdatePayload } from '../Models/hr-user-profile';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,7 @@ export class UserServiceService {
     this.baseURL=Api.BaseUrl
 
    }
-getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDepartments?: boolean }): Observable<UserModel[]> {
+getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDepartments?: boolean; departmentId?: number | 'none'; subDepartmentId?: number | null; }): Observable<UserModel[]> {
   const token = localStorage.getItem("token");
   const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
@@ -28,6 +29,12 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
   if (to_day) params.to_day = to_day;
   if (options?.allDepartments) {
     params.all_departments = true;
+  }
+  if (options?.departmentId !== undefined && options.departmentId !== null) {
+    params.department_id = options.departmentId;
+  }
+  if (options?.subDepartmentId !== undefined && options.subDepartmentId !== null) {
+    params.sub_department_id = options.subDepartmentId;
   }
 
   return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, { headers, params });
@@ -127,7 +134,7 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     return this.http.post<any>(this.baseURL + "/users/update_password/" + empId, body, { headers });
   }
 
-  SearchByNameAndDeptAndSubDep(Name: string, deptId?: number|null, subId?: number|null, options?: { allDepartments?: boolean }) {
+  SearchByNameAndDeptAndSubDep(Name: string, deptId?: number | 'none' | null, subId?: number | null, options?: { allDepartments?: boolean }) {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
   
@@ -137,18 +144,13 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
       params.department_id = deptId;
     }
   
-    if (subId != null) {
+    if (subId != null && deptId !== 'none') {
       params.sub_department_id = subId;
     }
     if (options?.allDepartments) {
       params.all_departments = true;
     }
-    console.log('/////');
 
-  console.log(deptId);
-  console.log(subId);
-  
-  
     return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, { headers, params });
   }
   
@@ -174,5 +176,17 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.post<any>(this.baseURL + `/auth/remove_serial_number/${empId}`, {}, { headers });
+  }
+
+  getHrUserProfile(userId: number) {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<{ profile: HrUserProfile }>(`${this.baseURL}/hr/users/${userId}/profile`, { headers });
+  }
+
+  updateHrUserProfile(userId: number, payload: HrUserProfileUpdatePayload) {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.put<{ profile: HrUserProfile }>(`${this.baseURL}/hr/users/${userId}/profile`, payload, { headers });
   }
 }

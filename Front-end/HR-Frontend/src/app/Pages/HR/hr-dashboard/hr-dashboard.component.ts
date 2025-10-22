@@ -6,6 +6,9 @@ import { CardChartComponent } from '../../../Components/Charts/card-chart/card-c
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChartsService } from '../../../Services/charts.service';
+import { DepartmentService } from '../../../Services/department.service';
+import { Router } from '@angular/router';
+import { Department } from '../../../Models/department';
 
 @Component({
   selector: 'app-hr-dashboard',
@@ -16,6 +19,8 @@ import { ChartsService } from '../../../Services/charts.service';
 })
 export class HrDashboardComponent {
   selectedYear: number = 0;
+  departments: Department[] = [];
+  readonly noDepartmentLabel = 'No Department';
 
   Data = [
     { label: 'Work From Home', icon: 'fi fi-rs-chart-pie', percentage: ''},
@@ -31,13 +36,18 @@ export class HrDashboardComponent {
     site: 0
   };
 
-  constructor(public chartService:ChartsService){}
+  constructor(
+    public chartService: ChartsService,
+    private readonly departmentService: DepartmentService,
+    private readonly router: Router
+  ){}
 
   ngOnInit(){
     this.populateYears()
     const currentDate = new Date();
     this.selectedYear = currentDate.getFullYear();
     this.getDataPercentage()      
+    this.fetchDepartments();
     localStorage.setItem('HrEmployeeCN', "1");
     localStorage.setItem('HrLocationsCN', "1");
     localStorage.setItem('HrAttendaceCN', "1");
@@ -104,5 +114,42 @@ export class HrDashboardComponent {
         ];
       }
     )
+  }
+
+  fetchDepartments(): void {
+    this.departmentService.getall().subscribe(
+      (response: any) => {
+        const departments = response?.data?.departments ?? response;
+        this.departments = Array.isArray(departments) ? departments : [];
+      },
+      () => {
+        this.departments = [];
+      }
+    );
+  }
+
+  onDepartmentSegmentSelected(label: string): void {
+    const normalized = (label || '').trim();
+
+    if (!normalized) {
+      return;
+    }
+
+    if (normalized.toLowerCase() === this.noDepartmentLabel.toLowerCase()) {
+      this.router.navigate(['/HR/HRAttendance'], {
+        queryParams: { noDepartment: '1' },
+      });
+      return;
+    }
+
+    const match = this.departments.find(
+      (department) => department.name?.toLowerCase() === normalized.toLowerCase()
+    );
+
+    if (match?.id) {
+      this.router.navigate(['/HR/HRAttendance'], {
+        queryParams: { departmentId: match.id },
+      });
+    }
   }
 }
