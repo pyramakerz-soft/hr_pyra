@@ -13,6 +13,20 @@
     <button type="button" class="close-btn" (click)="close()">×</button>
   </header>
 
+  <section class="dialog-section" *ngIf="profile?.vacation_balances?.length">
+    <h3 class="section-title">Current Balances</h3>
+    <div class="balance-summary">
+      <div class="balance-pill" *ngFor="let balance of profile?.vacation_balances">
+        <strong>{{ balance.vacation_type_name || 'Vacation' }}</strong>
+        <span>
+          Remaining: {{ (balance.remaining_days ?? 0) | number:'1.2-2' }} /
+          Allocated: {{ (balance.allocated_days ?? 0) | number:'1.2-2' }} /
+          Used: {{ (balance.used_days ?? 0) | number:'1.2-2' }} ({{ balance.year }})
+        </span>
+      </div>
+    </div>
+  </section>
+
   <section class="dialog-section">
     <h3 class="section-title">Payroll &amp; Contract</h3>
     <div class="form-grid" [formGroup]="detailGroup">
@@ -73,7 +87,7 @@
           <label class="form-field">
             <span>Vacation Type</span>
             <select formControlName="vacation_type_id">
-              <option [ngValue]="null" disabled>Select type</option>
+              <option [ngValue]="null">Select type</option>
               <option *ngFor="let option of availableVacationTypes(i)" [ngValue]="option.id">
                 {{ option.name }}
               </option>
