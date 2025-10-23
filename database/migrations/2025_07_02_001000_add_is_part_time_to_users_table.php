@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_part_time')->default(false)->after('emp_type');
+            $table->boolean('is_part_time')->default(false);
         });
     }
 
@@ -20,4 +20,3 @@ return new class extends Migration
         });
     }
 };
-
