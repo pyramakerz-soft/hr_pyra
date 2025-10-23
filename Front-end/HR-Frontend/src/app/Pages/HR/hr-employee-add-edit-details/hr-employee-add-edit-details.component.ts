@@ -56,11 +56,6 @@ export class HrEmployeeAddEditDetailsComponent {
     { value: 'home', label: 'Home' },
     { value: 'float', label: 'Float' },
   ];
-  filteredWorkTypes: WorkType[] = [];
-  selectedWorkTypeId: number | null = null;
-  private partTimeWorkTypeId: number | null = null;
-  private fullTimeWorkTypeId: number | null = null;
-  private readonly standardWorkTypeNames = ['full time', 'part time'];
 
   employee: AddEmployee = new AddEmployee();
 
@@ -111,13 +106,8 @@ export class HrEmployeeAddEditDetailsComponent {
     this.getDepartments()
     this.getRoles()
     this.getWorkType()
-    this.getLocations()
-this.getTimezones();
-
-    // const stringifiedEmployee = `{ "image":null,"name":"sdas","code":"12321","department_id":1,"sub_department_id":null,"deparment_name":null,"emp_type":"asdas","phone":"â€ª01117730007â€¬","contact_phone":"01117730007â€¬","email":"aanyyy@g.com","password":"111111111","national_id":"11111111111112","hiring_date":"2025-05-07","salary":"1","overtime_hours":"2","working_hours_day":12,"start_time":"10:59","end_time":"22:59","gender":"f","role":{"id":3,"name":"Employee","Permissions":[]},"location_id":[1],"location":[],"work_type_id":[3],"work_type_name":[],"work_home":false}`
-    
-    // this.employee = JSON.parse(stringifiedEmployee);
-    
+    this.getLocations();
+    this.getTimezones();
 
   }
 
@@ -253,10 +243,10 @@ onSubDepartmentChange() {
       (d: any) => {
         this.employee = d.User;
         this.normalizeEmployeeCollections();
-        this.syncSelectedWorkTypeFromEmployee();
-        this.selectedDepartment=this.employee.department_id
-        this.selectedSubDepartment=this.employee.sub_department_id
-        this.selectedTimezone=this.employee.timezone_id
+        this.updatePartTimeValidationState();
+        this.selectedDepartment = this.employee.department_id
+        this.selectedSubDepartment = this.employee.sub_department_id
+        this.selectedTimezone = this.employee.timezone_id
 
         if( this.employee.department_id){
           this.supDeptServ.setDeptId(this.employee.department_id!);
@@ -284,56 +274,12 @@ onSubDepartmentChange() {
   getWorkType(){
     this.workTypeService.getall().subscribe(
       (workTypes: any) => {
-        const responseWorkTypes: WorkType[] = (workTypes?.workTypes ?? []).map((work: any) => {
+        this.workTypes = (workTypes?.workTypes ?? []).map((work: any) => {
           const id = Number(work.id);
           return new WorkType(Number.isNaN(id) ? work.id : id, work.name);
         });
-        this.workTypes = responseWorkTypes;
-        this.applyWorkTypeFilters();
-        this.syncSelectedWorkTypeFromEmployee();
       }
     );
-  }
-
-  private applyWorkTypeFilters(): void {
-    const normalized = this.workTypes.map((work) => ({
-      ...work,
-      name: work.name ?? '',
-    }));
-
-    const preferred = normalized.filter((work) =>
-      this.standardWorkTypeNames.includes(work.name.toLowerCase())
-    );
-
-    this.filteredWorkTypes = preferred.length > 0 ? preferred : normalized;
-
-    this.fullTimeWorkTypeId = this.resolveWorkTypeIdByName('full time');
-    this.partTimeWorkTypeId = this.resolveWorkTypeIdByName('part time');
-  }
-
-  private resolveWorkTypeIdByName(name: string): number | null {
-    const match = this.workTypes.find(
-      (workType) => (workType.name ?? '').toLowerCase() === name.toLowerCase()
-    );
-    return match ? Number(match.id) : null;
-  }
-
-  private syncSelectedWorkTypeFromEmployee(): void {
-    if (this.employee.work_type_id && this.employee.work_type_id.length > 0) {
-      const firstId = Number(this.employee.work_type_id[0]);
-      this.selectedWorkTypeId = Number.isNaN(firstId) ? null : firstId;
-    }
-
-    if (this.selectedWorkTypeId === null && this.fullTimeWorkTypeId !== null) {
-      this.selectedWorkTypeId = this.fullTimeWorkTypeId;
-    }
-
-    if (this.selectedWorkTypeId !== null) {
-      this.employee.work_type_id = [this.selectedWorkTypeId];
-      this.validationErrors['work_type_id'] = '';
-    }
-
-    this.updatePartTimeValidationState();
   }
 
   private normalizeEmployeeCollections(): void {
@@ -369,17 +315,23 @@ onSubDepartmentChange() {
     }
   }
 
-  onWorkTypeSelected(workTypeId: number | null): void {
-    this.selectedWorkTypeId = workTypeId;
-    this.employee.work_type_id = workTypeId !== null ? [workTypeId] : [];
+  onWorkTypeChange(workTypeId: number, event: Event): void {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    const numericId = Number(workTypeId);
+
+    if (isChecked) {
+      if (!this.employee.work_type_id.includes(numericId)) {
+        this.employee.work_type_id.push(numericId);
+      }
+    } else {
+      this.employee.work_type_id = this.employee.work_type_id.filter((id) => id !== numericId);
+    }
 
     if (this.employee.work_type_id.length > 0) {
       this.validationErrors['work_type_id'] = '';
     } else {
       this.validationErrors['work_type_id'] = '*Work Type is required.';
     }
-
-    this.updatePartTimeValidationState();
   }
 
   isPartTimeSelected(): boolean {
@@ -549,7 +501,7 @@ onSubDepartmentChange() {
               continue; // Skip this field from validation
             }
 
-    // âœ… Add validation: If role is 'Employee', department is required
+    // Add validation: If role is 'Employee', department is required
   if (this.employee.role?.name === 'Employee' && !this.selectedDepartment) {
     this.validationErrors['department_id'] = '*Department is required for employees.';
     isValid = false;
@@ -1013,7 +965,6 @@ onSubDepartmentChange() {
   }
 
 SaveEmployee() {
-    this.employee.work_type_id = this.selectedWorkTypeId !== null ? [this.selectedWorkTypeId] : [];
     if (!this.employee.is_part_time) {
         this.employee.max_monthly_hours = null;
     }
@@ -1082,3 +1033,9 @@ SaveEmployee() {
     }
   }
 }
+
+
+
+
+
+
