@@ -63,6 +63,7 @@ class User extends Authenticatable implements JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_part_time' => 'boolean',
     ];
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.

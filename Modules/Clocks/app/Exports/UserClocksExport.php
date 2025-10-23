@@ -140,7 +140,7 @@ class UserClocksExport implements WithMultipleSheets
                 continue;
             }
 
-            $user->loadMissing(['work_types']);
+            $user->loadMissing(['work_types', 'subDepartment', 'user_detail', 'department']);
             $userWorkTypes = $user->work_types
                 ->pluck('name')
                 ->map(function ($name) {
@@ -171,10 +171,17 @@ class UserClocksExport implements WithMultipleSheets
 
             $userTimezoneName = optional($user->timezone)->name ?? 'Africa/Cairo';
             $department = optional($user->department);
+            $subDepartment = optional($user->subDepartment);
             $workScheduleType = strtolower($department->work_schedule_type ?? 'flexible');
             $isFlexibleSchedule = $workScheduleType !== 'strict';
-            $worksOnSaturday = (bool) ($department?->works_on_saturday ?? false);
             $userDetail = optional($user->user_detail);
+            $worksOnSaturday = (bool) ($department?->works_on_saturday ?? false);
+            if ($subDepartment && $subDepartment->works_on_saturday !== null) {
+                $worksOnSaturday = (bool) $subDepartment->works_on_saturday;
+            }
+            if ($userDetail && $userDetail->works_on_saturday !== null) {
+                $worksOnSaturday = (bool) $userDetail->works_on_saturday;
+            }
             $workingHoursDay = (float) ($userDetail->working_hours_day ?? 8);
             if ($workingHoursDay <= 0) {
                 $workingHoursDay = 8;
@@ -555,21 +562,21 @@ class UserClocksExport implements WithMultipleSheets
                 $appliedRules = [];
                 $planMonetaryDeduction = 0.0;
                 $rawDeductionMinutes = 0;
+                $skipDeductions = $isPartTime || $isVacation || $isNonWorkingWeekend;
 
-                if (! $isPartTime) {
+                if ($skipDeductions) {
+                    $latenessMinutesActual = 0;
+                    $latenessBeyondGrace = 0;
+                } else {
                     $evaluation = $deductionEngine->evaluate($evaluationMetrics, $ruleState);
                     $appliedRules = $evaluation['applied_rules'] ?? [];
                     $planMonetaryDeduction = $evaluation['monetary_amount'] ?? 0.0;
                     $totalPlanMonetaryAmount += $planMonetaryDeduction;
                     $rawDeductionMinutes = $hasIssue ? 0 : (int) ($evaluation['deduction_minutes'] ?? 0);
 
-                    if ($hasIssue) {
-                        $latenessBeyondGrace = 0;
-                    } elseif ($rawDeductionMinutes === 0) {
+                    if ($hasIssue || $rawDeductionMinutes === 0) {
                         $latenessBeyondGrace = 0;
                     }
-                } else {
-                    $latenessBeyondGrace = 0;
                 }
 
                 $deductionDetailSummary = collect($appliedRules)

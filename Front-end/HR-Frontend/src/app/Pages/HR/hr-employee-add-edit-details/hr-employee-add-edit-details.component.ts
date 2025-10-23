@@ -114,7 +114,7 @@ export class HrEmployeeAddEditDetailsComponent {
     this.getLocations()
 this.getTimezones();
 
-    // const stringifiedEmployee = `{ "image":null,"name":"sdas","code":"12321","department_id":1,"sub_department_id":null,"deparment_name":null,"emp_type":"asdas","phone":"‪01117730007‬","contact_phone":"01117730007‬","email":"aanyyy@g.com","password":"111111111","national_id":"11111111111112","hiring_date":"2025-05-07","salary":"1","overtime_hours":"2","working_hours_day":12,"start_time":"10:59","end_time":"22:59","gender":"f","role":{"id":3,"name":"Employee","Permissions":[]},"location_id":[1],"location":[],"work_type_id":[3],"work_type_name":[],"work_home":false}`
+    // const stringifiedEmployee = `{ "image":null,"name":"sdas","code":"12321","department_id":1,"sub_department_id":null,"deparment_name":null,"emp_type":"asdas","phone":"â€ª01117730007â€¬","contact_phone":"01117730007â€¬","email":"aanyyy@g.com","password":"111111111","national_id":"11111111111112","hiring_date":"2025-05-07","salary":"1","overtime_hours":"2","working_hours_day":12,"start_time":"10:59","end_time":"22:59","gender":"f","role":{"id":3,"name":"Employee","Permissions":[]},"location_id":[1],"location":[],"work_type_id":[3],"work_type_name":[],"work_home":false}`
     
     // this.employee = JSON.parse(stringifiedEmployee);
     
@@ -353,6 +353,20 @@ onSubDepartmentChange() {
     } else {
       this.employee.is_part_time = Boolean(rawIsPartTime);
     }
+
+    const rawWorksOnSaturday = (this.employee as any).works_on_saturday;
+    if (rawWorksOnSaturday === null || rawWorksOnSaturday === undefined || rawWorksOnSaturday === '') {
+      this.employee.works_on_saturday = null;
+    } else if (typeof rawWorksOnSaturday === 'string') {
+      const normalized = rawWorksOnSaturday.toLowerCase();
+      if (['inherit', 'null', ''].includes(normalized)) {
+        this.employee.works_on_saturday = null;
+      } else {
+        this.employee.works_on_saturday = ['1', 'true', 'yes', 'on'].includes(normalized);
+      }
+    } else {
+      this.employee.works_on_saturday = Boolean(rawWorksOnSaturday);
+    }
   }
 
   onWorkTypeSelected(workTypeId: number | null): void {
@@ -391,6 +405,10 @@ onSubDepartmentChange() {
       this.employee.max_monthly_hours = null;
     }
     this.updatePartTimeValidationState();
+  }
+
+  onWorksOnSaturdayChange(value: boolean | null): void {
+    this.employee.works_on_saturday = value;
   }
 
   private updatePartTimeValidationState(): boolean {
@@ -531,13 +549,13 @@ onSubDepartmentChange() {
               continue; // Skip this field from validation
             }
 
-    // ✅ Add validation: If role is 'Employee', department is required
+    // âœ… Add validation: If role is 'Employee', department is required
   if (this.employee.role?.name === 'Employee' && !this.selectedDepartment) {
     this.validationErrors['department_id'] = '*Department is required for employees.';
     isValid = false;
   }
 
-        if (!this.employee[field] && field !== "code" && field !== 'work_home' && field !== "image" &&  field !== "working_hours_day" && field !== "timezone_id" && field !== "max_monthly_hours") {
+        if (!this.employee[field] && field !== "code" && field !== 'work_home' && field !== "image" &&  field !== "working_hours_day" && field !== "timezone_id" && field !== "max_monthly_hours" && field !== "works_on_saturday") {
   
           if (this.EmployeeId !== 0) {
             continue;

@@ -30,6 +30,7 @@ export class AddEmployee {
         public work_type_name: string[] = [],
         public work_home: boolean = false,
         public is_part_time: boolean = false,
+        public works_on_saturday: boolean | null = null,
         // public is_float: number
     ) {}
 }

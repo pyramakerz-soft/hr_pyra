@@ -549,6 +549,7 @@ private function formatPagination($users)
         $overtime_hourly_rate = (($salary / 30) / $working_hours_day) * $overtime_hours;
         $start_time = $request['start_time'];
         $end_time = $request['end_time'];
+        $worksOnSaturdayPreference = $this->normalizeNullableBoolean($request->input('works_on_saturday', null));
 
         if (Carbon::parse($end_time)->lessThanOrEqualTo(Carbon::parse($start_time))) {
             return $this->returnError('End time must be later than start time', 422); // Return 422 Unprocessable Entity
@@ -564,6 +565,7 @@ private function formatPagination($users)
             'end_time' => $end_time,
             'emp_type' => $request['emp_type'],
             'hiring_date' => $request['hiring_date'],
+            'works_on_saturday' => $worksOnSaturdayPreference,
             'user_id' => $user->id,
             // 'is_float' => $data['is_float'],
 
@@ -795,6 +797,10 @@ private function formatPagination($users)
 
         $start_time = isset($request['start_time']) ? Carbon::parse($request['start_time'])->format("H:i:s") : $userDetail->start_time;
         $end_time = isset($request['end_time']) ? Carbon::parse($request['end_time'])->format("H:i:s") : $userDetail->end_time;
+        $worksOnSaturdayPreference = $userDetail->works_on_saturday;
+        if ($request->has('works_on_saturday')) {
+            $worksOnSaturdayPreference = $this->normalizeNullableBoolean($request['works_on_saturday']);
+        }
 
         // Use Carbon's diffInSeconds for time comparison to avoid format issues
         if (Carbon::parse($end_time)->lessThanOrEqualTo(Carbon::parse($start_time))) {
@@ -809,6 +815,7 @@ private function formatPagination($users)
             'end_time' => $end_time,
             'emp_type' => $request['emp_type'] ?? $userDetail->emp_type,
             'hiring_date' => $request['hiring_date'] ?? $userDetail->hiring_date,
+            'works_on_saturday' => $worksOnSaturdayPreference,
             'user_id' => $userDetail->user_id,
             // 'is_float' => $request['is_float'] ,
         ]);
@@ -1358,6 +1365,7 @@ private function formatPagination($users)
                     $overtimeHours = $row['overtime_hours'];
                     $hourlyRate = ($salary / 22) / $workingHoursDay;
                     $overtimeHourlyRate = (($salary / 30) / $workingHoursDay) * $overtimeHours;
+                    $worksOnSaturdayPreference = $this->normalizeNullableBoolean($row['works_on_saturday'] ?? null);
 
                     // Create user details
                     UserDetail::create([
@@ -1370,6 +1378,7 @@ private function formatPagination($users)
                         'end_time' => $row['end_time'],
                         'emp_type' => $row['emp_type'],
                         'hiring_date' => $row['hiring_date'],
+                        'works_on_saturday' => $worksOnSaturdayPreference,
                         'user_id' => $user->id,
                     ]);
 
@@ -1397,5 +1406,33 @@ private function formatPagination($users)
             return $this->returnError('An error occurred while processing the file: ' . $e->getMessage(), 500);
         }
     }
-}
 
+    private function normalizeNullableBoolean($value): ?bool
+    {
+        if ($value === null || $value === "" || (is_string($value) && trim($value) === "")) {
+            return null;
+        }
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_numeric($value)) {
+            return ((int) $value) === 1;
+        }
+
+        $normalized = strtolower((string) $value);
+
+        if (in_array($normalized, ["true", "1", "yes", "on"], true)) {
+            return true;
+        }
+
+        if (in_array($normalized, ["false", "0", "no", "off"], true)) {
+            return false;
+        }
+
+        return null;
+    }
+
+
+}

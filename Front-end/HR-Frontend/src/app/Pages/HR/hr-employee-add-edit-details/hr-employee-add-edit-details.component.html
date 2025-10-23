@@ -107,6 +107,38 @@
                         </div>
                     </div>
 
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Works on Saturday
+                        </label>
+                        <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl flex flex-col gap-3">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="worksOnSaturday"
+                                    [checked]="employee.works_on_saturday === null"
+                                    (change)="onWorksOnSaturdayChange(null)">
+                                <span class="text-sm">Inherit from Department/Sub-Department</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="worksOnSaturday"
+                                    [checked]="employee.works_on_saturday === true"
+                                    (change)="onWorksOnSaturdayChange(true)">
+                                <span class="text-sm">Works on Saturday</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="worksOnSaturday"
+                                    [checked]="employee.works_on_saturday === false"
+                                    (change)="onWorksOnSaturdayChange(false)">
+                                <span class="text-sm">Does not Work on Saturday</span>
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="mb-4 text-xs md:text-sm" *ngIf="isPartTimeSelected()">
                         <label class="font-semibold block mb-2 md:mb-3">
                             Monthly Hour Limit

@@ -68,6 +68,7 @@ class UpdateUserRequest extends FormRequest
             'department_id' => [ 'nullable','exists:departments,id'],
             'sub_department_id' => [ 'nullable','exists:sub_departments,id'],
             'is_part_time' => ['nullable', 'boolean'],
+            'works_on_saturday' => ['nullable', 'boolean'],
             // 'is_float' => ['nullable'],
         ];
     }

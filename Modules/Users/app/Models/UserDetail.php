@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class UserDetail extends Model
 {
     protected $guarded = [];
+
+    protected $casts = [
+        'works_on_saturday' => 'boolean',
+    ];
+
     use HasFactory;
     public function user()
     {

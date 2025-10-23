@@ -74,6 +74,11 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     formData.append('gender', emp.gender);
     formData.append('role', emp.role?.name.toString() || ''); 
     formData.append('is_part_time', emp.is_part_time ? '1' : '0');
+    if (emp.works_on_saturday === null || emp.works_on_saturday === undefined) {
+      formData.append('works_on_saturday', '');
+    } else {
+      formData.append('works_on_saturday', emp.works_on_saturday ? '1' : '0');
+    }
 
 
     // emp.roles.forEach((role, index) => formData.append(`roles[${index}]`, role));
@@ -120,6 +125,11 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     formData.append('gender', emp.gender || '');
     formData.append('role', emp.role?.name.toString() || ''); 
     formData.append('is_part_time', emp.is_part_time ? '1' : '0');
+    if (emp.works_on_saturday === null || emp.works_on_saturday === undefined) {
+      formData.append('works_on_saturday', '');
+    } else {
+      formData.append('works_on_saturday', emp.works_on_saturday ? '1' : '0');
+    }
 
     // emp.roles.forEach((role, index) => formData.append(`roles[${index}]`, role));
     emp.location_id.forEach((id, index) => formData.append(`location_id[${index}]`, id.toString()));
