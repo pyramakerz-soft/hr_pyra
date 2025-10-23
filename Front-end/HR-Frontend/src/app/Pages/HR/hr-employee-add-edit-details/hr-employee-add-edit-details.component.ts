@@ -62,9 +62,7 @@ export class HrEmployeeAddEditDetailsComponent {
   private fullTimeWorkTypeId: number | null = null;
   private readonly standardWorkTypeNames = ['full time', 'part time'];
 
-  employee: AddEmployee = new AddEmployee(null,
-    null, '', '', null, null, null, '', '', '', '', '', '', null, null, null, null, null, null, null, '',null, [], [], [], [], false
-  );
+  employee: AddEmployee = new AddEmployee();
 
    regexPhone = /^\d{11,}$/;
 

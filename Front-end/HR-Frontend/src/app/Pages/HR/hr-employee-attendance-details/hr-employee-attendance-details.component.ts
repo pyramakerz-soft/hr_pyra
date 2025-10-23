@@ -28,33 +28,7 @@ export class HrEmployeeAttendanceDetailsComponent {
   UserID: number = 1;
   DisplayPagginationOrNot: boolean = true;
   SelectedDate: string = ""
-  employee: AddEmployee = new AddEmployee(
-    null,
-    null,
-    '',
-    '',
-    null,
-    null,
-    null,
-    '',
-    '',
-    '',
-    '',
-    '',
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    '',
-    null,
-    [1],
-    [],
-    [],
-    [],
-    false,
-  );
+  employee: AddEmployee = new AddEmployee();
 
   isDateSelected = false
   rowNumber: boolean[] = [];

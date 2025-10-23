@@ -15,35 +15,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class HrEmployeeDetailsComponent {
   empId:number|null = null
-  employee: AddEmployee = new AddEmployee(
-    null, // timezone_id
-    null, // image
-    '', // name
-    '', // code
-    null, // department_id
-    null, // sub_department_id
-    null, // deparment_name
-    '', // emp_type
-    '', // phone
-    '', // contact_phone
-    '', // email
-    '', // password
-    '', // national_id
-    null, // hiring_date
-    null, // salary
-    null, // overtime_hours
-    null, // working_hours_day
-    null, // max_monthly_hours
-    null, // start_time
-    null, // end_time
-    '', // gender
-    null, // role
-    [1], // location_id
-    [], // location
-    [], // work_type_id
-    [], // work_type_name
-    false, // work_home
-  );
+  employee: AddEmployee = new AddEmployee();
 
   password:string =""
   PasswordError: string = ""; 
