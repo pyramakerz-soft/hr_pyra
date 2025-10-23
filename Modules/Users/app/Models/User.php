@@ -41,7 +41,8 @@ class User extends Authenticatable implements JWTSubject
         'serial_number',
         'mob',
         'sub_department_id',
-        'timezone_id'
+        'timezone_id',
+        'is_part_time'
     ];
 
     /**
