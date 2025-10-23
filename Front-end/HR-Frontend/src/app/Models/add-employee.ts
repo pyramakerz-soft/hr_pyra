@@ -29,6 +29,7 @@ export class AddEmployee {
         public work_type_id: number[] = [],
         public work_type_name: string[] = [],
         public work_home: boolean = false,
+        public is_part_time: boolean = false,
         // public is_float: number
     ) {}
 }

@@ -149,7 +149,10 @@ class UserClocksExport implements WithMultipleSheets
                 ->filter()
                 ->values()
                 ->all();
-            $isPartTime = in_array('part time', $userWorkTypes, true);
+            $isPartTime = (bool) ($user->is_part_time ?? false);
+            if (! $isPartTime) {
+                $isPartTime = in_array('part time', $userWorkTypes, true);
+            }
 
             $resolvedPlan = $planResolver->resolveForUser($user);
             $deductionEngine = new DeductionRuleEngine($resolvedPlan);

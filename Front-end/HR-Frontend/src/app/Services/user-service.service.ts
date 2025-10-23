@@ -73,6 +73,7 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     formData.append('end_time', emp.end_time || '');
     formData.append('gender', emp.gender);
     formData.append('role', emp.role?.name.toString() || ''); 
+    formData.append('is_part_time', emp.is_part_time ? '1' : '0');
 
 
     // emp.roles.forEach((role, index) => formData.append(`roles[${index}]`, role));
@@ -113,10 +114,12 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     formData.append('salary', emp.salary?.toString() || '');
     formData.append('overtime_hours', emp.overtime_hours?.toString() || '');
     formData.append('working_hours_day', emp.working_hours_day?.toString() || '');
+    formData.append('max_monthly_hours', emp.max_monthly_hours !== null && emp.max_monthly_hours !== undefined ? emp.max_monthly_hours.toString() : '');
     formData.append('start_time', emp.start_time || '');
     formData.append('end_time', emp.end_time || '');
     formData.append('gender', emp.gender || '');
     formData.append('role', emp.role?.name.toString() || ''); 
+    formData.append('is_part_time', emp.is_part_time ? '1' : '0');
 
     // emp.roles.forEach((role, index) => formData.append(`roles[${index}]`, role));
     emp.location_id.forEach((id, index) => formData.append(`location_id[${index}]`, id.toString()));

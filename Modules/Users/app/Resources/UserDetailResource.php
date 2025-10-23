@@ -66,6 +66,7 @@ class UserDetailResource extends JsonResource
             'work_type_id' => $this->user->work_types->pluck('id'),
             'work_type_name' => $this->user->work_types->pluck('name'),
             'work_home' => $work_home,
+            'is_part_time' => (bool) ($this->user->is_part_time ?? false),
         ];
     }
 }

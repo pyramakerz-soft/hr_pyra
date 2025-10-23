@@ -528,6 +528,7 @@ private function formatPagination($users)
             'sub_department_id' => $request['sub_department_id'],
             'timezone_id' => $request['timezone_id'],
 
+            'is_part_time' => (bool) ($request['is_part_time'] ?? false),
 
             'image' => $imageUrl,
             'serial_number' => null,
@@ -771,6 +772,7 @@ private function formatPagination($users)
             'sub_department_id' => $sub_department_id,
             'timezone_id' => $request['timezone_id'] ?? $user->timezone_id,
 
+            'is_part_time' => $request->has('is_part_time') ? (bool) $request['is_part_time'] : $user->is_part_time,
             'image' => $imageUrl,
         ]);
 

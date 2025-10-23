@@ -345,6 +345,14 @@ onSubDepartmentChange() {
       const parsed = parseFloat(rawMonthly);
       this.employee.max_monthly_hours = Number.isFinite(parsed) ? parsed : null;
     }
+
+    const rawIsPartTime = (this.employee as any).is_part_time;
+    if (typeof rawIsPartTime === 'string') {
+      const normalized = rawIsPartTime.toLowerCase();
+      this.employee.is_part_time = normalized === 'true' || normalized === '1';
+    } else {
+      this.employee.is_part_time = Boolean(rawIsPartTime);
+    }
   }
 
   onWorkTypeSelected(workTypeId: number | null): void {
@@ -361,7 +369,7 @@ onSubDepartmentChange() {
   }
 
   isPartTimeSelected(): boolean {
-    return this.selectedWorkTypeId !== null && this.partTimeWorkTypeId !== null && this.selectedWorkTypeId === this.partTimeWorkTypeId;
+    return this.employee.is_part_time === true;
   }
 
   onMaxMonthlyHoursChange(value: any): void {
@@ -374,6 +382,14 @@ onSubDepartmentChange() {
       this.employee.max_monthly_hours = Number.isFinite(parsed) ? parsed : null;
     }
 
+    this.updatePartTimeValidationState();
+  }
+
+  onEmploymentTypeChange(value: boolean): void {
+    this.employee.is_part_time = value;
+    if (!value) {
+      this.employee.max_monthly_hours = null;
+    }
     this.updatePartTimeValidationState();
   }
 
@@ -980,8 +996,8 @@ onSubDepartmentChange() {
 
 SaveEmployee() {
     this.employee.work_type_id = this.selectedWorkTypeId !== null ? [this.selectedWorkTypeId] : [];
-    if (!this.isPartTimeSelected()) {
-        this.employee.max_monthly_hours = this.employee.max_monthly_hours ?? null;
+    if (!this.employee.is_part_time) {
+        this.employee.max_monthly_hours = null;
     }
 
     if (this.isFormValid()) {

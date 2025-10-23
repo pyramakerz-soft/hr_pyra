@@ -85,6 +85,34 @@
 
                     <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">
+                            Employment Type
+                        </label>
+                        <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl flex flex-col md:flex-row gap-3">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="employmentType"
+                                    [ngModel]="employee.is_part_time"
+                                    [ngModelOptions]="{standalone: true}"
+                                    [ngValue]="false"
+                                    (ngModelChange)="onEmploymentTypeChange($event)">
+                                <span class="text-sm">Full Time</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="employmentType"
+                                    [ngModel]="employee.is_part_time"
+                                    [ngModelOptions]="{standalone: true}"
+                                    [ngValue]="true"
+                                    (ngModelChange)="onEmploymentTypeChange($event)">
+                                <span class="text-sm">Part Time</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 text-xs md:text-sm" *ngIf="isPartTimeSelected()">
+                        <label class="font-semibold block mb-2 md:mb-3">
                             Monthly Hour Limit
                             <span *ngIf="validationErrors['max_monthly_hours']" class="text-red-500 ml-3 font-normal">
                                 {{ validationErrors['max_monthly_hours'] }}
@@ -99,7 +127,7 @@
                             (ngModelChange)="onMaxMonthlyHoursChange($event)"
                             placeholder="Enter maximum working hours per month">
                         <p class="text-[10px] md:text-xs text-[#8E8E93] mt-1">
-                            Required for part-time employees; optional for full-time staff if you need to enforce a cap.
+                            Required for part-time employees to cap their total working hours in the month.
                         </p>
                     </div>
                
