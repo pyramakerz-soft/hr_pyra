@@ -92,20 +92,16 @@
                                 <input
                                     type="radio"
                                     name="employmentType"
-                                    [ngModel]="employee.is_part_time"
-                                    [ngModelOptions]="{standalone: true}"
-                                    [ngValue]="false"
-                                    (ngModelChange)="onEmploymentTypeChange($event)">
+                                    [checked]="!employee.is_part_time"
+                                    (change)="onEmploymentTypeChange(false)">
                                 <span class="text-sm">Full Time</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input
                                     type="radio"
                                     name="employmentType"
-                                    [ngModel]="employee.is_part_time"
-                                    [ngModelOptions]="{standalone: true}"
-                                    [ngValue]="true"
-                                    (ngModelChange)="onEmploymentTypeChange($event)">
+                                    [checked]="employee.is_part_time"
+                                    (change)="onEmploymentTypeChange(true)">
                                 <span class="text-sm">Part Time</span>
                             </label>
                         </div>
