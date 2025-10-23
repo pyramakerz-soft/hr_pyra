@@ -245,6 +245,100 @@ class DeductionRuleTemplateSeeder extends Seeder
                 ],
                 'is_active' => false,
             ],
+            [
+                'key' => 'flexible_arrival_window',
+                'name' => 'Flexible Arrival Window (7AM-11AM)',
+                'category' => 'lateness',
+                'scope' => 'daily',
+                'description' => 'Allow arrivals between 7:00 and 10:00 with no deduction if the full shift is worked, deduct 1 hour when arriving between 10:00-11:00, and half-day after 11:00.',
+                'rule' => [
+                    [
+                        'label' => 'Flexible Arrival: 07:00-10:00 (Full Shift)',
+                        'category' => 'lateness',
+                        'scope' => 'daily',
+                        'when' => [
+                            'first_clock_in_between' => ['07:00', '10:00'],
+                            'worked_minutes_meets_expected' => true,
+                        ],
+                        'penalty' => [
+                            'type' => 'fixed_minutes',
+                            'value' => 0,
+                        ],
+                        'notes' => 'Clocked in at {{metrics.first_clock_in_time}} and completed expected minutes => no deduction.',
+                        'color' => '#C6EFCE',
+                        'stop_processing' => true,
+                        'meta' => [
+                            'template_key' => 'flexible_arrival_window',
+                            'band' => '07-10_full_shift',
+                        ],
+                    ],
+                    [
+                        'label' => 'Flexible Arrival: 10:00-11:00 (1 Hour)',
+                        'category' => 'lateness',
+                        'scope' => 'daily',
+                        'when' => [
+                            'first_clock_in_gt' => '10:00',
+                            'first_clock_in_lte' => '11:00',
+                        ],
+                        'penalty' => [
+                            'type' => 'fixed_hours',
+                            'value' => 1,
+                        ],
+                        'notes' => 'Clocked in at {{metrics.first_clock_in_time}} => deduct 1 hour.',
+                        'color' => '#FFC7CE',
+                        'stop_processing' => true,
+                        'meta' => [
+                            'template_key' => 'flexible_arrival_window',
+                            'band' => '10-11_one_hour',
+                        ],
+                    ],
+                    [
+                        'label' => 'Flexible Arrival: After 11:00 (Half Day)',
+                        'category' => 'lateness',
+                        'scope' => 'daily',
+                        'when' => [
+                            'first_clock_in_gt' => '11:00',
+                        ],
+                        'penalty' => [
+                            'type' => 'fraction_day',
+                            'value' => 0.5,
+                        ],
+                        'notes' => 'Clocked in at {{metrics.first_clock_in_time}} => half-day deduction.',
+                        'color' => '#FFC7CE',
+                        'stop_processing' => true,
+                        'meta' => [
+                            'template_key' => 'flexible_arrival_window',
+                            'band' => 'after-11_half_day',
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'key' => 'part_time_monthly_limit',
+                'name' => 'Part-Time Monthly Limit',
+                'category' => 'deduction',
+                'scope' => 'daily',
+                'description' => 'Monitors part-time employees against their monthly hour cap and deducts excess minutes.',
+                'rule' => [
+                    'label' => 'Part-Time Monthly Cap Exceeded',
+                    'category' => 'deduction',
+                    'scope' => 'daily',
+                    'when' => [
+                        'is_part_time' => true,
+                        'part_time_exceeds_month_limit' => true,
+                    ],
+                    'penalty' => [
+                        'type' => 'metric_minutes',
+                        'metric' => 'part_time_excess_minutes',
+                    ],
+                    'notes' => 'Exceeded monthly limit by {{metrics.part_time_excess_minutes}} minutes (limit {{metrics.part_time_monthly_limit_minutes}}).',
+                    'color' => '#FFC7CE',
+                    'stop_processing' => false,
+                    'meta' => [
+                        'template_key' => 'part_time_monthly_limit',
+                    ],
+                ],
+            ],
         ];
 
         foreach ($templates as $templateData) {

@@ -2,6 +2,7 @@
 
 namespace Modules\Clocks\Support;
 
+use Carbon\Carbon;
 use Illuminate\Support\Arr;
 
 class DeductionRuleEngine
@@ -266,6 +267,163 @@ class DeductionRuleEngine
                         return false;
                     }
                     break;
+                case 'expected_schedule_source_in':
+                    $allowedSources = array_filter(array_map('strtolower', Arr::wrap($value)));
+                    $actualSource = strtolower((string) ($metrics['expected_schedule_source'] ?? ''));
+                    if (empty($allowedSources) || $actualSource === '' || ! in_array($actualSource, $allowedSources, true)) {
+                        return false;
+                    }
+                    break;
+                case 'expected_schedule_source_not_in':
+                    $blockedSources = array_filter(array_map('strtolower', Arr::wrap($value)));
+                    $actualSource = strtolower((string) ($metrics['expected_schedule_source'] ?? ''));
+                    if ($actualSource !== '' && ! empty($blockedSources) && in_array($actualSource, $blockedSources, true)) {
+                        return false;
+                    }
+                    break;
+                case 'expected_minutes_gte':
+                    if (($metrics['expected_minutes'] ?? 0) < (float) $value) {
+                        return false;
+                    }
+                    break;
+                case 'expected_minutes_gt':
+                    if (($metrics['expected_minutes'] ?? 0) <= (float) $value) {
+                        return false;
+                    }
+                    break;
+                case 'expected_minutes_lte':
+                    if (($metrics['expected_minutes'] ?? 0) > (float) $value) {
+                        return false;
+                    }
+                    break;
+                case 'expected_minutes_lt':
+                    if (($metrics['expected_minutes'] ?? 0) >= (float) $value) {
+                        return false;
+                    }
+                    break;
+                case 'first_clock_in_gte':
+                case 'first_clock_in_gt':
+                case 'first_clock_in_lte':
+                case 'first_clock_in_lt':
+                    $clockInMinutes = $metrics['first_clock_in_minutes'] ?? null;
+                    if ($clockInMinutes === null) {
+                        return false;
+                    }
+                    $threshold = $this->normalizeTimeToMinutes($value);
+                    if ($threshold === null) {
+                        return false;
+                    }
+
+                    switch ($key) {
+                        case 'first_clock_in_gte':
+                            if ($clockInMinutes < $threshold) {
+                                return false;
+                            }
+                            break;
+                        case 'first_clock_in_gt':
+                            if ($clockInMinutes <= $threshold) {
+                                return false;
+                            }
+                            break;
+                        case 'first_clock_in_lte':
+                            if ($clockInMinutes > $threshold) {
+                                return false;
+                            }
+                            break;
+                        case 'first_clock_in_lt':
+                            if ($clockInMinutes >= $threshold) {
+                                return false;
+                            }
+                            break;
+                    }
+                    break;
+                case 'first_clock_in_between':
+                    $clockInMinutes = $metrics['first_clock_in_minutes'] ?? null;
+                    if ($clockInMinutes === null) {
+                        return false;
+                    }
+
+                    $range = Arr::wrap($value);
+                    if (count($range) < 2) {
+                        return false;
+                    }
+
+                    $startMinutes = $this->normalizeTimeToMinutes($range[0]);
+                    $endMinutes = $this->normalizeTimeToMinutes($range[1]);
+                    if ($startMinutes === null || $endMinutes === null) {
+                        return false;
+                    }
+
+                    if ($startMinutes <= $endMinutes) {
+                        if ($clockInMinutes < $startMinutes || $clockInMinutes > $endMinutes) {
+                            return false;
+                        }
+                    } else {
+                        if ($clockInMinutes > $endMinutes && $clockInMinutes < $startMinutes) {
+                            return false;
+                        }
+                    }
+                    break;
+                case 'worked_minutes_meets_expected':
+                    if ((bool) ($metrics['worked_minutes_meets_expected'] ?? false) !== (bool) $value) {
+                        return false;
+                    }
+                    break;
+                case 'worked_minutes_meets_required':
+                    if ((bool) ($metrics['worked_minutes_meets_required'] ?? false) !== (bool) $value) {
+                        return false;
+                    }
+                    break;
+                case 'is_part_time':
+                    if ((bool) ($metrics['is_part_time'] ?? false) !== (bool) $value) {
+                        return false;
+                    }
+                    break;
+                case 'overtime_locked':
+                    if ((bool) ($metrics['overtime_locked'] ?? false) !== (bool) $value) {
+                        return false;
+                    }
+                    break;
+                case 'part_time_exceeds_month_limit':
+                    if ((bool) ($metrics['part_time_exceeds_month_limit'] ?? false) !== (bool) $value) {
+                        return false;
+                    }
+                    break;
+                case 'part_time_excess_minutes_gte':
+                    if (($metrics['part_time_excess_minutes'] ?? 0) < (float) $value) {
+                        return false;
+                    }
+                    break;
+                case 'part_time_excess_minutes_gt':
+                    if (($metrics['part_time_excess_minutes'] ?? 0) <= (float) $value) {
+                        return false;
+                    }
+                    break;
+                case 'part_time_excess_minutes_lte':
+                    if (($metrics['part_time_excess_minutes'] ?? 0) > (float) $value) {
+                        return false;
+                    }
+                    break;
+                case 'part_time_excess_minutes_lt':
+                    if (($metrics['part_time_excess_minutes'] ?? 0) >= (float) $value) {
+                        return false;
+                    }
+                    break;
+                case 'part_time_monthly_worked_before_gte':
+                    if (($metrics['part_time_monthly_worked_before'] ?? 0) < (float) $value) {
+                        return false;
+                    }
+                    break;
+                case 'part_time_monthly_worked_after_gte':
+                    if (($metrics['part_time_monthly_worked_after'] ?? 0) < (float) $value) {
+                        return false;
+                    }
+                    break;
+                case 'part_time_monthly_limit_minutes_gte':
+                    if (($metrics['part_time_monthly_limit_minutes'] ?? 0) < (float) $value) {
+                        return false;
+                    }
+                    break;
                 default:
                     // Unknown condition keys are ignored to keep rules forward compatible.
                     break;
@@ -273,6 +431,44 @@ class DeductionRuleEngine
         }
 
         return true;
+    }
+
+    protected function normalizeTimeToMinutes($value): ?int
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (is_int($value) || is_float($value) || (is_string($value) && is_numeric($value))) {
+            return (int) round((float) $value);
+        }
+
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+        if ($value === '') {
+            return null;
+        }
+
+        foreach (['H:i:s', 'H:i'] as $format) {
+            try {
+                $time = Carbon::createFromFormat($format, $value);
+                if ($time !== false) {
+                    return ($time->hour * 60) + $time->minute;
+                }
+            } catch (\Throwable $throwable) {
+                // Ignore and try next format.
+            }
+        }
+
+        try {
+            $time = Carbon::parse($value);
+            return ($time->hour * 60) + $time->minute;
+        } catch (\Throwable $throwable) {
+            return null;
+        }
     }
 
     protected function penaltyToMinutes(array $penalty, array $metrics, int $occurrence = 1): int
@@ -301,6 +497,16 @@ class DeductionRuleEngine
                 return max(0, (int) round($metrics['lateness_minutes_actual'] ?? 0));
             case 'lateness_beyond_grace':
                 return max(0, (int) round($metrics['lateness_beyond_grace'] ?? 0));
+            case 'metric_minutes':
+                $metricKey = is_string($penalty['metric'] ?? null) ? $penalty['metric'] : null;
+                if ($metricKey === null) {
+                    return 0;
+                }
+                $metricValue = $metrics[$metricKey] ?? 0;
+                if ($metricValue === null) {
+                    return 0;
+                }
+                return (int) round((float) $metricValue);
             case 'fixed_minutes':
             default:
                 return (int) round((float) ($value ?? 0));

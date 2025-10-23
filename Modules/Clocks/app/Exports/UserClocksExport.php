@@ -10,6 +10,7 @@ use Modules\Clocks\Exports\Sheets\UserClocksAggregatedSheet;
 use Modules\Clocks\Exports\Sheets\UserClocksDetailedSheet;
 use Modules\Clocks\Exports\Sheets\UserClocksSummarySheet;
 use Modules\Clocks\Exports\Sheets\UserClocksPlanSheet;
+use Modules\Clocks\Models\ClockInOut;
 use Modules\Clocks\Models\UserClockOvertime;
 use Modules\Users\Models\User;
 use Modules\Users\Models\CustomVacation;
@@ -148,6 +149,7 @@ class UserClocksExport implements WithMultipleSheets
                 ->filter()
                 ->values()
                 ->all();
+            $isPartTime = in_array('part time', $userWorkTypes, true);
 
             $resolvedPlan = $planResolver->resolveForUser($user);
             $deductionEngine = new DeductionRuleEngine($resolvedPlan);
@@ -175,6 +177,14 @@ class UserClocksExport implements WithMultipleSheets
                 $workingHoursDay = 8;
             }
             $requiredMinutesPerDay = (int) round($workingHoursDay * 60);
+            $partTimeMaxMonthlyMinutes = null;
+            if ($isPartTime) {
+                $maxMonthlyHours = $userDetail->max_monthly_hours;
+                if ($maxMonthlyHours !== null) {
+                    $partTimeMaxMonthlyMinutes = (int) round(((float) $maxMonthlyHours) * 60);
+                }
+            }
+            $partTimeRunningMonthlyMinutes = 0;
             $scheduledStartTime = $userDetail->start_time
                 ?? optional($user->subDepartment)->flexible_start_time
                 ?? ($department?->flexible_start_time ?? null)
@@ -371,12 +381,14 @@ class UserClocksExport implements WithMultipleSheets
                 }
 
                 $hasIssue = false;
-                $issueColumns = [];                $workedMinutes = 0;
+                $issueColumns = [];
+                $workedMinutes = 0;
                 $earliestIn = null;
                 $latestOut = null;
                 $firstLocIn = '';
                 $lastLocOut = '';
                 $segments = [];
+                $baselineClockForSchedule = null;
 
                 if ($dailyClocks->isNotEmpty()) {
                     foreach ($dailyClocks as $clock) {
@@ -404,6 +416,7 @@ class UserClocksExport implements WithMultipleSheets
 
                         if ($clockIn && (! $earliestIn || $clockIn->lt($earliestIn))) {
                             $earliestIn = $clockIn->copy();
+                            $baselineClockForSchedule = $clock;
                             $firstLocIn = $clock->location_type === 'float'
                                 ? ($clock->address_clock_in ?? '')
                                 : ($clock->location_type === 'home'
@@ -427,11 +440,29 @@ class UserClocksExport implements WithMultipleSheets
                     }
                 }
 
+                $earliestInLocal = $earliestIn ? $earliestIn->copy()->setTimezone($userTimezoneName) : null;
+                $latestOutLocal = $latestOut ? $latestOut->copy()->setTimezone($userTimezoneName) : null;
+
+                $effectiveSchedule = $this->resolveEffectiveSchedule(
+                    $user,
+                    $baselineClockForSchedule,
+                    $localDate,
+                    $userTimezoneName,
+                    $scheduledStartTime,
+                    $requiredMinutesPerDay,
+                    $isFlexibleSchedule
+                );
+
+                $scheduledStartLocal = $effectiveSchedule['start'];
+                $scheduledEndLocal = $effectiveSchedule['end'];
+                $expectedScheduledMinutes = $effectiveSchedule['minutes'];
+                $scheduleSource = $effectiveSchedule['source'] ?? 'default';
+
                 $isFriday = $localDate->isFriday();
                 $isSaturday = $localDate->isSaturday();
                 $isNonWorkingWeekend = $isFriday || ($isSaturday && ! $worksOnSaturday);
 
-                $requiredMinutes = $isNonWorkingWeekend ? 0 : $requiredMinutesPerDay;
+                $requiredMinutes = $isNonWorkingWeekend ? 0 : $expectedScheduledMinutes;
                 $totalRequiredMinutes += $requiredMinutes;
 
                 if ($hasIssue) {
@@ -441,21 +472,11 @@ class UserClocksExport implements WithMultipleSheets
 
                 $latenessBeyondGrace = 0;
                 $latenessMinutesActual = 0;
-                if ($earliestIn && $requiredMinutes > 0) {
-                    if ($isFlexibleSchedule) {
-                        $flexibleStartTime = optional($user->subDepartment)->flexible_start_time
-                            ?? ($department->flexible_start_time ?? null);
-                        $startTimeString = $flexibleStartTime ?: ($scheduledStartTime ?? '09:00:00');
-                    } else {
-                        $startTimeString = $scheduledStartTime ?? '08:00:00';
-                    }
+                if ($earliestIn && $requiredMinutes > 0 && $scheduledStartLocal) {
+                    $baselineStartUtc = $scheduledStartLocal->copy()->setTimezone('UTC');
+                    $graceEnd = $baselineStartUtc->copy()->addMinutes($planGraceMinutes);
 
-                    $baselineStart = Carbon::parse($formattedDate . ' ' . $startTimeString, $userTimezoneName)
-                        ->setTimezone('UTC');
-
-                    $graceEnd = $baselineStart->copy()->addMinutes($planGraceMinutes);
-
-                    $diffActual = $baselineStart->diffInMinutes($earliestIn, false);
+                    $diffActual = $baselineStartUtc->diffInMinutes($earliestIn, false);
                     if ($diffActual > 0) {
                         $latenessMinutesActual = $diffActual;
                     }
@@ -464,6 +485,13 @@ class UserClocksExport implements WithMultipleSheets
                         $latenessBeyondGrace = $graceEnd->diffInMinutes($earliestIn);
                     }
                 }
+
+                $scheduledStartMinutes = $scheduledStartLocal ? ($scheduledStartLocal->hour * 60 + $scheduledStartLocal->minute) : null;
+                $scheduledEndMinutes = $scheduledEndLocal ? ($scheduledEndLocal->hour * 60 + $scheduledEndLocal->minute) : null;
+                $earliestInMinutes = $earliestInLocal ? ($earliestInLocal->hour * 60 + $earliestInLocal->minute) : null;
+                $latestOutMinutes = $latestOutLocal ? ($latestOutLocal->hour * 60 + $latestOutLocal->minute) : null;
+                $workedMeetsExpected = $expectedScheduledMinutes > 0 && $workedMinutes >= $expectedScheduledMinutes;
+                $workedMeetsRequired = $requiredMinutes > 0 && $workedMinutes >= $requiredMinutes;
 
                 $dailyExcuseMinutes = $user->excuses()->where('status', 'approved')
                     ->whereDate('date', $formattedDate)
@@ -477,6 +505,20 @@ class UserClocksExport implements WithMultipleSheets
                 $recordedOtMinutes = $overtimeRecord ? (int) $overtimeRecord->overtime_minutes : null;
                 if ($recordedOtMinutes === null) {
                     $recordedOtMinutes = $attendanceOvertimeMinutes;
+                }
+
+                $partTimeWorkedBefore = $partTimeRunningMonthlyMinutes;
+                $partTimeWorkedAfter = $partTimeWorkedBefore + $workedMinutes;
+                $partTimeExcessMinutes = 0;
+                if ($partTimeMaxMonthlyMinutes !== null && $partTimeWorkedAfter > $partTimeMaxMonthlyMinutes) {
+                    $partTimeExcessMinutes = $partTimeWorkedAfter - $partTimeMaxMonthlyMinutes;
+                }
+
+                if ($isPartTime) {
+                    $attendanceOvertimeMinutes = 0;
+                    $recordedOtMinutes = 0;
+                    $latenessMinutesActual = 0;
+                    $latenessBeyondGrace = 0;
                 }
 
                 $shortfall = max(0, $requiredMinutes - $workedMinutes);
@@ -496,6 +538,7 @@ class UserClocksExport implements WithMultipleSheets
                     'day_of_week' => strtolower($localDate->format('l')),
                     'required_minutes' => $requiredMinutes,
                     'default_daily_minutes' => $requiredMinutesPerDay,
+                    'expected_minutes' => $expectedScheduledMinutes,
                     'worked_minutes' => $workedMinutes,
                     'shortfall_minutes' => $shortfall,
                     'lateness_minutes_actual' => $latenessMinutesActual ?? 0,
@@ -506,6 +549,24 @@ class UserClocksExport implements WithMultipleSheets
                     'is_vacation' => $isVacation,
                     'location_types' => $dailyLocationTypes,
                     'user_work_types' => $userWorkTypes,
+                    'expected_schedule_start' => $scheduledStartLocal ? $scheduledStartLocal->format('H:i:s') : null,
+                    'expected_schedule_end' => $scheduledEndLocal ? $scheduledEndLocal->format('H:i:s') : null,
+                    'expected_schedule_start_minutes' => $scheduledStartMinutes,
+                    'expected_schedule_end_minutes' => $scheduledEndMinutes,
+                    'expected_schedule_source' => $scheduleSource,
+                    'first_clock_in_time' => $earliestInLocal ? $earliestInLocal->format('H:i:s') : null,
+                    'first_clock_in_minutes' => $earliestInMinutes,
+                    'last_clock_out_time' => $latestOutLocal ? $latestOutLocal->format('H:i:s') : null,
+                    'last_clock_out_minutes' => $latestOutMinutes,
+                    'worked_minutes_meets_expected' => $workedMeetsExpected,
+                    'worked_minutes_meets_required' => $workedMeetsRequired,
+                    'is_part_time' => $isPartTime,
+                    'part_time_monthly_limit_minutes' => $partTimeMaxMonthlyMinutes,
+                    'part_time_monthly_worked_before' => $isPartTime ? $partTimeWorkedBefore : null,
+                    'part_time_monthly_worked_after' => $isPartTime ? $partTimeWorkedAfter : null,
+                    'part_time_excess_minutes' => $isPartTime ? $partTimeExcessMinutes : 0,
+                    'part_time_exceeds_month_limit' => $isPartTime && $partTimeExcessMinutes > 0,
+                    'overtime_locked' => $isPartTime,
                 ];
 
 
@@ -558,6 +619,10 @@ class UserClocksExport implements WithMultipleSheets
                     }
                 } else {
                     $deductionDetailSummary = '';
+                }
+
+                if ($isPartTime) {
+                    $partTimeRunningMonthlyMinutes = $partTimeWorkedAfter;
                 }
 
                 if ($workedMinutes > 0) {
@@ -1093,6 +1158,145 @@ class UserClocksExport implements WithMultipleSheets
         }
 
         return $stats;
+    }
+
+    protected function resolveEffectiveSchedule(
+        User $user,
+        ?ClockInOut $baselineClock,
+        Carbon $localDate,
+        string $userTimezoneName,
+        ?string $scheduledStartTime,
+        int $defaultRequiredMinutes,
+        bool $isFlexibleSchedule
+    ): array {
+        $makeDateTime = static function (Carbon $date, ?string $time, string $tz): ?Carbon {
+            if ($time === null) {
+                return null;
+            }
+
+            $time = trim((string) $time);
+            if ($time === '') {
+                return null;
+            }
+
+            $dateString = $date->toDateString() . ' ' . $time;
+
+            try {
+                return Carbon::parse($dateString, $tz);
+            } catch (\Throwable $throwable) {
+                return null;
+            }
+        };
+
+        $dateForCalculation = $localDate->copy();
+        $defaultStartString = $scheduledStartTime ?: '08:00:00';
+        $defaultStart = $makeDateTime($dateForCalculation, $defaultStartString, $userTimezoneName)
+            ?? Carbon::parse($dateForCalculation->toDateString() . ' 08:00:00', $userTimezoneName);
+
+        $userDetail = optional($user->user_detail);
+        $defaultEndString = $userDetail->end_time ?? null;
+        $defaultEnd = $defaultEndString
+            ? $makeDateTime($dateForCalculation, $defaultEndString, $userTimezoneName)
+            : null;
+
+        if (! $defaultEnd) {
+            $minutes = $defaultRequiredMinutes > 0 ? $defaultRequiredMinutes : 480;
+            $defaultEnd = $defaultStart->copy()->addMinutes($minutes);
+        }
+
+        $defaultMinutes = $defaultEnd->diffInMinutes($defaultStart);
+        if ($defaultMinutes <= 0) {
+            $defaultMinutes = $defaultRequiredMinutes > 0 ? $defaultRequiredMinutes : 480;
+            $defaultEnd = $defaultStart->copy()->addMinutes($defaultMinutes);
+        }
+
+        $start = $defaultStart->copy();
+        $end = $defaultEnd->copy();
+        $source = 'default';
+        $startAdjusted = false;
+        $endAdjusted = false;
+
+        if ($baselineClock instanceof ClockInOut) {
+            $baselineClock->loadMissing('location');
+
+            $locationType = strtolower((string) $baselineClock->location_type);
+            if ($locationType === 'site') {
+                $location = $baselineClock->location;
+                $locationStart = $location ? $makeDateTime($dateForCalculation, $location->start_time ?? null, $userTimezoneName) : null;
+                $locationEnd = $location ? $makeDateTime($dateForCalculation, $location->end_time ?? null, $userTimezoneName) : null;
+
+                if ($locationStart) {
+                    $start = $locationStart;
+                    $startAdjusted = true;
+                }
+
+                if ($locationEnd) {
+                    $end = $locationEnd;
+                    $endAdjusted = true;
+                }
+
+                if ($locationStart || $locationEnd) {
+                    $source = 'location_site';
+                }
+            } elseif ($locationType === 'home') {
+                $homeStart = $makeDateTime($dateForCalculation, $userDetail->start_time ?? null, $userTimezoneName);
+                $homeEnd = $makeDateTime($dateForCalculation, $userDetail->end_time ?? null, $userTimezoneName);
+
+                if ($homeStart) {
+                    $start = $homeStart;
+                    $startAdjusted = true;
+                }
+
+                if ($homeEnd) {
+                    $end = $homeEnd;
+                    $endAdjusted = true;
+                }
+
+                if ($homeStart || $homeEnd) {
+                    $source = 'home_detail';
+                }
+            }
+        }
+
+        if ($source === 'default' && $isFlexibleSchedule) {
+            $flexibleStartTime = optional($user->subDepartment)->flexible_start_time
+                ?? optional($user->department)->flexible_start_time
+                ?? null;
+
+            $flexibleStart = $makeDateTime($dateForCalculation, $flexibleStartTime, $userTimezoneName);
+            if ($flexibleStart) {
+                $start = $flexibleStart;
+                $source = 'flexible';
+                $startAdjusted = true;
+            }
+        }
+
+        if ($startAdjusted && ! $endAdjusted) {
+            $end = $start->copy()->addMinutes($defaultMinutes);
+            $endAdjusted = true;
+        }
+
+        if (! $end) {
+            $end = $start->copy()->addMinutes($defaultMinutes);
+        }
+
+        if ($end->lessThanOrEqualTo($start)) {
+            $end = $start->copy()->addMinutes($defaultMinutes);
+        }
+
+        $minutes = $end->diffInMinutes($start);
+        if ($minutes <= 0) {
+            $minutes = $defaultMinutes > 0 ? $defaultMinutes : $defaultRequiredMinutes;
+            $minutes = max(0, (int) $minutes);
+            $end = $start->copy()->addMinutes($minutes);
+        }
+
+        return [
+            'start' => $start,
+            'end' => $end,
+            'minutes' => (int) max(0, $minutes),
+            'source' => $source,
+        ];
     }
 
     protected function computeAttendanceOvertimeMinutes(int $dailyWorkedMinutes, ?string $date = null): int
