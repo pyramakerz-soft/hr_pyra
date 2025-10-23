@@ -177,14 +177,6 @@ class UserClocksExport implements WithMultipleSheets
                 $workingHoursDay = 8;
             }
             $requiredMinutesPerDay = (int) round($workingHoursDay * 60);
-            $partTimeMaxMonthlyMinutes = null;
-            if ($isPartTime) {
-                $maxMonthlyHours = $userDetail->max_monthly_hours;
-                if ($maxMonthlyHours !== null) {
-                    $partTimeMaxMonthlyMinutes = (int) round(((float) $maxMonthlyHours) * 60);
-                }
-            }
-            $partTimeRunningMonthlyMinutes = 0;
             $scheduledStartTime = $userDetail->start_time
                 ?? optional($user->subDepartment)->flexible_start_time
                 ?? ($department?->flexible_start_time ?? null)
@@ -507,13 +499,6 @@ class UserClocksExport implements WithMultipleSheets
                     $recordedOtMinutes = $attendanceOvertimeMinutes;
                 }
 
-                $partTimeWorkedBefore = $partTimeRunningMonthlyMinutes;
-                $partTimeWorkedAfter = $partTimeWorkedBefore + $workedMinutes;
-                $partTimeExcessMinutes = 0;
-                if ($partTimeMaxMonthlyMinutes !== null && $partTimeWorkedAfter > $partTimeMaxMonthlyMinutes) {
-                    $partTimeExcessMinutes = $partTimeWorkedAfter - $partTimeMaxMonthlyMinutes;
-                }
-
                 if ($isPartTime) {
                     $attendanceOvertimeMinutes = 0;
                     $recordedOtMinutes = 0;
@@ -561,24 +546,26 @@ class UserClocksExport implements WithMultipleSheets
                     'worked_minutes_meets_expected' => $workedMeetsExpected,
                     'worked_minutes_meets_required' => $workedMeetsRequired,
                     'is_part_time' => $isPartTime,
-                    'part_time_monthly_limit_minutes' => $partTimeMaxMonthlyMinutes,
-                    'part_time_monthly_worked_before' => $isPartTime ? $partTimeWorkedBefore : null,
-                    'part_time_monthly_worked_after' => $isPartTime ? $partTimeWorkedAfter : null,
-                    'part_time_excess_minutes' => $isPartTime ? $partTimeExcessMinutes : 0,
-                    'part_time_exceeds_month_limit' => $isPartTime && $partTimeExcessMinutes > 0,
                     'overtime_locked' => $isPartTime,
                 ];
 
+                $appliedRules = [];
+                $planMonetaryDeduction = 0.0;
+                $rawDeductionMinutes = 0;
 
-                $evaluation = $deductionEngine->evaluate($evaluationMetrics, $ruleState);
-                $appliedRules = $evaluation['applied_rules'] ?? [];
-                $planMonetaryDeduction = $evaluation['monetary_amount'] ?? 0.0;
-                $totalPlanMonetaryAmount += $planMonetaryDeduction;
-                $rawDeductionMinutes = $hasIssue ? 0 : (int) ($evaluation['deduction_minutes'] ?? 0);
+                if (! $isPartTime) {
+                    $evaluation = $deductionEngine->evaluate($evaluationMetrics, $ruleState);
+                    $appliedRules = $evaluation['applied_rules'] ?? [];
+                    $planMonetaryDeduction = $evaluation['monetary_amount'] ?? 0.0;
+                    $totalPlanMonetaryAmount += $planMonetaryDeduction;
+                    $rawDeductionMinutes = $hasIssue ? 0 : (int) ($evaluation['deduction_minutes'] ?? 0);
 
-                if ($hasIssue) {
-                    $latenessBeyondGrace = 0;
-                } elseif ($rawDeductionMinutes === 0) {
+                    if ($hasIssue) {
+                        $latenessBeyondGrace = 0;
+                    } elseif ($rawDeductionMinutes === 0) {
+                        $latenessBeyondGrace = 0;
+                    }
+                } else {
                     $latenessBeyondGrace = 0;
                 }
 
@@ -619,10 +606,6 @@ class UserClocksExport implements WithMultipleSheets
                     }
                 } else {
                     $deductionDetailSummary = '';
-                }
-
-                if ($isPartTime) {
-                    $partTimeRunningMonthlyMinutes = $partTimeWorkedAfter;
                 }
 
                 if ($workedMinutes > 0) {

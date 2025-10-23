@@ -29,7 +29,32 @@ export class HrEmployeeAttendanceDetailsComponent {
   DisplayPagginationOrNot: boolean = true;
   SelectedDate: string = ""
   employee: AddEmployee = new AddEmployee(
-    null, null, '', '', null, null, null, '', '', '', '', '', '', null, null, null, null, null, null, '', null, [1], [], [], [], false);
+    null,
+    null,
+    '',
+    '',
+    null,
+    null,
+    null,
+    '',
+    '',
+    '',
+    '',
+    '',
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    '',
+    null,
+    [1],
+    [],
+    [],
+    [],
+    false,
+  );
 
   isDateSelected = false
   rowNumber: boolean[] = [];

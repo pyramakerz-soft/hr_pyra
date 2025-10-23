@@ -313,32 +313,6 @@ class DeductionRuleTemplateSeeder extends Seeder
                     ],
                 ],
             ],
-            [
-                'key' => 'part_time_monthly_limit',
-                'name' => 'Part-Time Monthly Limit',
-                'category' => 'deduction',
-                'scope' => 'daily',
-                'description' => 'Monitors part-time employees against their monthly hour cap and deducts excess minutes.',
-                'rule' => [
-                    'label' => 'Part-Time Monthly Cap Exceeded',
-                    'category' => 'deduction',
-                    'scope' => 'daily',
-                    'when' => [
-                        'is_part_time' => true,
-                        'part_time_exceeds_month_limit' => true,
-                    ],
-                    'penalty' => [
-                        'type' => 'metric_minutes',
-                        'metric' => 'part_time_excess_minutes',
-                    ],
-                    'notes' => 'Exceeded monthly limit by {{metrics.part_time_excess_minutes}} minutes (limit {{metrics.part_time_monthly_limit_minutes}}).',
-                    'color' => '#FFC7CE',
-                    'stop_processing' => false,
-                    'meta' => [
-                        'template_key' => 'part_time_monthly_limit',
-                    ],
-                ],
-            ],
         ];
 
         foreach ($templates as $templateData) {

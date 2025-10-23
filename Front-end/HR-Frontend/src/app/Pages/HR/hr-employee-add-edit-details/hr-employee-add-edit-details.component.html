@@ -63,33 +63,45 @@
                             <span *ngIf="validationErrors['work_type_id']" class="text-red-500 ml-3 font-normal">{{ validationErrors['work_type_id'] }}</span>
                         </label>
                         <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
-                            @if(workTypes.length !==0 ) {
-                                <div *ngFor="let work of workTypes; let i = index" class="flex items-center mb-2">
-                                    <input 
-                                        type="checkbox" 
-                                        id="workType_{{work.id}}" 
-                                        [value]="work.id" 
-                                        class="mr-2"
-                                        (change)="onWorkTypeChange(work.id, $event)"
-                                        [checked]="employee.work_type_id.includes(work.id)"
-                                        >
-                                    <label for="workType_{{work.id}}" class="text-sm">{{work.name}}</label>
+                            <ng-container *ngIf="filteredWorkTypes.length > 0; else noWorkTypes">
+                                <div class="flex flex-col gap-2">
+                                    <label *ngFor="let work of filteredWorkTypes" class="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            class="h-4 w-4"
+                                            name="workTypeSelection"
+                                            [value]="work.id"
+                                            [checked]="selectedWorkTypeId === work.id"
+                                            (change)="onWorkTypeSelected(work.id)">
+                                        <span class="text-sm">{{ work.name }}</span>
+                                    </label>
                                 </div>
-                            } @else {
+                            </ng-container>
+                            <ng-template #noWorkTypes>
                                 <div>No Data Found</div>
-                            }
-                            <!-- <div class="flex items-center">
-                                <input 
-                                    type="checkbox"
-                                    id="is_float" 
-                                    value="1" 
-                                    class="mr-2"
-                                    (change)="onIsFloatChange($event)"
-                                    [checked]="isFloatChecked">
-                                <label for="is_float" class="text-sm">Is Float</label>
-                            </div> -->
+                            </ng-template>
                         </div>
                     </div>  
+
+                    <div class="mb-4 text-xs md:text-sm">
+                        <label class="font-semibold block mb-2 md:mb-3">
+                            Monthly Hour Limit
+                            <span *ngIf="validationErrors['max_monthly_hours']" class="text-red-500 ml-3 font-normal">
+                                {{ validationErrors['max_monthly_hours'] }}
+                            </span>
+                        </label>
+                        <input
+                            type="number"
+                            min="0"
+                            step="0.25"
+                            class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl"
+                            [(ngModel)]="employee.max_monthly_hours"
+                            (ngModelChange)="onMaxMonthlyHoursChange($event)"
+                            placeholder="Enter maximum working hours per month">
+                        <p class="text-[10px] md:text-xs text-[#8E8E93] mt-1">
+                            Required for part-time employees; optional for full-time staff if you need to enforce a cap.
+                        </p>
+                    </div>
                
                  <!-- Department Dropdown -->
 <div 

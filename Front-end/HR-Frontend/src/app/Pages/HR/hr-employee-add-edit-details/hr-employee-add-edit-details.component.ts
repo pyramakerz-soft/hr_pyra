@@ -56,9 +56,14 @@ export class HrEmployeeAddEditDetailsComponent {
     { value: 'home', label: 'Home' },
     { value: 'float', label: 'Float' },
   ];
+  filteredWorkTypes: WorkType[] = [];
+  selectedWorkTypeId: number | null = null;
+  private partTimeWorkTypeId: number | null = null;
+  private fullTimeWorkTypeId: number | null = null;
+  private readonly standardWorkTypeNames = ['full time', 'part time'];
 
   employee: AddEmployee = new AddEmployee(null,
-    null, '', '', null, null, null, '', '', '', '', '', '', null, null, null, null, null, null, '',null, [], [], [], [], false
+    null, '', '', null, null, null, '', '', '', '', '', '', null, null, null, null, null, null, null, '',null, [], [], [], [], false
   );
 
    regexPhone = /^\d{11,}$/;
@@ -249,6 +254,8 @@ onSubDepartmentChange() {
     this.userService.getUserById(id).subscribe(
       (d: any) => {
         this.employee = d.User;
+        this.normalizeEmployeeCollections();
+        this.syncSelectedWorkTypeFromEmployee();
         this.selectedDepartment=this.employee.department_id
         this.selectedSubDepartment=this.employee.sub_department_id
         this.selectedTimezone=this.employee.timezone_id
@@ -279,9 +286,110 @@ onSubDepartmentChange() {
   getWorkType(){
     this.workTypeService.getall().subscribe(
       (workTypes: any) => {
-        this.workTypes = workTypes.workTypes
+        const responseWorkTypes: WorkType[] = (workTypes?.workTypes ?? []).map((work: any) => {
+          const id = Number(work.id);
+          return new WorkType(Number.isNaN(id) ? work.id : id, work.name);
+        });
+        this.workTypes = responseWorkTypes;
+        this.applyWorkTypeFilters();
+        this.syncSelectedWorkTypeFromEmployee();
       }
     );
+  }
+
+  private applyWorkTypeFilters(): void {
+    const normalized = this.workTypes.map((work) => ({
+      ...work,
+      name: work.name ?? '',
+    }));
+
+    const preferred = normalized.filter((work) =>
+      this.standardWorkTypeNames.includes(work.name.toLowerCase())
+    );
+
+    this.filteredWorkTypes = preferred.length > 0 ? preferred : normalized;
+
+    this.fullTimeWorkTypeId = this.resolveWorkTypeIdByName('full time');
+    this.partTimeWorkTypeId = this.resolveWorkTypeIdByName('part time');
+  }
+
+  private resolveWorkTypeIdByName(name: string): number | null {
+    const match = this.workTypes.find(
+      (workType) => (workType.name ?? '').toLowerCase() === name.toLowerCase()
+    );
+    return match ? Number(match.id) : null;
+  }
+
+  private syncSelectedWorkTypeFromEmployee(): void {
+    if (this.employee.work_type_id && this.employee.work_type_id.length > 0) {
+      const firstId = Number(this.employee.work_type_id[0]);
+      this.selectedWorkTypeId = Number.isNaN(firstId) ? null : firstId;
+    }
+
+    if (this.selectedWorkTypeId === null && this.fullTimeWorkTypeId !== null) {
+      this.selectedWorkTypeId = this.fullTimeWorkTypeId;
+    }
+
+    if (this.selectedWorkTypeId !== null) {
+      this.employee.work_type_id = [this.selectedWorkTypeId];
+      this.validationErrors['work_type_id'] = '';
+    }
+
+    this.updatePartTimeValidationState();
+  }
+
+  private normalizeEmployeeCollections(): void {
+    this.employee.location_id = (this.employee.location_id ?? []).map((id: any) => Number(id)).filter((id) => !Number.isNaN(id));
+    this.employee.work_type_id = (this.employee.work_type_id ?? []).map((id: any) => Number(id)).filter((id) => !Number.isNaN(id));
+
+    const rawMonthly = (this.employee as any).max_monthly_hours;
+    if (typeof rawMonthly === 'string') {
+      const parsed = parseFloat(rawMonthly);
+      this.employee.max_monthly_hours = Number.isFinite(parsed) ? parsed : null;
+    }
+  }
+
+  onWorkTypeSelected(workTypeId: number | null): void {
+    this.selectedWorkTypeId = workTypeId;
+    this.employee.work_type_id = workTypeId !== null ? [workTypeId] : [];
+
+    if (this.employee.work_type_id.length > 0) {
+      this.validationErrors['work_type_id'] = '';
+    } else {
+      this.validationErrors['work_type_id'] = '*Work Type is required.';
+    }
+
+    this.updatePartTimeValidationState();
+  }
+
+  isPartTimeSelected(): boolean {
+    return this.selectedWorkTypeId !== null && this.partTimeWorkTypeId !== null && this.selectedWorkTypeId === this.partTimeWorkTypeId;
+  }
+
+  onMaxMonthlyHoursChange(value: any): void {
+    if (value === null || value === '') {
+      this.employee.max_monthly_hours = null;
+    } else if (typeof value === 'number') {
+      this.employee.max_monthly_hours = value;
+    } else {
+      const parsed = parseFloat(value);
+      this.employee.max_monthly_hours = Number.isFinite(parsed) ? parsed : null;
+    }
+
+    this.updatePartTimeValidationState();
+  }
+
+  private updatePartTimeValidationState(): boolean {
+    if (this.isPartTimeSelected()) {
+      const limit = this.employee.max_monthly_hours;
+      if (limit === null || limit === undefined || limit <= 0) {
+        this.validationErrors['max_monthly_hours'] = '*Monthly hour limit is required for part-time employees.';
+        return false;
+      }
+    }
+
+    this.validationErrors['max_monthly_hours'] = '';
+    return true;
   }
   
   getLocations(){
@@ -315,29 +423,6 @@ onSubDepartmentChange() {
     }
   }
 
-  onWorkTypeChange(WorkType: number, event: Event) {
-    const isChecked = (event.target as HTMLInputElement).checked;
-
-    if (isChecked) {
-      if (!this.employee.work_type_id.includes(WorkType)) {
-        this.employee.work_type_id.push(WorkType);
-      }
-    } else {
-      const index = this.employee.work_type_id.indexOf(WorkType);
-      if (index > -1) {
-        this.employee.work_type_id.splice(index, 1);
-      }
-    }
-
-    if(!this.isFloatChecked){
-      if (this.employee.work_type_id.length > 0) {
-        this.validationErrors['work_type_id'] = '';
-      } else {
-        this.validationErrors['work_type_id'] = '*Work Type is required.';
-      }
-    }
-  }
-  
   // onIsFloatChange(event: Event){
   //   this.isFloatChecked = !this.isFloatChecked;
   //   if(this.isFloatChecked){
@@ -438,7 +523,7 @@ onSubDepartmentChange() {
     isValid = false;
   }
 
-        if (!this.employee[field] && field !== "code" && field !== 'work_home' && field !== "image" &&  field !== "working_hours_day" && field !== "timezone_id") {
+        if (!this.employee[field] && field !== "code" && field !== 'work_home' && field !== "image" &&  field !== "working_hours_day" && field !== "timezone_id" && field !== "max_monthly_hours") {
   
           if (this.EmployeeId !== 0) {
             continue;
@@ -623,6 +708,10 @@ onSubDepartmentChange() {
       }
     }
   
+    if (!this.updatePartTimeValidationState()) {
+      isValid = false;
+    }
+
     return isValid;
   }
   
@@ -892,6 +981,11 @@ onSubDepartmentChange() {
   }
 
 SaveEmployee() {
+    this.employee.work_type_id = this.selectedWorkTypeId !== null ? [this.selectedWorkTypeId] : [];
+    if (!this.isPartTimeSelected()) {
+        this.employee.max_monthly_hours = this.employee.max_monthly_hours ?? null;
+    }
+
     if (this.isFormValid()) {
         this.isSaved = true;
         this.employee.department_id =this.selectedDepartment==null? null:Number(this.selectedDepartment);

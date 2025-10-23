@@ -67,8 +67,8 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     formData.append('hiring_date', emp.hiring_date ? emp.hiring_date.toString() : '');
     formData.append('salary', emp.salary?.toString() || '');
     formData.append('overtime_hours', emp.overtime_hours?.toString() || '');
-    formData.append('working_hours_day', emp.working_hours_day?.toString() || ''); 
-    formData.append('working_hours_day', emp.working_hours_day?.toString() || ''); 
+    formData.append('working_hours_day', emp.working_hours_day?.toString() || '');
+    formData.append('max_monthly_hours', emp.max_monthly_hours !== null && emp.max_monthly_hours !== undefined ? emp.max_monthly_hours.toString() : '');
     formData.append('start_time', emp.start_time || '');
     formData.append('end_time', emp.end_time || '');
     formData.append('gender', emp.gender);
