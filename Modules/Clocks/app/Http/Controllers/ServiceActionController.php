@@ -171,6 +171,7 @@ class ServiceActionController extends Controller
             : Carbon::now()->startOfDay();
 
         $clockOutTime = $payload['clock_out_time'] ?? null;
+        $hasExplicitClockOut = $clockOutTime !== null;
         $defaultMinutes = (int) ($payload['default_duration_minutes'] ?? 540);
         $defaultMinutes = max(60, min($defaultMinutes, 960));
         $now = Carbon::now();
@@ -203,7 +204,7 @@ class ServiceActionController extends Controller
                         $clockOutAt = $clockInAt->copy()->addMinutes($defaultMinutes);
                     }
 
-                    if ($clockOutAt->greaterThan($now)) {
+                    if (! $hasExplicitClockOut && $clockOutAt->greaterThan($now)) {
                         $clockOutAt = $now->copy();
                     }
 

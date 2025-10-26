@@ -9,7 +9,6 @@ import { UserServiceService } from '../../../Services/user-service.service';
 import { ServiceActionService } from '../../../Services/service-action.service';
 import { Department } from '../../../Models/department';
 import { SubDepartment } from '../../../Models/sub-department';
-import { UserModel } from '../../../Models/user-model';
 import {
   ServiceActionDefinition,
   ServiceActionRecord,
@@ -31,7 +30,7 @@ export class HrServiceActionsComponent implements OnInit, OnDestroy {
   actionForm: FormGroup;
   departments: Department[] = [];
   subDepartments: SubDepartment[] = [];
-  employees: UserModel[] = [];
+  employees: Array<{ id: number; name: string }> = [];
   recentActions: ServiceActionRecord[] = [];
   executionResult: ServiceActionRecord | null = null;
   isSubmitting = false;
@@ -140,7 +139,7 @@ export class HrServiceActionsComponent implements OnInit, OnDestroy {
     }
 
     if (formValue.scope_type === 'custom') {
-      payload.user_ids = formValue.user_ids ?? [];
+      payload.user_ids = (formValue.user_ids ?? []).map((id: any) => Number(id)).filter((id: number) => !Number.isNaN(id));
     }
 
     const payloadData: any = {};
@@ -221,7 +220,12 @@ export class HrServiceActionsComponent implements OnInit, OnDestroy {
   private loadEmployees(): void {
     this.userService.getAllUsersName().subscribe((response: any) => {
       const list = response?.usersNames ?? response?.data?.usersNames ?? [];
-      this.employees = Array.isArray(list) ? list : [];
+      this.employees = (Array.isArray(list) ? list : [])
+        .map((item: any) => ({
+          id: Number(item?.id ?? item),
+          name: String(item?.name ?? item ?? ''),
+        }))
+        .filter((item) => !!item.id && item.name.trim() !== '');
     });
   }
 

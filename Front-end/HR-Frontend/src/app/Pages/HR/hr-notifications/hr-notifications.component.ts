@@ -12,7 +12,6 @@ import { UserServiceService } from '../../../Services/user-service.service';
 import { RolesService } from '../../../Services/roles.service';
 import { Department } from '../../../Models/department';
 import { SubDepartment } from '../../../Models/sub-department';
-import { UserModel } from '../../../Models/user-model';
 import { RoleModel } from '../../../Models/role-model';
 import { SystemNotificationRecord } from '../../../Models/system-notification';
 
@@ -36,7 +35,7 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
 
   departments: Department[] = [];
   subDepartments: SubDepartment[] = [];
-  employees: UserModel[] = [];
+  employees: Array<{ id: number; name: string }> = [];
   roles: RoleModel[] = [];
   notifications: SystemNotificationRecord[] = [];
 
@@ -88,7 +87,6 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
   get scopeType(): string {
     return this.notificationForm.get('scope_type')?.value ?? '';
   }
-
   onDepartmentChange(event: Event): void {
     const select = event.target as HTMLSelectElement | null;
     const departmentId = select?.value ?? '';
@@ -131,7 +129,7 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
     }
 
     if (formValue.scope_type === 'custom') {
-      payload.user_ids = formValue.user_ids ?? [];
+      payload.user_ids = (formValue.user_ids ?? []).map((id: any) => Number(id)).filter((id: number) => !Number.isNaN(id));
     }
 
     const rolesFilter = formValue.filters?.roles ?? [];
@@ -195,7 +193,12 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
   private loadEmployees(): void {
     this.userService.getAllUsersName().subscribe((response: any) => {
       const list = response?.usersNames ?? response?.data?.usersNames ?? [];
-      this.employees = Array.isArray(list) ? list : [];
+      this.employees = (Array.isArray(list) ? list : [])
+        .map((item: any) => ({
+          id: Number(item?.id ?? item),
+          name: String(item?.name ?? item ?? ''),
+        }))
+        .filter((item) => !!item.id && item.name.trim() !== '');
     });
   }
 
