@@ -21,11 +21,39 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
 {
     protected Collection $rows;
     protected array $sheetLinks;
+    protected array $rowComparisons;
+    protected array $columnFillColors;
+    protected string $workedHoursWarningColor;
 
-    public function __construct(Collection $rows, array $sheetLinks = [])
+    public function __construct(Collection $rows, array $sheetLinks = [], array $rowComparisons = [], array $columnFillColors = [])
     {
         $this->rows = $rows;
         $this->sheetLinks = $sheetLinks;
+        $this->rowComparisons = $rowComparisons;
+        $this->columnFillColors = $columnFillColors ?: [
+            'E' => 'D4E9F7',
+            'F' => 'CFEAD6',
+            'G' => 'F6E6FF',
+            'H' => 'FFE3E3',
+            'I' => 'FFF1D6',
+            'J' => 'D6F5E1',
+            'K' => 'F6ECD6',
+            'L' => 'EAE0F6',
+            'M' => 'FFD8E1',
+            'N' => 'F9EDDC',
+            'O' => 'D9EFFA',
+            'P' => 'E8DAF6',
+            'Q' => 'F2F2DC',
+            'R' => 'D7EFE3',
+            'S' => 'E6F0FA',
+            'T' => 'FDEBD2',
+            'U' => 'E3F6F5',
+            'V' => 'F7E3F0',
+            'W' => 'DDEAF2',
+            'X' => 'F4E2D7',
+            'Y' => 'E6E6FA',
+        ];
+        $this->workedHoursWarningColor = 'F5B7B1';
     }
 
     public function collection(): Collection
@@ -84,66 +112,14 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
 
         $lastRow = $sheet->getHighestRow();
         if ($lastRow >= 2) {
-            $sheet->getStyle('E2:G' . $lastRow)->applyFromArray([
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'C6EFCE'],
-                ],
-            ]);
-            $sheet->getStyle('H2:H' . $lastRow)->applyFromArray([
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'FFC7CE'],
-                ],
-            ]);
-            $sheet->getStyle('I2:I' . $lastRow)->applyFromArray([
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'FFC7CE'],
-                ],
-            ]);
-            $sheet->getStyle('J2:J' . $lastRow)->applyFromArray([
-                'fill' => [
-                    'fillType' => Fill::FILL_GRADIENT_LINEAR,
-                    'rotation' => 90,
-                    'startColor' => ['rgb' => 'E8F5E9'],
-                    'endColor' => ['rgb' => 'A5D6A7'],
-                ],
-            ]);
-            $sheet->getStyle('K2:K' . $lastRow)->applyFromArray([
-                'fill' => [
-                    'fillType' => Fill::FILL_GRADIENT_LINEAR,
-                    'rotation' => 90,
-                    'startColor' => ['rgb' => 'FFF8D5'],
-                    'endColor' => ['rgb' => 'FFD966'],
-                ],
-            ]);
-            $sheet->getStyle('L2:L' . $lastRow)->applyFromArray([
-                'fill' => [
-                    'fillType' => Fill::FILL_GRADIENT_LINEAR,
-                    'rotation' => 90,
-                    'startColor' => ['rgb' => 'F8CECC'],
-                    'endColor' => ['rgb' => 'EA9999'],
-                ],
-            ]);
-            $sheet->getStyle('M2:M' . $lastRow)->applyFromArray([
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'FFC7CE'],
-                ],
-            ]);
-            $sheet->getStyle('N2:N' . $lastRow)->applyFromArray([
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'FCE4D6'],
-                ],
-            ]);
-            $sheet->getStyle('O2:P' . $lastRow)->applyFromArray([
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'BDD7EE'],
-                ],
-            ]);
+            foreach ($this->columnFillColors as $column => $color) {
+                $sheet->getStyle($column . '2:' . $column . $lastRow)->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => strtoupper($color)],
+                    ],
+                ]);
+            }
         }
 
         foreach ($this->rows as $index => $row) {
@@ -208,6 +184,21 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
                             'underline' => 'single',
                         ],
                     ]);
+                }
+
+                foreach ($this->rowComparisons as $index => $comparison) {
+                    $rowNumber = $index + 2;
+                    $requiredMinutes = (int) ($comparison['required_minutes'] ?? 0);
+                    $workedMinutes = (int) ($comparison['worked_minutes'] ?? 0);
+
+                    if ($requiredMinutes > 0 && $workedMinutes < $requiredMinutes) {
+                        $sheet->getStyle('E' . $rowNumber)->applyFromArray([
+                            'fill' => [
+                                'fillType' => Fill::FILL_SOLID,
+                                'startColor' => ['rgb' => $this->workedHoursWarningColor],
+                            ],
+                        ]);
+                    }
                 }
             },
         ];

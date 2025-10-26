@@ -48,7 +48,11 @@ class UsersClocksMultiSheetExport implements WithMultipleSheets
         }
 
         $summaryExport = new UserClocksExport($this->users, $this->startDate, $this->endDate);
-        $sheets[] = new UserClocksSummarySheet($summaryExport->getSummaryRows(), $sheetTitles);
+        $sheets[] = new UserClocksSummarySheet(
+            $summaryExport->getSummaryRows(),
+            $sheetTitles,
+            $summaryExport->getSummaryComparisons()
+        );
         $sheets[] = new UserClocksAggregatedSheet($summaryExport->getAggregatedRows());
 
         foreach ($this->users as $user) {

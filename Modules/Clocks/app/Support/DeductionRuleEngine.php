@@ -10,15 +10,15 @@ class DeductionRuleEngine
     protected array $plan;
 
     protected array $defaultCategoryColors = [
-        'lateness' => 'FFC7CE',
-        'deduction' => 'FFC7CE',
-        'shortfall' => 'FFC7CE',
-        'default_shortfall' => 'FFC7CE',
-        'overtime' => 'C6EFCE',
-        'vacation' => 'BDD7EE',
-        'issue' => 'FCE4D6',
-        'bonus' => 'C6EFCE',
-        'other' => 'D9D9D9',
+        'lateness' => 'F8D5D8',
+        'deduction' => 'F7E0C7',
+        'shortfall' => 'F3E5AB',
+        'default_shortfall' => 'F9D9B5',
+        'overtime' => 'C8E6C9',
+        'vacation' => 'AED9F4',
+        'issue' => 'F6C1D1',
+        'bonus' => 'D7C7ED',
+        'other' => 'D0D7DD',
     ];
 
     public function __construct(array $plan = [])

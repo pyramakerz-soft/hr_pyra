@@ -31,16 +31,17 @@ class UserClocksExport implements WithMultipleSheets
     protected Collection $aggregatedRows;
     protected array $rowStyles = [];
     protected array $ruleLegend = [];
+    protected array $summaryRowComparisons = [];
     protected array $defaultCategoryColors = [
-        'lateness' => 'FFC7CE',
-        'deduction' => 'FFC7CE',
-        'shortfall' => 'FFC7CE',
-        'default_shortfall' => 'FFC7CE',
-        'overtime' => 'C6EFCE',
-        'vacation' => 'BDD7EE',
-        'issue' => 'FCE4D6',
-        'bonus' => 'C6EFCE',
-        'other' => 'D9D9D9',
+        'lateness' => 'F8D5D8',
+        'deduction' => 'F7E0C7',
+        'shortfall' => 'F3E5AB',
+        'default_shortfall' => 'F9D9B5',
+        'overtime' => 'C8E6C9',
+        'vacation' => 'AED9F4',
+        'issue' => 'F6C1D1',
+        'bonus' => 'D7C7ED',
+        'other' => 'D0D7DD',
     ];
     protected array $excuseStatusOrder = ['approved', 'pending', 'rejected'];
 
@@ -60,7 +61,7 @@ class UserClocksExport implements WithMultipleSheets
     public function sheets(): array
     {
         return [
-            new UserClocksSummarySheet($this->summaryRows),
+            new UserClocksSummarySheet($this->summaryRows, [], $this->summaryRowComparisons),
             new UserClocksPlanSheet($this->planRows, $this->ruleLegend),
             new UserClocksDetailedSheet($this->detailedRows, $this->rowStyles),
             new UserClocksAggregatedSheet($this->aggregatedRows),
@@ -87,6 +88,11 @@ class UserClocksExport implements WithMultipleSheets
         return $this->rowStyles;
     }
 
+    public function getSummaryComparisons(): array
+    {
+        return $this->summaryRowComparisons;
+    }
+
     protected function prepareData(): void
     {
         $this->detailedRows = collect();
@@ -94,6 +100,7 @@ class UserClocksExport implements WithMultipleSheets
         $this->planRows = collect();
         $this->aggregatedRows = collect();
         $this->rowStyles = [];
+        $this->summaryRowComparisons = [];
         $this->ruleLegend = [
             'deduction' => $this->defaultCategoryColors['deduction'],
             'overtime' => $this->defaultCategoryColors['overtime'],
@@ -943,7 +950,7 @@ class UserClocksExport implements WithMultipleSheets
                 $excuseSummaryForNotes
             );
 
-            $this->summaryRows->push([
+            $summaryRow = [
                 'Employee' => $user->name,
                 'Code' => $user->code,
                 'Department' => $user->department?->name ?? 'N/A',
@@ -970,7 +977,14 @@ class UserClocksExport implements WithMultipleSheets
                 'Plan Deduction Amount' => $totalPlanMonetaryAmount !== 0.0 ? round($totalPlanMonetaryAmount, 2) : null,
                 'Net Pay' => $netPay !== 0.0 ? round($netPay, 2) : null,
                 'Notes' => $notes,
-            ]);
+            ];
+
+            $this->summaryRows->push($summaryRow);
+            $this->summaryRowComparisons[] = [
+                'employee' => $user->name,
+                'worked_minutes' => $totalWorkedMinutes,
+                'required_minutes' => $totalRequiredMinutes,
+            ];
 
             $overallTotals['required_minutes'] += $totalRequiredMinutes;
             $overallTotals['worked_minutes'] += $totalWorkedMinutes;
@@ -1014,7 +1028,7 @@ class UserClocksExport implements WithMultipleSheets
                 $overallExcuseSummary
             );
 
-            $this->summaryRows->push([
+            $summaryRow = [
                 'Employee' => 'TOTAL',
                 'Code' => '',
                 'Department' => '',
@@ -1041,7 +1055,14 @@ class UserClocksExport implements WithMultipleSheets
                 'Plan Deduction Amount' => $overallTotals['plan_monetary_amount'] !== 0.0 ? round($overallTotals['plan_monetary_amount'], 2) : null,
                 'Net Pay' => $overallTotals['net_pay'] !== 0.0 ? round($overallTotals['net_pay'], 2) : null,
                 'Notes' => $notes,
-            ]);
+            ];
+
+            $this->summaryRows->push($summaryRow);
+            $this->summaryRowComparisons[] = [
+                'employee' => 'TOTAL',
+                'worked_minutes' => $overallTotals['worked_minutes'],
+                'required_minutes' => $overallTotals['required_minutes'],
+            ];
         }
     }
 
