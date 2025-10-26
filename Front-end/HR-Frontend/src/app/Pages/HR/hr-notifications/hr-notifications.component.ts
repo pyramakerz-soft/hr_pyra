@@ -85,7 +85,14 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
     this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
-  onDepartmentChange(departmentId: string): void {
+  get scopeType(): string {
+    return this.notificationForm.get('scope_type')?.value ?? '';
+  }
+
+  onDepartmentChange(event: Event): void {
+    const select = event.target as HTMLSelectElement | null;
+    const departmentId = select?.value ?? '';
+
     if (!departmentId) {
       this.subDepartments = [];
       return;
@@ -199,10 +206,9 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
     });
   }
 
-  private loadNotifications(): void {
+  loadNotifications(): void {
     this.notificationCenter.getNotifications(15).subscribe((response) => {
       this.notifications = response.notifications ?? [];
     });
   }
 }
-

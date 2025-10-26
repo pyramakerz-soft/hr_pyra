@@ -96,7 +96,14 @@ export class HrServiceActionsComponent implements OnInit, OnDestroy {
     return this.selectedDefinition?.payload_fields ?? [];
   }
 
-  onDepartmentChange(departmentId: string): void {
+  get scopeType(): string {
+    return this.actionForm.get('scope_type')?.value ?? '';
+  }
+
+  onDepartmentChange(event: Event): void {
+    const select = event.target as HTMLSelectElement | null;
+    const departmentId = select?.value ?? '';
+
     if (!departmentId) {
       this.subDepartments = [];
       return;
@@ -218,7 +225,7 @@ export class HrServiceActionsComponent implements OnInit, OnDestroy {
     });
   }
 
-  private refreshHistory(): void {
+  refreshHistory(): void {
     this.isLoadingHistory = true;
     this.serviceActionService.getRecent().subscribe({
       next: (response) => {

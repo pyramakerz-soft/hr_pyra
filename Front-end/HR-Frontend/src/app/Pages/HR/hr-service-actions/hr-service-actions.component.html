@@ -49,14 +49,14 @@
         </div>
       </div>
 
-      <div class="grid md:grid-cols-2 gap-6" *ngIf="actionForm.get('scope_type')?.value === 'department'">
+      <div class="grid md:grid-cols-2 gap-6" *ngIf="scopeType === 'department'">
         <div class="space-y-2">
           <label for="department" class="text-sm font-medium text-[#344054]">Department</label>
           <select
             id="department"
             class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
             formControlName="scope_id"
-            (change)="onDepartmentChange($event.target.value)"
+            (change)="onDepartmentChange($event)"
           >
             <option value="">Select department</option>
             <option *ngFor="let department of departments; trackBy: trackById" [value]="department.id">
@@ -68,13 +68,13 @@
 
       <div
         class="grid md:grid-cols-2 gap-6"
-        *ngIf="actionForm.get('scope_type')?.value === 'sub_department'"
+        *ngIf="scopeType === 'sub_department'"
       >
         <div class="space-y-2">
           <label class="text-sm font-medium text-[#344054]">Department</label>
           <select
             class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-            (change)="onDepartmentChange($event.target.value)"
+            (change)="onDepartmentChange($event)"
           >
             <option value="">Select department</option>
             <option *ngFor="let department of departments; trackBy: trackById" [value]="department.id">
@@ -99,7 +99,7 @@
 
       <div
         class="space-y-4"
-        *ngIf="actionForm.get('scope_type')?.value === 'user'"
+        *ngIf="scopeType === 'user'"
       >
         <div class="space-y-2">
           <label class="text-sm font-medium text-[#344054]">Employee</label>
@@ -117,7 +117,7 @@
 
       <div
         class="space-y-4"
-        *ngIf="actionForm.get('scope_type')?.value === 'custom'"
+        *ngIf="scopeType === 'custom'"
       >
         <label class="text-sm font-medium text-[#344054]">Employees</label>
         <select
@@ -135,7 +135,7 @@
       <div
         class="grid md:grid-cols-2 gap-6"
         *ngIf="payloadFields.length"
-        [formGroup]="actionForm.get('payload') as FormGroup"
+        formGroupName="payload"
       >
         <div
           class="space-y-2"
@@ -177,7 +177,7 @@
   </section>
 
   <section
-    *ngIf="executionResult"
+    *ngIf="executionResult as result"
     class="bg-white border border-[#E0E7FF]/60 rounded-xl shadow p-6"
   >
     <h2 class="text-lg font-semibold text-[#17253E] mb-3">Last execution</h2>
@@ -185,19 +185,19 @@
       <div>
         <p class="text-sm text-[#5F6D7E] uppercase">Action</p>
         <p class="text-base font-medium text-[#17253E]">
-          {{ executionResult?.action_type | titlecase }}
+          {{ result.action_type | titlecase }}
         </p>
       </div>
       <div>
         <p class="text-sm text-[#5F6D7E] uppercase">Scope</p>
         <p class="text-base font-medium text-[#17253E]">
-          {{ executionResult?.scope_type | titlecase }}
+          {{ result.scope_type | titlecase }}
         </p>
       </div>
       <div class="md:col-span-2">
         <p class="text-sm text-[#5F6D7E] uppercase">Summary</p>
         <p class="text-base font-medium text-[#17253E]">
-          {{ formatResult(executionResult) }}
+          {{ formatResult(result) }}
         </p>
       </div>
     </div>

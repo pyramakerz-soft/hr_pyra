@@ -64,13 +64,13 @@
         ></textarea>
       </div>
 
-      <div class="grid md:grid-cols-2 gap-6" *ngIf="notificationForm.get('scope_type')?.value === 'department'">
+      <div class="grid md:grid-cols-2 gap-6" *ngIf="scopeType === 'department'">
         <div class="space-y-2">
           <label class="text-sm font-medium text-[#344054]">Department</label>
           <select
             class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
             formControlName="scope_id"
-            (change)="onDepartmentChange($event.target.value)"
+            (change)="onDepartmentChange($event)"
           >
             <option value="">Select department</option>
             <option *ngFor="let department of departments; trackBy: trackById" [value]="department.id">
@@ -80,12 +80,12 @@
         </div>
       </div>
 
-      <div class="grid md:grid-cols-2 gap-6" *ngIf="notificationForm.get('scope_type')?.value === 'sub_department'">
+      <div class="grid md:grid-cols-2 gap-6" *ngIf="scopeType === 'sub_department'">
         <div class="space-y-2">
           <label class="text-sm font-medium text-[#344054]">Department</label>
           <select
             class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-            (change)="onDepartmentChange($event.target.value)"
+            (change)="onDepartmentChange($event)"
           >
             <option value="">Select department</option>
             <option *ngFor="let department of departments; trackBy: trackById" [value]="department.id">
@@ -108,7 +108,7 @@
         </div>
       </div>
 
-      <div class="space-y-2" *ngIf="notificationForm.get('scope_type')?.value === 'user'">
+      <div class="space-y-2" *ngIf="scopeType === 'user'">
         <label class="text-sm font-medium text-[#344054]">Employee</label>
         <select
           class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
@@ -121,7 +121,7 @@
         </select>
       </div>
 
-      <div class="space-y-3" *ngIf="notificationForm.get('scope_type')?.value === 'custom'">
+      <div class="space-y-3" *ngIf="scopeType === 'custom'">
         <label class="text-sm font-medium text-[#344054]">Targeted employees</label>
         <select
           multiple
@@ -135,13 +135,12 @@
         <p class="text-xs text-[#5F6D7E]">Hold CTRL (or CMD on Mac) to select multiple employees.</p>
       </div>
 
-      <div class="space-y-2">
+      <div class="space-y-2" formGroupName="filters">
         <label class="text-sm font-medium text-[#344054]">Filter by role</label>
         <select
           multiple
           class="w-full min-h-[120px] border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
           formControlName="roles"
-          [formGroup]="notificationForm.get('filters') as FormGroup"
         >
           <option value="">Include all roles</option>
           <option *ngFor="let role of roles; trackBy: trackById" [value]="role.name">
@@ -222,4 +221,3 @@
     </div>
   </section>
 </section>
-
