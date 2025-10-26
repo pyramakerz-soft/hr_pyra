@@ -17,12 +17,14 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
     protected Collection $rows;
     protected array $rowStyles;
     protected string $title;
+    protected string $workedHoursWarningColor;
 
     public function __construct(Collection $rows, array $rowStyles, string $title = "Details")
     {
         $this->rows = $rows;
         $this->rowStyles = $rowStyles;
         $this->title = $title;
+        $this->workedHoursWarningColor = 'F7BFA0';
     }
 
     public function collection(): Collection
@@ -155,6 +157,17 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'E2EFDA'],
+                    ],
+                ]);
+            }
+
+            $requiredMinutes = isset($mark['required_minutes']) ? (int) $mark['required_minutes'] : 0;
+            $workedMinutes = isset($mark['worked_minutes']) ? (int) $mark['worked_minutes'] : 0;
+            if ($requiredMinutes > 0 && $workedMinutes < $requiredMinutes) {
+                $sheet->getStyle('G' . $rowNumber)->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => $this->workedHoursWarningColor],
                     ],
                 ]);
             }

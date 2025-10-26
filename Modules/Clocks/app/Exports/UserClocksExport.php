@@ -384,6 +384,8 @@ class UserClocksExport implements WithMultipleSheets
                         'plan_monetary_amount' => 0,
                         'deduction_color' => null,
                         'is_vacation' => $isVacation,
+                        'worked_minutes' => 0,
+                        'required_minutes' => 0,
                         'issue_columns' => [],
                     ];
                     continue;
@@ -668,6 +670,8 @@ class UserClocksExport implements WithMultipleSheets
                     'plan_monetary_amount' => $planMonetaryDeduction,
                     'deduction_color' => $appliedRules[0]['color'] ?? null,
                     'is_vacation' => $isVacation,
+                    'worked_minutes' => $workedMinutes,
+                    'required_minutes' => $requiredMinutes,
                     'issue_columns' => $issueColumns,
                 ];
             }
@@ -762,6 +766,8 @@ class UserClocksExport implements WithMultipleSheets
                     'ot_status' => $entry['ot_status'],
                     'weekend' => $entry['weekend'],
                     'issue_columns' => $entry['issue_columns'] ?? [],
+                    'worked_minutes' => $entry['worked_minutes'] ?? null,
+                    'required_minutes' => $entry['required_minutes'] ?? null,
                     'deduction_color' => $entry['deduction_color'] ?? null,
                     'deduction_rules' => $entry['deduction_rules'] ?? [],
                     'vacation' => $entry['is_vacation'] ?? false,
