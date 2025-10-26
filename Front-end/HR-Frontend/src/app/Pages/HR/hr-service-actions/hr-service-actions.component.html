@@ -8,6 +8,15 @@
     </div>
     <div class="flex items-center space-x-3">
       <button
+        type="button"
+        class="px-4 py-2 rounded-md text-sm font-semibold border border-[#437EF7] text-[#437EF7] hover:bg-[#437EF7] hover:text-white transition disabled:opacity-60 disabled:cursor-not-allowed"
+        (click)="revertLastAction()"
+        [disabled]="!canRevert || isReverting"
+      >
+        <span *ngIf="!isReverting">Revert last action</span>
+        <span *ngIf="isReverting">Reverting...</span>
+      </button>
+      <button
         class="px-4 py-2 rounded-md text-sm font-semibold bg-[#17253E] text-white shadow hover:bg-[#0f1a2d] transition"
         routerLink="/HR/HRDashboard"
       >

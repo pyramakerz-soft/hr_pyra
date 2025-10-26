@@ -35,6 +35,8 @@ export class HrServiceActionsComponent implements OnInit, OnDestroy {
   executionResult: ServiceActionRecord | null = null;
   isSubmitting = false;
   isLoadingHistory = false;
+  isReverting = false;
+  canRevert = false;
 
   private subscriptions: Subscription[] = [];
 
@@ -180,6 +182,10 @@ export class HrServiceActionsComponent implements OnInit, OnDestroy {
   }
 
   formatResult(action: ServiceActionRecord): string {
+    if (action.status === 'reverted') {
+      return 'Action reverted';
+    }
+
     if (!action.result) {
       return 'No additional details recorded.';
     }
@@ -229,16 +235,64 @@ export class HrServiceActionsComponent implements OnInit, OnDestroy {
     });
   }
 
+  revertLastAction(): void {
+    if (!this.canRevert || this.isReverting) {
+      return;
+    }
+
+    Swal.fire({
+      title: 'Revert last action?',
+      text: 'This will restore clock entries touched by your most recent service action.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#437EF7',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Revert',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      this.isReverting = true;
+
+      this.serviceActionService.revertLast().subscribe({
+        next: (response) => {
+          this.isReverting = false;
+          this.executionResult = response.service_action;
+          this.refreshHistory();
+          Swal.fire({
+            icon: 'success',
+            title: 'Reverted',
+            text: 'The last service action has been reverted successfully.',
+            confirmButtonColor: '#437EF7',
+          });
+        },
+        error: () => {
+          this.isReverting = false;
+          Swal.fire({
+            icon: 'error',
+            title: 'Unable to revert',
+            text: 'No revertable action was found or the records could not be restored.',
+            confirmButtonColor: '#F87171',
+          });
+        },
+      });
+    });
+  }
+
   refreshHistory(): void {
     this.isLoadingHistory = true;
     this.serviceActionService.getRecent().subscribe({
       next: (response) => {
         this.recentActions = response.service_actions ?? [];
         this.isLoadingHistory = false;
+        this.canRevert = this.recentActions.some((action) => action.status === 'completed');
       },
       error: () => {
         this.recentActions = [];
         this.isLoadingHistory = false;
+        this.canRevert = false;
       },
     });
   }

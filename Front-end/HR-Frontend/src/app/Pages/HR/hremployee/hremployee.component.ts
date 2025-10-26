@@ -179,7 +179,10 @@ export class HREmployeeComponent {
   getUsersName() {
     this.userServ.getAllUsersName().subscribe(
       (d: any) => {
-        this.UsersNames = d.usersNames;
+        const list = d?.usersNames ?? [];
+        this.UsersNames = (Array.isArray(list) ? list : [])
+          .map((item: any) => String(item?.name ?? item ?? ''))
+          .filter((name) => name.trim() !== '');
       }
     );
   }

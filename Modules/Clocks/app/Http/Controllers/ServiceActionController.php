@@ -181,6 +181,7 @@ class ServiceActionController extends Controller
 
         $affectedClocks = 0;
         $affectedUsers = collect();
+        $changes = [];
 
         ClockInOut::query()
             ->whereIn('user_id', $userIds)
@@ -192,7 +193,9 @@ class ServiceActionController extends Controller
                 $clockOutTime,
                 $defaultMinutes,
                 $now,
-                &$affectedUsers
+                $hasExplicitClockOut,
+                &$affectedUsers,
+                &$changes
             ) {
                 foreach ($clocks as $clock) {
                     $clockInAt = Carbon::parse($clock->clock_in);
@@ -209,6 +212,9 @@ class ServiceActionController extends Controller
                     }
 
                     $duration = $clockInAt->diff($clockOutAt)->format('%H:%I:%S');
+                    $beforeClockOut = $clock->clock_out ? Carbon::parse($clock->clock_out)->toIso8601String() : null;
+                    $beforeDuration = $clock->duration;
+                    $beforeIssue = (bool) $clock->is_issue;
 
                     $clock->update([
                         'clock_out' => $clockOutAt,
@@ -218,13 +224,27 @@ class ServiceActionController extends Controller
 
                     $affectedClocks++;
                     $affectedUsers->push($clock->user_id);
+                    $changes[] = [
+                        'clock_id' => $clock->id,
+                        'before' => [
+                            'clock_out' => $beforeClockOut,
+                            'duration' => $beforeDuration,
+                            'is_issue' => $beforeIssue,
+                        ],
+                        'after' => [
+                            'clock_out' => $clockOutAt->toIso8601String(),
+                            'duration' => $duration,
+                            'is_issue' => false,
+                        ],
+                    ];
                 }
             });
 
         return [
             'affected_clocks' => $affectedClocks,
-            'unique_users' => $affectedUsers->unique()->values(),
+            'unique_users' => $affectedUsers->unique()->values()->all(),
             'applied_date' => $startOfDay->toDateString(),
+            'changes' => $changes,
         ];
     }
 
@@ -245,16 +265,30 @@ class ServiceActionController extends Controller
             $issuesQuery->where('clock_in', '<=', $toDate);
         }
 
-        $issueIds = $issuesQuery->pluck('id');
-        $resolvedCount = $issueIds->count();
+        $issueIds = [];
+        $changes = [];
+        $affectedUsers = collect();
 
-        if ($resolvedCount > 0) {
-            ClockInOut::query()->whereIn('id', $issueIds)->update(['is_issue' => false]);
-        }
+        $issuesQuery->orderBy('id')->chunkById(100, function ($clocks) use (&$issueIds, &$changes, &$affectedUsers) {
+            foreach ($clocks as $clock) {
+                $issueIds[] = $clock->id;
+                $affectedUsers->push($clock->user_id);
+
+                $changes[] = [
+                    'clock_id' => $clock->id,
+                    'before' => ['is_issue' => (bool) $clock->is_issue],
+                    'after' => ['is_issue' => false],
+                ];
+
+                $clock->update(['is_issue' => false]);
+            }
+        });
 
         return [
-            'resolved_issues' => $resolvedCount,
+            'resolved_issues' => count($issueIds),
             'clock_ids' => $issueIds,
+            'unique_users' => $affectedUsers->unique()->values()->all(),
+            'changes' => $changes,
         ];
     }
 
@@ -278,8 +312,10 @@ class ServiceActionController extends Controller
 
         $updated = 0;
         $mismatched = 0;
+        $changes = [];
+        $affectedUsers = collect();
 
-        $query->orderBy('id')->chunkById(100, function ($clocks) use (&$updated, &$mismatched) {
+        $query->orderBy('id')->chunkById(100, function ($clocks) use (&$updated, &$mismatched, &$changes, &$affectedUsers) {
             foreach ($clocks as $clock) {
                 $clockInAt = Carbon::parse($clock->clock_in);
                 $clockOutAt = Carbon::parse($clock->clock_out);
@@ -292,6 +328,14 @@ class ServiceActionController extends Controller
                 $duration = $clockInAt->diff($clockOutAt)->format('%H:%I:%S');
 
                 if ($clock->duration !== $duration) {
+                    $changes[] = [
+                        'clock_id' => $clock->id,
+                        'before' => ['duration' => $clock->duration],
+                        'after' => ['duration' => $duration],
+                    ];
+
+                    $affectedUsers->push($clock->user_id);
+
                     $clock->update(['duration' => $duration]);
                     $updated++;
                 }
@@ -301,6 +345,137 @@ class ServiceActionController extends Controller
         return [
             'recomputed' => $updated,
             'skipped_invalid' => $mismatched,
+            'changes' => $changes,
+            'unique_users' => $affectedUsers->unique()->values()->all(),
         ];
+    }
+
+    public function revertLast()
+    {
+        $action = ServiceAction::query()
+            ->where('status', 'completed')
+            ->orderByDesc('created_at')
+            ->first();
+
+        if (! $action) {
+            return $this->returnError('No completed service actions are available to revert.', 422);
+        }
+
+        $changes = $action->result['changes'] ?? null;
+        if (empty($changes) || ! is_array($changes)) {
+            return $this->returnError('The last service action cannot be reverted automatically.', 422);
+        }
+
+        $restored = 0;
+
+        DB::transaction(function () use ($action, $changes, &$restored) {
+            $restored = match ($action->action_type) {
+                ServiceActionRegistry::ACTION_FORCE_CLOCK_OUT => $this->revertForceClockOut($changes),
+                ServiceActionRegistry::ACTION_RESOLVE_CLOCK_ISSUES => $this->revertResolveClockIssues($changes),
+                ServiceActionRegistry::ACTION_RECOMPUTE_DURATIONS => $this->revertRecomputeDurations($changes),
+                default => throw new \InvalidArgumentException('Unknown service action supplied.'),
+            };
+
+            $result = $action->result ?? [];
+            $result['reverted_at'] = Carbon::now()->toIso8601String();
+            $result['reverted_changes'] = $restored;
+
+            $action->forceFill([
+                'status' => 'reverted',
+                'result' => $result,
+            ])->save();
+        });
+
+        return $this->returnData(
+            'service_action',
+            $action->fresh('performer'),
+            'Service action reverted successfully.'
+        );
+    }
+
+    protected function revertForceClockOut(array $changes): int
+    {
+        $updated = 0;
+
+        foreach ($changes as $change) {
+            $clockId = $change['clock_id'] ?? null;
+            if (! $clockId) {
+                continue;
+            }
+
+            $clock = ClockInOut::find($clockId);
+            if (! $clock) {
+                continue;
+            }
+
+            $before = $change['before'] ?? [];
+            $clockOut = $before['clock_out'] ?? null;
+            $duration = $before['duration'] ?? null;
+            $isIssue = $before['is_issue'] ?? false;
+
+            $clock->update([
+                'clock_out' => $clockOut ? Carbon::parse($clockOut) : null,
+                'duration' => $duration,
+                'is_issue' => (bool) $isIssue,
+            ]);
+
+            $updated++;
+        }
+
+        return $updated;
+    }
+
+    protected function revertResolveClockIssues(array $changes): int
+    {
+        $updated = 0;
+
+        foreach ($changes as $change) {
+            $clockId = $change['clock_id'] ?? null;
+            if (! $clockId) {
+                continue;
+            }
+
+            $clock = ClockInOut::find($clockId);
+            if (! $clock) {
+                continue;
+            }
+
+            $before = $change['before'] ?? [];
+            if (! array_key_exists('is_issue', $before)) {
+                continue;
+            }
+
+            $clock->update(['is_issue' => (bool) $before['is_issue']]);
+            $updated++;
+        }
+
+        return $updated;
+    }
+
+    protected function revertRecomputeDurations(array $changes): int
+    {
+        $updated = 0;
+
+        foreach ($changes as $change) {
+            $clockId = $change['clock_id'] ?? null;
+            if (! $clockId) {
+                continue;
+            }
+
+            $clock = ClockInOut::find($clockId);
+            if (! $clock) {
+                continue;
+            }
+
+            $before = $change['before'] ?? [];
+            if (! array_key_exists('duration', $before)) {
+                continue;
+            }
+
+            $clock->update(['duration' => $before['duration']]);
+            $updated++;
+        }
+
+        return $updated;
     }
 }

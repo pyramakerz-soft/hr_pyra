@@ -50,9 +50,14 @@ export class ServiceActionService {
     });
   }
 
+  revertLast(): Observable<ServiceActionStoreResponse> {
+    return this.http.post<ServiceActionStoreResponse>(`${this.baseUrl}/service-actions/revert`, {}, {
+      headers: this.buildHeaders(),
+    });
+  }
+
   private buildHeaders(): HttpHeaders {
     const token = localStorage.getItem('token') || '';
     return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 }
-

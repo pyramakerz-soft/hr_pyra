@@ -52,12 +52,6 @@ export class HrDashboardComponent {
       route: '/HR/HRServiceActions',
       icon: 'fi fi-br-tools',
     },
-    {
-      label: 'Send notification',
-      description: 'Share announcements, alerts, and reminders with a single message.',
-      route: '/HR/HRNotifications',
-      icon: 'fi fi-rr-megaphone',
-    },
   ];
 
   constructor(

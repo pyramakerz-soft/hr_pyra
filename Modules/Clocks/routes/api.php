@@ -62,6 +62,7 @@ Route::group(['middleware' => ['auth:api', 'role:Hr|Team leader']], function () 
         Route::get('/', [ServiceActionController::class, 'index']);
         Route::get('/available', [ServiceActionController::class, 'available']);
         Route::post('/', [ServiceActionController::class, 'store']);
+        Route::post('/revert', [ServiceActionController::class, 'revertLast']);
     });
 
 
