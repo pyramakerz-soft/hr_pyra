@@ -925,8 +925,12 @@ private function formatPagination($users)
      */
     public function getAllUsersNames()
     {
-        $usersByName = User::pluck('name');
-        return $this->returnData("usersNames", $usersByName, "UsersName");
+        $users = User::query()
+            ->select(['id', 'name'])
+            ->orderBy('name')
+            ->get();
+
+        return $this->returnData("usersNames", $users, "UsersName");
     }
     public function updatePassword(Request $request, User $user)
     {
