@@ -1,0 +1,225 @@
+<section class="space-y-6">
+  <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-semibold text-[#17253E]">Communications Center</h1>
+      <p class="text-sm md:text-base text-[#5F6D7E]">
+        Broadcast targeted announcements, alerts, and reminders to keep every team aligned.
+      </p>
+    </div>
+    <div class="flex items-center space-x-3">
+      <button
+        routerLink="/HR/HRDashboard"
+        class="px-4 py-2 rounded-md text-sm font-semibold bg-[#17253E] text-white shadow hover:bg-[#0f1a2d] transition"
+      >
+        Back to dashboard
+      </button>
+    </div>
+  </header>
+
+  <section class="bg-white shadow rounded-xl border border-[#E0E7FF]/60 p-6 space-y-6">
+    <form [formGroup]="notificationForm" (ngSubmit)="submit()" class="space-y-6">
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-[#344054]">Notification type</label>
+          <select
+            class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+            formControlName="type"
+          >
+            <option *ngFor="let option of notificationTypes" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-[#344054]">Scope</label>
+          <select
+            class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+            formControlName="scope_type"
+          >
+            <option *ngFor="let option of scopeOptions" [value]="option.key">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-sm font-medium text-[#344054]">Title</label>
+        <input
+          type="text"
+          class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+          formControlName="title"
+          placeholder="e.g. Attendance policy refresh"
+        />
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-sm font-medium text-[#344054]">Message</label>
+        <textarea
+          rows="4"
+          class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7] resize-y"
+          formControlName="message"
+          placeholder="Provide context, timelines, and the action required."
+        ></textarea>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6" *ngIf="notificationForm.get('scope_type')?.value === 'department'">
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-[#344054]">Department</label>
+          <select
+            class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+            formControlName="scope_id"
+            (change)="onDepartmentChange($event.target.value)"
+          >
+            <option value="">Select department</option>
+            <option *ngFor="let department of departments; trackBy: trackById" [value]="department.id">
+              {{ department.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6" *ngIf="notificationForm.get('scope_type')?.value === 'sub_department'">
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-[#344054]">Department</label>
+          <select
+            class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+            (change)="onDepartmentChange($event.target.value)"
+          >
+            <option value="">Select department</option>
+            <option *ngFor="let department of departments; trackBy: trackById" [value]="department.id">
+              {{ department.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-[#344054]">Sub department</label>
+          <select
+            class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+            formControlName="scope_id"
+          >
+            <option value="">Select sub department</option>
+            <option *ngFor="let sub of subDepartments; trackBy: trackById" [value]="sub.id">
+              {{ sub.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="space-y-2" *ngIf="notificationForm.get('scope_type')?.value === 'user'">
+        <label class="text-sm font-medium text-[#344054]">Employee</label>
+        <select
+          class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+          formControlName="scope_id"
+        >
+          <option value="">Select employee</option>
+          <option *ngFor="let employee of employees; trackBy: trackById" [value]="employee.id">
+            {{ employee.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="space-y-3" *ngIf="notificationForm.get('scope_type')?.value === 'custom'">
+        <label class="text-sm font-medium text-[#344054]">Targeted employees</label>
+        <select
+          multiple
+          class="w-full min-h-[140px] border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+          formControlName="user_ids"
+        >
+          <option *ngFor="let employee of employees; trackBy: trackById" [value]="employee.id">
+            {{ employee.name }}
+          </option>
+        </select>
+        <p class="text-xs text-[#5F6D7E]">Hold CTRL (or CMD on Mac) to select multiple employees.</p>
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-sm font-medium text-[#344054]">Filter by role</label>
+        <select
+          multiple
+          class="w-full min-h-[120px] border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+          formControlName="roles"
+          [formGroup]="notificationForm.get('filters') as FormGroup"
+        >
+          <option value="">Include all roles</option>
+          <option *ngFor="let role of roles; trackBy: trackById" [value]="role.name">
+            {{ role.name }}
+          </option>
+        </select>
+        <p class="text-xs text-[#5F6D7E]">
+          Filter recipients by role to send more personalised updates.
+        </p>
+      </div>
+
+      <div class="flex justify-end">
+        <button
+          type="submit"
+          class="px-5 py-2 rounded-md text-sm font-semibold text-white bg-[#437EF7] hover:bg-[#3566c7] transition disabled:opacity-60 disabled:cursor-not-allowed"
+          [disabled]="isSubmitting"
+        >
+          <span *ngIf="!isSubmitting">Send notification</span>
+          <span *ngIf="isSubmitting">Sending...</span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="bg-white border border-[#E0E7FF]/60 rounded-xl shadow p-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+      <div>
+        <h2 class="text-lg font-semibold text-[#17253E]">Recent notifications</h2>
+        <p class="text-sm text-[#5F6D7E]">
+          Track what has been shared recently with the organisation.
+        </p>
+      </div>
+      <button
+        class="text-sm text-[#437EF7] font-semibold hover:underline"
+        (click)="loadNotifications()"
+      >
+        Refresh
+      </button>
+    </div>
+
+    <div *ngIf="notifications.length === 0" class="text-sm text-[#5F6D7E]">
+      No notifications sent yet. Craft your first message above.
+    </div>
+
+    <div *ngIf="notifications.length > 0" class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-[#E5E7EB] text-sm">
+        <thead>
+          <tr class="text-left text-[#5F6D7E] uppercase text-xs">
+            <th class="py-3 pr-4">Title</th>
+            <th class="py-3 pr-4">Type</th>
+            <th class="py-3 pr-4">Scope</th>
+            <th class="py-3 pr-4">Recipients</th>
+            <th class="py-3">Sent</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#F3F4F6]">
+          <tr *ngFor="let notification of notifications">
+            <td class="py-3 pr-4 text-[#17253E] font-medium">
+              {{ notification.title }}
+            </td>
+            <td class="py-3 pr-4">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#E0EAFF] text-[#0037C5]">
+                {{ notification.type | titlecase }}
+              </span>
+            </td>
+            <td class="py-3 pr-4 text-[#5F6D7E]">
+              {{ notification.scope_type | titlecase }}
+            </td>
+            <td class="py-3 pr-4 text-[#17253E]">
+              {{ notification.recipients_count || 0 }}
+            </td>
+            <td class="py-3 text-[#5F6D7E]">
+              {{ notification.created_at | date: 'medium' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+

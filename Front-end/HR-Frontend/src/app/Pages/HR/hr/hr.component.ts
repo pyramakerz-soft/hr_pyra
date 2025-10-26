@@ -25,6 +25,8 @@ export class HRComponent {
     { label: 'Department', icon: 'fi fi-rr-chart-simple', route: '/HR/HRDepartment' , notificationCount: 0 },
     // { label: 'Issues', icon: 'fi fi-rr-chart-simple', route: '/HR/HRIssues', notificationCount: this.count }, 
     { label: 'Custom Vacations', icon: 'fi fi-rr-calendar-star', route: '/HR/HRCustomVacations' , notificationCount: 0 },
+    { label: 'Service Actions', icon: 'fi fi-br-tools', route: '/HR/HRServiceActions' , notificationCount: 0 },
+    { label: 'Notifications', icon: 'fi fi-rr-megaphone', route: '/HR/HRNotifications' , notificationCount: 0 },
     { label: 'TimeZones', icon: 'fa-solid fa-clock-rotate-left', route: '/HR/ShowTimezones' , notificationCount: 0 },
     { label: 'Sign Out', icon: 'fi fi-bs-sign-out-alt transform rotate-180', route: '' , notificationCount: 0 },
 

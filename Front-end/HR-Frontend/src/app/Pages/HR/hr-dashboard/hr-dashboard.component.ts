@@ -7,13 +7,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChartsService } from '../../../Services/charts.service';
 import { DepartmentService } from '../../../Services/department.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Department } from '../../../Models/department';
+import { DashboardInsightsService } from '../../../Services/dashboard-insights.service';
+import { DashboardMetricSummary, PresenceSnapshot } from '../../../Models/dashboard-summary';
+import { SystemNotificationRecord } from '../../../Models/system-notification';
+import { ServiceActionRecord } from '../../../Models/service-action';
 
 @Component({
   selector: 'app-hr-dashboard',
   standalone: true,
-  imports: [DashboardHeroComponent,DonutChartComponent,BarChartComponent, CardChartComponent, CommonModule, FormsModule],
+  imports: [DashboardHeroComponent,DonutChartComponent,BarChartComponent, CardChartComponent, CommonModule, FormsModule, RouterLink],
   templateUrl: './hr-dashboard.component.html',
   styleUrl: './hr-dashboard.component.css'
 })
@@ -36,10 +40,31 @@ export class HrDashboardComponent {
     site: 0
   };
 
+  summaryMetrics: DashboardMetricSummary | null = null;
+  presenceSnapshot: PresenceSnapshot | null = null;
+  recentNotifications: SystemNotificationRecord[] = [];
+  recentServiceActions: ServiceActionRecord[] = [];
+
+  quickActions = [
+    {
+      label: 'Run service action',
+      description: 'Close open shifts, resolve issues, and keep attendance data clean.',
+      route: '/HR/HRServiceActions',
+      icon: 'fi fi-br-tools',
+    },
+    {
+      label: 'Send notification',
+      description: 'Share announcements, alerts, and reminders with a single message.',
+      route: '/HR/HRNotifications',
+      icon: 'fi fi-rr-megaphone',
+    },
+  ];
+
   constructor(
     public chartService: ChartsService,
     private readonly departmentService: DepartmentService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly dashboardInsights: DashboardInsightsService
   ){}
 
   ngOnInit(){
@@ -48,6 +73,8 @@ export class HrDashboardComponent {
     this.selectedYear = currentDate.getFullYear();
     this.getDataPercentage()      
     this.fetchDepartments();
+    this.loadSummary();
+    this.loadPresence();
     localStorage.setItem('HrEmployeeCN', "1");
     localStorage.setItem('HrLocationsCN', "1");
     localStorage.setItem('HrAttendaceCN', "1");
@@ -151,5 +178,38 @@ export class HrDashboardComponent {
         queryParams: { departmentId: match.id },
       });
     }
+  }
+
+  loadSummary(): void {
+    this.dashboardInsights.getSummary().subscribe((response) => {
+      const summary = response?.summary;
+      this.summaryMetrics = summary?.metrics ?? null;
+      this.recentNotifications = summary?.notifications ?? [];
+      this.recentServiceActions = summary?.service_actions ?? [];
+    });
+  }
+
+  loadPresence(): void {
+    this.dashboardInsights.getPresence().subscribe((response) => {
+      this.presenceSnapshot = response.presence;
+    });
+  }
+
+  get presenceTotals() {
+    return this.presenceSnapshot?.totals;
+  }
+
+  get presencePercentages() {
+    const totals = this.presenceTotals;
+    if (!totals || totals.employees === 0) {
+      return { present: 0, absent: 0, onLeave: 0 };
+    }
+
+    const employees = totals.employees;
+    return {
+      present: Math.round((totals.present / employees) * 100),
+      absent: Math.round((totals.absent / employees) * 100),
+      onLeave: Math.round((totals.on_leave / employees) * 100),
+    };
   }
 }

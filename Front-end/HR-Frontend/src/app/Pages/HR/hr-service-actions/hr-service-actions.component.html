@@ -1,0 +1,270 @@
+<section class="space-y-6">
+  <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-semibold text-[#17253E]">Service Actions</h1>
+      <p class="text-sm md:text-base text-[#5F6D7E]">
+        Launch bulk maintenance jobs for an entire department, sub department, or targeted employees with just a few clicks.
+      </p>
+    </div>
+    <div class="flex items-center space-x-3">
+      <button
+        class="px-4 py-2 rounded-md text-sm font-semibold bg-[#17253E] text-white shadow hover:bg-[#0f1a2d] transition"
+        routerLink="/HR/HRDashboard"
+      >
+        Back to dashboard
+      </button>
+    </div>
+  </header>
+
+  <section class="bg-white shadow rounded-xl border border-[#E0E7FF]/60 p-6 space-y-6">
+    <form [formGroup]="actionForm" (ngSubmit)="submit()" class="space-y-6">
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="space-y-2">
+          <label for="action_type" class="text-sm font-medium text-[#344054]">Action</label>
+          <select
+            id="action_type"
+            class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+            formControlName="action_type"
+          >
+            <option *ngFor="let definition of actionDefinitions" [value]="definition.key">
+              {{ definition.label }}
+            </option>
+          </select>
+          <p class="text-xs text-[#5F6D7E]">
+            {{ selectedDefinition?.description || 'Pick the operation you would like to perform.' }}
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <label for="scope_type" class="text-sm font-medium text-[#344054]">Scope</label>
+          <select
+            id="scope_type"
+            class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+            formControlName="scope_type"
+          >
+            <option *ngFor="let option of scopeOptions" [value]="option.key">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6" *ngIf="actionForm.get('scope_type')?.value === 'department'">
+        <div class="space-y-2">
+          <label for="department" class="text-sm font-medium text-[#344054]">Department</label>
+          <select
+            id="department"
+            class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+            formControlName="scope_id"
+            (change)="onDepartmentChange($event.target.value)"
+          >
+            <option value="">Select department</option>
+            <option *ngFor="let department of departments; trackBy: trackById" [value]="department.id">
+              {{ department.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div
+        class="grid md:grid-cols-2 gap-6"
+        *ngIf="actionForm.get('scope_type')?.value === 'sub_department'"
+      >
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-[#344054]">Department</label>
+          <select
+            class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+            (change)="onDepartmentChange($event.target.value)"
+          >
+            <option value="">Select department</option>
+            <option *ngFor="let department of departments; trackBy: trackById" [value]="department.id">
+              {{ department.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-[#344054]">Sub Department</label>
+          <select
+            class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+            formControlName="scope_id"
+          >
+            <option value="">Select sub department</option>
+            <option *ngFor="let sub of subDepartments; trackBy: trackById" [value]="sub.id">
+              {{ sub.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div
+        class="space-y-4"
+        *ngIf="actionForm.get('scope_type')?.value === 'user'"
+      >
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-[#344054]">Employee</label>
+          <select
+            class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+            formControlName="scope_id"
+          >
+            <option value="">Select employee</option>
+            <option *ngFor="let employee of employees; trackBy: trackById" [value]="employee.id">
+              {{ employee.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div
+        class="space-y-4"
+        *ngIf="actionForm.get('scope_type')?.value === 'custom'"
+      >
+        <label class="text-sm font-medium text-[#344054]">Employees</label>
+        <select
+          multiple
+          class="w-full min-h-[140px] border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+          formControlName="user_ids"
+        >
+          <option *ngFor="let employee of employees; trackBy: trackById" [value]="employee.id">
+            {{ employee.name }}
+          </option>
+        </select>
+        <p class="text-xs text-[#5F6D7E]">Hold CTRL (or CMD on Mac) to select multiple employees.</p>
+      </div>
+
+      <div
+        class="grid md:grid-cols-2 gap-6"
+        *ngIf="payloadFields.length"
+        [formGroup]="actionForm.get('payload') as FormGroup"
+      >
+        <div
+          class="space-y-2"
+          *ngFor="let field of payloadFields"
+        >
+          <label class="text-sm font-medium text-[#344054]">
+            {{ field.label }}
+          </label>
+
+          <input
+            *ngIf="field.type !== 'number'"
+            [type]="field.type"
+            class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+            [formControlName]="field.key"
+          />
+
+          <input
+            *ngIf="field.type === 'number'"
+            type="number"
+            class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+            [formControlName]="field.key"
+            min="60"
+            max="1440"
+          />
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <button
+          type="submit"
+          class="px-5 py-2 rounded-md text-sm font-semibold text-white bg-[#437EF7] hover:bg-[#3566c7] transition disabled:opacity-60 disabled:cursor-not-allowed"
+          [disabled]="isSubmitting"
+        >
+          <span *ngIf="!isSubmitting">Run action</span>
+          <span *ngIf="isSubmitting">Processing...</span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section
+    *ngIf="executionResult"
+    class="bg-white border border-[#E0E7FF]/60 rounded-xl shadow p-6"
+  >
+    <h2 class="text-lg font-semibold text-[#17253E] mb-3">Last execution</h2>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <p class="text-sm text-[#5F6D7E] uppercase">Action</p>
+        <p class="text-base font-medium text-[#17253E]">
+          {{ executionResult?.action_type | titlecase }}
+        </p>
+      </div>
+      <div>
+        <p class="text-sm text-[#5F6D7E] uppercase">Scope</p>
+        <p class="text-base font-medium text-[#17253E]">
+          {{ executionResult?.scope_type | titlecase }}
+        </p>
+      </div>
+      <div class="md:col-span-2">
+        <p class="text-sm text-[#5F6D7E] uppercase">Summary</p>
+        <p class="text-base font-medium text-[#17253E]">
+          {{ formatResult(executionResult) }}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white border border-[#E0E7FF]/60 rounded-xl shadow p-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+      <div>
+        <h2 class="text-lg font-semibold text-[#17253E]">Recent history</h2>
+        <p class="text-sm text-[#5F6D7E]">
+          Review the last executed jobs and their outcomes.
+        </p>
+      </div>
+      <button
+        class="text-sm text-[#437EF7] font-semibold hover:underline"
+        (click)="refreshHistory()"
+      >
+        Refresh
+      </button>
+    </div>
+
+    <div *ngIf="isLoadingHistory" class="text-sm text-[#5F6D7E]">Loading history...</div>
+
+    <div *ngIf="!isLoadingHistory && recentActions.length === 0" class="text-sm text-[#5F6D7E]">
+      No service actions recorded yet. Execute your first action to see it here.
+    </div>
+
+    <div *ngIf="recentActions.length > 0" class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-[#E5E7EB] text-sm">
+        <thead>
+          <tr class="text-left text-[#5F6D7E] uppercase text-xs">
+            <th class="py-3 pr-4">Action</th>
+            <th class="py-3 pr-4">Scope</th>
+            <th class="py-3 pr-4">Status</th>
+            <th class="py-3 pr-4">Impact</th>
+            <th class="py-3">Run at</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#F3F4F6]">
+          <tr *ngFor="let item of recentActions">
+            <td class="py-3 pr-4 text-[#17253E] font-medium">
+              {{ item.action_type | titlecase }}
+            </td>
+            <td class="py-3 pr-4 text-[#5F6D7E]">
+              {{ item.scope_type | titlecase }}
+            </td>
+            <td class="py-3 pr-4">
+              <span
+                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
+                [ngClass]="{
+                  'bg-emerald-100 text-emerald-700': item.status === 'completed',
+                  'bg-yellow-100 text-yellow-700': item.status === 'pending',
+                  'bg-rose-100 text-rose-700': item.status === 'failed'
+                }"
+              >
+                {{ item.status | titlecase }}
+              </span>
+            </td>
+            <td class="py-3 pr-4 text-[#17253E]">
+              {{ formatResult(item) }}
+            </td>
+            <td class="py-3 text-[#5F6D7E]">
+              {{ item.created_at | date: 'medium' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>

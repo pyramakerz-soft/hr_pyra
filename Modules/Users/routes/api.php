@@ -13,6 +13,8 @@ use Modules\Users\Http\Controllers\UserVacationController;
 use Modules\Users\Http\Controllers\WorkTypeController;
 use Modules\Users\Http\Controllers\HrUserProfileController;
 use Modules\Users\Http\Controllers\CustomVacationController;
+use Modules\Users\Http\Controllers\NotificationController;
+use Modules\Users\Http\Controllers\DashboardInsightsController;
 
 /*
  *--------------------------------------------------------------------------
@@ -158,3 +160,15 @@ Route::post('/export-clocks', [UsersController::class, 'exportClocks']);
 
 
 });
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/summary', [DashboardInsightsController::class, 'summary']);
+        Route::get('/presence', [DashboardInsightsController::class, 'presence']);
+    });
+
+    Route::prefix('notifications')->group(function () {
+        Route::get('/types', [NotificationController::class, 'types']);
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::get('/{notification}', [NotificationController::class, 'show']);
+        Route::post('/', [NotificationController::class, 'store']);
+        Route::post('/{notification}/read', [NotificationController::class, 'markRead']);
+    });

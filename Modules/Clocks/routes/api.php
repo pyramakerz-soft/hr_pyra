@@ -5,6 +5,7 @@ use Modules\Clocks\Http\Controllers\ClockController;
 use Modules\Clocks\Http\Controllers\ClocksController;
 use Modules\Clocks\Http\Controllers\DeductionPlanController;
 use Modules\Clocks\Http\Controllers\DeductionRuleTemplateController;
+use Modules\Clocks\Http\Controllers\ServiceActionController;
 
 /*
  *--------------------------------------------------------------------------
@@ -56,6 +57,12 @@ Route::group(['middleware' => ['auth:api', 'role:Hr|Team leader']], function () 
 
     Route::get('/users_clocks_Outs', [ClockController::class, 'getUsersClockOutStatus']);
     Route::get('/getAbsentUser', [ClockController::class, 'getAbsentUser'])->name('clocks.getAbsentUser'); //HR role
+
+    Route::prefix('service-actions')->group(function () {
+        Route::get('/', [ServiceActionController::class, 'index']);
+        Route::get('/available', [ServiceActionController::class, 'available']);
+        Route::post('/', [ServiceActionController::class, 'store']);
+    });
 
 
 
