@@ -25,6 +25,7 @@ class StoreUserVacationRequest extends FormRequest
             'from_date' => 'required|date',
             'to_date' => 'required|date',
             'vacation_type_id' => 'nullable|exists:vacation_types,id',
+            'is_half_day' => 'nullable|boolean',
         ];
     }
 }

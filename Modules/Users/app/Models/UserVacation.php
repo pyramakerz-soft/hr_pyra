@@ -20,7 +20,7 @@ class UserVacation extends Model
     ];
 
     protected $appends = [
-        'overall_status',
+        'is_half_day',
     ];
 
     public function user()
@@ -43,20 +43,9 @@ class UserVacation extends Model
         return $this->belongsTo(User::class, 'head_approved_by');
     }
 
-    public function getOverallStatusAttribute(): string
+    public function getIsHalfDayAttribute(): bool
     {
-        $direct = $this->extractStatusValue($this->approval_of_direct);
-        $head = $this->extractStatusValue($this->approval_of_head);
-
-        if ($direct === 'declined' || $head === 'declined') {
-            return 'declined';
-        }
-
-        if ($direct === 'approved' && $head === 'approved') {
-            return 'approved';
-        }
-
-        return 'pending';
+        return $this->days_count == 0.5;
     }
 
     protected function extractStatusValue($status): ?string
