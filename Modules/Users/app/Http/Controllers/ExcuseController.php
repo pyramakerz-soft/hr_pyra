@@ -57,12 +57,26 @@ class ExcuseController extends Controller
      */
     public function addUserExcuse(StoreExcusesRequest $request)
     {
+        //TODO make a limit two excuses per month DONE
         $authUser = Auth::user();
+
+        $requestedDate = Carbon::parse($request->input('date'));
+        $startOfMonth = $requestedDate->copy()->startOfMonth();
+        $endOfMonth = $requestedDate->copy()->endOfMonth();
+
+        $excusesCount = Excuse::where('user_id', $authUser->id)
+            ->whereBetween('date', [$startOfMonth, $endOfMonth])
+            ->count();
+
+        if ($excusesCount >= 2) {
+            return $this->returnError('You have reached the limit of 2 excuses for ' . $requestedDate->format('F Y') . '.', 422);
+        }
+
         $userExcuse = Excuse::create([
             'date' => $request->input('date'),
             'from' => $request->input('from'),
             'to' => $request->input('to'),
-            'status' => $request->input('status', 'pending'), // Default to 'pending' if not provided
+            'status' => $request->input('status', 'pending'),
             'user_id' => $authUser->id,
         ]);
 
@@ -151,7 +165,7 @@ class ExcuseController extends Controller
 
         $authUser = Auth::user();
 
-      
+
         $employeeIds =   $authUser->getManagedEmployeeIds();
 
         if (!in_array($excuse->user_id, $employeeIds->toArray())) {
@@ -245,13 +259,13 @@ class ExcuseController extends Controller
     public function getExcusesOfManagerEmployees()
     {
         $manager = Auth::user();
-    
+
         $employeeIds = $manager->getManagedEmployeeIds();
-    
+
         if ($employeeIds->isEmpty()) {
             return $this->returnError('No employees found under this manager', 404);
         }
-    
+
         // Date range: 26th of previous month to 26th of current month
             // $currentDate = Carbon::now();
             // if ($currentDate->day > 26) {
@@ -261,21 +275,21 @@ class ExcuseController extends Controller
             //     $startDate = $currentDate->copy()->subMonth()->setDay(26);
             //     $endDate = $currentDate->copy()->setDay(26);
             // }
-        
+
         $searchTerm = request()->query('searchTerm');
         $statusFilter = request()->query('status');
-    
+
         // Build the base query
         $query = Excuse::whereIn('user_id', $employeeIds)
             ->with('user');
-    
+
         // Apply search term filter if provided
         if (!empty($searchTerm)) {
             $query->whereHas('user', function ($q) use ($searchTerm) {
                 $q->where('name', 'LIKE', '%' . $searchTerm . '%');
             });
         }
-    
+
         // Apply status filter if provided and not "all"
         if (!empty($statusFilter) && $statusFilter !== 'all') {
             // You can also support multiple status values if needed:
@@ -285,20 +299,20 @@ class ExcuseController extends Controller
                 $query->where('status', $statusFilter);
             }
         }
-    
+
         // Order by latest created_at
         $query->orderBy('created_at', 'desc');
-    
+
         // Paginate the results
         $excuses = $query->paginate(6, ['*'], 'page', request()->query('page', 1));
-    
+
         // Format response
         $excusesWithUserData = collect($excuses->items())->map(function ($excuse) {
             return [
                 'excuse' => $excuse,
             ];
         });
-    
+
         return $this->returnData('Excuses', [
             'data' => $excusesWithUserData,
             'pagination' => [
@@ -311,5 +325,5 @@ class ExcuseController extends Controller
             ]
         ], 'Excuses for employees in the departments managed by the authenticated user');
     }
-    
+
 }
