@@ -11,7 +11,7 @@ use Modules\Clocks\Exports\Sheets\UserClocksDetailedSheet;
 use Modules\Clocks\Exports\Sheets\UserClocksSummarySheet;
 use Modules\Clocks\Exports\Sheets\UserClocksPlanSheet;
 use Modules\Clocks\Models\ClockInOut;
-use Modules\Clocks\Models\UserClockOvertime;
+use Modules\Users\Models\OverTime;
 use Modules\Users\Models\User;
 use Modules\Users\Models\CustomVacation;
 use Modules\Clocks\Support\DeductionPlanResolver;
@@ -292,8 +292,12 @@ class UserClocksExport implements WithMultipleSheets
                 ->orderBy('clock_in')
                 ->get();
 
-            $overtimeRecords = UserClockOvertime::where('user_id', $user->id)
-                ->whereBetween('overtime_date', [$startDate->toDateString(), $endDate->toDateString()])
+            $overtimeRecords = OverTime::where('user_id', $user->id)
+                ->where(function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('from', [$startDate->toDateString(), $endDate->toDateString()])
+                          ->orWhereBetween('to', [$startDate->toDateString(), $endDate->toDateString()]);
+                })
+                ->where('status', 'approved')
                 ->get()
                 ->keyBy(function ($record) {
                     return Carbon::parse($record->overtime_date)->toDateString();
@@ -1333,9 +1337,9 @@ class UserClocksExport implements WithMultipleSheets
         }
 
         $extraAfterNine = $dailyWorkedMinutes - 535;
-        $blocks = intdiv($extraAfterNine, 15);
 
-        return 60 + ($blocks * 15);
+
+        return 60 + $extraAfterNine;
     }
 
     protected function timeToMinutes(?string $time): int

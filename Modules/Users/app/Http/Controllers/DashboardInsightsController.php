@@ -8,7 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Modules\Clocks\Models\ClockInOut;
 use Modules\Clocks\Models\ServiceAction;
-use Modules\Clocks\Models\UserClockOvertime;
+use Modules\Users\Models\OverTime;
 use Modules\Users\Enums\StatusEnum;
 use Modules\Users\Models\Excuse;
 use Modules\Users\Models\SystemNotification;
@@ -31,7 +31,7 @@ class DashboardInsightsController extends Controller
             ->where('status', StatusEnum::Pending)
             ->count();
 
-        $pendingOvertime = UserClockOvertime::query()
+        $pendingOvertime = OverTime::query()
             ->where(function ($query) {
                 $query->whereNull('approval_of_direct')
                     ->orWhereNull('approval_of_head')

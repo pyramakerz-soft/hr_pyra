@@ -342,8 +342,8 @@ class UserClocksSheet implements FromCollection, WithHeadings, WithStyles, WithC
         }
         if ($dailyWorkedMinutes < 540) { return 0; }
         $extraAfterNine = $dailyWorkedMinutes - 540;
-        $blocks = intdiv($extraAfterNine, 15);
-        return 60 + ($blocks * 15);
+
+        return 60 + $extraAfterNine;
     }
 
     protected function timeToMinutes(?string $time): int

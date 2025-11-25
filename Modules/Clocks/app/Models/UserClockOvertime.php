@@ -64,7 +64,7 @@ class UserClockOvertime extends Model
             return 'declined';
         }
 
-        if ($this->approval_of_direct === 'approved' && $this->approval_of_head === 'approved') {
+        if ($this->approval_of_direct === 'approved' || $this->approval_of_head === 'approved') {
             return 'approved';
         }
 
