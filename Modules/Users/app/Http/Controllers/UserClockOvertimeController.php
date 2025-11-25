@@ -34,7 +34,7 @@ class UserClockOvertimeController extends Controller
         $statusFilter = $request->query('status');
         if (!empty($statusFilter)) {
             $statuses = is_array($statusFilter) ? $statusFilter : [$statusFilter];
-            $statuses = array_filter($statuses, fn ($status) => $status !== 'all');
+            $statuses = array_filter($statuses, fn($status) => $status !== 'all');
 
             if (!empty($statuses)) {
                 $query->where(function ($outer) use ($statuses) {

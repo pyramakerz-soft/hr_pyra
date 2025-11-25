@@ -20,8 +20,7 @@ class OvertimeCalculator
         }
 
         $extraAfterNine = $dailyWorkedMinutes - 535;
-        $blocks = intdiv($extraAfterNine, 15);
 
-        return 60 + ($blocks * 15);
+        return 60 + $extraAfterNine;
     }
 }
