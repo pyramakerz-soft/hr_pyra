@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Clocks\Models\ClockInOut;
 use Modules\Clocks\Models\OverTimeInOut;
-use Modules\Clocks\Models\UserClockOvertime;
 use Modules\Clocks\Models\DeductionPlan;
 use Modules\Location\Models\Location;
 use Modules\Users\Models\UserVacationBalance;
+use Modules\Users\Models\OverTime;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
@@ -215,7 +215,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function clockOvertimes()
     {
-        return $this->hasMany(UserClockOvertime::class);
+        return $this->hasMany(OverTime::class);
     }
 
     public function vacationBalances()
