@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use Modules\Users\Http\Controllers\DepartmentController;
 use Modules\Users\Http\Controllers\ExcuseController;
 use Modules\Users\Http\Controllers\OverTimeController;
-use Modules\Users\Http\Controllers\UserClockOvertimeController;
 use Modules\Users\Http\Controllers\PermissionController;
 use Modules\Users\Http\Controllers\RoleController;
 use Modules\Users\Http\Controllers\TimezoneController;
@@ -54,8 +53,6 @@ Route::group(['prefix' => 'overtime'], function () {
         Route::post('/change_overtime_status/{overtime}', [OverTimeController::class, 'changeOvertimeStatus']);
         Route::get('/get_overtime_of_manager_employees', [OverTimeController::class, 'getOvertimeOfManagerEmployees']);
 
-        Route::get('/clock_overtime', [UserClockOvertimeController::class, 'index']);
-        Route::patch('/clock_overtime/{overtime}', [UserClockOvertimeController::class, 'updateStatus']);
     });
 });
 
@@ -64,11 +61,14 @@ Route::group(['prefix' => 'vacation'], function () {
 
     Route::post('/add_user_vacation', [UserVacationController::class, 'addUserVacation'])->name('add_user_vacation');
     Route::get('/show_user_vacations', [UserVacationController::class, 'showUserVacations']);
+    Route::post('/import-vacation-balances', [UserVacationController::class, 'importVacationBalances']);
+    Route::get('/types', [UserVacationController::class, 'getVacationTypes']);
 
     Route::group(['middleware' => 'role:Manager|Team leader|Hr|Admin'], function () {
 
         Route::post('/change_vacation_status/{vacation}', [UserVacationController::class, 'changeVacationStatus']);
         Route::get('/get_vacations_of_manager_employees', [UserVacationController::class, 'getVacationsOfManagerEmployees']);
+
     });
 });
 
@@ -98,12 +98,13 @@ Route::post('/exportAttendance', [UsersController::class, 'exportAttendance']);
 Route::post('/export-clocks', [UsersController::class, 'exportClocks']);
         Route::post('/import-users-from-excel', [UsersController::class, 'importUsersFromExcel']);
 
+
         //User Management
         Route::get('/manager_names', [UsersController::class, 'ManagerNames']); //HR role
-      
+
         Route::get('/teamlead_names', [UsersController::class, 'teamleadNames']); //HR role
 
-      
+
         Route::get('/employees_per_month', [UsersController::class, 'employeesPerMonth']); //HR role
 
 
@@ -137,8 +138,8 @@ Route::post('/export-clocks', [UsersController::class, 'exportClocks']);
 
     // sub Depratment
     Route::get('/departments/{departmentId}/sub-departments', [DepartmentController::class, 'getSubDepartment'])->name('departments.getSubDepartment'); //HR role
-   
-   
+
+
         Route::get('/departments/{departmentId}/sub-departments/{subDepartmentId}', [DepartmentController::class, 'getSubDepartmentById'])->name('departments.getSubDepartmentById'); //HR role
 
     Route::post('/departments/{departmentId}/sub-departments', [DepartmentController::class, 'storeSubDepartment'])->name('departments.storeSubDepartment'); //HR role

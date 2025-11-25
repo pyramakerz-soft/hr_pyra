@@ -45,7 +45,7 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.get<AddEmployee>(this.baseURL + "/users/get_user_by_id/" + id, { headers });
   }
-  
+
   createUser(emp: AddEmployee) {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
@@ -72,7 +72,7 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     formData.append('start_time', emp.start_time || '');
     formData.append('end_time', emp.end_time || '');
     formData.append('gender', emp.gender);
-    formData.append('role', emp.role?.name.toString() || ''); 
+    formData.append('role', emp.role?.name.toString() || '');
     formData.append('is_part_time', emp.is_part_time ? '1' : '0');
     if (emp.works_on_saturday === null || emp.works_on_saturday === undefined) {
       formData.append('works_on_saturday', '');
@@ -87,6 +87,14 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
 
     return this.http.post<any>(this.baseURL + "/users/create_user", formData, { headers });
 }
+
+  importVacationBalances(file: File): Observable<any> {
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    return this.http.post(`${this.baseURL}/vacation/import-vacation-balances`, formData, { headers });
+  }
 
   updateUser(emp: AddEmployee, empId: number) {
     const token = localStorage.getItem("token");
@@ -123,7 +131,7 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     formData.append('start_time', emp.start_time || '');
     formData.append('end_time', emp.end_time || '');
     formData.append('gender', emp.gender || '');
-    formData.append('role', emp.role?.name.toString() || ''); 
+    formData.append('role', emp.role?.name.toString() || '');
     formData.append('is_part_time', emp.is_part_time ? '1' : '0');
     if (emp.works_on_saturday === null || emp.works_on_saturday === undefined) {
       formData.append('works_on_saturday', '');
@@ -137,7 +145,7 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
 
     return this.http.post<any>(this.baseURL + "/users/update_user/" + empId, formData, { headers });
 }
-  
+
   updatePassword(pass:string, empId:number){
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
@@ -150,13 +158,13 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
   SearchByNameAndDeptAndSubDep(Name: string, deptId?: number | 'none' | null, subIds?: number[] | null, options?: { allDepartments?: boolean }) {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-  
+
     let params: any = { search: Name };
-  
+
     if (deptId != null) {
       params.department_id = deptId;
     }
-  
+
     if (subIds && subIds.length > 0 && deptId !== 'none') {
       params.sub_department_ids = subIds.join(',');
     }
@@ -166,7 +174,7 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
 
     return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, { headers, params });
   }
-  
+
   getAllUsersName(){
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
