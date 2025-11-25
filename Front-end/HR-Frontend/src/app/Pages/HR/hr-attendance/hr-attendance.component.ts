@@ -1,5 +1,5 @@
 ﻿import { CommonModule } from '@angular/common';
-import { Component, HostListener } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { Department } from '../../../Models/department';
@@ -8,6 +8,7 @@ import { ClockService } from '../../../Services/clock.service';
 import { DepartmentService } from '../../../Services/department.service';
 import { SubDepartmentService } from '../../../Services/sub-department.service';
 import { UserServiceService } from '../../../Services/user-service.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-hr-attendance',
@@ -17,6 +18,8 @@ import { UserServiceService } from '../../../Services/user-service.service';
   styleUrl: './hr-attendance.component.css'
 })
 export class HrAttendanceComponent {
+  @ViewChild('balanceFileInput') balanceFileInput!: ElementRef;
+
   PagesNumber: number = 1;
   CurrentPageNumber: number = 1;
   pages: number[] = [];
@@ -68,7 +71,7 @@ export class HrAttendanceComponent {
     public UserClocksService: ClockService,
     private clockService: ClockService,
     public departmentServ: DepartmentService,
-    public supDeptServ: SubDepartmentService
+    public supDeptServ: SubDepartmentService,
   ) {}
 
   ngOnInit() {
@@ -162,6 +165,49 @@ export class HrAttendanceComponent {
 
   NavigateToEmployeeAttendanceDetails(EmpId: number) {
     this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/" + EmpId)
+  }
+
+  ImportOpeningBalanceSheet() {
+    this.balanceFileInput.nativeElement.click();
+  }
+
+  onBalanceFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.importVacationBalances(file);
+    }
+  }
+
+  importVacationBalances(file: File): void {
+    this.isLoading = true;
+    this.userServ.importVacationBalances(file).subscribe({
+      next: (response) => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Import Successful',
+          text: response.message || 'Vacation balances imported successfully!',
+          confirmButtonColor: '#17253E',
+        });
+      },
+      error: (error) => {
+        let errorMessage = 'An error occurred during import.';
+        if (error.error && typeof error.error.message === 'string') {
+          errorMessage = error.error.message;
+        }
+        Swal.fire({
+          icon: 'error',
+          title: 'Import Failed',
+          text: errorMessage,
+          confirmButtonColor: '#FF7519',
+        });
+      },
+      complete: () => {
+        this.isLoading = false;
+        if (this.balanceFileInput) {
+          this.balanceFileInput.nativeElement.value = '';
+        }
+      }
+    });
   }
 
   private applyQueryParams(params: ParamMap): void {
@@ -523,7 +569,3 @@ export class HrAttendanceComponent {
     this.isSubDepartmentDropdownOpen = false;
   }
 }
-
-
-
-
