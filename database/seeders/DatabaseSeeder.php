@@ -54,7 +54,8 @@ class DatabaseSeeder extends Seeder
             // ClockSeeder::class,
             DeductionRuleTemplateSeeder::class,
             RolesSeeder::class,
-            TimezoneSeeder::class
+            TimezoneSeeder::class,
+            VacationTypeSeeder::class,
         ]);
 
     }
