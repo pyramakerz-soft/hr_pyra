@@ -23,7 +23,6 @@ class EndUserOverTimeRequest extends FormRequest
     {
         return [
             'to' => 'required|date',  // Validate 'to' as required and a valid date
-            'reason' => 'required|string',  // Validate 'reason' as required and a string
             'overtime_id' => 'required|exists:over_time,id',  // Validate that 'overtime_id' exists in the 'over_time' table
         ];
     }
