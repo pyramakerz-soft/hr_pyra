@@ -113,6 +113,12 @@ class UserVacationController extends Controller
             return $this->returnError($eligibilityError, 422);
         }
 
+        // Validate Academic Department Casual/Emergency Limit
+        $academicLimitError = $this->validateAcademicCasualEmergencyLimit($authUser, $vacationType, $from, $to, $daysCount);
+        if ($academicLimitError) {
+            return $this->returnError($academicLimitError, 422);
+        }
+
         // Calculate available days for this vacation type
         $availableDays = $this->calculateAvailableDays($authUser, $vacationType, $from, $daysCount);
 
@@ -1016,5 +1022,88 @@ class UserVacationController extends Controller
                 'unpaid_vacation' => $vacationUnpaid->fresh(['vacationType'])
             ], 'Insufficient balance. Request split into Paid (' . $availableDays . ' days) and Unpaid (' . $unpaidDays . ' days) Leave.');
         });
+    }
+    /**
+     * Validate Academic Department Casual/Emergency Leave Limit
+     *
+     */
+    protected function validateAcademicCasualEmergencyLimit($user, $vacationType, $from, $to, $daysCount): ?string
+    {
+        // Only apply to Emergency and Casual Leave for Academic department
+        $targetTypes = [self::EMERGENCY_LEAVE_NAME, self::CASUAL_LEAVE_NAME];
+        if (!in_array($vacationType->name, $targetTypes)) {
+            return null;
+        }
+
+        $department = $user->department;
+        if (!$department || strtolower($department->name) !== 'academic') {
+            return null;
+        }
+
+        // Check if request falls during academic year (Sept 1 - June 30)
+        if (!$this->isAcademicYearPeriod($from, $to)) {
+            return null;
+        }
+
+        $academicYearStart = $this->getAcademicYearStart($from);
+        $academicYearEnd = $this->getAcademicYearEnd($from);
+
+        // Calculate days already taken for Casual/Emergency in the current academic year
+        $daysTaken = UserVacation::where('user_id', $user->id)
+            ->whereHas('vacationType', function ($q) use ($targetTypes) {
+                $q->whereIn('name', $targetTypes);
+            })
+            ->where('status', StatusEnum::Approved)
+            ->where(function ($q) use ($academicYearStart, $academicYearEnd) {
+                $q->whereBetween('from_date', [$academicYearStart, $academicYearEnd])
+                    ->orWhereBetween('to_date', [$academicYearStart, $academicYearEnd]);
+            })
+            ->sum('days_count');
+
+        if (($daysTaken + $daysCount) > 3) {
+            return "Academic staff can only take a maximum of 3 days combined for Emergency and Casual leave during the academic year (Sept-June). You have already taken {$daysTaken} days.";
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if the period falls within the academic year (Sept-June)
+     *
+     */
+    protected function isAcademicYearPeriod($from, $to): bool
+    {
+        // Academic year: Sept 1 - June 30
+        // Simplification: Check if start date is in academic year.
+        $month = $from->month;
+        return ($month >= 9 || $month <= 6);
+    }
+
+    /**
+     * Get the start date of the academic year for a given date
+     *
+     */
+    protected function getAcademicYearStart($date): Carbon
+    {
+        $year = $date->year;
+        $month = $date->month;
+
+        // If current month is Sept-Dec, academic year started this year (Sept 1)
+        // If current month is Jan-June, academic year started last year (Sept 1)
+        if ($month >= 9) {
+            return Carbon::create($year, 9, 1);
+        } else {
+            return Carbon::create($year - 1, 9, 1);
+        }
+    }
+
+    /**
+     * Get the end date of the academic year for a given date
+     *
+     */
+    protected function getAcademicYearEnd($date): Carbon
+    {
+        $start = $this->getAcademicYearStart($date);
+        return $start->copy()->addYear()->month(6)->endOfMonth(); // June 30 of next year relative to start
     }
 }
