@@ -128,20 +128,29 @@ class OverTimeController extends Controller
         $authUser = Auth::user();
 
         // Find the overtime record by its ID
-        $userOvertime = OverTime::find($request->overtime_id);
+        $userOvertime = OverTime::find($request->input('overtime_id'));
 
-        // Calculate overtime minutes
-        $overtimeMinutes = null;
+        if (!$userOvertime) {
+            return $this->returnError('Overtime record not found', 404);
+        }
+
+        // Validate end time is not before start time
         if ($userOvertime->from && $request->input('to')) {
             $from = \Carbon\Carbon::parse($userOvertime->from);
             $to = \Carbon\Carbon::parse($request->input('to'));
+
+            if ($to->lessThan($from)) {
+                return $this->returnError('End time cannot be before start time', 422);
+            }
+
             $overtimeMinutes = $from->diffInMinutes($to); // Calculate from 'from' to 'to'
+        } else {
+            $overtimeMinutes = null;
         }
 
         // Update the overtime record
         $userOvertime->update([
             'to' => $request->input('to'),
-            'reason' => $request->input('reason'),
             'user_id' => $authUser->id,
             'overtime_minutes' => $overtimeMinutes,
         ]);
