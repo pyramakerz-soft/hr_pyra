@@ -1,78 +1,108 @@
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* @import '~@coreui/coreui/dist/css/coreui.min.css'; */
 
-.poppins{
-    font-family: "Poppins", sans-serif;;
+.poppins {
+    font-family: "Poppins", sans-serif;
+    ;
 }
 
-.D1{
+.D1 {
     font-size: 36px !important;
 }
 
-.D2{
+.D2 {
     font-size: 32px !important;
 }
 
-.h1{
+.h1 {
     font-size: 28px !important;
 }
 
-.h2{
+.h2 {
     font-size: 24px !important;
 }
 
-.h3{
+.h3 {
     font-size: 20px !important;
 }
 
-.h4{
+.h4 {
     font-size: 16px !important;
 }
 
-.h5{
+.h5 {
     font-size: 14px !important;
 }
 
-.h6{
+.h6 {
     font-size: 12px !important;
 }
 
-.p1{
+.p1 {
     font-size: 20px !important;
 }
 
-.p2{
+.p2 {
     font-size: 16px !important;
 }
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
 
 .cdk-global-overlay-wrapper {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 24px;
-  min-height: 100vh;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 24px;
+    min-height: 100vh;
 }
 
 .employee-hr-profile-dialog-panel {
-  max-width: min(900px, 95vw) !important;
-  width: 100% !important;
+    max-width: min(900px, 95vw) !important;
+    width: 100% !important;
 }
 
 
 .employee-hr-profile-dialog-panel .mat-mdc-dialog-surface {
-  width: 100% !important;
-  max-width: min(900px, 95vw) !important;
-  border-radius: 16px;
-  padding: 0;
+    width: 100% !important;
+    max-width: min(900px, 95vw) !important;
+    border-radius: 16px;
+    padding: 0;
 }
 
 .employee-hr-profile-dialog-panel .mat-mdc-dialog-container {
-  padding: 0;
-  overflow: visible;
+    padding: 0;
+    overflow: visible;
 }
 
+/* Custom Dialog Styles */
+.custom-dialog-container {
+    position: relative !important;
+}
+
+.custom-dialog-container .mat-mdc-dialog-surface {
+    border-radius: 8px !important;
+    box-shadow: 0 11px 15px -7px rgba(0, 0, 0, 0.2),
+        0 24px 38px 3px rgba(0, 0, 0, 0.14),
+        0 9px 46px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
+.custom-backdrop {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.cdk-overlay-pane {
+    position: static !important;
+}

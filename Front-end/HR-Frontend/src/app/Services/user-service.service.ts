@@ -210,4 +210,10 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.put<{ profile: HrUserProfile }>(`${this.baseURL}/hr/users/${userId}/profile`, payload, { headers });
   }
+
+  resetVacationBalance(payload: any): Observable<any> {
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post<any>(`${this.baseURL}/users/reset-vacation-balance`, payload, { headers });
+  }
 }

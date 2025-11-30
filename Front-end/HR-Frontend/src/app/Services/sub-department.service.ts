@@ -10,27 +10,27 @@ import { ApiService } from './api.service';
 })
 export class SubDepartmentService {
 
-  baseurl:string = "";
+  baseurl: string = "";
   token: string = ""
   deptId: number = 0;  // Variable to store the department ID
 
-  constructor(private route: ActivatedRoute, public http: HttpClient,public Api:ApiService) {
+  constructor(private route: ActivatedRoute, public http: HttpClient, public Api: ApiService) {
 
 
-   }
+  }
 
-   // Method to set the DeptId
+  // Method to set the DeptId
   setDeptId(deptId: number) {
     this.deptId = deptId;
     this.baseurl = this.Api.BaseUrl + `/departments/${deptId}/sub-departments`;
   }
 
 
-  getall( deptId : Number): Observable<SubDepartment[]> {
-
+  getall(deptId: Number): Observable<SubDepartment[]> {
+    const url = this.Api.BaseUrl + `/departments/${deptId}/sub-departments`;
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<SubDepartment[]>(this. baseurl, { headers });
+    return this.http.get<SubDepartment[]>(url, { headers });
   }
 
   deleteById(id: number): Observable<any> {
@@ -41,7 +41,7 @@ export class SubDepartmentService {
   }
 
 
-  createDepartment(name: string, teamLeadId: number , ): Observable<SubDepartment> {
+  createDepartment(name: string, teamLeadId: number,): Observable<SubDepartment> {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
@@ -59,7 +59,7 @@ export class SubDepartmentService {
     return this.http.get<SubDepartment[]>(`${this.baseurl}/${ID}`, { headers });
   }
 
-  UpdateDept(ID: number ,name: string, teamLeadId: number , ){
+  UpdateDept(ID: number, name: string, teamLeadId: number,) {
     const token = localStorage.getItem("token");
     const body = {
       name: name,
@@ -67,7 +67,7 @@ export class SubDepartmentService {
 
     };
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.post<SubDepartment[]>(`${this.baseurl}/${ID}`,body, { headers });
+    return this.http.post<SubDepartment[]>(`${this.baseurl}/${ID}`, body, { headers });
 
   }
 
