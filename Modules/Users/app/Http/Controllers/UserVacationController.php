@@ -18,6 +18,8 @@ use Modules\Users\Models\VacationType;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
+use Modules\Users\Models\Department;
+use Modules\Users\Models\SubDepartment;
 
 
 
@@ -147,7 +149,6 @@ class UserVacationController extends Controller
      */
     public function showUserVacations(Request $request)
     {
-        //TODO add vication balance to this response, first check if it needed for every vacation type
         $authUser = Auth::user();
 
         $perPage = (int) $request->query('per_page', 10);
@@ -1105,5 +1106,105 @@ class UserVacationController extends Controller
     {
         $start = $this->getAcademicYearStart($date);
         return $start->copy()->addYear()->month(6)->endOfMonth(); // June 30 of next year relative to start
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/users/reset-vacation-balance",
+     *     tags={"User"},
+     *     summary="Reset vacation balances for a user, department, or sub-department",
+     *     security={{"bearerAuth": {}}},
+     *     description="Resets vacation balances for the specified target (user, department, or sub-department) for a given year.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="user_id", type="integer", description="ID of the user to reset"),
+     *             @OA\Property(property="department_id", type="integer", description="ID of the department to reset (includes sub-departments)"),
+     *             @OA\Property(property="sub_department_id", type="integer", description="ID of the sub-department to reset"),
+     *             @OA\Property(property="year", type="integer", description="Year to reset balances for (default: current year)")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Vacation balances reset successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Vacation balances reset successfully for 10 users.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Please provide user_id, department_id, or sub_department_id.")
+     *         )
+     *     )
+     * )
+     */
+    public function resetUsersVacationBalance(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'nullable|exists:users,id',
+            'department_id' => 'nullable|exists:departments,id',
+            'sub_department_id' => 'nullable|exists:sub_departments,id',
+            'year' => 'nullable|integer|min:2000|max:2100',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->returnError($validator->errors()->first(), 400);
+        }
+
+        if (!$request->user_id && !$request->department_id && !$request->sub_department_id) {
+            return $this->returnError('Please provide user_id, department_id, or sub_department_id.', 400);
+        }
+
+        $year = $request->input('year', Carbon::now()->year);
+        $userIds = collect();
+
+        if ($request->user_id) {
+            $userIds->push($request->user_id);
+        } elseif ($request->department_id) {
+            $department = Department::find($request->department_id);
+            if ($department) {
+                $userIds = $department->employees()->pluck('id');
+            }
+        } elseif ($request->sub_department_id) {
+            $subDepartment = SubDepartment::find($request->sub_department_id);
+            if ($subDepartment) {
+                $userIds = $subDepartment->users()->pluck('id');
+            }
+        }
+
+        if ($userIds->isEmpty()) {
+            return $this->returnError('No users found for the specified criteria.', 404);
+        }
+
+        DB::transaction(function () use ($userIds, $year) {
+            $vacationTypes = VacationType::all();
+
+            foreach ($userIds as $userId) {
+                foreach ($vacationTypes as $type) {
+                    $allocatedDays = $type->default_days ?? 0;
+
+                    // Specific logic for Annual Leave: Reset to 0
+                    if ($type->name === self::ANNUAL_LEAVE_NAME) {
+                        $allocatedDays = 0;
+                    }
+
+                    UserVacationBalance::updateOrCreate(
+                        [
+                            'user_id' => $userId,
+                            'vacation_type_id' => $type->id,
+                            'year' => $year,
+                        ],
+                        [
+                            'allocated_days' => $allocatedDays,
+                            'used_days' => 0,
+                        ]
+                    );
+                }
+            }
+        });
+
+        return $this->returnSuccess("Vacation balances reset successfully for " . $userIds->count() . " users.", 200);
     }
 }

@@ -9,11 +9,13 @@ import { DepartmentService } from '../../../Services/department.service';
 import { SubDepartmentService } from '../../../Services/sub-department.service';
 import { UserServiceService } from '../../../Services/user-service.service';
 import Swal from 'sweetalert2';
+import { ResetVacationBalancePopupComponent } from '../../../Components/reset-vacation-balance-popup/reset-vacation-balance-popup.component';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-hr-attendance',
   standalone: true,
-  imports: [CommonModule , FormsModule],
+  imports: [CommonModule, FormsModule, MatDialogModule],
   templateUrl: './hr-attendance.component.html',
   styleUrl: './hr-attendance.component.css'
 })
@@ -72,7 +74,8 @@ export class HrAttendanceComponent {
     private clockService: ClockService,
     public departmentServ: DepartmentService,
     public supDeptServ: SubDepartmentService,
-  ) {}
+    public dialog: MatDialog
+  ) { }
 
   ngOnInit() {
     const savedPageNumber = localStorage.getItem('HrAttendaceCN');
@@ -98,6 +101,20 @@ export class HrAttendanceComponent {
     localStorage.setItem('HrEmployeeCN', "1");
     localStorage.setItem('HrLocationsCN', "1");
     localStorage.setItem('HrAttanceDetailsCN', "1");
+  }
+
+  openResetVacationBalanceDialog() {
+    this.dialog.open(ResetVacationBalancePopupComponent, {
+      data: { userId: null, userName: null },
+      width: '500px',
+      maxHeight: '90vh',
+      autoFocus: true,
+      restoreFocus: true,
+      disableClose: false,
+      panelClass: 'custom-dialog-container',
+      hasBackdrop: true,
+      backdropClass: 'custom-backdrop'
+    });
   }
 
   // Method to handle "Select All" checkbox state change
@@ -160,7 +177,7 @@ export class HrAttendanceComponent {
       }, () => {
         this.isLoading = false;
       },
-    );
+      );
   }
 
   NavigateToEmployeeAttendanceDetails(EmpId: number) {
@@ -406,7 +423,7 @@ export class HrAttendanceComponent {
         this.DisplayPagginationOrNot = false;
         this.generatePages();
       },
-      () => {}
+      () => { }
     );
   }
 
@@ -418,7 +435,7 @@ export class HrAttendanceComponent {
           .map((item: any) => String(item?.name ?? item ?? ''))
           .filter((name) => name.trim() !== '');
       },
-      () => {}
+      () => { }
     );
   }
 
@@ -457,7 +474,7 @@ export class HrAttendanceComponent {
         this.tableData = d.data.users;
         this.DisplayPagginationOrNot = false;
       },
-      () => {}
+      () => { }
     );
   }
 
@@ -541,7 +558,7 @@ export class HrAttendanceComponent {
       .filter(id => !Number.isNaN(id));
   }
 
-    generatePages() {
+  generatePages() {
     this.pages = [];
     for (let i = 1; i <= this.PagesNumber; i++) {
       this.pages.push(i);

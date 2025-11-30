@@ -24,7 +24,7 @@ use Modules\Users\Http\Controllers\DashboardInsightsController;
  * routes are loaded by the RouteServiceProvider within a group which
  * is assigned the "api" middleware group. Enjoy building your API!
  *
-*/
+ */
 
 
 Route::group(['prefix' => 'excuse'], function () {
@@ -72,17 +72,21 @@ Route::group(['prefix' => 'vacation'], function () {
     });
 });
 
+Route::group(['prefix' => 'users'], function () {
+    Route::post('/reset-vacation-balance', [UserVacationController::class, 'resetUsersVacationBalance']);
+});
+
 
 
 Route::group(['middleware' => 'role:Hr|Admin|Team leader'], function () {
 
 
 
-Route::get('timezones', [TimezoneController::class, 'index']);
-Route::get('timezones/{id}', [TimezoneController::class, 'show']);
-Route::post('timezones', [TimezoneController::class, 'store']);
-Route::put('timezones/{id}', [TimezoneController::class, 'update']);
-Route::delete('timezones/{id}', [TimezoneController::class, 'destroy']);
+    Route::get('timezones', [TimezoneController::class, 'index']);
+    Route::get('timezones/{id}', [TimezoneController::class, 'show']);
+    Route::post('timezones', [TimezoneController::class, 'store']);
+    Route::put('timezones/{id}', [TimezoneController::class, 'update']);
+    Route::delete('timezones/{id}', [TimezoneController::class, 'destroy']);
 
 
     Route::group(['prefix' => 'users'], function () {
@@ -94,8 +98,8 @@ Route::delete('timezones/{id}', [TimezoneController::class, 'destroy']);
         Route::post('/create_user', [UsersController::class, 'store'])->withoutMiddleware('auth:api')->name('user.store'); // Excluding middleware for this route
         Route::get('/get_user_by_id/{user}', [UsersController::class, 'show'])->name('user.show');
         Route::post('/update_password/{user}', [UsersController::class, 'updatePassword'])->name('user.updatePassword');
-Route::post('/exportAttendance', [UsersController::class, 'exportAttendance']);
-Route::post('/export-clocks', [UsersController::class, 'exportClocks']);
+        Route::post('/exportAttendance', [UsersController::class, 'exportAttendance']);
+        Route::post('/export-clocks', [UsersController::class, 'exportClocks']);
         Route::post('/import-users-from-excel', [UsersController::class, 'importUsersFromExcel']);
 
 
@@ -140,7 +144,7 @@ Route::post('/export-clocks', [UsersController::class, 'exportClocks']);
     Route::get('/departments/{departmentId}/sub-departments', [DepartmentController::class, 'getSubDepartment'])->name('departments.getSubDepartment'); //HR role
 
 
-        Route::get('/departments/{departmentId}/sub-departments/{subDepartmentId}', [DepartmentController::class, 'getSubDepartmentById'])->name('departments.getSubDepartmentById'); //HR role
+    Route::get('/departments/{departmentId}/sub-departments/{subDepartmentId}', [DepartmentController::class, 'getSubDepartmentById'])->name('departments.getSubDepartmentById'); //HR role
 
     Route::post('/departments/{departmentId}/sub-departments', [DepartmentController::class, 'storeSubDepartment'])->name('departments.storeSubDepartment'); //HR role
     Route::post('/departments/{departmentId}/sub-departments/{subDepartmentId}', [DepartmentController::class, 'updateSubDepartment'])->name('departments.updateSubDepartment'); //HR role
@@ -161,15 +165,15 @@ Route::post('/export-clocks', [UsersController::class, 'exportClocks']);
 
 
 });
-    Route::prefix('dashboard')->group(function () {
-        Route::get('/summary', [DashboardInsightsController::class, 'summary']);
-        Route::get('/presence', [DashboardInsightsController::class, 'presence']);
-    });
+Route::prefix('dashboard')->group(function () {
+    Route::get('/summary', [DashboardInsightsController::class, 'summary']);
+    Route::get('/presence', [DashboardInsightsController::class, 'presence']);
+});
 
-    Route::prefix('notifications')->group(function () {
-        Route::get('/types', [NotificationController::class, 'types']);
-        Route::get('/', [NotificationController::class, 'index']);
-        Route::get('/{notification}', [NotificationController::class, 'show']);
-        Route::post('/', [NotificationController::class, 'store']);
-        Route::post('/{notification}/read', [NotificationController::class, 'markRead']);
-    });
+Route::prefix('notifications')->group(function () {
+    Route::get('/types', [NotificationController::class, 'types']);
+    Route::get('/', [NotificationController::class, 'index']);
+    Route::get('/{notification}', [NotificationController::class, 'show']);
+    Route::post('/', [NotificationController::class, 'store']);
+    Route::post('/{notification}/read', [NotificationController::class, 'markRead']);
+});
