@@ -471,7 +471,7 @@ class UserVacationController extends Controller
         }
 
         $query = UserVacation::with(['user', 'vacationType'])
-            ->whereIn('user_id', $employeeIds);
+            ->whereIn('user_id', $employeeIds)->orderBy('created_at', 'desc');
 
         $searchTerm = request()->query('searchTerm');
         if (!empty($searchTerm)) {
