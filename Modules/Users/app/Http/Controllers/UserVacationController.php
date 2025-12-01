@@ -284,6 +284,7 @@ class UserVacationController extends Controller
                 return $this->returnError('You do not have permission to approve as direct manager', 403);
             }
 
+            $vacation->status = StatusEnum::from($status);
             $vacation->approval_of_direct = StatusEnum::from($status);
             $vacation->direct_approved_by = $manager->id;
         } elseif ($approver === 'head') {
@@ -292,6 +293,7 @@ class UserVacationController extends Controller
                 return $this->returnError('You do not have permission to approve as head manager', 403);
             }
 
+            $vacation->status = StatusEnum::from($status);
             $vacation->approval_of_head = StatusEnum::from($status);
             $vacation->head_approved_by = $manager->id;
         } else {
