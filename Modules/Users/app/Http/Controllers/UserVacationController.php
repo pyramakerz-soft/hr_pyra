@@ -619,6 +619,9 @@ class UserVacationController extends Controller
 
         $file = $request->file('file');
 
+        $vacationType = VacationType::where('name', 'Annual Leave')->first();
+        $year = Carbon::now()->year;
+
         try {
             $rows = Excel::toArray([], $file)[0];
             $header = array_map('trim', array_map('strtolower', array_shift($rows)));
@@ -654,8 +657,14 @@ class UserVacationController extends Controller
                 }
 
                 UserVacationBalance::updateOrCreate(
-                    ['user_id' => $user->id,],
-                    ['allocated_days' => $rowData['balance']]
+                    [
+                        'user_id' => $user->id,
+                        'vacation_type_id' => $vacationType->id,
+                        'year' => $year
+                    ],
+                    [
+                        'allocated_days' => $rowData['balance']
+                    ]
                 );
                 $updatedCount++;
             }
