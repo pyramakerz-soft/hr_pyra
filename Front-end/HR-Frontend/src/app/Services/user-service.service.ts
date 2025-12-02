@@ -13,34 +13,34 @@ export class UserServiceService {
 
   baseURL = ""
 
-  constructor(public http:HttpClient , public Api:ApiService) {
-    this.baseURL=Api.BaseUrl
+  constructor(public http: HttpClient, public Api: ApiService) {
+    this.baseURL = Api.BaseUrl
 
-   }
-getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDepartments?: boolean; departmentId?: number | 'none'; subDepartmentIds?: number[]; }): Observable<UserModel[]> {
-  const token = localStorage.getItem("token");
-  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  }
+  getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDepartments?: boolean; departmentId?: number | 'none'; subDepartmentIds?: number[]; }): Observable<UserModel[]> {
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-  let params: any = {};
-  if (!options?.allDepartments) {
-    params.page = pageNumber;
-  }
-  if (from_day) params.from_day = from_day;
-  if (to_day) params.to_day = to_day;
-  if (options?.allDepartments) {
-    params.all_departments = true;
-  }
-  if (options?.departmentId !== undefined && options.departmentId !== null) {
-    params.department_id = options.departmentId;
-  }
-  if (options?.subDepartmentIds && options.subDepartmentIds.length > 0) {
-    params.sub_department_ids = options.subDepartmentIds.join(',');
+    let params: any = {};
+    if (!options?.allDepartments) {
+      params.page = pageNumber;
+    }
+    if (from_day) params.from_day = from_day;
+    if (to_day) params.to_day = to_day;
+    if (options?.allDepartments) {
+      params.all_departments = true;
+    }
+    if (options?.departmentId !== undefined && options.departmentId !== null) {
+      params.department_id = options.departmentId;
+    }
+    if (options?.subDepartmentIds && options.subDepartmentIds.length > 0) {
+      params.sub_department_ids = options.subDepartmentIds.join(',');
+    }
+
+    return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, { headers, params });
   }
 
-  return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, { headers, params });
-}
-
-  getUserById(id:number): Observable<AddEmployee> {
+  getUserById(id: number): Observable<AddEmployee> {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.get<AddEmployee>(this.baseURL + "/users/get_user_by_id/" + id, { headers });
@@ -74,6 +74,8 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     formData.append('gender', emp.gender);
     formData.append('role', emp.role?.name.toString() || '');
     formData.append('is_part_time', emp.is_part_time ? '1' : '0');
+    formData.append('bank_name', emp.bank_name || '');
+    formData.append('bank_account_number', emp.bank_account_number || '');
     if (emp.works_on_saturday === null || emp.works_on_saturday === undefined) {
       formData.append('works_on_saturday', '');
     } else {
@@ -86,7 +88,7 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     emp.work_type_id.forEach((id, index) => formData.append(`work_type_id[${index}]`, id.toString()));
 
     return this.http.post<any>(this.baseURL + "/users/create_user", formData, { headers });
-}
+  }
 
   importVacationBalances(file: File): Observable<any> {
     const token = localStorage.getItem("token");
@@ -104,11 +106,11 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
 
     // Handle the image field
     if (typeof emp.image === "string") {
-        // If the image is a string (URL), skip appending it to FormData
-        // You might need to handle this differently on the server
+      // If the image is a string (URL), skip appending it to FormData
+      // You might need to handle this differently on the server
     } else if (emp.image instanceof File) {
-        // If the image is a file, append it to FormData
-        formData.append('image', emp.image);
+      // If the image is a file, append it to FormData
+      formData.append('image', emp.image);
     }
 
     // Append other fields
@@ -133,6 +135,8 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     formData.append('gender', emp.gender || '');
     formData.append('role', emp.role?.name.toString() || '');
     formData.append('is_part_time', emp.is_part_time ? '1' : '0');
+    formData.append('bank_name', emp.bank_name || '');
+    formData.append('bank_account_number', emp.bank_account_number || '');
     if (emp.works_on_saturday === null || emp.works_on_saturday === undefined) {
       formData.append('works_on_saturday', '');
     } else {
@@ -144,12 +148,12 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     emp.work_type_id.forEach((id, index) => formData.append(`work_type_id[${index}]`, id.toString()));
 
     return this.http.post<any>(this.baseURL + "/users/update_user/" + empId, formData, { headers });
-}
+  }
 
-  updatePassword(pass:string, empId:number){
+  updatePassword(pass: string, empId: number) {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    const body={
+    const body = {
       password: pass
     }
     return this.http.post<any>(this.baseURL + "/users/update_password/" + empId, body, { headers });
@@ -175,25 +179,25 @@ getall(pageNumber: number, from_day?: string, to_day?: string, options?: { allDe
     return this.http.get<UserModel[]>(this.baseURL + `/users/getAllUsers`, { headers, params });
   }
 
-  getAllUsersName(){
+  getAllUsersName() {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.get<UserModel[]>(this.baseURL + `/users/users_by_name`, { headers });
   }
 
-  DeleteById(id:number): Observable<AddEmployee> {
+  DeleteById(id: number): Observable<AddEmployee> {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.delete<any>(this.baseURL + "/users/delete_user/" + id, { headers });
   }
 
-  checkSerialNumber(empId:number){
+  checkSerialNumber(empId: number) {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.get<any>(this.baseURL + `/auth/check_serial_number/${empId}`, { headers });
   }
 
-  DeleteSerialNum(empId:number){
+  DeleteSerialNum(empId: number) {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.post<any>(this.baseURL + `/auth/remove_serial_number/${empId}`, {}, { headers });

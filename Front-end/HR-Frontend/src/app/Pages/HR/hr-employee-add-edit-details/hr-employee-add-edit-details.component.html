@@ -1,248 +1,238 @@
 <div>
-    <div class="flex justify-between mb-5 items-center">
-        <div>
-            <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Employee</p>
-        </div>
-        <button (click)="SaveEmployee()"
-            [hidden]="isSaved"
-            class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
-            Save
-        </button>
-        <button
-            *ngIf="isSaved"
-            [disabled]
-            class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
-            <div class="loader"></div>
-        </button>
+  <div class="flex justify-between mb-5 items-center">
+    <div>
+      <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Employee</p>
     </div>
+    <button (click)="SaveEmployee()" [hidden]="isSaved"
+      class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
+      Save
+    </button>
+    <button *ngIf="isSaved" [disabled]
+      class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
+      <div class="loader"></div>
+    </button>
+  </div>
 
-    <div class="border border-[#ECECEC] rounded-lg p-4 md:p-8 shadow-md shadow-[#0000001F]">
-        <p class="font-semibold text-sm md:text-lg mb-3">Information's</p>
+  <div class="border border-[#ECECEC] rounded-lg p-4 md:p-8 shadow-md shadow-[#0000001F]">
+    <p class="font-semibold text-sm md:text-lg mb-3">Information's</p>
 
-        <div class="mt-5">
-            <div class="flex items-center space-x-4">
-                <div class="flex justify-center md:justify-start w-full md:w-1/3">
-                    <label for="file-upload" class="cursor-pointer flex flex-col items-center bg-[#F6F6F6] rounded-xl px-6 py-3 lg:py-5">
-                        <img *ngIf="!imagePreview" src="../../../../assets/images/AddPhoto.png" class="w-1/4">
-                        <img *ngIf="imagePreview" [src]="imagePreview" class="w-1/3 object-cover">
-                        <span class="bg-[#FF7519] text-white px-4 md:px-8 py-2 lg:py-4 lg:font-semibold text-xs md:text-sm rounded-lg my-2 md:my-4 text-center">Select Image</span>
-                        <p class="font-normal text-xs md:text-sm">or drag photo here</p>
-                        <p class="font-normal text-xs md:text-sm text-[#8E8E93]">(JPEG, PNG with max size of 15 MB)</p>
-                    </label>
-                    <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)" accept="image/jpeg, image/png"  />
+    <div class="mt-5">
+      <div class="flex items-center space-x-4">
+        <div class="flex justify-center md:justify-start w-full md:w-1/3">
+          <label for="file-upload"
+            class="cursor-pointer flex flex-col items-center bg-[#F6F6F6] rounded-xl px-6 py-3 lg:py-5">
+            <img *ngIf="!imagePreview" src="../../../../assets/images/AddPhoto.png" class="w-1/4">
+            <img *ngIf="imagePreview" [src]="imagePreview" class="w-1/3 object-cover">
+            <span
+              class="bg-[#FF7519] text-white px-4 md:px-8 py-2 lg:py-4 lg:font-semibold text-xs md:text-sm rounded-lg my-2 md:my-4 text-center">Select
+              Image</span>
+            <p class="font-normal text-xs md:text-sm">or drag photo here</p>
+            <p class="font-normal text-xs md:text-sm text-[#8E8E93]">(JPEG, PNG with max size of 15 MB)</p>
+          </label>
+          <input id="file-upload" type="file" class="hidden" (change)="onImageFileSelected($event)"
+            accept="image/jpeg, image/png" />
+        </div>
+        <span *ngIf="validationErrors['image']" class="text-red-500  font-normal text-xs md:text-sm">{{
+          validationErrors['image'] }}</span>
+      </div>
+
+      <div class="text-[#3A3A3C] mt-4 flex flex-col md:flex-row md:space-x-8 space-y-3 md:space-y-0">
+        <div class="flex-1">
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Name
+              <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name']
+                }}</span>
+            </label>
+            <input [(ngModel)]="employee.name" (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"
+              type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the name"
+              maxlength="50">
+          </div>
+          <!-- new -->
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Code
+              <span *ngIf="validationErrors['code']" class="text-red-500 ml-3 font-normal">{{ validationErrors['code']
+                }}</span>
+            </label>
+            <input [(ngModel)]="employee.code" (ngModelChange)="onInputValueChange({ field: 'code', value: $event })"
+              type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the code"
+              maxlength="50">
+          </div>
+
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Work Type
+              <span *ngIf="validationErrors['work_type_id']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['work_type_id'] }}</span>
+            </label>
+            <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+              <ng-container *ngIf="workTypes.length > 0; else noWorkTypes">
+                <div class="flex flex-col gap-2">
+                  <label *ngFor="let work of workTypes" class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" class="h-4 w-4" [id]="'workType_' + work.id" [value]="work.id"
+                      (change)="onWorkTypeChange(work.id, $event)" [checked]="employee.work_type_id.includes(work.id)">
+                    <span class="text-sm">{{ work.name }}</span>
+                  </label>
                 </div>
-                <span *ngIf="validationErrors['image']" class="text-red-500  font-normal text-xs md:text-sm">{{ validationErrors['image'] }}</span>
+              </ng-container>
+              <ng-template #noWorkTypes>
+                <div>No Data Found</div>
+              </ng-template>
             </div>
+          </div>
 
-            <div class="text-[#3A3A3C] mt-4 flex flex-col md:flex-row md:space-x-8 space-y-3 md:space-y-0">
-                <div class="flex-1">
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Name
-                            <span *ngIf="validationErrors['name']" class="text-red-500 ml-3 font-normal">{{ validationErrors['name'] }}</span>
-                        </label>
-                        <input [(ngModel)]="employee.name"
-                            (ngModelChange)="onInputValueChange({ field: 'name', value: $event })"
-                            type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the name" maxlength="50">
-                    </div>
-                    <!-- new -->
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Code
-                            <span *ngIf="validationErrors['code']" class="text-red-500 ml-3 font-normal">{{ validationErrors['code']
-                                }}</span>
-                        </label>
-                        <input [(ngModel)]="employee.code" (ngModelChange)="onInputValueChange({ field: 'code', value: $event })"
-                            type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the code"
-                            maxlength="50">
-                    </div>
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Employment Type
+            </label>
+            <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl flex flex-col md:flex-row gap-3">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="employmentType" [checked]="!employee.is_part_time"
+                  (change)="onEmploymentTypeChange(false)">
+                <span class="text-sm">Full Time</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="employmentType" [checked]="employee.is_part_time"
+                  (change)="onEmploymentTypeChange(true)">
+                <span class="text-sm">Part Time</span>
+              </label>
+            </div>
+          </div>
 
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Work Type
-                            <span *ngIf="validationErrors['work_type_id']" class="text-red-500 ml-3 font-normal">{{ validationErrors['work_type_id'] }}</span>
-                        </label>
-                        <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
-                            <ng-container *ngIf="workTypes.length > 0; else noWorkTypes">
-                                <div class="flex flex-col gap-2">
-                                    <label *ngFor="let work of workTypes" class="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            class="h-4 w-4"
-                                            [id]="'workType_' + work.id"
-                                            [value]="work.id"
-                                            (change)="onWorkTypeChange(work.id, $event)"
-                                            [checked]="employee.work_type_id.includes(work.id)">
-                                        <span class="text-sm">{{ work.name }}</span>
-                                    </label>
-                                </div>
-                            </ng-container>
-                            <ng-template #noWorkTypes>
-                                <div>No Data Found</div>
-                            </ng-template>
-                        </div>
-                    </div>
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Works on Saturday
+            </label>
+            <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl flex flex-col gap-3">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="worksOnSaturday" [checked]="employee.works_on_saturday === null"
+                  (change)="onWorksOnSaturdayChange(null)">
+                <span class="text-sm">Inherit from Department/Sub-Department</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="worksOnSaturday" [checked]="employee.works_on_saturday === true"
+                  (change)="onWorksOnSaturdayChange(true)">
+                <span class="text-sm">Works on Saturday</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="worksOnSaturday" [checked]="employee.works_on_saturday === false"
+                  (change)="onWorksOnSaturdayChange(false)">
+                <span class="text-sm">Does not Work on Saturday</span>
+              </label>
+            </div>
+          </div>
 
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Employment Type
-                        </label>
-                        <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl flex flex-col md:flex-row gap-3">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="employmentType"
-                                    [checked]="!employee.is_part_time"
-                                    (change)="onEmploymentTypeChange(false)">
-                                <span class="text-sm">Full Time</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="employmentType"
-                                    [checked]="employee.is_part_time"
-                                    (change)="onEmploymentTypeChange(true)">
-                                <span class="text-sm">Part Time</span>
-                            </label>
-                        </div>
-                    </div>
+          <div class="mb-4 text-xs md:text-sm" *ngIf="isPartTimeSelected()">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Monthly Hour Limit
+              <span *ngIf="validationErrors['max_monthly_hours']" class="text-red-500 ml-3 font-normal">
+                {{ validationErrors['max_monthly_hours'] }}
+              </span>
+            </label>
+            <input type="number" min="0" step="0.25" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl"
+              [(ngModel)]="employee.max_monthly_hours" (ngModelChange)="onMaxMonthlyHoursChange($event)"
+              placeholder="Enter maximum working hours per month">
+            <p class="text-[10px] md:text-xs text-[#8E8E93] mt-1">
+              Required for part-time employees to cap their total working hours in the month.
+            </p>
+          </div>
 
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Works on Saturday
-                        </label>
-                        <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl flex flex-col gap-3">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="worksOnSaturday"
-                                    [checked]="employee.works_on_saturday === null"
-                                    (change)="onWorksOnSaturdayChange(null)">
-                                <span class="text-sm">Inherit from Department/Sub-Department</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="worksOnSaturday"
-                                    [checked]="employee.works_on_saturday === true"
-                                    (change)="onWorksOnSaturdayChange(true)">
-                                <span class="text-sm">Works on Saturday</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="worksOnSaturday"
-                                    [checked]="employee.works_on_saturday === false"
-                                    (change)="onWorksOnSaturdayChange(false)">
-                                <span class="text-sm">Does not Work on Saturday</span>
-                            </label>
-                        </div>
-                    </div>
+          <!-- Department Dropdown -->
+          <div class="mb-4 text-xs md:text-sm">
 
-                    <div class="mb-4 text-xs md:text-sm" *ngIf="isPartTimeSelected()">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Monthly Hour Limit
-                            <span *ngIf="validationErrors['max_monthly_hours']" class="text-red-500 ml-3 font-normal">
-                                {{ validationErrors['max_monthly_hours'] }}
-                            </span>
-                        </label>
-                        <input
-                            type="number"
-                            min="0"
-                            step="0.25"
-                            class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl"
-                            [(ngModel)]="employee.max_monthly_hours"
-                            (ngModelChange)="onMaxMonthlyHoursChange($event)"
-                            placeholder="Enter maximum working hours per month">
-                        <p class="text-[10px] md:text-xs text-[#8E8E93] mt-1">
-                            Required for part-time employees to cap their total working hours in the month.
-                        </p>
-                    </div>
+            <label class="font-semibold block mb-2 md:mb-3">
+              Department
+              <span *ngIf="validationErrors['department_id']" class="text-red-500 ml-3 font-normal">
+                {{ validationErrors['department_id'] }}
+              </span>
+            </label>
+            <select class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl overflow-y-auto"
+              [(ngModel)]="selectedDepartment" (change)="onDepartmentChange()" name="department">
+              <option [ngValue]="null">-- No Department Selected --</option>
+              <option *ngFor="let dept of departments" [ngValue]="dept.id">
+                {{ dept.name }}
+              </option>
+            </select>
 
-                 <!-- Department Dropdown -->
-<div
-class="mb-4 text-xs md:text-sm">
+          </div>
 
-<label class="font-semibold block mb-2 md:mb-3">
-  Department
-  <span *ngIf="validationErrors['department_id']" class="text-red-500 ml-3 font-normal">
-    {{ validationErrors['department_id'] }}
-  </span>
-</label>
-<select
-  class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl overflow-y-auto"
-  [(ngModel)]="selectedDepartment"
-  (change)="onDepartmentChange()"
-  name="department"
->
-  <option [ngValue]="null">-- No Department Selected --</option>
-  <option *ngFor="let dept of departments" [ngValue]="dept.id">
-    {{ dept.name }}
-  </option>
-</select>
+          <!-- Sub Department Dropdown -->
+          <div class="mb-4 text-xs md:text-sm"
+            *ngIf="(employee.role?.name === 'Employee' && subDepartments.length > 0)">
 
-</div>
+            <select class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl overflow-y-auto"
+              [(ngModel)]="selectedSubDepartment" (change)="onSubDepartmentChange()" name="subDepartment">
+              <option [ngValue]="null">-- No Sub Department Selected --</option>
+              <option *ngFor="let sub of subDepartments" [ngValue]="sub.id">
+                {{ sub.name }}
+              </option>
+            </select>
 
-<!-- Sub Department Dropdown -->
-<div
-class="mb-4 text-xs md:text-sm"
-*ngIf="(employee.role?.name === 'Employee' && subDepartments.length > 0)">
-
-<select
-  class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl overflow-y-auto"
-  [(ngModel)]="selectedSubDepartment"
-  (change)="onSubDepartmentChange()"
-  name="subDepartment"
->
-  <option [ngValue]="null">-- No Sub Department Selected --</option>
-  <option *ngFor="let sub of subDepartments" [ngValue]="sub.id">
-    {{ sub.name }}
-  </option>
-</select>
-
-</div>
+          </div>
 
 
 
-                    <div class="mb-4 text-xs md:text-sm pt-2">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Phone
-                            <span *ngIf="validationErrors['phone']" class="text-red-500 ml-3 font-normal">{{ validationErrors['phone'] }}</span>
-                        </label>
-                        <input [(ngModel)]="employee.phone"
-                        (ngModelChange)="onInputValueChange({ field: 'phone', value: $event })"
-                        type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the phone">
-                    </div>
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Email
-                            <span *ngIf="validationErrors['email']" class="text-red-500 ml-3 font-normal">{{ validationErrors['email'] }}</span>
-                        </label>
-                        <input [(ngModel)]="employee.email"
-                        (ngModelChange)="onInputValueChange({ field: 'email', value: $event })"
-                        type="email" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the email">
-                    </div>
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            National ID
-                            <span *ngIf="validationErrors['national_id']" class="text-red-500 ml-3 font-normal">{{ validationErrors['national_id'] }}</span>
-                        </label>
-                        <input [(ngModel)]="employee.national_id"
-                        (ngModelChange)="onInputValueChange({ field: 'national_id', value: $event })"
-                        type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the national ID">
-                    </div>
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Salary
-                            <span *ngIf="validationErrors['salary']" class="text-red-500 ml-3 font-normal">{{ validationErrors['salary'] }}</span>
-                        </label>
-                        <input [(ngModel)]="employee.salary"
-                        (ngModelChange)="onInputValueChange({ field: 'salary', value: $event })"
-                        type="text"
-                        (input)="filterNumericInput($event)"
-                        class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the salary number">
-                    </div>
-                    <!-- <div class="mb-4 text-xs md:text-sm">
+          <div class="mb-4 text-xs md:text-sm pt-2">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Phone
+              <span *ngIf="validationErrors['phone']" class="text-red-500 ml-3 font-normal">{{ validationErrors['phone']
+                }}</span>
+            </label>
+            <input [(ngModel)]="employee.phone" (ngModelChange)="onInputValueChange({ field: 'phone', value: $event })"
+              type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the phone">
+          </div>
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Email
+              <span *ngIf="validationErrors['email']" class="text-red-500 ml-3 font-normal">{{ validationErrors['email']
+                }}</span>
+            </label>
+            <input [(ngModel)]="employee.email" (ngModelChange)="onInputValueChange({ field: 'email', value: $event })"
+              type="email" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the email">
+          </div>
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              National ID
+              <span *ngIf="validationErrors['national_id']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['national_id'] }}</span>
+            </label>
+            <input [(ngModel)]="employee.national_id"
+              (ngModelChange)="onInputValueChange({ field: 'national_id', value: $event })" type="text"
+              class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the national ID">
+          </div>
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Salary
+              <span *ngIf="validationErrors['salary']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['salary'] }}</span>
+            </label>
+            <input [(ngModel)]="employee.salary"
+              (ngModelChange)="onInputValueChange({ field: 'salary', value: $event })" type="text"
+              (input)="filterNumericInput($event)" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl"
+              placeholder="Enter the salary number">
+          </div>
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Bank Name
+              <span *ngIf="validationErrors['bank_name']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['bank_name'] }}</span>
+            </label>
+            <input [(ngModel)]="employee.bank_name"
+              (ngModelChange)="onInputValueChange({ field: 'bank_name', value: $event })" type="text"
+              class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the bank name">
+          </div>
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Bank Account Number
+              <span *ngIf="validationErrors['bank_account_number']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['bank_account_number'] }}</span>
+            </label>
+            <input [(ngModel)]="employee.bank_account_number"
+              (ngModelChange)="onInputValueChange({ field: 'bank_account_number', value: $event })" type="text"
+              class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the bank account number">
+          </div>
+          <!-- <div class="mb-4 text-xs md:text-sm">
                         <label class="font-semibold block mb-2 md:mb-3">
                             Working Hours
                             <span *ngIf="validationErrors['working_hours_day']" class="text-red-500 ml-3 font-normal">{{ validationErrors['working_hours_day'] }}</span>
@@ -252,450 +242,441 @@ class="mb-4 text-xs md:text-sm"
                         (ngModelChange)="onInputValueChange({ field: 'working_hours_day', value: $event })"
                         type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the daily working hours">
                     </div> -->
-                    <div class="text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Gender
-                            <span *ngIf="validationErrors['gender']" class="text-red-500 ml-3 font-normal">{{ validationErrors['gender'] }}</span>
-                        </label>
-                        <select [(ngModel)]="employee.gender"
-                        (ngModelChange)="onInputValueChange({ field: 'gender', value: $event })"
-                        class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
-                            <option value="" disabled selected hidden>Choose</option>
-                            <option value="m">Male</option>
-                            <option value="f">Female</option>
-                        </select>
-                    </div>
+          <div class="text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Gender
+              <span *ngIf="validationErrors['gender']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['gender'] }}</span>
+            </label>
+            <select [(ngModel)]="employee.gender"
+              (ngModelChange)="onInputValueChange({ field: 'gender', value: $event })"
+              class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+              <option value="" disabled selected hidden>Choose</option>
+              <option value="m">Male</option>
+              <option value="f">Female</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="dropdown-container flex-1">
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Location
+              <span *ngIf="validationErrors['location_id']" class="text-red-500 text-sm ml-2 font-normal">{{
+                validationErrors['location_id'] }}</span>
+            </label>
+            <div>
+              <!-- Dropdown toggle -->
+              <div
+                class="flex justify-between items-center w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl cursor-pointer"
+                (click)="toggleDropdown($event)">
+                <span *ngIf="employee.location_id.length == 0">
+                  Choose Location
+                </span>
+                <div *ngIf="employee.location_id.length != 0" class="flex space-x-2 flex-wrap">
+                  <div *ngFor="let locationId of employee.location_id">
+                    <p *ngFor="let location of Locations">
+                      @if(location.id == locationId){
+                    <p class="p-1 rounded-lg border border-[#bebebe]">
+                      {{location.name}}
+                      <i class="fa-solid fa-xmark text-red-600 ml-3"
+                        (click)="removeFromLocations(locationId, $event)"></i>
+                    </p>
+                    }
+                    </p>
+                  </div>
                 </div>
+                <i class="fa-solid fa-angle-down"></i>
+              </div>
 
-                <div class="dropdown-container flex-1">
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Location
-                            <span *ngIf="validationErrors['location_id']" class="text-red-500 text-sm ml-2 font-normal">{{ validationErrors['location_id'] }}</span>
-                        </label>
-                        <div>
-                            <!-- Dropdown toggle -->
-                            <div class="flex justify-between items-center w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl cursor-pointer"
-                            (click)="toggleDropdown($event)">
-                                <span *ngIf="employee.location_id.length == 0">
-                                   Choose Location
-                                </span>
-                                <div *ngIf="employee.location_id.length != 0" class="flex space-x-2 flex-wrap">
-                                    <div *ngFor="let locationId of employee.location_id">
-                                        <p *ngFor="let location of Locations">
-                                            @if(location.id == locationId){
-                                                <p class="p-1 rounded-lg border border-[#bebebe]">
-                                                    {{location.name}}
-                                                    <i class="fa-solid fa-xmark text-red-600 ml-3" (click)="removeFromLocations(locationId, $event)"></i>
-                                                </p>
-                                            }
-                                        </p>
-                                    </div>
-                                </div>
-                                <i class="fa-solid fa-angle-down"></i>
-                            </div>
-
-                            <!-- Dropdown content -->
-                            <div *ngIf="isDropdownOpen" class=" w-full border border-[#E5E5EA] rounded-xl bg-white mt-1 max-h-60 overflow-y-auto">
-                                @if(Locations.length !==0 ) {
-                                    <div *ngFor="let location of Locations" class="p-2 hover:bg-gray-100">
-                                        <input type="checkbox"
-                                        id="location{{location.name}}"
-                                        class="mr-2"
-                                        [value]="location.id"
-                                        (change)="onLocationChange(location.id, $event)"
-                                        [checked]="employee.location_id.includes(location.id)">
-                                        <label for="location{{location.name}}" class="text-xs md:text-sm">{{ location.name }}</label>
-                                    </div>
-                                }@else {
-                                    <div class="p-2">No Data Found</div>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Position
-                            <span *ngIf="validationErrors['emp_type']" class="text-red-500 ml-3 font-normal">{{ validationErrors['emp_type'] }}</span>
-                        </label>
-                        <input [(ngModel)]="employee.emp_type"
-                        (ngModelChange)="onInputValueChange({ field: 'emp_type', value: $event })"
-                        type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the position" maxlength="50">
-                    </div>
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Contact Phone
-                            <span *ngIf="validationErrors['contact_phone']" class="text-red-500 ml-3 font-normal">{{ validationErrors['contact_phone'] }}</span>
-                        </label>
-                        <input [(ngModel)]="employee.contact_phone"
-                        (ngModelChange)="onInputValueChange({ field: 'contact_phone', value: $event })"
-                        type="tel" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the Contact Phone">
-                    </div>
-                    <div *ngIf="EmployeeId === 0" class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Password
-                            <span *ngIf="validationErrors['password']" class="text-red-500 ml-3 font-normal">{{ validationErrors['password'] }}</span>
-                        </label>
-                        <input [(ngModel)]="employee.password"
-                        (ngModelChange)="onInputValueChange({ field: 'password', value: $event })"
-                        type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the password">
-                    </div>
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Hiring Date
-                            <span *ngIf="validationErrors['hiring_date']" class="text-red-500 ml-3 font-normal">{{ validationErrors['hiring_date'] }}</span>
-                        </label>
-                        <input [(ngModel)]="employee.hiring_date"
-                        (ngModelChange)="onInputValueChange({ field: 'hiring_date', value: $event })"
-                        name="hiring_date"
-                         type="date" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Choose">
-                    </div>
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Over time Hours
-                            <span *ngIf="validationErrors['overtime_hours']" class="text-red-500 ml-3 font-normal">{{ validationErrors['overtime_hours'] }}</span>
-                        </label>
-                        <input [(ngModel)]="employee.overtime_hours"
-                        (input)="filterNumericInput($event)"
-                        (ngModelChange)="onInputValueChange({ field: 'overtime_hours', value: $event })"
-                        type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the over time hours">
-                    </div>
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            Start Time
-                            <span *ngIf="validationErrors['start_time']" class="text-red-500 ml-3 font-normal">{{ validationErrors['start_time'] }}</span>
-                        </label>
-                        <input [(ngModel)]="employee.start_time"
-                        (ngModelChange)="onInputValueChange({ field: 'start_time', value: $event })"
-                        type="time" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter start time" min="0" max="24">
-                    </div>
-                    <div class="mb-4 text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                            End Time
-                            <span *ngIf="validationErrors['end_time']" class="text-red-500 ml-3 font-normal">{{ validationErrors['end_time'] }}</span>
-                        </label>
-                        <input [(ngModel)]="employee.end_time"
-                        (ngModelChange)="onInputValueChange({ field: 'end_time', value: $event })"
-                        type="time" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter end time" min="0" max="24">
-                    </div>
-                    <div class="text-xs md:text-sm">
-                        <label class="font-semibold block mb-2 md:mb-3">
-                          Role
-                          <span *ngIf="validationErrors['role']" class="text-red-500 ml-3 font-normal">
-                            {{ validationErrors['role'] }}
-                          </span>
-                        </label>
-                   <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
-                    <ng-container *ngIf="roles.length !== 0; else noRoles">
-                        <div *ngFor="let role of roles" class="flex items-center mb-2">
-                          <input
-                            type="checkbox"
-                            class="mr-2"
-                            [id]="role?.id"
-                            [checked]="employee.role?.id === role?.id"
-                            (change)="toggleSingleRole(role)"
-                          >
-                          <label [for]="role?.id" class="text-sm">
-                            {{role.name}}
-                          </label>
-                        </div>
-                      </ng-container>
+              <!-- Dropdown content -->
+              <div *ngIf="isDropdownOpen"
+                class=" w-full border border-[#E5E5EA] rounded-xl bg-white mt-1 max-h-60 overflow-y-auto">
+                @if(Locations.length !==0 ) {
+                <div *ngFor="let location of Locations" class="p-2 hover:bg-gray-100">
+                  <input type="checkbox" id="location{{location.name}}" class="mr-2" [value]="location.id"
+                    (change)="onLocationChange(location.id, $event)"
+                    [checked]="employee.location_id.includes(location.id)">
+                  <label for="location{{location.name}}" class="text-xs md:text-sm">{{ location.name }}</label>
+                </div>
+                }@else {
+                <div class="p-2">No Data Found</div>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Position
+              <span *ngIf="validationErrors['emp_type']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['emp_type'] }}</span>
+            </label>
+            <input [(ngModel)]="employee.emp_type"
+              (ngModelChange)="onInputValueChange({ field: 'emp_type', value: $event })" type="text"
+              class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the position"
+              maxlength="50">
+          </div>
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Contact Phone
+              <span *ngIf="validationErrors['contact_phone']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['contact_phone'] }}</span>
+            </label>
+            <input [(ngModel)]="employee.contact_phone"
+              (ngModelChange)="onInputValueChange({ field: 'contact_phone', value: $event })" type="tel"
+              class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the Contact Phone">
+          </div>
+          <div *ngIf="EmployeeId === 0" class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Password
+              <span *ngIf="validationErrors['password']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['password'] }}</span>
+            </label>
+            <input [(ngModel)]="employee.password"
+              (ngModelChange)="onInputValueChange({ field: 'password', value: $event })" type="text"
+              class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the password">
+          </div>
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Hiring Date
+              <span *ngIf="validationErrors['hiring_date']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['hiring_date'] }}</span>
+            </label>
+            <input [(ngModel)]="employee.hiring_date"
+              (ngModelChange)="onInputValueChange({ field: 'hiring_date', value: $event })" name="hiring_date"
+              type="date" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Choose">
+          </div>
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Over time Hours
+              <span *ngIf="validationErrors['overtime_hours']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['overtime_hours'] }}</span>
+            </label>
+            <input [(ngModel)]="employee.overtime_hours" (input)="filterNumericInput($event)"
+              (ngModelChange)="onInputValueChange({ field: 'overtime_hours', value: $event })" type="text"
+              class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter the over time hours">
+          </div>
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Start Time
+              <span *ngIf="validationErrors['start_time']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['start_time'] }}</span>
+            </label>
+            <input [(ngModel)]="employee.start_time"
+              (ngModelChange)="onInputValueChange({ field: 'start_time', value: $event })" type="time"
+              class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter start time" min="0"
+              max="24">
+          </div>
+          <div class="mb-4 text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              End Time
+              <span *ngIf="validationErrors['end_time']" class="text-red-500 ml-3 font-normal">{{
+                validationErrors['end_time'] }}</span>
+            </label>
+            <input [(ngModel)]="employee.end_time"
+              (ngModelChange)="onInputValueChange({ field: 'end_time', value: $event })" type="time"
+              class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl" placeholder="Enter end time" min="0"
+              max="24">
+          </div>
+          <div class="text-xs md:text-sm">
+            <label class="font-semibold block mb-2 md:mb-3">
+              Role
+              <span *ngIf="validationErrors['role']" class="text-red-500 ml-3 font-normal">
+                {{ validationErrors['role'] }}
+              </span>
+            </label>
+            <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl">
+              <ng-container *ngIf="roles.length !== 0; else noRoles">
+                <div *ngFor="let role of roles" class="flex items-center mb-2">
+                  <input type="checkbox" class="mr-2" [id]="role?.id" [checked]="employee.role?.id === role?.id"
+                    (change)="toggleSingleRole(role)">
+                  <label [for]="role?.id" class="text-sm">
+                    {{role.name}}
+                  </label>
+                </div>
+              </ng-container>
 
 
-                      <ng-template #noRoles>
-                        <div>No Data Found</div>
-                      </ng-template>
+              <ng-template #noRoles>
+                <div>No Data Found</div>
+              </ng-template>
 
 
 
             </div>
-        </div>
+          </div>
 
-        <!-- Timezone Dropdown -->
-        <div class="mb-4 text-xs md:text-sm">
+          <!-- Timezone Dropdown -->
+          <div class="mb-4 text-xs md:text-sm">
             <label class="font-semibold block mb-2 md:mb-3">
-                Timezone
-                <span *ngIf="validationErrors['timezone_id']" class="text-red-500 ml-3 font-normal">
-                    {{ validationErrors['timezone_id'] }}
-                </span>
+              Timezone
+              <span *ngIf="validationErrors['timezone_id']" class="text-red-500 ml-3 font-normal">
+                {{ validationErrors['timezone_id'] }}
+              </span>
             </label>
-            <select
-                class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl"
-                [class.border-red-500]="validationErrors['timezone_id']"
-                [(ngModel)]="selectedTimezone"
-                (ngModelChange)="onTimezoneChange()"
-                name="timezone">
-                <option [ngValue]="null">-- Select Timezone --</option>
-                <option *ngFor="let timezone of timezones" [ngValue]="timezone.id">
-                    {{ timezone.name }}
-                </option>
+            <select class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl"
+              [class.border-red-500]="validationErrors['timezone_id']" [(ngModel)]="selectedTimezone"
+              (ngModelChange)="onTimezoneChange()" name="timezone">
+              <option [ngValue]="null">-- Select Timezone --</option>
+              <option *ngFor="let timezone of timezones" [ngValue]="timezone.id">
+                {{ timezone.name }}
+              </option>
             </select>
+          </div>
         </div>
-    </div>
 
-  <div class="border border-[#ECECEC] rounded-lg p-4 md:p-8 shadow-md shadow-[#0000001F] mt-6">
-    <div class="flex items-center justify-between mb-4">
-      <p class="text-[#272D37] font-semibold text-lg md:text-xl">Deduction Plan</p>
-      <div class="flex items-center space-x-2">
-        <button type="button"
-          class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 px-4 md:px-5 rounded-lg"
-          (click)="togglePlanSection()">
-          {{ showPlanEditor ? 'Hide Rules' : 'Manage Rules' }}
-        </button>
-        <button type="button"
-          class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 px-4 md:px-5 rounded-lg"
-          [disabled]="!showPlanEditor || !canEditPlan || planSaving || planLoading"
-          (click)="savePlan()">
-          {{ planSaving ? 'Saving...' : 'Save Plan' }}
-        </button>
-      </div>
-    </div>
-    <div *ngIf="!canEditPlan" class="text-sm text-[#707070] mb-4">
-      Save the employee details before configuring a deduction plan.
-    </div>
-    <div *ngIf="planLoading" class="text-sm text-[#707070] mb-4">
-      Loading plan...
-    </div>
-    <div *ngIf="!planLoading && planEffectiveSources.length > 0" class="border border-[#E5E5EA] rounded-lg bg-[#F9FAFB] p-4 mb-4 text-xs md:text-sm text-[#3A3A3C]">
-      <p class="font-semibold mb-2">Currently applied sources</p>
-      <ul class="list-disc pl-5 space-y-1">
-        <li *ngFor="let source of planEffectiveSources">{{ formatSourceLabel(source) }}</li>
-      </ul>
-      <p class="mt-3 text-[#707070]">
-        Active grace minutes: {{ effectivePlan?.grace_minutes ?? employeePlan.grace_minutes ?? 15 }}
-      </p>
-    </div>
-    <ng-container *ngIf="showPlanEditor">
-      <div class="grid gap-4 md:grid-cols-2 mb-6">
-        <div>
-          <label class="block mb-2 font-semibold text-xs md:text-sm text-[#3A3A3C]">Grace Minutes</label>
-          <input type="number" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-            [ngModel]="employeePlan.grace_minutes"
-            [ngModelOptions]="{standalone: true}"
-            (ngModelChange)="updateGraceMinutes($event)"
-            [disabled]="!canEditPlan || planSaving || planLoading">
-        </div>
-        <div class="flex items-end justify-end md:justify-start">
-          <button type="button"
-            class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 md:py-2 px-4 md:px-5 rounded-lg"
-            (click)="addRule()"
-            [disabled]="!canEditPlan || planSaving || planLoading">
-            Add Rule
-          </button>
-        </div>
-      </div>
-      <div class="grid gap-4 md:grid-cols-3 mb-6 text-xs md:text-sm text-[#3A3A3C]">
-        <label class="flex items-center">
-          <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5 mr-2"
-            [ngModel]="employeePlan.overwrite"
-            [ngModelOptions]="{standalone: true}"
-            (ngModelChange)="onOverwriteAllChange($event)"
-            [disabled]="!canEditPlan || planSaving || planLoading">
-          Overwrite all upstream plans
-        </label>
-        <label class="flex items-center">
-          <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5 mr-2"
-            [ngModel]="employeePlan.overwrite_dep"
-            [ngModelOptions]="{standalone: true}"
-            (ngModelChange)="onOverwriteDepartmentChange($event)"
-            [disabled]="!canEditPlan || planSaving || planLoading || !!employeePlan.overwrite">
-          Override department rules
-        </label>
-        <label class="flex items-center">
-          <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5 mr-2"
-            [ngModel]="employeePlan.overwrite_subdep"
-            [ngModelOptions]="{standalone: true}"
-            (ngModelChange)="onOverwriteSubDepartmentChange($event)"
-            [disabled]="!canEditPlan || planSaving || planLoading || !!employeePlan.overwrite">
-          Override sub-department rules
-        </label>
-      </div>
-      <div *ngFor="let rule of employeePlan.rules; let i = index; trackBy: trackRuleByIndex" class="border border-[#E5E5EA] rounded-lg p-4 md:p-6 mb-4">
-        <div class="flex items-center justify-between mb-3">
-          <p class="font-semibold text-sm md:text-base text-[#272D37]">Rule {{ i + 1 }}</p>
-          <button type="button" class="text-[#FF7519] text-xs md:text-sm"
-            (click)="removeRule(i)"
-            [disabled]="employeePlan.rules.length <= 1 || !canEditPlan || planSaving || planLoading">
-            Remove
-          </button>
-        </div>
-        <div class="grid gap-4 md:grid-cols-2">
-          <div>
-            <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Label</label>
-            <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-              [(ngModel)]="rule.label"
-              [ngModelOptions]="{standalone: true}"
-              [disabled]="!canEditPlan || planSaving || planLoading">
+        <div class="border border-[#ECECEC] rounded-lg p-4 md:p-8 shadow-md shadow-[#0000001F] mt-6">
+          <div class="flex items-center justify-between mb-4">
+            <p class="text-[#272D37] font-semibold text-lg md:text-xl">Deduction Plan</p>
+            <div class="flex items-center space-x-2">
+              <button type="button"
+                class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 px-4 md:px-5 rounded-lg"
+                (click)="togglePlanSection()">
+                {{ showPlanEditor ? 'Hide Rules' : 'Manage Rules' }}
+              </button>
+              <button type="button"
+                class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 px-4 md:px-5 rounded-lg"
+                [disabled]="!showPlanEditor || !canEditPlan || planSaving || planLoading" (click)="savePlan()">
+                {{ planSaving ? 'Saving...' : 'Save Plan' }}
+              </button>
+            </div>
           </div>
-          <div>
-            <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Category</label>
-            <select class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-              [(ngModel)]="rule.category"
-              [ngModelOptions]="{standalone: true}"
-              [disabled]="!canEditPlan || planSaving || planLoading">
-              <option *ngFor="let category of ruleCategories" [value]="category">{{ category }}</option>
-            </select>
+          <div *ngIf="!canEditPlan" class="text-sm text-[#707070] mb-4">
+            Save the employee details before configuring a deduction plan.
           </div>
-          <div>
-            <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Scope</label>
-            <select class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-              [(ngModel)]="rule.scope"
-              [ngModelOptions]="{standalone: true}"
-              [disabled]="!canEditPlan || planSaving || planLoading">
-              <option *ngFor="let scope of scopeOptions" [value]="scope">{{ scope }}</option>
-            </select>
+          <div *ngIf="planLoading" class="text-sm text-[#707070] mb-4">
+            Loading plan...
           </div>
-          <div>
-            <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Penalty Type</label>
-            <select class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-              [(ngModel)]="rule.penalty.type"
-              [ngModelOptions]="{standalone: true}"
-              [disabled]="!canEditPlan || planSaving || planLoading">
-              <option *ngFor="let penalty of penaltyTypes" [value]="penalty.value">{{ penalty.label }}</option>
-            </select>
+          <div *ngIf="!planLoading && planEffectiveSources.length > 0"
+            class="border border-[#E5E5EA] rounded-lg bg-[#F9FAFB] p-4 mb-4 text-xs md:text-sm text-[#3A3A3C]">
+            <p class="font-semibold mb-2">Currently applied sources</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li *ngFor="let source of planEffectiveSources">{{ formatSourceLabel(source) }}</li>
+            </ul>
+            <p class="mt-3 text-[#707070]">
+              Active grace minutes: {{ effectivePlan?.grace_minutes ?? employeePlan.grace_minutes ?? 15 }}
+            </p>
           </div>
-          <div>
-            <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Penalty Value</label>
-            <input type="number" step="0.01" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-              [(ngModel)]="rule.penalty.value"
-              [ngModelOptions]="{standalone: true}"
-              [disabled]="!canEditPlan || planSaving || planLoading">
-          </div>
-          <div>
-            <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Penalty Unit (optional)</label>
-            <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-              [(ngModel)]="rule.penalty.unit"
-              [ngModelOptions]="{standalone: true}"
-              [disabled]="!canEditPlan || planSaving || planLoading">
-          </div>
-          <div>
-            <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Color</label>
-            <input type="color" class="h-10 w-16 border border-[#E5E5EA] rounded"
-              [(ngModel)]="rule.color"
-              [ngModelOptions]="{standalone: true}"
-              [disabled]="!canEditPlan || planSaving || planLoading">
-          </div>
-          <div class="flex items-center mt-4 md:mt-8">
-            <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5"
-              [(ngModel)]="rule.stop_processing"
-              [ngModelOptions]="{standalone: true}"
-              [disabled]="!canEditPlan || planSaving || planLoading">
-            <span class="ml-2 text-xs md:text-sm text-[#3A3A3C]">Stop after this rule</span>
-          </div>
-        </div>
-        <div class="mt-4">
-          <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Notes</label>
-          <textarea rows="2" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-            [(ngModel)]="rule.notes"
-            [ngModelOptions]="{standalone: true}"
-            [disabled]="!canEditPlan || planSaving || planLoading"></textarea>
-        </div>
-        <div class="mt-6">
-          <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Conditions</label>
-          <div class="space-y-3">
-            <div *ngFor="let condition of getConditionEntries(rule); trackBy: trackCondition" class="grid gap-3 md:grid-cols-[minmax(0,200px)_1fr_auto] items-start">
+          <ng-container *ngIf="showPlanEditor">
+            <div class="grid gap-4 md:grid-cols-2 mb-6">
               <div>
-                <p class="font-semibold text-xs md:text-sm text-[#3A3A3C]">{{ getConditionLabel(condition.key) }}</p>
-                <p *ngIf="getConditionHint(condition.key)" class="text-[11px] md:text-xs text-[#707070]">
-                  {{ getConditionHint(condition.key) }}
-                </p>
+                <label class="block mb-2 font-semibold text-xs md:text-sm text-[#3A3A3C]">Grace Minutes</label>
+                <input type="number" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                  [ngModel]="employeePlan.grace_minutes" [ngModelOptions]="{standalone: true}"
+                  (ngModelChange)="updateGraceMinutes($event)" [disabled]="!canEditPlan || planSaving || planLoading">
               </div>
-              <div>
-                <ng-container [ngSwitch]="getConditionType(condition.key)">
-                  <input *ngSwitchCase="'number'" type="number" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-                    [ngModel]="condition.value"
-                    (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+              <div class="flex items-end justify-end md:justify-start">
+                <button type="button"
+                  class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 md:py-2 px-4 md:px-5 rounded-lg"
+                  (click)="addRule()" [disabled]="!canEditPlan || planSaving || planLoading">
+                  Add Rule
+                </button>
+              </div>
+            </div>
+            <div class="grid gap-4 md:grid-cols-3 mb-6 text-xs md:text-sm text-[#3A3A3C]">
+              <label class="flex items-center">
+                <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5 mr-2" [ngModel]="employeePlan.overwrite"
+                  [ngModelOptions]="{standalone: true}" (ngModelChange)="onOverwriteAllChange($event)"
+                  [disabled]="!canEditPlan || planSaving || planLoading">
+                Overwrite all upstream plans
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5 mr-2" [ngModel]="employeePlan.overwrite_dep"
+                  [ngModelOptions]="{standalone: true}" (ngModelChange)="onOverwriteDepartmentChange($event)"
+                  [disabled]="!canEditPlan || planSaving || planLoading || !!employeePlan.overwrite">
+                Override department rules
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5 mr-2" [ngModel]="employeePlan.overwrite_subdep"
+                  [ngModelOptions]="{standalone: true}" (ngModelChange)="onOverwriteSubDepartmentChange($event)"
+                  [disabled]="!canEditPlan || planSaving || planLoading || !!employeePlan.overwrite">
+                Override sub-department rules
+              </label>
+            </div>
+            <div *ngFor="let rule of employeePlan.rules; let i = index; trackBy: trackRuleByIndex"
+              class="border border-[#E5E5EA] rounded-lg p-4 md:p-6 mb-4">
+              <div class="flex items-center justify-between mb-3">
+                <p class="font-semibold text-sm md:text-base text-[#272D37]">Rule {{ i + 1 }}</p>
+                <button type="button" class="text-[#FF7519] text-xs md:text-sm" (click)="removeRule(i)"
+                  [disabled]="employeePlan.rules.length <= 1 || !canEditPlan || planSaving || planLoading">
+                  Remove
+                </button>
+              </div>
+              <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Label</label>
+                  <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                    [(ngModel)]="rule.label" [ngModelOptions]="{standalone: true}"
                     [disabled]="!canEditPlan || planSaving || planLoading">
-                  <select *ngSwitchCase="'boolean'" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-                    [ngModel]="condition.value === true ? 'true' : condition.value === false ? 'false' : ''"
-                    (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                </div>
+                <div>
+                  <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Category</label>
+                  <select class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                    [(ngModel)]="rule.category" [ngModelOptions]="{standalone: true}"
                     [disabled]="!canEditPlan || planSaving || planLoading">
-                    <option value="">Choose...</option>
-                    <option value="true">True</option>
-                    <option value="false">False</option>
+                    <option *ngFor="let category of ruleCategories" [value]="category">{{ category }}</option>
                   </select>
-                  <select *ngSwitchCase="'weekday'" multiple class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-                    [ngModel]="asArray(condition.value)"
-                    (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                </div>
+                <div>
+                  <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Scope</label>
+                  <select class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                    [(ngModel)]="rule.scope" [ngModelOptions]="{standalone: true}"
                     [disabled]="!canEditPlan || planSaving || planLoading">
-                    <option *ngFor="let day of weekdayOptions" [ngValue]="day.value">{{ day.label }}</option>
+                    <option *ngFor="let scope of scopeOptions" [value]="scope">{{ scope }}</option>
                   </select>
-                  <ng-container *ngSwitchDefault>
-                    <ng-container *ngIf="isLocationTypeCondition(condition.key); else stringConditionField">
-                      <select multiple class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-                        [ngModel]="asArray(condition.value)"
-                        (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
-                        [disabled]="!canEditPlan || planSaving || planLoading">
-                        <option *ngFor="let option of locationTypeOptions" [ngValue]="option.value">{{ option.label }}</option>
-                      </select>
-                    </ng-container>
-                    <ng-template #stringConditionField>
-                      <ng-container *ngIf="isWorkTypeCondition(condition.key); else defaultStringField">
-                        <select multiple class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                </div>
+                <div>
+                  <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Penalty Type</label>
+                  <select class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                    [(ngModel)]="rule.penalty.type" [ngModelOptions]="{standalone: true}"
+                    [disabled]="!canEditPlan || planSaving || planLoading">
+                    <option *ngFor="let penalty of penaltyTypes" [value]="penalty.value">{{ penalty.label }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Penalty Value</label>
+                  <input type="number" step="0.01"
+                    class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                    [(ngModel)]="rule.penalty.value" [ngModelOptions]="{standalone: true}"
+                    [disabled]="!canEditPlan || planSaving || planLoading">
+                </div>
+                <div>
+                  <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Penalty Unit
+                    (optional)</label>
+                  <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                    [(ngModel)]="rule.penalty.unit" [ngModelOptions]="{standalone: true}"
+                    [disabled]="!canEditPlan || planSaving || planLoading">
+                </div>
+                <div>
+                  <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Color</label>
+                  <input type="color" class="h-10 w-16 border border-[#E5E5EA] rounded" [(ngModel)]="rule.color"
+                    [ngModelOptions]="{standalone: true}" [disabled]="!canEditPlan || planSaving || planLoading">
+                </div>
+                <div class="flex items-center mt-4 md:mt-8">
+                  <input type="checkbox" class="w-4 h-4 md:w-5 md:h-5" [(ngModel)]="rule.stop_processing"
+                    [ngModelOptions]="{standalone: true}" [disabled]="!canEditPlan || planSaving || planLoading">
+                  <span class="ml-2 text-xs md:text-sm text-[#3A3A3C]">Stop after this rule</span>
+                </div>
+              </div>
+              <div class="mt-4">
+                <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Notes</label>
+                <textarea rows="2" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                  [(ngModel)]="rule.notes" [ngModelOptions]="{standalone: true}"
+                  [disabled]="!canEditPlan || planSaving || planLoading"></textarea>
+              </div>
+              <div class="mt-6">
+                <label class="font-semibold block mb-2 text-xs md:text-sm text-[#3A3A3C]">Conditions</label>
+                <div class="space-y-3">
+                  <div *ngFor="let condition of getConditionEntries(rule); trackBy: trackCondition"
+                    class="grid gap-3 md:grid-cols-[minmax(0,200px)_1fr_auto] items-start">
+                    <div>
+                      <p class="font-semibold text-xs md:text-sm text-[#3A3A3C]">{{ getConditionLabel(condition.key) }}
+                      </p>
+                      <p *ngIf="getConditionHint(condition.key)" class="text-[11px] md:text-xs text-[#707070]">
+                        {{ getConditionHint(condition.key) }}
+                      </p>
+                    </div>
+                    <div>
+                      <ng-container [ngSwitch]="getConditionType(condition.key)">
+                        <input *ngSwitchCase="'number'" type="number"
+                          class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                          [ngModel]="condition.value" (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                          [disabled]="!canEditPlan || planSaving || planLoading">
+                        <select *ngSwitchCase="'boolean'"
+                          class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                          [ngModel]="condition.value === true ? 'true' : condition.value === false ? 'false' : ''"
+                          (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                          [disabled]="!canEditPlan || planSaving || planLoading">
+                          <option value="">Choose...</option>
+                          <option value="true">True</option>
+                          <option value="false">False</option>
+                        </select>
+                        <select *ngSwitchCase="'weekday'" multiple
+                          class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
                           [ngModel]="asArray(condition.value)"
                           (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
                           [disabled]="!canEditPlan || planSaving || planLoading">
-                        <option *ngFor="let work of workTypes" [ngValue]="(work.name || '').toLowerCase()">{{ work.name }}</option>
+                          <option *ngFor="let day of weekdayOptions" [ngValue]="day.value">{{ day.label }}</option>
                         </select>
+                        <ng-container *ngSwitchDefault>
+                          <ng-container *ngIf="isLocationTypeCondition(condition.key); else stringConditionField">
+                            <select multiple
+                              class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                              [ngModel]="asArray(condition.value)"
+                              (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                              [disabled]="!canEditPlan || planSaving || planLoading">
+                              <option *ngFor="let option of locationTypeOptions" [ngValue]="option.value">{{
+                                option.label }}</option>
+                            </select>
+                          </ng-container>
+                          <ng-template #stringConditionField>
+                            <ng-container *ngIf="isWorkTypeCondition(condition.key); else defaultStringField">
+                              <select multiple
+                                class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                                [ngModel]="asArray(condition.value)"
+                                (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                                [disabled]="!canEditPlan || planSaving || planLoading">
+                                <option *ngFor="let work of workTypes" [ngValue]="(work.name || '').toLowerCase()">{{
+                                  work.name }}</option>
+                              </select>
+                            </ng-container>
+                            <ng-template #defaultStringField>
+                              <input type="text"
+                                class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                                [ngModel]="condition.value"
+                                (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
+                                [disabled]="!canEditPlan || planSaving || planLoading">
+                            </ng-template>
+                          </ng-template>
+                        </ng-container>
                       </ng-container>
-                      <ng-template #defaultStringField>
-                        <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-                          [ngModel]="condition.value"
-                          (ngModelChange)="onConditionValueChange(i, condition.key, $event)"
-                          [disabled]="!canEditPlan || planSaving || planLoading">
-                      </ng-template>
-                    </ng-template>
-                  </ng-container>
-                </ng-container>
+                    </div>
+                    <button type="button" class="text-[#FF7519] text-xs md:text-sm"
+                      (click)="removeCondition(i, condition.key)"
+                      [disabled]="!canEditPlan || planSaving || planLoading">
+                      Remove
+                    </button>
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <div class="flex flex-col md:flex-row md:items-center gap-3">
+                    <select class="border border-[#E5E5EA] rounded-lg p-2 md:p-3 text-xs md:text-sm"
+                      [ngModel]="getSelectedCondition(i)" [ngModelOptions]="{standalone: true}"
+                      (ngModelChange)="onSelectCondition(i, $event)"
+                      [disabled]="!canEditPlan || planSaving || planLoading">
+                      <option [ngValue]="null">Choose condition...</option>
+                      <option *ngFor="let option of getAvailableConditionOptions(rule)" [ngValue]="option.key">{{
+                        option.label }}</option>
+                    </select>
+                    <button type="button"
+                      class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 px-4 rounded-lg"
+                      (click)="addSelectedCondition(i)"
+                      [disabled]="!canEditPlan || planSaving || planLoading || !getSelectedCondition(i)">
+                      Add Condition
+                    </button>
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <p class="font-semibold text-xs md:text-sm text-[#3A3A3C] mb-2">Custom condition</p>
+                  <div class="grid gap-3 md:grid-cols-[minmax(0,150px)_1fr_auto] items-center">
+                    <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                      [ngModel]="getCustomDraft(i).key" [ngModelOptions]="{standalone: true}"
+                      (ngModelChange)="updateCustomDraftKey(i, $event)" placeholder="Key"
+                      [disabled]="!canEditPlan || planSaving || planLoading">
+                    <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
+                      [ngModel]="getCustomDraft(i).value" [ngModelOptions]="{standalone: true}"
+                      (ngModelChange)="updateCustomDraftValue(i, $event)" placeholder="Value"
+                      [disabled]="!canEditPlan || planSaving || planLoading">
+                    <button type="button"
+                      class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 px-4 rounded-lg"
+                      (click)="addCustomCondition(i)"
+                      [disabled]="!canEditPlan || planSaving || planLoading || !getCustomDraft(i).key">
+                      Add
+                    </button>
+                  </div>
+                </div>
               </div>
-              <button type="button" class="text-[#FF7519] text-xs md:text-sm"
-                (click)="removeCondition(i, condition.key)"
-                [disabled]="!canEditPlan || planSaving || planLoading">
-                Remove
-              </button>
             </div>
-          </div>
-          <div class="mt-4">
-            <div class="flex flex-col md:flex-row md:items-center gap-3">
-              <select class="border border-[#E5E5EA] rounded-lg p-2 md:p-3 text-xs md:text-sm"
-                [ngModel]="getSelectedCondition(i)"
-                [ngModelOptions]="{standalone: true}"
-                (ngModelChange)="onSelectCondition(i, $event)"
-                [disabled]="!canEditPlan || planSaving || planLoading">
-                <option [ngValue]="null">Choose condition...</option>
-                <option *ngFor="let option of getAvailableConditionOptions(rule)" [ngValue]="option.key">{{ option.label }}</option>
-              </select>
-              <button type="button" class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 px-4 rounded-lg"
-                (click)="addSelectedCondition(i)"
-                [disabled]="!canEditPlan || planSaving || planLoading || !getSelectedCondition(i)">
-                Add Condition
-              </button>
-            </div>
-          </div>
-          <div class="mt-4">
-            <p class="font-semibold text-xs md:text-sm text-[#3A3A3C] mb-2">Custom condition</p>
-            <div class="grid gap-3 md:grid-cols-[minmax(0,150px)_1fr_auto] items-center">
-              <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-                [ngModel]="getCustomDraft(i).key"
-                [ngModelOptions]="{standalone: true}"
-                (ngModelChange)="updateCustomDraftKey(i, $event)"
-                placeholder="Key"
-                [disabled]="!canEditPlan || planSaving || planLoading">
-              <input type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-3 text-xs md:text-base"
-                [ngModel]="getCustomDraft(i).value"
-                [ngModelOptions]="{standalone: true}"
-                (ngModelChange)="updateCustomDraftValue(i, $event)"
-                placeholder="Value"
-                [disabled]="!canEditPlan || planSaving || planLoading">
-              <button type="button" class="border border-[#17253E] text-[#17253E] font-semibold text-xs md:text-sm py-2 px-4 rounded-lg"
-                (click)="addCustomCondition(i)"
-                [disabled]="!canEditPlan || planSaving || planLoading || !getCustomDraft(i).key">
-                Add
-              </button>
-            </div>
-          </div>
+          </ng-container>
         </div>
       </div>
-    </ng-container>
-  </div>
-</div>
