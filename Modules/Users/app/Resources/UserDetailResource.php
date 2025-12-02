@@ -32,8 +32,9 @@ class UserDetailResource extends JsonResource
         }
         Log::info('/////////////////');
 
-        Log::info(json_encode( $this->user->roles()->first(),
-));
+        Log::info(json_encode(
+            $this->user->roles()->first(),
+        ));
 
         return [
             "id" => $this->user->id,
@@ -43,8 +44,8 @@ class UserDetailResource extends JsonResource
             "phone" => $this->user->phone,
             "contact_phone" => $this->user->contact_phone,
             "gender" => $this->user->gender,
-            "department_id" => $this->user->department_id  ?? null,
-            "sub_department_id" => $this->user->sub_department_id  ?? null,
+            "department_id" => $this->user->department_id ?? null,
+            "sub_department_id" => $this->user->sub_department_id ?? null,
             "timezone_id" => $this->user->timezone_id ?? null,
 
             "deparment_name" => $this->user->department->name ?? null,
@@ -68,6 +69,8 @@ class UserDetailResource extends JsonResource
             'work_home' => $work_home,
             'is_part_time' => (bool) ($this->user->is_part_time ?? false),
             'works_on_saturday' => $this->works_on_saturday !== null ? (bool) $this->works_on_saturday : null,
+            'bank_name' => $this->bank_name,
+            'bank_account_number' => $this->bank_account_number,
         ];
     }
 }

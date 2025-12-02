@@ -31,6 +31,8 @@ export class AddEmployee {
         public work_home: boolean = false,
         public is_part_time: boolean = false,
         public works_on_saturday: boolean | null = null,
+        public bank_name: string = '',
+        public bank_account_number: string = '',
         // public is_float: number
-    ) {}
+    ) { }
 }

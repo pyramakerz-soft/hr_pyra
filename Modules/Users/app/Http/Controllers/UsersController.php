@@ -86,7 +86,9 @@ class UsersController extends Controller
     use ResponseTrait, UserTrait;
 
 
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
 
     /**
@@ -121,173 +123,178 @@ class UsersController extends Controller
      * )
      */
     public function index(Request $request)
-{
-    $search = $request->get('search');
-    $department = $request->get('department_id');
-    $subDepartment = $request->get('sub_department_id');
-    $subDepartmentIdsInput = $request->input('sub_department_ids');
-    $parsedSubDepartmentIds = collect();
+    {
+        $search = $request->get('search');
+        $department = $request->get('department_id');
+        $subDepartment = $request->get('sub_department_id');
+        $subDepartmentIdsInput = $request->input('sub_department_ids');
+        $parsedSubDepartmentIds = collect();
 
-    if (is_array($subDepartmentIdsInput)) {
-        $parsedSubDepartmentIds = collect($subDepartmentIdsInput);
-    } elseif (is_string($subDepartmentIdsInput)) {
-        $parsedSubDepartmentIds = collect(explode(',', $subDepartmentIdsInput));
-    }
+        if (is_array($subDepartmentIdsInput)) {
+            $parsedSubDepartmentIds = collect($subDepartmentIdsInput);
+        } elseif (is_string($subDepartmentIdsInput)) {
+            $parsedSubDepartmentIds = collect(explode(',', $subDepartmentIdsInput));
+        }
 
-    if ($subDepartment !== null && $subDepartment !== '') {
-        $parsedSubDepartmentIds->push($subDepartment);
-    }
+        if ($subDepartment !== null && $subDepartment !== '') {
+            $parsedSubDepartmentIds->push($subDepartment);
+        }
 
-    $parsedSubDepartmentIds = $parsedSubDepartmentIds
-        ->map(function ($id) {
-            return is_numeric($id) ? (int) $id : null;
-        })
-        ->filter(function ($id) {
-            return $id !== null;
-        })
-        ->unique()
-        ->values();
-    $from_day = $request->get('from_day');
-    $to_day = $request->get('to_day');
-    $isAllDepartmentsValue = $department === 'all';
-    $isNoDepartmentValue = $department === 'none';
-    $allDepartments = $isAllDepartmentsValue || filter_var($request->get('all_departments'), FILTER_VALIDATE_BOOLEAN);
-    $usersData = null;
+        $parsedSubDepartmentIds = $parsedSubDepartmentIds
+            ->map(function ($id) {
+                return is_numeric($id) ? (int) $id : null;
+            })
+            ->filter(function ($id) {
+                return $id !== null;
+            })
+            ->unique()
+            ->values();
+        $from_day = $request->get('from_day');
+        $to_day = $request->get('to_day');
+        $isAllDepartmentsValue = $department === 'all';
+        $isNoDepartmentValue = $department === 'none';
+        $allDepartments = $isAllDepartmentsValue || filter_var($request->get('all_departments'), FILTER_VALIDATE_BOOLEAN);
+        $usersData = null;
 
-    // Base query
-    $usersQuery = User::query();
+        // Base query
+        $usersQuery = User::query();
 
-    // Filter by department
-    $hasDepartmentFilter = !is_null($department) && $department !== '' && ! $isAllDepartmentsValue && ! $isNoDepartmentValue;
-    if ($isNoDepartmentValue) {
-        $usersQuery->whereNull('department_id');
-    } elseif ($hasDepartmentFilter) {
-        $usersQuery->where('department_id', $department);
-    }
-
-    // Filter by sub-department
-    $hasSubDepartmentFilter = $parsedSubDepartmentIds->isNotEmpty() && ! $isNoDepartmentValue;
-    if ($hasSubDepartmentFilter) {
-        $usersQuery->whereIn('sub_department_id', $parsedSubDepartmentIds->all());
-    }
-
-    if ($from_day && $to_day) {
-        $fromDate = Carbon::parse($from_day)->startOfDay();
-        $toDate   = Carbon::parse($to_day)->endOfDay();
-
-        $usersQuery->whereHas('user_clocks', function($query) use ($fromDate, $toDate) {
-            $query->whereBetween('created_at', [$fromDate, $toDate]);
-        });
-    }
-    // Handle export
-    if ($request->has('export')) {
-        $users = $usersQuery->get();
-
-        return (new UsersClocksMultiSheetExport($users,$from_day, $to_day))
-            ->download('all_user_clocks.xlsx');
-    }
-    
-
-    // Handle search
-    if ($search) {
-        $users = $this->searchUsersByNameOrCode($search);
-
-        // Apply department/sub-department filtering to search results
+        // Filter by department
+        $hasDepartmentFilter = !is_null($department) && $department !== '' && !$isAllDepartmentsValue && !$isNoDepartmentValue;
         if ($isNoDepartmentValue) {
-            $users = $users->filter(function ($user) {
-                return $user->department_id === null;
-            });
+            $usersQuery->whereNull('department_id');
         } elseif ($hasDepartmentFilter) {
-            $users = $users->where('department_id', $department);
-        }
-        if ($hasSubDepartmentFilter) {
-            $users = $users->whereIn('sub_department_id', $parsedSubDepartmentIds->all());
+            $usersQuery->where('department_id', $department);
         }
 
-        $usersData = $users->isEmpty() ? null : [
-            'users' => UserResource::collection($users),
-            'pagination' => null,
-        ];
-    } else {
-        // If filters are applied, fetch all users matching the filters (no pagination)
-        // Remove pagination if filtering by date, department, sub-department, or requesting all departments
-        $shouldReturnAllUsers = $allDepartments || $hasDepartmentFilter || $isNoDepartmentValue || $hasSubDepartmentFilter || ($from_day && $to_day);
-        if ($shouldReturnAllUsers) {
+        // Filter by sub-department
+        $hasSubDepartmentFilter = $parsedSubDepartmentIds->isNotEmpty() && !$isNoDepartmentValue;
+        if ($hasSubDepartmentFilter) {
+            $usersQuery->whereIn('sub_department_id', $parsedSubDepartmentIds->all());
+        }
+
+        if ($from_day && $to_day) {
+            $fromDate = Carbon::parse($from_day)->startOfDay();
+            $toDate = Carbon::parse($to_day)->endOfDay();
+
+            $usersQuery->whereHas('user_clocks', function ($query) use ($fromDate, $toDate) {
+                $query->whereBetween('created_at', [$fromDate, $toDate]);
+            });
+        }
+        // Handle export
+        if ($request->has('export')) {
             $users = $usersQuery->get();
-            $usersData = [
-                // Pass dates to UserResource!
-                'users' => UserResource::collection($users)->additional([
-                    'from_day' => $from_day,
-                    'to_day' => $to_day,
-                ]),
+
+            return (new UsersClocksMultiSheetExport($users, $from_day, $to_day))
+                ->download('all_user_clocks.xlsx');
+        }
+
+
+        // Handle search
+        if ($search) {
+            $users = $this->searchUsersByNameOrCode($search);
+
+            // Apply department/sub-department filtering to search results
+            if ($isNoDepartmentValue) {
+                $users = $users->filter(function ($user) {
+                    return $user->department_id === null;
+                });
+            } elseif ($hasDepartmentFilter) {
+                $users = $users->where('department_id', $department);
+            }
+            if ($hasSubDepartmentFilter) {
+                $users = $users->whereIn('sub_department_id', $parsedSubDepartmentIds->all());
+            }
+
+            $usersData = $users->isEmpty() ? null : [
+                'users' => UserResource::collection($users),
                 'pagination' => null,
             ];
         } else {
-            $users = $usersQuery->paginate(5);
-            $usersData = [
-                'users' => UserResource::collection($users),
-                'pagination' => $this->formatPagination($users),
-            ];
+            // If filters are applied, fetch all users matching the filters (no pagination)
+            // Remove pagination if filtering by date, department, sub-department, or requesting all departments
+            $shouldReturnAllUsers = $allDepartments || $hasDepartmentFilter || $isNoDepartmentValue || $hasSubDepartmentFilter || ($from_day && $to_day);
+            if ($shouldReturnAllUsers) {
+                $users = $usersQuery->get();
+                $usersData = [
+                    // Pass dates to UserResource!
+                    'users' => UserResource::collection($users)->additional([
+                        'from_day' => $from_day,
+                        'to_day' => $to_day,
+                    ]),
+                    'pagination' => null,
+                ];
+            } else {
+                $users = $usersQuery->paginate(5);
+                $usersData = [
+                    'users' => UserResource::collection($users),
+                    'pagination' => $this->formatPagination($users),
+                ];
+            }
+
         }
 
+        if (!$usersData) {
+            return $this->returnError('No Users Found');
+        }
+
+        return $this->returnData("data", $usersData, "Users Data");
+    }
+    public function exportClocks(Request $request)
+    {
+        $userIds = $request->input('user_ids', []);
+        $from_day = $request->input('from_day');
+        $to_day = $request->input('to_day');
+
+        if (empty($userIds)) {
+            return response()->json(['error' => 'No users selected.'], 400);
+        }
+
+        $users = User::with([
+            'user_clocks',
+            'department',
+            'timezone',
+            'excuses',
+            'overTimes',
+            'user_vacations'
+        ])->whereIn('id', $userIds)->get();
+
+        return (new UsersClocksMultiSheetExport($users, $from_day, $to_day))
+            ->download('all_user_clocks.xlsx');
     }
 
-    if (!$usersData) {
-        return $this->returnError('No Users Found');
+    public function exportAttendance(Request $request)
+    {
+        $userIds = $request->input('user_ids', []);
+        $from_day = $request->input('from_day');
+        $to_day = $request->input('to_day');
+
+        $usersQuery = User::query()->whereIn('id', $userIds);
+
+        // Filter attendances by date
+        if ($from_day && $to_day) {
+            $usersQuery->whereHas('user_clocks', function ($query) use ($from_day, $to_day) {
+                $query->whereBetween('created_at', [$from_day, $to_day]);
+            });
+        }
+
+        $users = $usersQuery->get();
+
+        return (new UsersClocksMultiSheetExport($users, $from_day, $to_day))->download('all_user_clocks.xlsx');
     }
 
-    return $this->returnData("data", $usersData, "Users Data");
-}
-public function exportClocks(Request $request)
-{
-    $userIds = $request->input('user_ids', []);
-    $from_day = $request->input('from_day');
-    $to_day = $request->input('to_day');
-
-    if (empty($userIds)) {
-        return response()->json(['error' => 'No users selected.'], 400);
+    // Function to format pagination data
+    private function formatPagination($users)
+    {
+        return [
+            'current_page' => $users->currentPage(),
+            'last_page' => $users->lastPage(),
+            'per_page' => $users->perPage(),
+            'total' => $users->total(),
+        ];
     }
 
-    $users = User::with([
-        'user_clocks', 'department', 'timezone', 'excuses', 'overTimes', 'user_vacations'
-    ])->whereIn('id', $userIds)->get();
 
-    return (new UsersClocksMultiSheetExport($users, $from_day, $to_day))
-        ->download('all_user_clocks.xlsx');
-}
-
-public function exportAttendance(Request $request)
-{
-    $userIds = $request->input('user_ids', []);
-    $from_day = $request->input('from_day');
-    $to_day = $request->input('to_day');
-
-    $usersQuery = User::query()->whereIn('id', $userIds);
-
-    // Filter attendances by date
-    if ($from_day && $to_day) {
-        $usersQuery->whereHas('user_clocks', function($query) use ($from_day, $to_day) {
-            $query->whereBetween('created_at', [$from_day, $to_day]);
-        });
-    }
-
-    $users = $usersQuery->get();
-
-    return (new UsersClocksMultiSheetExport($users, $from_day, $to_day))->download('all_user_clocks.xlsx');
-}
-
-// Function to format pagination data
-private function formatPagination($users)
-{
-    return [
-        'current_page' => $users->currentPage(),
-        'last_page' => $users->lastPage(),
-        'per_page' => $users->perPage(),
-        'total' => $users->total(),
-    ];
-}
-
-    
 
 
 
@@ -500,13 +507,13 @@ private function formatPagination($users)
         if ($request->sub_department_id) {
             $subDepartment = SubDepartment::find($request['sub_department_id']);
 
-            if (($department && $subDepartment->department_id != $department->id) || (! $subDepartment)) {
+            if (($department && $subDepartment->department_id != $department->id) || (!$subDepartment)) {
                 return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
             }
         }
 
 
-        $code =  $request->code;
+        $code = $request->code;
 
         // Handle image upload
         $imageUrl = null;
@@ -532,6 +539,7 @@ private function formatPagination($users)
 
             'image' => $imageUrl,
             'serial_number' => null,
+
         ]);
 
 
@@ -567,6 +575,9 @@ private function formatPagination($users)
             'hiring_date' => $request['hiring_date'],
             'works_on_saturday' => $worksOnSaturdayPreference,
             'user_id' => $user->id,
+            'bank_account_number' => $request['bank_account_number'],
+            'bank_name' => $request['bank_name'],
+
             // 'is_float' => $data['is_float'],
 
         ]);
@@ -735,16 +746,16 @@ private function formatPagination($users)
             if (!$department) {
                 return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
             }
-        
-        if ($request->sub_department_id) {
-            $subDepartment = SubDepartment::find($request['sub_department_id']);
 
-            if (($department && $subDepartment->department_id != $department->id) || (! $subDepartment)) {
-                return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
+            if ($request->sub_department_id) {
+                $subDepartment = SubDepartment::find($request['sub_department_id']);
+
+                if (($department && $subDepartment->department_id != $department->id) || (!$subDepartment)) {
+                    return $this->returnError('Invalid department selected', Response::HTTP_BAD_REQUEST);
+                }
             }
-        }
 
-    }
+        }
         // Ensure that the department_id exists in $data before accessing it
         $departmentId = isset($request['department_id']) ? $request['department_id'] : $user->department_id;
 
@@ -762,7 +773,7 @@ private function formatPagination($users)
         }
 
         // Update user information
-        $updatedUser =    $user->update([
+        $updatedUser = $user->update([
             'code' => $request['code'] ?? $user->code,
             'name' => $request['name'] ?? $user->name,
             'email' => $request['email'] ?? $user->email,
@@ -806,7 +817,7 @@ private function formatPagination($users)
         if (Carbon::parse($end_time)->lessThanOrEqualTo(Carbon::parse($start_time))) {
             return $this->returnError('End time must be later than start time', 422); // Return 422 Unprocessable Entity
         }
-        $updatedUserDetail =  $userDetail->update([
+        $updatedUserDetail = $userDetail->update([
             'salary' => $salary,
             'working_hours_day' => $working_hours_day,
             'hourly_rate' => $hourly_rate,
@@ -816,6 +827,8 @@ private function formatPagination($users)
             'emp_type' => $request['emp_type'] ?? $userDetail->emp_type,
             'hiring_date' => $request['hiring_date'] ?? $userDetail->hiring_date,
             'works_on_saturday' => $worksOnSaturdayPreference,
+            'bank_name' => $request['bank_name'] ?? $userDetail->bank_name,
+            'bank_account_number' => $request['bank_account_number'] ?? $userDetail->bank_account_number,
             'user_id' => $userDetail->user_id,
             // 'is_float' => $request['is_float'] ,
         ]);
@@ -823,10 +836,10 @@ private function formatPagination($users)
 
         // Assign roles, locations, and work types
 
-            Log::info($request);
-            Log::info(json_encode([$request['role']]));
-            $this->assignRoles($user, [$request['role']]);
-        
+        Log::info($request);
+        Log::info(json_encode([$request['role']]));
+        $this->assignRoles($user, [$request['role']]);
+
 
         if ($request->has('location_id')) {
             $this->assignLocations($user, $request->input('location_id'));
