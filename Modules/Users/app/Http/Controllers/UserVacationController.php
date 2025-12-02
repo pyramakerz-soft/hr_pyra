@@ -121,6 +121,23 @@ class UserVacationController extends Controller
             return $this->returnError($academicLimitError, 422);
         }
 
+        // Check for overlapping vacations (pending or approved)
+        $overlappingVacation = UserVacation::where('user_id', $authUser->id)
+            ->whereIn('status', [StatusEnum::Pending->value, StatusEnum::Approved->value])
+            ->where(function ($query) use ($from, $to) {
+                $query->whereBetween('from_date', [$from, $to])
+                    ->orWhereBetween('to_date', [$from, $to])
+                    ->orWhere(function ($q) use ($from, $to) {
+                        $q->where('from_date', '<=', $from)
+                            ->where('to_date', '>=', $to);
+                    });
+            })
+            ->first();
+
+        if ($overlappingVacation) {
+            return $this->returnError('You already have a vacation request (pending or approved) that overlaps with the selected dates.', 422);
+        }
+
         // Calculate available days for this vacation type
         $availableDays = $this->calculateAvailableDays($authUser, $vacationType, $from, $daysCount);
 
@@ -870,7 +887,7 @@ class UserVacationController extends Controller
                 $yearsEmployed = $hiringDate->diffInYears(Carbon::now());
 
                 if ($yearsEmployed < 5) {
-                    return 'Hajj / Umrah leave is only available after 5 years of employment. You have been employed for ' . $yearsEmployed . ' year(s).';
+                    return 'Hajj / Umrah leave is only available after 5 years of employment.';
                 }
             } else {
                 return 'Unable to verify employment tenure. Hiring date not found.';
