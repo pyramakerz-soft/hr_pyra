@@ -561,10 +561,9 @@ class UserVacationController extends Controller
                 ];
             }
 
-            return [
-                'vacation' => $vacation,
-                'balances' => $balances,
-            ];
+            $vacation['balances'] = $balances;
+
+            return $vacation;
         });
 
         return $this->returnData('Vacations', [
