@@ -29,4 +29,20 @@ class OverTime extends Model
     return $this->belongsTo(User::class);  // Each excuse belongs to one user
   }
 
+  /**
+   * Get the direct manager who approved the overtime.
+   */
+  public function directApprovedBy()
+  {
+    return $this->belongsTo(User::class, 'direct_approved_by');
+  }
+
+  /**
+   * Get the head manager who approved the overtime.
+   */
+  public function headApprovedBy()
+  {
+    return $this->belongsTo(User::class, 'head_approved_by');
+  }
+
 }
