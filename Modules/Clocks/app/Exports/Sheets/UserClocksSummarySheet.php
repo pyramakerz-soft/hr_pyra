@@ -69,7 +69,7 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
             'Department',
             'Total Days Worked',
             'Total Worked Hours',
-            'Total OT Hours',
+            'Total Approved OT Hours',
             'Total Attendance OT Hours',
             'Raw Deduction Hours',
             'Excuse Hours Used',
@@ -169,7 +169,7 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
                         ? $this->sheetLinks[$employee]
                         : null;
 
-                    if (! $targetSheet) {
+                    if (!$targetSheet) {
                         continue;
                     }
 

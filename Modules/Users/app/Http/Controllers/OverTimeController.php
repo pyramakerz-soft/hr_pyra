@@ -283,6 +283,7 @@ class OverTimeController extends Controller
                 return $this->returnError('You do not have permission to approve as direct manager', 403);
             }
 
+            $overtime->status = $status;
             $overtime->approval_of_direct = $status;
             $overtime->direct_approved_by = $manager->id;
         } elseif ($approver === 'head') {
@@ -291,6 +292,7 @@ class OverTimeController extends Controller
                 return $this->returnError('You do not have permission to approve as head manager', 403);
             }
 
+            $overtime->status = $status;
             $overtime->approval_of_head = $status;
             $overtime->head_approved_by = $manager->id;
         } else {
