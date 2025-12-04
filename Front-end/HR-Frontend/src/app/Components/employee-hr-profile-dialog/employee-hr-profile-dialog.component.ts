@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
@@ -36,6 +36,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly userService: UserServiceService,
     private readonly dialogRef: MatDialogRef<EmployeeHrProfileDialogComponent>,
+    private readonly cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
   ) {
     this.form = this.fb.group({
@@ -73,10 +74,15 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
         this.patchDetail(response.profile.detail);
         this.setBalances(response.profile.vacation_balances ?? []);
         this.isLoading = false;
+
+        // Manually trigger change detection to ensure the view updates
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isLoading = false;
         this.loadError = 'Unable to load employee profile.';
+        this.cdr.detectChanges();
+
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -112,17 +118,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
       this.balances.push(this.createBalanceGroup(balance));
     });
 
-    if (this.balances.length === 0 && this.vacationTypeOptions.length > 0) {
-      const firstType = this.vacationTypeOptions[0];
-      this.balances.push(this.createBalanceGroup({
-        vacation_type_id: firstType.id,
-        vacation_type_name: firstType.name,
-        year: this.currentYear,
-        allocated_days: 0,
-        used_days: 0,
-        remaining_days: 0,
-      } as HrVacationBalance));
-    }
+    this.cdr.detectChanges();
   }
 
   addBalance(): void {
@@ -138,14 +134,22 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
     }
 
     const nextType = availableTypes[0];
-    this.balances.push(this.createBalanceGroup({
+    const newBalanceGroup = this.createBalanceGroup({
       vacation_type_id: nextType.id,
       vacation_type_name: nextType.name,
       year: this.currentYear,
       allocated_days: 0,
       used_days: 0,
       remaining_days: 0,
-    } as HrVacationBalance));
+    } as HrVacationBalance);
+
+    this.balances.push(newBalanceGroup);
+
+    // Mark the form as touched to show validation immediately
+    newBalanceGroup.markAllAsTouched();
+
+    // Force change detection
+    this.cdr.detectChanges();
   }
 
   removeBalance(index: number): void {
@@ -174,11 +178,15 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
     const match = this.vacationTypeOptions.find((option) => option.id === vacationTypeId);
     return match ? match.name : '';
   }
+
   canAddMoreBalances(): boolean {
     return this.availableVacationTypes().length > 0;
   }
 
   save(): void {
+    // Validate all form controls
+    this.validateAllFormControls();
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       Swal.fire({
@@ -192,6 +200,9 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
 
     const payload = this.buildPayload();
 
+    // Log payload for debugging
+    console.log('Saving payload:', payload);
+
     this.isSaving = true;
     this.userService.updateHrUserProfile(this.data.userId, payload).subscribe({
       next: (response) => {
@@ -200,6 +211,8 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
         this.profile = response.profile;
         this.patchDetail(response.profile.detail);
         this.setBalances(response.profile.vacation_balances ?? []);
+        this.cdr.detectChanges();
+
         Swal.fire({
           icon: 'success',
           title: 'Updated',
@@ -207,8 +220,11 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
           confirmButtonColor: '#FF7519',
         });
       },
-      error: () => {
+      error: (error) => {
         this.isSaving = false;
+        this.cdr.detectChanges();
+
+        console.error('Save error:', error);
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -219,6 +235,18 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
     });
   }
 
+  private validateAllFormControls(): void {
+    // Validate each balance group
+    this.balances.controls.forEach((control) => {
+      if (control instanceof FormGroup) {
+        Object.keys(control.controls).forEach((key) => {
+          const formControl = control.get(key);
+          formControl?.updateValueAndValidity();
+        });
+      }
+    });
+  }
+
   close(): void {
     this.dialogRef.close();
   }
@@ -226,19 +254,26 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
   private createBalanceGroup(balance?: HrVacationBalance): FormGroup {
     const group = this.fb.group({
       id: [balance?.id ?? null],
-      vacation_type_id: [balance?.vacation_type_id ?? null, Validators.required],
+      vacation_type_id: [balance?.vacation_type_id ?? null, [Validators.required, Validators.min(1)]],
       allocated_days: [balance?.allocated_days ?? 0, [Validators.required, Validators.min(0)]],
       used_days: [balance?.used_days ?? 0, [Validators.min(0)]],
       remaining_days: [{ value: balance?.remaining_days ?? 0, disabled: true }],
       year: [{ value: balance?.year ?? this.currentYear, disabled: true }],
     });
 
+    // Calculate remaining days when values change
     group.valueChanges.subscribe(() => {
       const allocated = Number(group.get('allocated_days')?.value ?? 0);
       const used = Number(group.get('used_days')?.value ?? 0);
-      const remaining = Number.isFinite(allocated - used) ? allocated - used : 0;
+      const remaining = Math.max(0, allocated - used);
       group.get('remaining_days')?.setValue(remaining, { emitEvent: false });
     });
+
+    // Calculate initial remaining days
+    const allocated = Number(group.get('allocated_days')?.value ?? 0);
+    const used = Number(group.get('used_days')?.value ?? 0);
+    const remaining = Math.max(0, allocated - used);
+    group.get('remaining_days')?.setValue(remaining, { emitEvent: false });
 
     return group;
   }
@@ -276,34 +311,45 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
       detailPayload[key] = typeof value === 'string' ? value.trim() : value;
     });
 
-    const balancesPayload = this.balances.controls.map((control) => {
-      const raw = control.getRawValue();
-      return {
-        id: raw.id ?? undefined,
-        vacation_type_id: Number(raw.vacation_type_id),
-        year: this.currentYear,
-        allocated_days: Number(raw.allocated_days ?? 0),
-        used_days: Number(raw.used_days ?? 0),
-      };
-    }).filter((balance) => balance.vacation_type_id);
+    // Build vacation balances payload
+    const balancesPayload = this.balances.controls
+      .map((control) => {
+        const raw = control.getRawValue();
+
+        // Skip if vacation_type_id is not valid
+        if (!raw.vacation_type_id || raw.vacation_type_id <= 0) {
+          return null;
+        }
+
+        return {
+          id: raw.id && raw.id > 0 ? raw.id : undefined,
+          vacation_type_id: Number(raw.vacation_type_id),
+          year: this.currentYear,
+          allocated_days: Number(raw.allocated_days ?? 0),
+          used_days: Number(raw.used_days ?? 0),
+        };
+      })
+      .filter((balance): balance is NonNullable<typeof balance> => balance !== null);
 
     const payload: HrUserProfileUpdatePayload = {};
 
+    // Only add detail if it has values
     if (Object.keys(detailPayload).length > 0) {
       payload.detail = detailPayload;
     }
 
+    // Only add vacation_balances if there are any
     if (balancesPayload.length > 0) {
       payload.vacation_balances = balancesPayload;
     }
 
+    // Add ids to delete if any
     if (this.balancesToDelete.length > 0) {
       payload.vacation_balance_ids_to_delete = this.balancesToDelete.slice();
     }
 
     return payload;
   }
-
   private formatTimeForInput(value?: string | null): string {
     if (!value) {
       return '';
