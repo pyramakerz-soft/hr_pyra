@@ -114,7 +114,7 @@ use Modules\Users\Models\User;
 
 class ClockController extends Controller
 {
-    use ResponseTrait, ClockCalculationsHelperTrait,  ClockInTrait, ClockOutTrait;
+    use ResponseTrait, ClockCalculationsHelperTrait, ClockInTrait, ClockOutTrait;
 
     protected $filters;
     public function __construct()
@@ -746,11 +746,11 @@ class ClockController extends Controller
         // Get the authenticated user
         $authUser = Auth::user();
         $user_id = $authUser->id;
-        $clock_in = Carbon::now();
+        $clock_in = Carbon::now()->setSeconds(0);
 
         $arr = ['type' => 'In', 'version' => $request->version, 'lat' => $request->latitude, 'lng' => $request->longitude, 'user' => $authUser->email];
         Log::info($arr);
-        if (!$request->version  && ! App::environment('local'))
+        if (!$request->version && !App::environment('local'))
             return response()->json(['message' => 'Please update the application to the latest version.'], 406);
 
         // Determine the latest version based on the platform (Android/iOS)
@@ -758,12 +758,12 @@ class ClockController extends Controller
         $latestVersion = AppVersion::where('type', $platformType)->orderBy('version', 'desc')->value('version');
 
         // Check if the request's version is outdated
-        if ($request->version != $latestVersion   &&  ! App::environment('local')) {
+        if ($request->version != $latestVersion && !App::environment('local')) {
             return response()->json(['message' => 'Please update the application to the latest version.'], 406);
             // throw new \Exception('', 406);
         }
 
-        if ($request->mob  && ! App::environment('local')) {
+        if ($request->mob && !App::environment('local')) {
             if (is_null($authUser->mob)) {
                 $authUser->update(['mob' => $request->mob]);
             } elseif ($authUser->mob !== $request->mob) {
@@ -852,7 +852,7 @@ class ClockController extends Controller
             return $this->returnError('You are not clocked in.');
         }
         $clockIn = Carbon::parse($clock->clock_in);
-        $clockOut = Carbon::now();
+        $clockOut = Carbon::now()->setSeconds(0);
 
         $this->validateClockTime($clockIn, $clockOut);
 
@@ -1303,7 +1303,7 @@ class ClockController extends Controller
                 'name' => $user->name,
                 'phone' => $user->phone,
 
-                'clock_id' => $clockInOut ?  $clockInOut->id : null,
+                'clock_id' => $clockInOut ? $clockInOut->id : null,
                 'date' => $clockInOut && $clockInOut->clock_in
                     ? Carbon::parse($clockInOut->clock_in)->format('Y-m-d')
                     : Carbon::now()->format('Y-m-d'), // Default to today's date if no record found
@@ -1455,7 +1455,7 @@ class ClockController extends Controller
                 'name' => $user->name,
                 'phone' => $user->phone,
 
-                'clock_id' => $clockInOut ?  $clockInOut->id : null,
+                'clock_id' => $clockInOut ? $clockInOut->id : null,
                 'date' => $clockInOut && $clockInOut->clock_in
                     ? Carbon::parse($clockInOut->clock_in)->format('Y-m-d')
                     : Carbon::now()->format('Y-m-d'), // Default to today's date if no record found

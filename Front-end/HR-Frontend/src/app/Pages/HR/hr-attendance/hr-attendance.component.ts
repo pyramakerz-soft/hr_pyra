@@ -217,6 +217,7 @@ export class HrAttendanceComponent {
           text: errorMessage,
           confirmButtonColor: '#FF7519',
         });
+        this.isLoading = false;
       },
       complete: () => {
         this.isLoading = false;
