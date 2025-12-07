@@ -38,6 +38,7 @@ class AccrueMonthlyVacationBalances extends Command
 
             $existingYearPairs = UserVacationBalance::query()
                 ->where('year', $year)
+                ->where('vacation_type_id', $annualLeaveVacationType->id)
                 ->get()
                 ->mapWithKeys(function (UserVacationBalance $balance) use ($annualLeaveVacationType) {
                     return [sprintf('%d-%d', $balance->user_id, $annualLeaveVacationType->id) => true];
@@ -94,6 +95,7 @@ class AccrueMonthlyVacationBalances extends Command
             // Ensure balances exist for Casual Leave (similar to Annual Leave)
             $existingCasualYearPairs = UserVacationBalance::query()
                 ->where('year', $year)
+                ->where('vacation_type_id', $casualLeaveType->id)
                 ->get()
                 ->mapWithKeys(function (UserVacationBalance $balance) use ($casualLeaveType) {
                     return [sprintf('%d-%d', $balance->user_id, $casualLeaveType->id) => true];
