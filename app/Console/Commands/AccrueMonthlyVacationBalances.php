@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Modules\Users\Models\UserVacationBalance;
 use Modules\Users\Models\VacationType;
+use Modules\Users\Models\User;
 
 class AccrueMonthlyVacationBalances extends Command
 {
@@ -27,29 +28,26 @@ class AccrueMonthlyVacationBalances extends Command
         }
 
         $year = $referenceDate->year;
+        $userIds = User::pluck('id');
 
-        DB::transaction(function () use ($referenceDate, $year) {
+        DB::transaction(function () use ($referenceDate, $year, $userIds) {
 
             $annualLeaveVacationType = VacationType::where('name', 'Annual Leave')->first();
             // Ensure every existing user/type pairing has a row for the active year
-            $distinctPairs = UserVacationBalance::query()
-                ->select('user_id', 'vacation_type_id')
-                ->where('vacation_type_id', $annualLeaveVacationType->id)
-                ->distinct()
-                ->get();
+            // Ensure every user has a row for the active year
 
             $existingYearPairs = UserVacationBalance::query()
                 ->where('year', $year)
                 ->get()
-                ->mapWithKeys(function (UserVacationBalance $balance) {
+                ->mapWithKeys(function (UserVacationBalance $balance) use ($annualLeaveVacationType) {
                     return [sprintf('%d-%d', $balance->user_id, $annualLeaveVacationType->id) => true];
                 });
 
-            foreach ($distinctPairs as $pair) {
-                $key = sprintf('%d-%d', $pair->user_id, $annualLeaveVacationType->id);
-                if (! isset($existingYearPairs[$key])) {
+            foreach ($userIds as $userId) {
+                $key = sprintf('%d-%d', $userId, $annualLeaveVacationType->id);
+                if (!isset($existingYearPairs[$key])) {
                     UserVacationBalance::create([
-                        'user_id' => $pair->user_id,
+                        'user_id' => $userId,
                         'vacation_type_id' => $annualLeaveVacationType->id,
                         'year' => $year,
                         'allocated_days' => 0,
@@ -88,70 +86,64 @@ class AccrueMonthlyVacationBalances extends Command
                         $balance->save();
                     }
                 });
+        });
+
+        // Handle Casual Leave Adjustment
+        $casualLeaveType = VacationType::where('name', 'Casual Leave')->first();
+        if ($casualLeaveType) {
+            // Ensure balances exist for Casual Leave (similar to Annual Leave)
+            $existingCasualYearPairs = UserVacationBalance::query()
+                ->where('year', $year)
+                ->get()
+                ->mapWithKeys(function (UserVacationBalance $balance) use ($casualLeaveType) {
+                    return [sprintf('%d-%d', $balance->user_id, $casualLeaveType->id) => true];
                 });
 
-            // Handle Casual Leave Adjustment
-            $casualLeaveType = VacationType::where('name', 'Casual Leave')->first();
-            if ($casualLeaveType) {
-                // Ensure balances exist for Casual Leave (similar to Annual Leave)
-                $distinctCasualPairs = UserVacationBalance::query()
-                    ->select('user_id', 'vacation_type_id')
-                    ->where('vacation_type_id', $casualLeaveType->id)
-                    ->distinct()
-                    ->get();
-
-                $existingCasualYearPairs = UserVacationBalance::query()
-                    ->where('year', $year)
-                    ->get()
-                    ->mapWithKeys(function (UserVacationBalance $balance) use ($casualLeaveType) {
-                        return [sprintf('%d-%d', $balance->user_id, $casualLeaveType->id) => true];
-                    });
-
-                foreach ($distinctCasualPairs as $pair) {
-                    $key = sprintf('%d-%d', $pair->user_id, $casualLeaveType->id);
-                    if (! isset($existingCasualYearPairs[$key])) {
-                        UserVacationBalance::create([
-                            'user_id' => $pair->user_id,
-                            'vacation_type_id' => $casualLeaveType->id,
-                            'year' => $year,
-                            'allocated_days' => $casualLeaveType->default_days ?? 14,
-                            'used_days' => 0,
-                        ]);
-                    }
+            foreach ($userIds as $userId) {
+                $key = sprintf('%d-%d', $userId, $casualLeaveType->id);
+                if (!isset($existingCasualYearPairs[$key])) {
+                    UserVacationBalance::create([
+                        'user_id' => $userId,
+                        'vacation_type_id' => $casualLeaveType->id,
+                        'year' => $year,
+                        'allocated_days' => $casualLeaveType->default_days ?? 14,
+                        'used_days' => 0,
+                    ]);
                 }
+            }
 
-                UserVacationBalance::query()
-                    ->where('vacation_type_id', $casualLeaveType->id)
-                    ->where('year', $year)
-                    ->with('user.user_detail')
-                    ->chunkById(500, function ($balances) use ($referenceDate, $casualLeaveType) {
-                        foreach ($balances as $balance) {
-                            $user = $balance->user;
-                            $userDetail = $user->user_detail;
-                            $allocatedDays = $casualLeaveType->default_days ?? 14;
+            UserVacationBalance::query()
+                ->where('vacation_type_id', $casualLeaveType->id)
+                ->where('year', $year)
+                ->with('user.user_detail')
+                ->chunkById(500, function ($balances) use ($referenceDate, $casualLeaveType) {
+                    foreach ($balances as $balance) {
+                        $user = $balance->user;
+                        $userDetail = $user->user_detail;
+                        $allocatedDays = $casualLeaveType->default_days ?? 14;
 
-                            if ($userDetail && $userDetail->hiring_date) {
-                                $hiringDate = Carbon::parse($userDetail->hiring_date);
-                                $ruleStartDate = Carbon::create(2025, 9, 1)->startOfDay();
-                                $oneYearAfterHiring = $hiringDate->copy()->addYear();
+                        if ($userDetail && $userDetail->hiring_date) {
+                            $hiringDate = Carbon::parse($userDetail->hiring_date);
+                            $ruleStartDate = Carbon::create(2025, 9, 1)->startOfDay();
+                            $oneYearAfterHiring = $hiringDate->copy()->addYear();
 
-                                if ($hiringDate->gte($ruleStartDate) && $referenceDate->lessThan($oneYearAfterHiring)) {
-                                    $allocatedDays = 8;
-                                }
-                            }
-
-                            if ($balance->allocated_days != $allocatedDays) {
-                                $balance->allocated_days = $allocatedDays;
-                                $balance->save();
+                            if ($hiringDate->gte($ruleStartDate) && $referenceDate->lessThan($oneYearAfterHiring)) {
+                                $allocatedDays = 8;
                             }
                         }
-                    });
-            }
 
-            // Handle Balance Reset for Academic Department at end of August
-            if ($referenceDate->month === 8 && $referenceDate->day === 31) {
-                $this->resetAcademicDepartmentBalances($year);
-            }
+                        if ($balance->allocated_days != $allocatedDays) {
+                            $balance->allocated_days = $allocatedDays;
+                            $balance->save();
+                        }
+                    }
+                });
+        }
+
+        // Handle Balance Reset for Academic Department at end of August
+        if ($referenceDate->month === 8 && $referenceDate->day === 31) {
+            $this->resetAcademicDepartmentBalances($year);
+        }
 
         $this->info('Monthly vacation balances accrued successfully.');
 
