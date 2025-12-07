@@ -1,18 +1,18 @@
 <div class="dialog-container" *ngIf="!isLoading; else loadingTpl">
+  <!-- Header -->
   <header class="dialog-header">
     <div *ngIf="profile as profileData">
-      <h2 class="dialog-title">
-        {{ profileData.user.name || 'Employee Profile' }}
-      </h2>
+      <h2 class="dialog-title">{{ profileData.user.name || 'Employee Profile' }}</h2>
       <p class="dialog-subtitle">
         Code: {{ profileData.user.code ?? 'N/A' }} |
         Department: {{ profileData.user.department ?? 'N/A' }} |
         Sub Department: {{ profileData.user.sub_department ?? 'N/A' }}
       </p>
     </div>
-    <button type="button" class="close-btn" (click)="close()">×</button>
+    <button type="button" class="close-btn" (click)="close()">Ã—</button>
   </header>
 
+  <!-- Current Balances (Read-only display) -->
   <section class="dialog-section" *ngIf="profile?.vacation_balances?.length; else noBalancesTpl">
     <h3 class="section-title">Current Balances</h3>
     <div class="balance-summary">
@@ -34,7 +34,8 @@
     </section>
   </ng-template>
 
-  <section class="dialog-section">
+  <!-- Payroll & Contract (Commented out as requested) -->
+  <!-- <section class="dialog-section">
     <h3 class="section-title">Payroll &amp; Contract</h3>
     <div class="form-grid compact" [formGroup]="detailGroup">
       <label class="form-field">
@@ -58,63 +59,120 @@
         <input type="date" formControlName="hiring_date" />
       </label>
     </div>
-  </section>
+  </section> -->
 
+  <!-- Vacation Balances Form -->
   <section class="dialog-section">
     <header class="section-header">
       <h3 class="section-title">Vacation Balances</h3>
-      <button type="button" class="link-btn" (click)="addBalance()" [disabled]="!canAddMoreBalances()">+ Add balance</button>
+      <button 
+        type="button" 
+        class="link-btn" 
+        (click)="addBalance()" 
+        [disabled]="!canAddMoreBalances()">
+        + Add balance
+      </button>
     </header>
 
-    <div class="vacation-list" formArrayName="balances">
-      <div class="vacation-card" *ngFor="let balance of balances.controls; let i = index" [formGroupName]="i">
-        <div class="vacation-card-header">
-          <span class="vacation-card-title">
-            {{ getVacationTypeName(balance.get('vacation_type_id')?.value) || 'New balance' }}
-          </span>
-          <button type="button" class="link-btn danger" (click)="removeBalance(i)">Remove</button>
-        </div>
-        <div class="vacation-grid">
-          <label class="form-field type-field">
-            <span>Vacation Type</span>
-            <select formControlName="vacation_type_id">
-              <option [ngValue]="null" disabled>Select type</option>
-              <option *ngFor="let option of availableVacationTypes(i)" [ngValue]="option.id">
-                {{ option.name }}
-              </option>
-            </select>
-          </label>
-          <label class="form-field">
-            <span>Allocated Days</span>
-            <input type="number" formControlName="allocated_days" />
-          </label>
-          <label class="form-field">
-            <span>Used Days</span>
-            <input type="number" formControlName="used_days" />
-          </label>
-          <div class="year-chip-display">
-            Year: {{ currentYear }}
-          </div>
-          <div class="remaining-indicator">
-            Remaining: {{ balance.get('remaining_days')?.value | number:'1.2-2' }}
-          </div>
-        </div>
-      </div>
+    <form [formGroup]="form">
+      <div class="vacation-list" formArrayName="balances">
+        <!-- Balance Cards -->
+        <div 
+          class="vacation-card" 
+          *ngFor="let balance of balances.controls; let i = index" 
+          [formGroupName]="i">
+          
+          <!-- <div class="vacation-card-header">
+            <span class="vacation-card-title">
+              {{ getVacationTypeName(balance.get('vacation_type_id')?.value) }}
+            </span>
+            <button type="button" class="link-btn danger" (click)="removeBalance(i)">
+              Remove
+            </button>
+          </div> -->
 
-      <p class="muted" *ngIf="balances.length === 0">
-        No vacation balances assigned. Use “Add balance” to configure allowances.
-      </p>
-    </div>
+          <div class="vacation-grid">
+            <!-- Vacation Type Dropdown -->
+            <label class="form-field type-field">
+              <span>Vacation Type <span class="required">*</span></span>
+              <select formControlName="vacation_type_id">
+                <option [ngValue]="null" disabled>Select type</option>
+                <option *ngFor="let option of availableVacationTypes(i)" [ngValue]="option.id">
+                  {{ option.name }}
+                </option>
+              </select>
+              <span class="error" *ngIf="balance.get('vacation_type_id')?.invalid && balance.get('vacation_type_id')?.touched">
+                Please select a vacation type
+              </span>
+            </label>
+
+            <!-- Allocated Days -->
+            <label class="form-field">
+              <span>Allocated Days <span class="required">*</span></span>
+              <input 
+                type="number" 
+                formControlName="allocated_days" 
+                step="0.5" 
+                min="0" 
+                placeholder="0" />
+              <span class="error" *ngIf="balance.get('allocated_days')?.invalid && balance.get('allocated_days')?.touched">
+                Required (min: 0)
+              </span>
+            </label>
+
+            <!-- Used Days -->
+            <label class="form-field">
+              <span>Used Days</span>
+              <input 
+                type="number" 
+                formControlName="used_days" 
+                step="0.5" 
+                min="0" 
+                placeholder="0" />
+              <span class="error" *ngIf="balance.get('used_days')?.invalid && balance.get('used_days')?.touched">
+                Min: 0
+              </span>
+            </label>
+
+            <!-- Year Display -->
+            <div class="year-chip-display">
+              Year: {{ currentYear }}
+            </div>
+
+            <!-- Remaining Display -->
+            <!-- <div class="remaining-indicator">
+              Remaining: {{ (balance.get('remaining_days')?.value || 0) | number:'1.2-2' }}
+            </div> -->
+            <button type="button" class="link-btn danger" (click)="removeBalance(i)">
+              Remove
+            </button>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <p class="muted" *ngIf="balances.length === 0">
+          No vacation balances assigned. Use "Add balance" to configure allowances.
+        </p>
+      </div>
+    </form>
   </section>
 
+  <!-- Action Buttons -->
   <footer class="dialog-actions">
-    <button type="button" class="btn secondary" (click)="close()">Cancel</button>
-    <button type="button" class="btn primary" (click)="save()" [disabled]="isSaving">
+    <button type="button" class="btn secondary" (click)="close()">
+      Cancel
+    </button>
+    <button 
+      type="button" 
+      class="btn primary" 
+      (click)="save()" 
+      [disabled]="isSaving">
       {{ isSaving ? 'Saving...' : 'Save Changes' }}
     </button>
   </footer>
 </div>
 
+<!-- Loading Template -->
 <ng-template #loadingTpl>
   <div class="loading-state">
     <div class="spinner"></div>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
@@ -36,6 +36,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly userService: UserServiceService,
     private readonly dialogRef: MatDialogRef<EmployeeHrProfileDialogComponent>,
+    private readonly cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
   ) {
     this.form = this.fb.group({
@@ -73,10 +74,15 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
         this.patchDetail(response.profile.detail);
         this.setBalances(response.profile.vacation_balances ?? []);
         this.isLoading = false;
+        
+        // Manually trigger change detection to ensure the view updates
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isLoading = false;
         this.loadError = 'Unable to load employee profile.';
+        this.cdr.detectChanges();
+        
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -103,7 +109,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
 
   setBalances(balances: HrVacationBalance[]): void {
     this.balances.clear();
-
+    
     const currentYearBalances = (balances ?? []).filter(
       (balance) => (balance.year ?? this.currentYear) === this.currentYear,
     );
@@ -111,42 +117,40 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
     currentYearBalances.forEach((balance) => {
       this.balances.push(this.createBalanceGroup(balance));
     });
-
-    if (this.balances.length === 0 && this.vacationTypeOptions.length > 0) {
-      const firstType = this.vacationTypeOptions[0];
-      this.balances.push(this.createBalanceGroup({
-        vacation_type_id: firstType.id,
-        vacation_type_name: firstType.name,
-        year: this.currentYear,
-        allocated_days: 0,
-        used_days: 0,
-        remaining_days: 0,
-      } as HrVacationBalance));
-    }
+    
+    this.cdr.detectChanges();
   }
 
-  addBalance(): void {
-    const availableTypes = this.availableVacationTypes();
-    if (availableTypes.length === 0) {
-      Swal.fire({
-        icon: 'info',
-        title: 'All Types Added',
-        text: 'All vacation types already have balances for this year.',
-        confirmButtonColor: '#FF7519',
-      });
-      return;
-    }
-
-    const nextType = availableTypes[0];
-    this.balances.push(this.createBalanceGroup({
-      vacation_type_id: nextType.id,
-      vacation_type_name: nextType.name,
-      year: this.currentYear,
-      allocated_days: 0,
-      used_days: 0,
-      remaining_days: 0,
-    } as HrVacationBalance));
+addBalance(): void {
+  const availableTypes = this.availableVacationTypes();
+  if (availableTypes.length === 0) {
+    Swal.fire({
+      icon: 'info',
+      title: 'All Types Added',
+      text: 'All vacation types already have balances for this year.',
+      confirmButtonColor: '#FF7519',
+    });
+    return;
   }
+
+  const nextType = availableTypes[0];
+  const newBalanceGroup = this.createBalanceGroup({
+    vacation_type_id: nextType.id,
+    vacation_type_name: nextType.name,
+    year: this.currentYear,
+    allocated_days: 0,
+    used_days: 0,
+    remaining_days: 0,
+  } as HrVacationBalance);
+  
+  this.balances.push(newBalanceGroup);
+  
+  // Mark the form as touched to show validation immediately
+  newBalanceGroup.markAllAsTouched();
+  
+  // Force change detection
+  this.cdr.detectChanges();
+}
 
   removeBalance(index: number): void {
     const group = this.balances.at(index) as FormGroup;
@@ -174,136 +178,178 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
     const match = this.vacationTypeOptions.find((option) => option.id === vacationTypeId);
     return match ? match.name : '';
   }
+  
   canAddMoreBalances(): boolean {
     return this.availableVacationTypes().length > 0;
   }
 
-  save(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+save(): void {
+  // Validate all form controls
+  this.validateAllFormControls();
+  
+  if (this.form.invalid) {
+    this.form.markAllAsTouched();
+    Swal.fire({
+      icon: 'warning',
+      title: 'Incomplete',
+      text: 'Please review the highlighted fields before saving.',
+      confirmButtonColor: '#FF7519',
+    });
+    return;
+  }
+
+  const payload = this.buildPayload();
+  
+  // Log payload for debugging
+  console.log('Saving payload:', payload);
+
+  this.isSaving = true;
+  this.userService.updateHrUserProfile(this.data.userId, payload).subscribe({
+    next: (response) => {
+      this.isSaving = false;
+      this.balancesToDelete = [];
+      this.profile = response.profile;
+      this.patchDetail(response.profile.detail);
+      this.setBalances(response.profile.vacation_balances ?? []);
+      this.cdr.detectChanges();
+      
       Swal.fire({
-        icon: 'warning',
-        title: 'Incomplete',
-        text: 'Please review the highlighted fields before saving.',
+        icon: 'success',
+        title: 'Updated',
+        text: 'Employee profile updated successfully.',
         confirmButtonColor: '#FF7519',
       });
-      return;
+    },
+    error: (error) => {
+      this.isSaving = false;
+      this.cdr.detectChanges();
+      
+      console.error('Save error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Could not update the employee profile. Please try again.',
+        confirmButtonColor: '#FF7519',
+      });
+    },
+  });
+}
+
+private validateAllFormControls(): void {
+  // Validate each balance group
+  this.balances.controls.forEach((control) => {
+    if (control instanceof FormGroup) {
+      Object.keys(control.controls).forEach((key) => {
+        const formControl = control.get(key);
+        formControl?.updateValueAndValidity();
+      });
     }
-
-    const payload = this.buildPayload();
-
-    this.isSaving = true;
-    this.userService.updateHrUserProfile(this.data.userId, payload).subscribe({
-      next: (response) => {
-        this.isSaving = false;
-        this.balancesToDelete = [];
-        this.profile = response.profile;
-        this.patchDetail(response.profile.detail);
-        this.setBalances(response.profile.vacation_balances ?? []);
-        Swal.fire({
-          icon: 'success',
-          title: 'Updated',
-          text: 'Employee profile updated successfully.',
-          confirmButtonColor: '#FF7519',
-        });
-      },
-      error: () => {
-        this.isSaving = false;
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Could not update the employee profile. Please try again.',
-          confirmButtonColor: '#FF7519',
-        });
-      },
-    });
-  }
+  });
+}
 
   close(): void {
     this.dialogRef.close();
   }
 
-  private createBalanceGroup(balance?: HrVacationBalance): FormGroup {
-    const group = this.fb.group({
-      id: [balance?.id ?? null],
-      vacation_type_id: [balance?.vacation_type_id ?? null, Validators.required],
-      allocated_days: [balance?.allocated_days ?? 0, [Validators.required, Validators.min(0)]],
-      used_days: [balance?.used_days ?? 0, [Validators.min(0)]],
-      remaining_days: [{ value: balance?.remaining_days ?? 0, disabled: true }],
-      year: [{ value: balance?.year ?? this.currentYear, disabled: true }],
-    });
+private createBalanceGroup(balance?: HrVacationBalance): FormGroup {
+  const group = this.fb.group({
+    id: [balance?.id ?? null],
+    vacation_type_id: [balance?.vacation_type_id ?? null, [Validators.required, Validators.min(1)]],
+    allocated_days: [balance?.allocated_days ?? 0, [Validators.required, Validators.min(0)]],
+    used_days: [balance?.used_days ?? 0, [Validators.min(0)]],
+    remaining_days: [{ value: balance?.remaining_days ?? 0, disabled: true }],
+    year: [{ value: balance?.year ?? this.currentYear, disabled: true }],
+  });
 
-    group.valueChanges.subscribe(() => {
-      const allocated = Number(group.get('allocated_days')?.value ?? 0);
-      const used = Number(group.get('used_days')?.value ?? 0);
-      const remaining = Number.isFinite(allocated - used) ? allocated - used : 0;
-      group.get('remaining_days')?.setValue(remaining, { emitEvent: false });
-    });
+  // Calculate remaining days when values change
+  group.valueChanges.subscribe(() => {
+    const allocated = Number(group.get('allocated_days')?.value ?? 0);
+    const used = Number(group.get('used_days')?.value ?? 0);
+    const remaining = Math.max(0, allocated - used);
+    group.get('remaining_days')?.setValue(remaining, { emitEvent: false });
+  });
 
-    return group;
-  }
+  // Calculate initial remaining days
+  const allocated = Number(group.get('allocated_days')?.value ?? 0);
+  const used = Number(group.get('used_days')?.value ?? 0);
+  const remaining = Math.max(0, allocated - used);
+  group.get('remaining_days')?.setValue(remaining, { emitEvent: false });
 
-  private buildPayload(): HrUserProfileUpdatePayload {
-    const detailRaw = this.detailGroup.getRawValue();
-    const detailPayload: Record<string, unknown> = {};
+  return group;
+}
 
-    const numericFields = ['working_hours_day'];
-    const timeFields = ['start_time', 'end_time'];
-    const dateFields = ['hiring_date'];
+private buildPayload(): HrUserProfileUpdatePayload {
+  const detailRaw = this.detailGroup.getRawValue();
+  const detailPayload: Record<string, unknown> = {};
 
-    Object.entries(detailRaw).forEach(([key, value]) => {
-      if (value === '' || value === null || value === undefined) {
-        detailPayload[key] = null;
-        return;
-      }
+  const numericFields = ['working_hours_day'];
+  const timeFields = ['start_time', 'end_time'];
+  const dateFields = ['hiring_date'];
 
-      if (numericFields.includes(key)) {
-        const numericValue = Number(value);
-        detailPayload[key] = Number.isFinite(numericValue) ? numericValue : null;
-        return;
-      }
+  Object.entries(detailRaw).forEach(([key, value]) => {
+    if (value === '' || value === null || value === undefined) {
+      detailPayload[key] = null;
+      return;
+    }
 
-      if (timeFields.includes(key)) {
-        detailPayload[key] = this.formatTimeForPayload(String(value));
-        return;
-      }
+    if (numericFields.includes(key)) {
+      const numericValue = Number(value);
+      detailPayload[key] = Number.isFinite(numericValue) ? numericValue : null;
+      return;
+    }
 
-      if (dateFields.includes(key)) {
-        detailPayload[key] = this.formatDateForPayload(String(value));
-        return;
-      }
+    if (timeFields.includes(key)) {
+      detailPayload[key] = this.formatTimeForPayload(String(value));
+      return;
+    }
 
-      detailPayload[key] = typeof value === 'string' ? value.trim() : value;
-    });
+    if (dateFields.includes(key)) {
+      detailPayload[key] = this.formatDateForPayload(String(value));
+      return;
+    }
 
-    const balancesPayload = this.balances.controls.map((control) => {
+    detailPayload[key] = typeof value === 'string' ? value.trim() : value;
+  });
+
+  // Build vacation balances payload
+  const balancesPayload = this.balances.controls
+    .map((control) => {
       const raw = control.getRawValue();
+      
+      // Skip if vacation_type_id is not valid
+      if (!raw.vacation_type_id || raw.vacation_type_id <= 0) {
+        return null;
+      }
+      
       return {
-        id: raw.id ?? undefined,
+        id: raw.id && raw.id > 0 ? raw.id : undefined,
         vacation_type_id: Number(raw.vacation_type_id),
         year: this.currentYear,
         allocated_days: Number(raw.allocated_days ?? 0),
         used_days: Number(raw.used_days ?? 0),
       };
-    }).filter((balance) => balance.vacation_type_id);
+    })
+    .filter((balance): balance is NonNullable<typeof balance> => balance !== null);
 
-    const payload: HrUserProfileUpdatePayload = {};
+  const payload: HrUserProfileUpdatePayload = {};
 
-    if (Object.keys(detailPayload).length > 0) {
-      payload.detail = detailPayload;
-    }
-
-    if (balancesPayload.length > 0) {
-      payload.vacation_balances = balancesPayload;
-    }
-
-    if (this.balancesToDelete.length > 0) {
-      payload.vacation_balance_ids_to_delete = this.balancesToDelete.slice();
-    }
-
-    return payload;
+  // Only add detail if it has values
+  if (Object.keys(detailPayload).length > 0) {
+    payload.detail = detailPayload;
   }
 
+  // Only add vacation_balances if there are any
+  if (balancesPayload.length > 0) {
+    payload.vacation_balances = balancesPayload;
+  }
+
+  // Add ids to delete if any
+  if (this.balancesToDelete.length > 0) {
+    payload.vacation_balance_ids_to_delete = this.balancesToDelete.slice();
+  }
+
+  return payload;
+}
   private formatTimeForInput(value?: string | null): string {
     if (!value) {
       return '';
