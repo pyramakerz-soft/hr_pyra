@@ -1021,8 +1021,13 @@ class UserVacationController extends Controller
         }
 
         return DB::transaction(function () use ($user, $vacationType, $unpaidType, $from, $to, $availableDays, $daysCount) {
-            // 1. Paid Portion
-            $paidTo = (clone $from)->addDays(ceil($availableDays) - 1);
+            // 1. Paid Portion - find the end date that represents availableDays working days
+            $paidTo = $from->copy();
+
+            // Keep extending paidTo until we have the required number of business days
+            while ($this->calculateBusinessDays($from, $paidTo, $user) < $availableDays) {
+                $paidTo->addDay();
+            }
 
             $vacationPaid = UserVacation::create([
                 'user_id' => $user->id,
