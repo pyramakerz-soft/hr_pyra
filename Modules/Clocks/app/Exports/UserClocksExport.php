@@ -334,20 +334,37 @@ class UserClocksExport implements WithMultipleSheets
                 $hasRequestedVacation = !empty($requestedForDay);
                 $hasCustomVacation = !empty($customForDay);
 
-                if ($hasRequestedVacation) {
-                    $totalVacationDays++;
-                }
+                // Check if this is a working day
+                $isFriday = $localDate->isFriday();
+                $isSaturday = $localDate->isSaturday();
+                $isNonWorkingDay = $isFriday || ($isSaturday && !$worksOnSaturday);
+
 
                 $vacationTags = [];
-                foreach ($requestedForDay as $vacation) {
-                    $typeName = optional($vacation->vacationType)->name;
-                    $vacationTags[] = $typeName
-                        ? 'Requested: ' . $typeName
-                        : 'Requested Vacation';
-                }
 
-                foreach ($customForDay as $vacation) {
-                    $vacationTags[] = 'Custom: ' . $vacation->name;
+                // Only add vacation tags if it's a working day
+                $vacationDirectApprover = '';
+                $vacationHeadApprover = '';
+                if (!$isNonWorkingDay) {
+                    if ($hasRequestedVacation && !empty($requestedForDay)) {
+                        $firstVacation = $requestedForDay[0];
+                        $vacationDirectApprover = $firstVacation->directApprover ? $firstVacation->directApprover->name : '';
+                        $vacationHeadApprover = $firstVacation->headApprover ? $firstVacation->headApprover->name : '';
+                    }
+                    if ($hasRequestedVacation) {
+                        $totalVacationDays++;
+                    }
+
+                    foreach ($requestedForDay as $vacation) {
+                        $typeName = optional($vacation->vacationType)->name;
+                        $vacationTags[] = $typeName
+                            ? 'Requested: ' . $typeName
+                            : 'Requested Vacation';
+                    }
+
+                    foreach ($customForDay as $vacation) {
+                        $vacationTags[] = 'Custom: ' . $vacation->name;
+                    }
                 }
 
                 if ($vacationTags) {
@@ -358,13 +375,7 @@ class UserClocksExport implements WithMultipleSheets
                 $isVacation = $hasRequestedVacation || $hasCustomVacation;
 
                 // Extract vacation approver names (use first vacation if multiple)
-                $vacationDirectApprover = '';
-                $vacationHeadApprover = '';
-                if ($hasRequestedVacation && !empty($requestedForDay)) {
-                    $firstVacation = $requestedForDay[0];
-                    $vacationDirectApprover = $firstVacation->directApprover ? $firstVacation->directApprover->name : '';
-                    $vacationHeadApprover = $firstVacation->headApprover ? $firstVacation->headApprover->name : '';
-                }
+
 
                 // Handle days without clock entries
                 if ($dailyClocks->isEmpty()) {
