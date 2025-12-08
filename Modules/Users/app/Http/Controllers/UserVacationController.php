@@ -353,7 +353,7 @@ class UserVacationController extends Controller
         }
 
         // Change vacation type to Exceptional Leave if future balance is allowed
-        if ($allowFutureBalance && $status === 'approved') {
+        if ($allowFutureBalance && $status === 'approved' && $vacation->vacationType->name == self::UNPAID_LEAVE_NAME) {
             $exceptionalLeaveType = VacationType::where('name', self::EXCEPTIONAL_LEAVE_NAME)->first();
             if ($exceptionalLeaveType) {
                 $vacation->vacation_type_id = $exceptionalLeaveType->id;
