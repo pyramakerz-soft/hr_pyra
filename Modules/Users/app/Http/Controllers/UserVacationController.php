@@ -257,7 +257,7 @@ class UserVacationController extends Controller
     public function changeVacationStatus(Request $request, $vacationId)
     {
         $request->validate([
-            'status' => 'required|in:approved,declined,rejected',
+            'status' => 'required|in:approved,declined,rejected,refused',
             'approver' => 'nullable|in:direct,head',
             'allow_future_balance' => 'nullable|boolean',
         ]);
