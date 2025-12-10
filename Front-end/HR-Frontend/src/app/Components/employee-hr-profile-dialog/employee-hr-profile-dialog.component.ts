@@ -133,15 +133,14 @@ addBalance(): void {
     return;
   }
 
-  const nextType = availableTypes[0];
   const newBalanceGroup = this.createBalanceGroup({
-    vacation_type_id: nextType.id,
-    vacation_type_name: nextType.name,
+    vacation_type_id: null as any, // This allows null in the form
+    vacation_type_name: undefined,
     year: this.currentYear,
     allocated_days: 0,
     used_days: 0,
     remaining_days: 0,
-  } as HrVacationBalance);
+  });
   
   this.balances.push(newBalanceGroup);
   

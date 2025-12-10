@@ -11,6 +11,7 @@ import { UserServiceService } from '../../../Services/user-service.service';
 import Swal from 'sweetalert2';
 import { ResetVacationBalancePopupComponent } from '../../../Components/reset-vacation-balance-popup/reset-vacation-balance-popup.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { HrStateService } from '../../../Services/SaveState/hr-state.service';
 
 @Component({
   selector: 'app-hr-attendance',
@@ -74,34 +75,58 @@ export class HrAttendanceComponent {
     private clockService: ClockService,
     public departmentServ: DepartmentService,
     public supDeptServ: SubDepartmentService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private hrStateService: HrStateService
+
   ) { }
 
-  ngOnInit() {
+ngOnInit() {
+  const savedState = this.hrStateService.getAttendanceState();
+  
+  if (savedState.tableData && savedState.tableData.length > 0) {
+    this.selectedName = savedState.searchQuery;
+    this.CurrentPageNumber = savedState.currentPage;
+    this.tableData = savedState.tableData;
+    this.PagesNumber = savedState.pagesNumber;
+    this.from_day = savedState.from_day;
+    this.to_day = savedState.to_day;
+    this.selectedDepartment = savedState.selectedDepartment;
+    this.selectedSubDepartmentIds = savedState.selectedSubDepartmentIds;
+    this.DisplayPagginationOrNot = savedState.displayPagination;
+    
+    this.hrStateService.clearAttendanceState();
+    
+    if (typeof this.selectedDepartment === 'number') {
+      this.supDeptServ.setDeptId(this.selectedDepartment);
+      this.getSubDepartments(this.selectedDepartment, false);
+    }
+  } else {
     const savedPageNumber = localStorage.getItem('HrAttendaceCN');
     if (savedPageNumber) {
       this.CurrentPageNumber = parseInt(savedPageNumber, 10);
     } else {
       this.CurrentPageNumber = 1;
     }
+    
     this.route.queryParamMap.subscribe((params) => {
       this.applyQueryParams(params);
       this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
     });
-
-    this.getUsersName();
-    this.GetAllDepartment();
-    this.populateYears();
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1;
-    this.selectedMonth = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
-    this.selectedYear = currentDate.getFullYear();
-    this.SelectDepartment = "AllDepartment";
-    this.DateString = this.selectedYear + "-" + this.selectedMonth;
-    localStorage.setItem('HrEmployeeCN', "1");
-    localStorage.setItem('HrLocationsCN', "1");
-    localStorage.setItem('HrAttanceDetailsCN', "1");
   }
+  
+  this.getUsersName();
+  this.GetAllDepartment();
+  this.populateYears();
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  this.selectedMonth = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
+  this.selectedYear = currentDate.getFullYear();
+  this.SelectDepartment = "AllDepartment";
+  this.DateString = this.selectedYear + "-" + this.selectedMonth;
+  localStorage.setItem('HrEmployeeCN', "1");
+  localStorage.setItem('HrLocationsCN', "1");
+  localStorage.setItem('HrAttanceDetailsCN', "1");
+}
 
   openResetVacationBalanceDialog() {
     this.dialog.open(ResetVacationBalancePopupComponent, {
@@ -181,7 +206,19 @@ export class HrAttendanceComponent {
   }
 
   NavigateToEmployeeAttendanceDetails(EmpId: number) {
-    this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/" + EmpId)
+    this.hrStateService.saveAttendanceState({
+      searchQuery: this.selectedName,
+      currentPage: this.CurrentPageNumber,
+      tableData: this.tableData,
+      pagesNumber: this.PagesNumber,
+      from_day: this.from_day,
+      to_day: this.to_day,
+      selectedDepartment: this.selectedDepartment,
+      selectedSubDepartmentIds: this.selectedSubDepartmentIds,
+      displayPagination: this.DisplayPagginationOrNot
+    });
+    
+    this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/" + EmpId);
   }
 
   ImportOpeningBalanceSheet() {

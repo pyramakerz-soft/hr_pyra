@@ -10,6 +10,7 @@ import { EmployeeDashboard } from '../../../Models/employee-dashboard';
 import { ClockService } from '../../../Services/clock.service';
 import { EmployeeDashService } from '../../../Services/employee-dash.service';
 import { UserServiceService } from '../../../Services/user-service.service';
+import { HrStateService } from '../../../Services/SaveState/hr-state.service';
 
 @Component({
   selector: 'app-hr-employee-attendance-details',
@@ -62,7 +63,7 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   constructor(public empDashserv: EmployeeDashService, public UserClocksService:
     ClockService, public activatedRoute: ActivatedRoute, public userService: UserServiceService,
-    public route: Router, public dialog: MatDialog) { }
+    public route: Router, public dialog: MatDialog, private hrStateService: HrStateService) { }
 
 
   ngOnInit() {
@@ -96,6 +97,10 @@ export class HrEmployeeAttendanceDetailsComponent {
       }
     });
   }
+
+goBack() {
+  this.route.navigateByUrl('HR/HRAttendance');
+}
 
   populateYears(): void {
     const startYear = 2019;
