@@ -40,7 +40,7 @@ class UserVacationController extends Controller
     const MATERNITY_LEAVE_NAME = 'Maternity Leave';
     const MARRIAGE_LEAVE_NAME = 'Marriage Leave';
     const HAJJ_LEAVE_NAME = 'Hajj / Umrah Leave';
-
+    const EXCEPTIONAL_LEAVE_NAME = 'Exceptional Leave';
     /**
      * @OA\Post(
      *     path="/api/vacation/add_user_vacation",
@@ -115,8 +115,8 @@ class UserVacationController extends Controller
             return $this->returnError($eligibilityError, 422);
         }
 
-        // Validate Academic Department Casual/Emergency Limit
-        $academicLimitError = $this->validateAcademicCasualEmergencyLimit($authUser, $vacationType, $from, $to, $daysCount);
+        // Validate B2B Department Casual/Emergency Limit
+        $academicLimitError = $this->validateB2BCasualEmergencyLimit($authUser, $vacationType, $from, $to, $daysCount);
         if ($academicLimitError) {
             return $this->returnError($academicLimitError, 422);
         }
@@ -257,7 +257,7 @@ class UserVacationController extends Controller
     public function changeVacationStatus(Request $request, $vacationId)
     {
         $request->validate([
-            'status' => 'required|in:approved,declined',
+            'status' => 'required|in:approved,declined,rejected,refused',
             'approver' => 'nullable|in:direct,head',
             'allow_future_balance' => 'nullable|boolean',
         ]);
@@ -352,6 +352,14 @@ class UserVacationController extends Controller
             }
         }
 
+        // Change vacation type to Exceptional Leave if future balance is allowed
+        if ($allowFutureBalance && $status === 'approved' && $vacation->vacationType->name == self::UNPAID_LEAVE_NAME) {
+            $exceptionalLeaveType = VacationType::where('name', self::EXCEPTIONAL_LEAVE_NAME)->first();
+            if ($exceptionalLeaveType) {
+                $vacation->vacation_type_id = $exceptionalLeaveType->id;
+            }
+        }
+
         $vacation->save();
 
         $this->syncVacationBalance($vacation, $previousOverall, $allowFutureBalance);
@@ -371,7 +379,7 @@ class UserVacationController extends Controller
 
             $allocated = (float) ($annualBalance->allocated_days ?? 0);
             $used = (float) ($annualBalance->used_days ?? 0);
-            $remaining = $allocated - $used; // Allow negative values
+            $remaining = $allocated - $used;
 
             $balances[self::ANNUAL_LEAVE_NAME] = [
                 'allocated' => $allocated,
@@ -760,8 +768,8 @@ class UserVacationController extends Controller
             ->where('year', Carbon::parse($vacation->from_date)->year)
             ->first();
 
-        // For Casual/Emergency, we only update Annual Leave balance
-        if (in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME])) {
+        // For Casual/Emergency/Exceptional, we only update Annual Leave balance
+        if (in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME, self::EXCEPTIONAL_LEAVE_NAME])) {
             $annualType = VacationType::where('name', self::ANNUAL_LEAVE_NAME)->first();
             if (!$annualType) {
                 return;
@@ -793,8 +801,8 @@ class UserVacationController extends Controller
         $days = (float) ($vacation->days_count ?? 0);
 
         if ($previousOverall === StatusEnum::Approved->value && $current !== StatusEnum::Approved->value) {
-            // Only update balance if NOT Casual/Emergency
-            if (!in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME])) {
+            // Only update balance if NOT Casual/Emergency/Exceptional
+            if (!in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME, self::EXCEPTIONAL_LEAVE_NAME])) {
                 $balance->used_days = max(0, ($balance->used_days ?? 0) - $days);
                 $balance->save();
             }
@@ -806,8 +814,8 @@ class UserVacationController extends Controller
         }
 
         if ($previousOverall !== StatusEnum::Approved->value && $current === StatusEnum::Approved->value) {
-            // Only update balance if NOT Casual/Emergency
-            if (!in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME])) {
+            // Only update balance if NOT Casual/Emergency/Exceptional
+            if (!in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME, self::EXCEPTIONAL_LEAVE_NAME])) {
                 $balance->used_days = ($balance->used_days ?? 0) + $days;
                 $balance->save();
             }
@@ -1013,8 +1021,13 @@ class UserVacationController extends Controller
         }
 
         return DB::transaction(function () use ($user, $vacationType, $unpaidType, $from, $to, $availableDays, $daysCount) {
-            // 1. Paid Portion
-            $paidTo = (clone $from)->addDays(ceil($availableDays) - 1);
+            // 1. Paid Portion - find the end date that represents availableDays working days
+            $paidTo = $from->copy();
+
+            // Keep extending paidTo until we have the required number of business days
+            while ($this->calculateBusinessDays($from, $paidTo, $user) < $availableDays) {
+                $paidTo->addDay();
+            }
 
             $vacationPaid = UserVacation::create([
                 'user_id' => $user->id,
@@ -1052,19 +1065,24 @@ class UserVacationController extends Controller
         });
     }
     /**
-     * Validate Academic Department Casual/Emergency Leave Limit
+     * Validate B2B Department Casual/Emergency Leave Limit
      *
      */
-    protected function validateAcademicCasualEmergencyLimit($user, $vacationType, $from, $to, $daysCount): ?string
+    protected function validateB2BCasualEmergencyLimit($user, $vacationType, $from, $to, $daysCount): ?string
     {
-        // Only apply to Emergency and Casual Leave for Academic department
+        // Only apply to Emergency and Casual Leave for B2B department
         $targetTypes = [self::EMERGENCY_LEAVE_NAME, self::CASUAL_LEAVE_NAME];
         if (!in_array($vacationType->name, $targetTypes)) {
             return null;
         }
 
         $department = $user->department;
-        if (!$department || strtolower($department->name) !== 'academic') {
+        if (!$department || strtolower($department->name) !== 'b2b') {
+            return null;
+        }
+
+        // Only apply to users with role 'employee'
+        if (strtolower($user->getRoleName()) !== 'employee') {
             return null;
         }
 
@@ -1073,26 +1091,59 @@ class UserVacationController extends Controller
             return null;
         }
 
+        // Check if request falls within Half Year Vacation (Dec 26 - Feb 10)
+        if ($this->isHalfYearVacation($from, $to)) {
+            return null;
+        }
+
         $academicYearStart = $this->getAcademicYearStart($from);
         $academicYearEnd = $this->getAcademicYearEnd($from);
 
-        // Calculate days already taken for Casual/Emergency in the current academic year
         $daysTaken = UserVacation::where('user_id', $user->id)
             ->whereHas('vacationType', function ($q) use ($targetTypes) {
                 $q->whereIn('name', $targetTypes);
             })
-            ->where('status', StatusEnum::Approved)
+            ->where(function ($q) {
+                $q->where('status', StatusEnum::Approved)
+                    ->orWhere('status', StatusEnum::Pending);
+            })
             ->where(function ($q) use ($academicYearStart, $academicYearEnd) {
                 $q->whereBetween('from_date', [$academicYearStart, $academicYearEnd])
                     ->orWhereBetween('to_date', [$academicYearStart, $academicYearEnd]);
             })
+            ->get()
+            ->filter(function ($vacation) {
+                // Filter out vacations that fall within the Half Year Vacation period
+                return !$this->isHalfYearVacation(Carbon::parse($vacation->from_date), Carbon::parse($vacation->to_date));
+            })
             ->sum('days_count');
 
         if (($daysTaken + $daysCount) > 3) {
-            return "Academic staff can only take a maximum of 3 days combined for Emergency and Casual leave during the academic year (Sept-June). You have already taken {$daysTaken} days.";
+            return "B2B staff can only take a maximum of 3 days combined for Emergency and Casual leave during the academic year (Sept-June), excluding Half Year Vacation (Dec 26 - Feb 10). You have already requested {$daysTaken} days.";
         }
 
         return null;
+    }
+
+    /**
+     * Check if the period falls within the Half Year Vacation (Dec 26 - Feb 10)
+     */
+    protected function isHalfYearVacation($from, $to): bool
+    {
+        $year = $from->year;
+        // Half Year Vacation starts Dec 26 of current academic year start year
+        // Ends Feb 10 of next year
+
+        // Determine the relevant academic year start for the given date
+        $academicYearStart = $this->getAcademicYearStart($from);
+        $startYear = $academicYearStart->year;
+
+        $halfYearStart = Carbon::create($startYear, 12, 26);
+        $halfYearEnd = Carbon::create($startYear + 1, 2, 10);
+
+        // Check if the requested period overlaps with the Half Year Vacation
+        // Logic: (StartA <= EndB) and (EndA >= StartB)
+        return $from->lessThanOrEqualTo($halfYearEnd) && $to->greaterThanOrEqualTo($halfYearStart);
     }
 
     /**
