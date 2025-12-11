@@ -94,6 +94,11 @@ export class HrSubDepartmentAddComponent {
 
 
   }
+
+  goBack() {
+    this.router.navigateByUrl(`/HR/HRSubDepartment/${this.DeptId}`);
+  }
+
   getTeamLeadsNames() {
     this.teamLeadSer.getall().subscribe(
       (d: any) => {

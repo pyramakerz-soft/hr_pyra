@@ -96,7 +96,7 @@
             <label class="form-field type-field">
               <span>Vacation Type <span class="required">*</span></span>
               <select formControlName="vacation_type_id">
-                <option [ngValue]="null" disabled>Select type</option>
+                <option [ngValue]=null selected disabled hidden>Select type</option>
                 <option *ngFor="let option of availableVacationTypes(i)" [ngValue]="option.id">
                   {{ option.name }}
                 </option>

@@ -17,14 +17,27 @@ export class HrDepartmentComponent {
 AddButton:boolean=false
   constructor(private router: Router, public departmentServ: DepartmentService) { }
 
-  ngOnInit() {
+ngOnInit() {
+  const savedState = localStorage.getItem('hrDepartmentState');
+  
+  if (savedState) {
+    const state = JSON.parse(savedState);
+    if (state.departments && state.departments.length > 0) {
+      this.departments = state.departments;
+      localStorage.removeItem('hrDepartmentState');
+    } else {
+      this.GetAll();
+    }
+  } else {
     this.GetAll();
-    localStorage.setItem('HrEmployeeCN', "1");
-    localStorage.setItem('HrLocationsCN', "1");
-    localStorage.setItem('HrAttendaceCN', "1");
-    localStorage.setItem('HrAttanceDetailsCN', "1");
-
   }
+  
+  localStorage.setItem('HrEmployeeCN', "1");
+  localStorage.setItem('HrLocationsCN', "1");
+  localStorage.setItem('HrAttendaceCN', "1");
+  localStorage.setItem('HrAttanceDetailsCN', "1");
+}
+
   GetAll() {
     this.departmentServ.getall().subscribe(
       (d: any) => {
@@ -58,21 +71,41 @@ AddButton:boolean=false
 
 
 
-  EditDepartment(id: number) {
-    this.AddButton=true;
-    this.router.navigateByUrl("/HR/HRDepartmentEdit/" + id);
+EditDepartment(id: number) {
+  this.AddButton = true;
+  
+  const state = {
+    departments: this.departments
+  };
+  
+  localStorage.setItem('hrDepartmentState', JSON.stringify(state));
+  
+  this.router.navigateByUrl("/HR/HRDepartmentEdit/" + id);
+}
 
-  }
+navigateToSubDept(id: number) {
+  this.AddButton = true;
+  
+  const state = {
+    departments: this.departments
+  };
+  
+  localStorage.setItem('hrDepartmentState', JSON.stringify(state));
+  
+  this.router.navigateByUrl("/HR/HRSubDepartment/" + id);
+}
 
-  navigateToSubDept(id: number) {
-    this.AddButton=true;
-    this.router.navigateByUrl("/HR/HRSubDepartment/" + id);
-
-  }
-
-  NavigateToAddDepartment() {
-    this.AddButton=true;
-    this.router.navigateByUrl("/HR/HRDepartmentAdd");
-  }
+NavigateToAddDepartment() {
+  this.AddButton = true;
+  
+  // Save current state
+  const state = {
+    departments: this.departments
+  };
+  
+  localStorage.setItem('hrDepartmentState', JSON.stringify(state));
+  
+  this.router.navigateByUrl("/HR/HRDepartmentAdd");
+}
 
 }

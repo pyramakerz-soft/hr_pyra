@@ -77,6 +77,12 @@ export class HrDepartmentAddComponent {
 
 
   }
+
+goBack() {
+  localStorage.removeItem('hrDepartmentState');
+  this.router.navigateByUrl('/HR/HRDepartment');
+}
+
   getMnagerNames() {
     this.managerServ.getall().subscribe(
       (d: any) => {

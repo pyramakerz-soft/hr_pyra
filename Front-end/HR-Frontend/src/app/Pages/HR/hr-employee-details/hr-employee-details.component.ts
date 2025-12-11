@@ -5,6 +5,7 @@ import { AddEmployee } from '../../../Models/add-employee';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
+import { HrStateService } from '../../../Services/SaveState/hr-state.service';
 
 @Component({
   selector: 'app-hr-employee-details',
@@ -22,7 +23,7 @@ export class HrEmployeeDetailsComponent {
   isChange = false;
   has_serial_number = false;
 
-  constructor(public router:Router, public activeRoute:ActivatedRoute, public userService:UserServiceService){}
+  constructor(public router:Router, public activeRoute:ActivatedRoute, public userService:UserServiceService, private hrStateService: HrStateService){}
 
   ngOnInit(): void {
     this.activeRoute.params.subscribe(params => {
@@ -30,6 +31,10 @@ export class HrEmployeeDetailsComponent {
       this.getEmployeeByID(this.empId)
     });
   }
+
+goBack() {
+  this.router.navigateByUrl('HR/HREmployee');
+}
 
   getEmployeeByID(id:number){
     this.userService.getUserById(id).subscribe(
