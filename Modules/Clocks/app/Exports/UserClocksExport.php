@@ -295,15 +295,12 @@ class UserClocksExport implements WithMultipleSheets
                 ->get();
 
             $overtimeRecords = OverTime::where('user_id', $user->id)
-                ->where(function ($query) use ($startDate, $endDate) {
-                    $query->whereBetween('from', [$startDate->toDateString(), $endDate->toDateString()])
-                        ->orWhereBetween('to', [$startDate->toDateString(), $endDate->toDateString()]);
-                })
+                ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
                 ->where('status', 'approved')
                 ->with(['directApprovedBy', 'headApprovedBy'])
                 ->get()
                 ->keyBy(function ($record) {
-                    return Carbon::parse($record->from)->toDateString();
+                    return $record->date;
                 });
 
             $grouped = $clocks->groupBy(function ($clock) use ($userTimezoneName) {
