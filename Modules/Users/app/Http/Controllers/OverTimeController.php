@@ -158,7 +158,7 @@ class OverTimeController extends Controller
     public function changeOvertimeStatus(Request $request, $overtimeId)
     {
         $request->validate([
-            'status' => 'required|in:approved,declined',
+            'status' => 'required|in:approved,declined,rejected,refused',
             'approver' => 'nullable|in:direct,head',
         ]);
 
