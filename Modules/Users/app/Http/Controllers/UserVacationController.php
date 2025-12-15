@@ -740,7 +740,7 @@ class UserVacationController extends Controller
         // For Unpaid Leave with future balance, deduct from Annual Leave instead
         if (
             $allowFutureBalance &&
-            $vacation->vacationType->name === self::UNPAID_LEAVE_NAME &&
+            $vacation->vacationType->name === self::EXCEPTIONAL_LEAVE_NAME &&
             $previousOverall !== StatusEnum::Approved->value &&
             $current === StatusEnum::Approved->value
         ) {
@@ -768,24 +768,6 @@ class UserVacationController extends Controller
             ->where('year', Carbon::parse($vacation->from_date)->year)
             ->first();
 
-        // For Casual/Emergency/Exceptional, we only update Annual Leave balance
-        if (in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME, self::EXCEPTIONAL_LEAVE_NAME])) {
-            $annualType = VacationType::where('name', self::ANNUAL_LEAVE_NAME)->first();
-            if (!$annualType) {
-                return;
-            }
-            $vacation->loadMissing('vacationType', 'user'); // Ensure user and vacationType are loaded
-            $type = $annualType;
-            $user = $vacation->user;
-
-            if (!$type || !$user) {
-                return;
-            }
-            // Re-fetch or create balance for annual leave
-            $balance = $this->getOrCreateBalance($user, $type, Carbon::parse($vacation->from_date));
-        }
-
-
         if (!$balance) {
             $vacation->loadMissing('vacationType', 'user');
             $type = $vacation->vacationType;
@@ -801,11 +783,9 @@ class UserVacationController extends Controller
         $days = (float) ($vacation->days_count ?? 0);
 
         if ($previousOverall === StatusEnum::Approved->value && $current !== StatusEnum::Approved->value) {
-            // Only update balance if NOT Casual/Emergency/Exceptional
-            if (!in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME, self::EXCEPTIONAL_LEAVE_NAME])) {
-                $balance->used_days = max(0, ($balance->used_days ?? 0) - $days);
-                $balance->save();
-            }
+            // Update specific balance
+            $balance->used_days = max(0, ($balance->used_days ?? 0) - $days);
+            $balance->save();
 
             // Revert Annual Leave balance if Casual or Emergency
             $this->updateAnnualBalance($vacation, -$days);
@@ -814,11 +794,9 @@ class UserVacationController extends Controller
         }
 
         if ($previousOverall !== StatusEnum::Approved->value && $current === StatusEnum::Approved->value) {
-            // Only update balance if NOT Casual/Emergency/Exceptional
-            if (!in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME, self::EXCEPTIONAL_LEAVE_NAME])) {
-                $balance->used_days = ($balance->used_days ?? 0) + $days;
-                $balance->save();
-            }
+            // Update specific balance
+            $balance->used_days = ($balance->used_days ?? 0) + $days;
+            $balance->save();
 
             // Deduct from Annual Leave balance if Casual or Emergency
             $this->updateAnnualBalance($vacation, $days);
@@ -839,12 +817,14 @@ class UserVacationController extends Controller
 
     protected function calculateUsedDays(User $user, VacationType $type, int $year): float
     {
-        return (float) UserVacation::where('user_id', $user->id)
+        $balance = $user->vacationBalances()
             ->where('vacation_type_id', $type->id)
-            ->where('status', StatusEnum::Approved)
-            ->whereYear('from_date', $year)
-            ->sum('days_count');
+            ->where('year', $year)
+            ->first();
+
+        return $balance ? (float) $balance->used_days : 0.0;
     }
+
 
     /**
      * @OA\Get(

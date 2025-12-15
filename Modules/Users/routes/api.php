@@ -49,7 +49,6 @@ Route::group(['prefix' => 'overtime'], function () {
 
     Route::group(['middleware' => 'role:Manager|Team leader|Hr|Admin'], function () {
 
-        // Route to change overtime status
         Route::post('/change_overtime_status/{overtime}', [OverTimeController::class, 'changeOvertimeStatus']);
         Route::get('/get_overtime_of_manager_employees', [OverTimeController::class, 'getOvertimeOfManagerEmployees']);
 

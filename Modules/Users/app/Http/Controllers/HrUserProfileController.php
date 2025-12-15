@@ -67,7 +67,7 @@ class HrUserProfileController extends Controller
 
         DB::transaction(function () use ($payload, $user) {
             $detailData = $payload['detail'] ?? [];
-            if (! empty($detailData)) {
+            if (!empty($detailData)) {
                 $detail = $user->user_detail ?? new UserDetail(['user_id' => $user->id]);
                 $detail->fill([
                     'salary' => $detailData['salary'] ?? $detail->salary,
@@ -109,7 +109,7 @@ class HrUserProfileController extends Controller
             }
 
             $idsToDelete = $payload['vacation_balance_ids_to_delete'] ?? [];
-            if (! empty($idsToDelete)) {
+            if (!empty($idsToDelete)) {
                 UserVacationBalance::where('user_id', $user->id)
                     ->whereIn('id', $idsToDelete)
                     ->delete();
