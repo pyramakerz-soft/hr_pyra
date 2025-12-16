@@ -220,7 +220,7 @@ class UserClocksExport implements WithMultipleSheets
                 ->where('status', 'approved')
                 ->whereDate('from_date', '<=', $userRangeEnd)
                 ->whereDate('to_date', '>=', $userRangeStart)
-                ->with(['vacationType', 'directApprover', 'headApprover'])
+                ->with(['vacationType', 'directApprover', 'headApprover', 'attachments'])
                 ->get();
 
             $requestedVacationsByDate = [];
@@ -354,9 +354,16 @@ class UserClocksExport implements WithMultipleSheets
 
                     foreach ($requestedForDay as $vacation) {
                         $typeName = optional($vacation->vacationType)->name;
-                        $vacationTags[] = $typeName
+                        $label = $typeName
                             ? 'Requested: ' . $typeName
                             : 'Requested Vacation';
+
+                        if ($typeName === 'Sick Leave' && $vacation->attachments->isNotEmpty()) {
+                            $url = $vacation->attachments->first()->file_url;
+                            $label = '=HYPERLINK("' . $url . '", "' . $label . '")';
+                        }
+
+                        $vacationTags[] = $label;
                     }
 
                     foreach ($customForDay as $vacation) {
