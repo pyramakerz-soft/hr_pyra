@@ -22,6 +22,6 @@ class LeaveAttachment extends Model
 
     public function getFileUrlAttribute()
     {
-        return $this->file_path ? Storage::disk('public')->url($this->file_path) : null;
+        return $this->file_path ? $this->file_path : null;
     }
 }

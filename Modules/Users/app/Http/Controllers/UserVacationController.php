@@ -1073,10 +1073,11 @@ class UserVacationController extends Controller
 
         foreach ($attachments as $file) {
             $path = $file->store('leave_attachments', 'public');
+            $fileUrl = asset('storage/' . $path);
 
             LeaveAttachment::create([
                 'user_vacation_id' => $vacation->id,
-                'file_path' => $path,
+                'file_path' => $fileUrl,
                 'file_name' => $file->getClientOriginalName(),
                 'mime_type' => $file->getClientMimeType(),
             ]);
