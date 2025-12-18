@@ -115,29 +115,29 @@ class User extends Authenticatable implements JWTSubject
             $department_id = $this->department_id;
 
             if (!$department_id) {
-                $dept = Department::where('manager_id', $this->id)->first();
+                $dept = Department::where('manager_id', $this->id)->pluck('id')->toArray();
 
                 if (!$dept) {
                     abort(406, 'Department is null in manager data');
                 }
 
-                $department_id = $dept->id;
+                $department_id = $dept;
             }
 
             // Get all team leaders in the department
-            $teamLeadIds = self::where('department_id', $department_id)
+            $teamLeadIds = self::whereIn('department_id', $department_id)
                 ->whereHas('roles', fn($query) => $query->where('name', 'Team leader'))
                 ->pluck('id');
 
             // Get sub-departments in the same department
-            $subDepartmentIds = SubDepartment::where('department_id', $department_id)->pluck('id');
+            $subDepartmentIds = SubDepartment::whereIn('department_id', $department_id)->pluck('id');
 
             // Get all employees in sub-departments (including team leaders of sub-departments)
             $subDeptEmployeeIds = self::whereIn('sub_department_id', $subDepartmentIds)
                 ->pluck('id');
 
             // Get all employees in the same department (excluding current user)
-            $departmentEmployeeIds = self::where('department_id', $department_id)
+            $departmentEmployeeIds = self::whereIn('department_id', $department_id)
                 ->where('id', '!=', $this->id)
                 ->pluck('id');
 
