@@ -96,24 +96,18 @@ class User extends Authenticatable implements JWTSubject
 
         $role = $this->getRoleName(); // Get the role of the authenticated user
         if ($role === 'Team leader') {
-            // Check if the model's sub_department_id is set
-            $subDepartmentId = $this->sub_department_id;
+
+            // Try to find a sub department where this user is the team leader
+            $subDepartmentId = SubDepartment::where('teamlead_id', $this->id)->pluck('id')->toArray();
 
             if (!$subDepartmentId) {
-                // Try to find a sub department where this user is the team leader
-                $subDepartment = SubDepartment::where('teamlead_id', $this->id)->first();
-
-                if (!$subDepartment) {
-                    abort(406, 'No sub department assigned or led by this user.');
-                }
-
-                $subDepartmentId = $subDepartment->id;
+                abort(406, 'No sub department assigned or led by this user.');
             }
 
 
 
             // Get all employees in the same sub-department, excluding the team lead (this user)
-            return self::where('sub_department_id', $subDepartmentId)
+            return self::whereIn('sub_department_id', $subDepartmentId)
                 ->where('id', '!=', $this->id)
                 ->pluck('id');
         } elseif ($role === 'Manager' || $role === 'Hr') {
