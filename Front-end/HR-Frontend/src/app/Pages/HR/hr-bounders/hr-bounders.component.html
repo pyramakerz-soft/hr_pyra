@@ -91,12 +91,13 @@
   </div>
 
   <div class="mt-5 flex justify-between items-center" *ngIf="DisplayPagginationOrNot">
-    <button
-      class="h-[44px] md:w-[119px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] md:gap-[8px] md:flex items-center"
-      [ngClass]="{'disabled': CurrentPageNumber === 1, 'opacity-50 cursor-not-allowed': CurrentPageNumber === 1}"
-      [disabled]="CurrentPageNumber === 1" (click)="getPrevPage()">
-      <i class="fa-solid fa-arrow-left"></i> <p class="hidden md:flex">Previous</p>
-    </button>
+<button 
+    class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+    [disabled]="CurrentPageNumber === 1" 
+    (click)="getPrevPage()">
+    <i class="fa-solid fa-arrow-left"></i>
+    <span>Previous</span>
+  </button>
 
    
 
@@ -122,12 +123,13 @@
 
 
     <!-- Next Button -->
-    <button
-      class="h-[44px] md:w-[92px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] md:gap-[8px] md:flex items-center"
-      [ngClass]="{'disabled': CurrentPageNumber === PagesNumber, 'opacity-50 cursor-not-allowed': CurrentPageNumber === PagesNumber}"
-      [disabled]="CurrentPageNumber === PagesNumber" (click)="getNextPage()">
-      <p class="hidden md:flex">Next</p> <i class="fa-solid fa-arrow-right"></i>
-    </button>
+<button 
+    class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+    [disabled]="CurrentPageNumber === PagesNumber" 
+    (click)="getNextPage()">
+    <span>Next</span>
+    <i class="fa-solid fa-arrow-right"></i>
+  </button>
   </div>
 
 </div>

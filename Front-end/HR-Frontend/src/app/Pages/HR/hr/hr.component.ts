@@ -8,36 +8,36 @@ import { IssuesService } from '../../../Services/issues.service';
 @Component({
   selector: 'app-hr',
   standalone: true,
-  imports: [SideBarComponent,CommonModule,RouterLink,RouterLinkActive,RouterOutlet],
+  imports: [SideBarComponent, CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './hr.component.html',
   styleUrl: './hr.component.css'
 })
 export class HRComponent {
   isMenuOpen: boolean = false;
-  count:number=0;
+  count: number = 0;
 
   menuItems = [
-    { label: 'Dashboard', icon: 'fi fi-rr-table-rows', route: '/HR/HRDashboard', notificationCount: 0  },
-    { label: 'Employee', icon: 'fas fa-home', route: '/HR/HREmployee' , notificationCount: 0 },
-    { label: 'Roles', icon: 'fi fi-rs-chart-pie', route: '/HR/HRRole' , notificationCount: 0 },
-    { label: 'Attendance ', icon: 'fi fi-rr-chart-simple', route: '/HR/HRAttendance' , notificationCount: 0 },
-    { label: 'Locations', icon: 'fi fi-rr-chart-simple', route: '/HR/HRBounders' , notificationCount: 0 },
-    { label: 'Department', icon: 'fi fi-rr-chart-simple', route: '/HR/HRDepartment' , notificationCount: 0 },
+    { label: 'Dashboard', icon: 'fi fi-rr-table-rows', route: '/HR/HRDashboard', notificationCount: 0 },
+    { label: 'Employee', icon: 'fas fa-home', route: '/HR/HREmployee', notificationCount: 0 },
+    { label: 'Roles', icon: 'fi fi-rs-chart-pie', route: '/HR/HRRole', notificationCount: 0 },
+    { label: 'Attendance ', icon: 'fi fi-rr-chart-simple', route: '/HR/HRAttendance', notificationCount: 0 },
+    { label: 'Locations', icon: 'fi fi-rr-chart-simple', route: '/HR/HRBounders', notificationCount: 0 },
+    { label: 'Department', icon: 'fi fi-rr-chart-simple', route: '/HR/HRDepartment', notificationCount: 0 },
     // { label: 'Issues', icon: 'fi fi-rr-chart-simple', route: '/HR/HRIssues', notificationCount: this.count }, 
-    { label: 'Custom Vacations', icon: 'fi fi-rr-calendar-star', route: '/HR/HRCustomVacations' , notificationCount: 0 },
-    { label: 'Service Actions', icon: 'fi fi-br-tools', route: '/HR/HRServiceActions' , notificationCount: 0 },
-    { label: 'TimeZones', icon: 'fa-solid fa-clock-rotate-left', route: '/HR/ShowTimezones' , notificationCount: 0 },
-    { label: 'Sign Out', icon: 'fi fi-bs-sign-out-alt transform rotate-180', route: '' , notificationCount: 0 },
+    { label: 'Custom Vacations', icon: 'fi fi-rr-calendar-star', route: '/HR/HRCustomVacations', notificationCount: 0 },
+    { label: 'Service Actions', icon: 'fi fi-rr-tools', route: '/HR/HRServiceActions', notificationCount: 0 },
+    { label: 'TimeZones', icon: 'fa-solid fa-clock-rotate-left', route: '/HR/ShowTimezones', notificationCount: 0 },
+    { label: 'Sign Out', icon: 'fi fi-bs-sign-out-alt transform rotate-180', route: '', notificationCount: 0 },
 
   ];
 
-  constructor(public router: Router, public activeRoute: ActivatedRoute,private issueNotificationService: IssueNotificationService ,public IssueServ : IssuesService) { }
+  constructor(public router: Router, public activeRoute: ActivatedRoute, private issueNotificationService: IssueNotificationService, public IssueServ: IssuesService) { }
 
   ngOnInit() {
     // Step 4: Subscribe to menuItems$ to get the latest count
     this.issueNotificationService.menuItems$.subscribe(count => {
       this.IssueServ.GetIssueCount().subscribe(
-        (d:any)=>{
+        (d: any) => {
           this.count = d.data.count;
         });
     });

@@ -6,6 +6,6 @@ import { Injectable } from '@angular/core';
 export class ApiService {
 
   //BaseUrl = "http://127.0.0.1:8000/api"
-  BaseUrl="https://pyramakerz-artifacts.com/hr-test/hr_pyra/public/api"
+  BaseUrl = "https://pyramakerz-artifacts.com/hr-test/hr_pyra/public/api"
   constructor() { }
 }

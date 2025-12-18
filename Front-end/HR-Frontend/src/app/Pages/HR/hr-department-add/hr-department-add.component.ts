@@ -384,39 +384,39 @@ UpdateDepartment(){
     });
   }
 
-  savePlan(): void {
-    if (this.mode !== 'Edit' || !this.DeptId) {
-      Swal.fire({
-        text: 'Save the department details before configuring a plan.',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#FF7519',
-      });
-      return;
-    }
+  // savePlan(): void {
+  //   if (this.mode !== 'Edit' || !this.DeptId) {
+  //     Swal.fire({
+  //       text: 'Save the department details before configuring a plan.',
+  //       confirmButtonText: 'OK',
+  //       confirmButtonColor: '#FF7519',
+  //     });
+  //     return;
+  //   }
 
-    this.planSaving = true;
-    this.planService.saveDepartmentPlan(this.DeptId, this.planEditor.plan).subscribe({
-      next: (plan) => {
-        this.initializePlan(plan);
-        this.planSaving = false;
-        Swal.fire({
-          icon: 'success',
-          text: 'Department deduction plan saved successfully.',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#17253E',
-        });
-      },
-      error: () => {
-        this.planSaving = false;
-        Swal.fire({
-          icon: 'error',
-          text: 'Failed to save the plan. Please try again later.',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#FF7519',
-        });
-      },
-    });
-  }
+  //   this.planSaving = true;
+  //   this.planService.saveDepartmentPlan(this.DeptId, this.planEditor.plan).subscribe({
+  //     next: (plan) => {
+  //       this.initializePlan(plan);
+  //       this.planSaving = false;
+  //       Swal.fire({
+  //         icon: 'success',
+  //         text: 'Department deduction plan saved successfully.',
+  //         confirmButtonText: 'OK',
+  //         confirmButtonColor: '#17253E',
+  //       });
+  //     },
+  //     error: () => {
+  //       this.planSaving = false;
+  //       Swal.fire({
+  //         icon: 'error',
+  //         text: 'Failed to save the plan. Please try again later.',
+  //         confirmButtonText: 'OK',
+  //         confirmButtonColor: '#FF7519',
+  //       });
+  //     },
+  //   });
+  // }
 
   trackRuleByIndex(index: number): number {
     return index;
