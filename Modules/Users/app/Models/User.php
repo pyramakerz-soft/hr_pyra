@@ -110,7 +110,7 @@ class User extends Authenticatable implements JWTSubject
             return self::whereIn('sub_department_id', $subDepartmentId)
                 ->where('id', '!=', $this->id)
                 ->pluck('id');
-        } elseif ($role === 'Manager' || $role === 'Hr') {
+        } elseif ($role === 'Manager') {
             // Check or retrieve department_id
             $department_id = $this->department_id;
 
