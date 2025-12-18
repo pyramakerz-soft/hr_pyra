@@ -163,8 +163,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
   availableVacationTypes(excludeIndex: number | null = null): HrVacationTypeOption[] {
     const selectedIds = this.balances.controls
       .filter((_, index) => index !== excludeIndex)
-      .map((control) => control.get('vacation_type_id')?.value)
-      .filter((id): id is number => !!id);
+      .map((control) => control.get('vacation_type_id')?.value);
 
     return this.vacationTypeOptions.filter((option) => !selectedIds.includes(option.id));
   }

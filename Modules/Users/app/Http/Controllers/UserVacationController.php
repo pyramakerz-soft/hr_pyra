@@ -848,7 +848,11 @@ class UserVacationController extends Controller
      */
     public function getVacationTypes()
     {
-        $types = VacationType::all()->where('name', '!=', 'Annual Leave')->where('name', '!=', 'Official Holiday');
+        if (auth()->user()->hasRole('Hr')) {
+            $types = VacationType::all();
+        } else {
+            $types = VacationType::all()->where('name', '!=', 'Annual Leave')->where('name', '!=', 'Official Holiday');
+        }
         return $this->returnData('data', $types, 'Vacation Types');
     }
 
@@ -1072,13 +1076,14 @@ class UserVacationController extends Controller
         }
 
         foreach ($attachments as $file) {
-            $path = $file->store('leave_attachments', 'public');
-            $fileUrl = asset('storage/' . $path);
+            $fileName = $file->getClientOriginalName();
+            $filePath = $file->storeAs('attachments', $fileName, 'public');
+            $fileUrl = asset('storage/' . $filePath);
 
             LeaveAttachment::create([
                 'user_vacation_id' => $vacation->id,
                 'file_path' => $fileUrl,
-                'file_name' => $file->getClientOriginalName(),
+                'file_name' => $fileName,
                 'mime_type' => $file->getClientMimeType(),
             ]);
         }
