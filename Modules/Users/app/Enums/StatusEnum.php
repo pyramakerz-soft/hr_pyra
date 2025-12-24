@@ -9,4 +9,5 @@ enum StatusEnum: string
     case Approved = 'approved';
     case Rejected = 'rejected';
     case Declined = 'declined';
+    case Refused = 'refused';
 }

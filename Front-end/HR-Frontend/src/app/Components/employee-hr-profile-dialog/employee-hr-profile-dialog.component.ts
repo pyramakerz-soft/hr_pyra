@@ -74,7 +74,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
         this.patchDetail(response.profile.detail);
         this.setBalances(response.profile.vacation_balances ?? []);
         this.isLoading = false;
-        
+
         // Manually trigger change detection to ensure the view updates
         this.cdr.detectChanges();
       },
@@ -82,7 +82,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
         this.isLoading = false;
         this.loadError = 'Unable to load employee profile.';
         this.cdr.detectChanges();
-        
+
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -109,7 +109,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
 
   setBalances(balances: HrVacationBalance[]): void {
     this.balances.clear();
-    
+
     const currentYearBalances = (balances ?? []).filter(
       (balance) => (balance.year ?? this.currentYear) === this.currentYear,
     );
@@ -117,7 +117,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
     currentYearBalances.forEach((balance) => {
       this.balances.push(this.createBalanceGroup(balance));
     });
-    
+
     this.cdr.detectChanges();
   }
 
@@ -199,8 +199,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
   availableVacationTypes(excludeIndex: number | null = null): HrVacationTypeOption[] {
     const selectedIds = this.balances.controls
       .filter((_, index) => index !== excludeIndex)
-      .map((control) => control.get('vacation_type_id')?.value)
-      .filter((id): id is number => !!id);
+      .map((control) => control.get('vacation_type_id')?.value);
 
     return this.vacationTypeOptions.filter((option) => !selectedIds.includes(option.id));
   }
@@ -213,7 +212,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
     const match = this.vacationTypeOptions.find((option) => option.id === vacationTypeId);
     return match ? match.name : '';
   }
-  
+
   canAddMoreBalances(): boolean {
     // Check if the number of current balances is less than total vacation types
     return this.balances.length < this.vacationTypeOptions.length;
@@ -386,7 +385,6 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
 
     return payload;
   }
-
   private formatTimeForInput(value?: string | null): string {
     if (!value) {
       return '';

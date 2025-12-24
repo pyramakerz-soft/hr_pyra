@@ -65,11 +65,7 @@
   <section class="dialog-section">
     <header class="section-header">
       <h3 class="section-title">Vacation Balances</h3>
-      <button 
-        type="button" 
-        class="link-btn" 
-        (click)="addBalance()" 
-        [disabled]="!canAddMoreBalances()">
+      <button type="button" class="link-btn" (click)="addBalance()" [disabled]="!canAddMoreBalances()">
         + Add balance
       </button>
     </header>
@@ -77,11 +73,8 @@
     <form [formGroup]="form">
       <div class="vacation-list" formArrayName="balances">
         <!-- Balance Cards -->
-        <div 
-          class="vacation-card" 
-          *ngFor="let balance of balances.controls; let i = index" 
-          [formGroupName]="i">
-          
+        <div class="vacation-card" *ngFor="let balance of balances.controls; let i = index" [formGroupName]="i">
+
           <!-- <div class="vacation-card-header">
             <span class="vacation-card-title">
               {{ getVacationTypeName(balance.get('vacation_type_id')?.value) }}
@@ -101,7 +94,8 @@
                   {{ option.name }}
                 </option>
               </select>
-              <span class="error" *ngIf="balance.get('vacation_type_id')?.invalid && balance.get('vacation_type_id')?.touched">
+              <span class="error"
+                *ngIf="balance.get('vacation_type_id')?.invalid && balance.get('vacation_type_id')?.touched">
                 Please select a vacation type
               </span>
             </label>
@@ -109,13 +103,9 @@
             <!-- Allocated Days -->
             <label class="form-field">
               <span>Allocated Days <span class="required">*</span></span>
-              <input 
-                type="number" 
-                formControlName="allocated_days" 
-                step="0.5" 
-                min="0" 
-                placeholder="0" />
-              <span class="error" *ngIf="balance.get('allocated_days')?.invalid && balance.get('allocated_days')?.touched">
+              <input type="number" formControlName="allocated_days" step="0.5" min="0" placeholder="0" />
+              <span class="error"
+                *ngIf="balance.get('allocated_days')?.invalid && balance.get('allocated_days')?.touched">
                 Required (min: 0)
               </span>
             </label>
@@ -123,21 +113,20 @@
             <!-- Used Days -->
             <label class="form-field">
               <span>Used Days</span>
-              <input 
-                type="number" 
-                formControlName="used_days" 
-                step="0.5" 
-                min="0" 
-                placeholder="0" />
+              <input type="number" formControlName="used_days" step="0.5" min="0" placeholder="0" />
               <span class="error" *ngIf="balance.get('used_days')?.invalid && balance.get('used_days')?.touched">
                 Min: 0
               </span>
             </label>
 
             <!-- Year Display -->
-            <div class="year-chip-display">
-              Year: {{ currentYear }}
-            </div>
+            <label class="form-field">
+              <span>Year</span>
+              <input type="number" formControlName="year" step="1" min="0" placeholder="2025" />
+              <span class="error" *ngIf="balance.get('year')?.invalid && balance.get('year')?.touched">
+                Min: 0
+              </span>
+            </label>
 
             <!-- Remaining Display -->
             <!-- <div class="remaining-indicator">
@@ -158,15 +147,11 @@
   </section>
 
   <!-- Action Buttons -->
-  <footer class="dialog-actions">
+  <footer class="dialog-actions p-4">
     <button type="button" class="btn secondary" (click)="close()">
       Cancel
     </button>
-    <button 
-      type="button" 
-      class="btn primary" 
-      (click)="save()" 
-      [disabled]="isSaving">
+    <button type="button" class="btn primary" (click)="save()" [disabled]="isSaving">
       {{ isSaving ? 'Saving...' : 'Save Changes' }}
     </button>
   </footer>

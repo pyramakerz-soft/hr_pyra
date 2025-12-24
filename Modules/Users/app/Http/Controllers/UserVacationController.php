@@ -20,6 +20,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 use Modules\Users\Models\Department;
 use Modules\Users\Models\SubDepartment;
+use Modules\Users\Models\LeaveAttachment;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 
 
@@ -41,6 +44,7 @@ class UserVacationController extends Controller
     const MARRIAGE_LEAVE_NAME = 'Marriage Leave';
     const HAJJ_LEAVE_NAME = 'Hajj / Umrah Leave';
     const EXCEPTIONAL_LEAVE_NAME = 'Exceptional Leave';
+    const SICK_LEAVE_NAME = 'Sick Leave';
     /**
      * @OA\Post(
      *     path="/api/vacation/add_user_vacation",
@@ -141,8 +145,10 @@ class UserVacationController extends Controller
         // Calculate available days for this vacation type
         $availableDays = $this->calculateAvailableDays($authUser, $vacationType, $from, $daysCount);
 
+        $attachments = $request->file('attachments');
+
         // Create vacation(s) based on available balance
-        return $this->createVacationRecords($authUser, $vacationType, $from, $to, $daysCount, $availableDays);
+        return $this->createVacationRecords($authUser, $vacationType, $from, $to, $daysCount, $availableDays, $attachments);
     }
 
     /**
@@ -174,7 +180,7 @@ class UserVacationController extends Controller
         }
 
         $vacations = $authUser->user_vacations()
-            ->with('vacationType')
+            ->with(['vacationType', 'attachments'])
             ->orderByDesc('created_at')
             ->paginate($perPage, ['*'], 'page', $request->query('page', 1));
 
@@ -342,7 +348,7 @@ class UserVacationController extends Controller
                             return $this->returnError('Insufficient ' . self::ANNUAL_LEAVE_NAME . ' balance. Remaining days: ' . $annualBalance->remaining_days, 422);
                         }
                     }
-                } elseif ($vacation->vacationType->name !== self::UNPAID_LEAVE_NAME) {
+                } elseif ($vacation->vacationType->name !== self::UNPAID_LEAVE_NAME && $vacation->vacationType->name !== self::SICK_LEAVE_NAME) {
                     // Standard check for other types (excluding Unpaid)
                     $balance = $this->getOrCreateBalance($vacation->user, $vacation->vacationType, Carbon::parse($vacation->from_date));
                     if ($balance->remaining_days < ($vacation->days_count ?? 0)) {
@@ -495,7 +501,7 @@ class UserVacationController extends Controller
             return $this->returnError('No employees found under this manager', 404);
         }
 
-        $query = UserVacation::with(['user', 'vacationType'])
+        $query = UserVacation::with(['user', 'vacationType', 'attachments'])
             ->whereIn('user_id', $employeeIds)->orderBy('created_at', 'desc');
 
         $searchTerm = request()->query('searchTerm');
@@ -740,7 +746,7 @@ class UserVacationController extends Controller
         // For Unpaid Leave with future balance, deduct from Annual Leave instead
         if (
             $allowFutureBalance &&
-            $vacation->vacationType->name === self::UNPAID_LEAVE_NAME &&
+            $vacation->vacationType->name === self::EXCEPTIONAL_LEAVE_NAME &&
             $previousOverall !== StatusEnum::Approved->value &&
             $current === StatusEnum::Approved->value
         ) {
@@ -768,24 +774,6 @@ class UserVacationController extends Controller
             ->where('year', Carbon::parse($vacation->from_date)->year)
             ->first();
 
-        // For Casual/Emergency/Exceptional, we only update Annual Leave balance
-        if (in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME, self::EXCEPTIONAL_LEAVE_NAME])) {
-            $annualType = VacationType::where('name', self::ANNUAL_LEAVE_NAME)->first();
-            if (!$annualType) {
-                return;
-            }
-            $vacation->loadMissing('vacationType', 'user'); // Ensure user and vacationType are loaded
-            $type = $annualType;
-            $user = $vacation->user;
-
-            if (!$type || !$user) {
-                return;
-            }
-            // Re-fetch or create balance for annual leave
-            $balance = $this->getOrCreateBalance($user, $type, Carbon::parse($vacation->from_date));
-        }
-
-
         if (!$balance) {
             $vacation->loadMissing('vacationType', 'user');
             $type = $vacation->vacationType;
@@ -801,11 +789,9 @@ class UserVacationController extends Controller
         $days = (float) ($vacation->days_count ?? 0);
 
         if ($previousOverall === StatusEnum::Approved->value && $current !== StatusEnum::Approved->value) {
-            // Only update balance if NOT Casual/Emergency/Exceptional
-            if (!in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME, self::EXCEPTIONAL_LEAVE_NAME])) {
-                $balance->used_days = max(0, ($balance->used_days ?? 0) - $days);
-                $balance->save();
-            }
+            // Update specific balance
+            $balance->used_days = max(0, ($balance->used_days ?? 0) - $days);
+            $balance->save();
 
             // Revert Annual Leave balance if Casual or Emergency
             $this->updateAnnualBalance($vacation, -$days);
@@ -814,11 +800,9 @@ class UserVacationController extends Controller
         }
 
         if ($previousOverall !== StatusEnum::Approved->value && $current === StatusEnum::Approved->value) {
-            // Only update balance if NOT Casual/Emergency/Exceptional
-            if (!in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME, self::EXCEPTIONAL_LEAVE_NAME])) {
-                $balance->used_days = ($balance->used_days ?? 0) + $days;
-                $balance->save();
-            }
+            // Update specific balance
+            $balance->used_days = ($balance->used_days ?? 0) + $days;
+            $balance->save();
 
             // Deduct from Annual Leave balance if Casual or Emergency
             $this->updateAnnualBalance($vacation, $days);
@@ -839,12 +823,14 @@ class UserVacationController extends Controller
 
     protected function calculateUsedDays(User $user, VacationType $type, int $year): float
     {
-        return (float) UserVacation::where('user_id', $user->id)
+        $balance = $user->vacationBalances()
             ->where('vacation_type_id', $type->id)
-            ->where('status', StatusEnum::Approved)
-            ->whereYear('from_date', $year)
-            ->sum('days_count');
+            ->where('year', $year)
+            ->first();
+
+        return $balance ? (float) $balance->used_days : 0.0;
     }
+
 
     /**
      * @OA\Get(
@@ -863,7 +849,11 @@ class UserVacationController extends Controller
      */
     public function getVacationTypes()
     {
-        $types = VacationType::all()->where('name', '!=', 'Annual Leave')->where('name', '!=', 'Official Holiday');
+        if (auth()->user()->hasRole('Hr')) {
+            $types = VacationType::all();
+        } else {
+            $types = VacationType::all()->where('name', '!=', 'Annual Leave')->where('name', '!=', 'Official Holiday');
+        }
         return $this->returnData('data', $types, 'Vacation Types');
     }
 
@@ -970,12 +960,17 @@ class UserVacationController extends Controller
             return $daysCount;
         }
 
+        if ($vacationType->name === self::SICK_LEAVE_NAME) {
+            return $daysCount;
+        }
+
+
         // For other leave types (Annual, Maternity, Marriage, Hajj), check balance
         $balance = $this->getOrCreateBalance($user, $vacationType, $date);
         return $balance->remaining_days;
     }
 
-    protected function createVacationRecords(User $user, VacationType $vacationType, Carbon $from, Carbon $to, float $daysCount, float $availableDays)
+    protected function createVacationRecords(User $user, VacationType $vacationType, Carbon $from, Carbon $to, float $daysCount, float $availableDays, $attachments = null)
     {
         // Sufficient balance - create single vacation record
         if ($availableDays >= $daysCount) {
@@ -989,6 +984,8 @@ class UserVacationController extends Controller
                 'approval_of_direct' => StatusEnum::Pending,
                 'approval_of_head' => StatusEnum::Pending,
             ]);
+
+            $this->processAttachments($vacation, $attachments);
 
             return $this->returnData('Vacation', $vacation->fresh(['vacationType']), 'User Vacation created successfully');
         }
@@ -1011,6 +1008,8 @@ class UserVacationController extends Controller
                 'approval_of_head' => StatusEnum::Pending,
             ]);
 
+            $this->processAttachments($vacation, $attachments);
+
             return $this->returnData('Vacation', $vacation->fresh(['vacationType']), 'Insufficient balance. Request converted to Unpaid Leave.');
         }
 
@@ -1020,7 +1019,7 @@ class UserVacationController extends Controller
             return $this->returnError('Insufficient balance for full request and Unpaid Leave type is not configured.', 422);
         }
 
-        return DB::transaction(function () use ($user, $vacationType, $unpaidType, $from, $to, $availableDays, $daysCount) {
+        return DB::transaction(function () use ($user, $vacationType, $unpaidType, $from, $to, $availableDays, $daysCount, $attachments) {
             // 1. Paid Portion - find the end date that represents availableDays working days
             $paidTo = $from->copy();
 
@@ -1039,6 +1038,8 @@ class UserVacationController extends Controller
                 'approval_of_direct' => StatusEnum::Pending,
                 'approval_of_head' => StatusEnum::Pending,
             ]);
+
+            $this->processAttachments($vacationPaid, $attachments);
 
             // 2. Unpaid Portion
             $unpaidFrom = (clone $paidTo);
@@ -1064,6 +1065,46 @@ class UserVacationController extends Controller
             ], 'Insufficient balance. Request split into Paid (' . $availableDays . ' days) and Unpaid (' . $unpaidDays . ' days) Leave.');
         });
     }
+
+    protected function processAttachments(UserVacation $vacation, $attachments)
+    {
+        if (!$attachments) {
+            return;
+        }
+
+        if (!is_array($attachments)) {
+            $attachments = [$attachments];
+        }
+
+        $destinationPath = public_path('storage/attachments');
+
+        if (!is_dir($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
+        }
+
+        foreach ($attachments as $file) {
+            if (!$file || !$file->isValid()) {
+                continue;
+            }
+
+            $baseName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $file->getClientOriginalExtension();
+            $safeBaseName = Str::slug($baseName ?: 'attachment');
+            $uniqueName = $safeBaseName . '-' . uniqid();
+            $fileName = $extension ? "{$uniqueName}.{$extension}" : $uniqueName;
+
+            $file->move($destinationPath, $fileName);
+            $fileUrl = asset('storage/attachments/' . $fileName);
+
+            LeaveAttachment::create([
+                'user_vacation_id' => $vacation->id,
+                'file_path' => $fileUrl,
+                'file_name' => $fileName,
+                'mime_type' => $file->getClientMimeType(),
+            ]);
+        }
+    }
+
     /**
      * Validate B2B Department Casual/Emergency Leave Limit
      *
@@ -1098,7 +1139,11 @@ class UserVacationController extends Controller
 
         $academicYearStart = $this->getAcademicYearStart($from);
         $academicYearEnd = $this->getAcademicYearEnd($from);
-
+        $daysTaken = UserVacationBalance::select('used_days')
+            ->where('user_id', $user->id)
+            ->where('vacation_type_id', $vacationType->id)
+            ->where('year', $from->year)
+            ->first();
         $daysTaken = UserVacation::where('user_id', $user->id)
             ->whereHas('vacationType', function ($q) use ($targetTypes) {
                 $q->whereIn('name', $targetTypes);

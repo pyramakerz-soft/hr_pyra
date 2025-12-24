@@ -43,6 +43,11 @@ class UserVacation extends Model
         return $this->belongsTo(User::class, 'head_approved_by');
     }
 
+    public function attachments()
+    {
+        return $this->hasMany(LeaveAttachment::class);
+    }
+
     public function getIsHalfDayAttribute(): bool
     {
         return $this->days_count == 0.5;

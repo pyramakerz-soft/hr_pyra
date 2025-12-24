@@ -96,54 +96,48 @@ class User extends Authenticatable implements JWTSubject
 
         $role = $this->getRoleName(); // Get the role of the authenticated user
         if ($role === 'Team leader') {
-            // Check if the model's sub_department_id is set
-            $subDepartmentId = $this->sub_department_id;
+
+            // Try to find a sub department where this user is the team leader
+            $subDepartmentId = SubDepartment::where('teamlead_id', $this->id)->pluck('id')->toArray();
 
             if (!$subDepartmentId) {
-                // Try to find a sub department where this user is the team leader
-                $subDepartment = SubDepartment::where('teamlead_id', $this->id)->first();
-
-                if (!$subDepartment) {
-                    abort(406, 'No sub department assigned or led by this user.');
-                }
-
-                $subDepartmentId = $subDepartment->id;
+                abort(406, 'No sub department assigned or led by this user.');
             }
 
 
 
             // Get all employees in the same sub-department, excluding the team lead (this user)
-            return self::where('sub_department_id', $subDepartmentId)
+            return self::whereIn('sub_department_id', $subDepartmentId)
                 ->where('id', '!=', $this->id)
                 ->pluck('id');
-        } elseif ($role === 'Manager' || $role === 'Hr') {
+        } elseif ($role === 'Manager') {
             // Check or retrieve department_id
             $department_id = $this->department_id;
 
             if (!$department_id) {
-                $dept = Department::where('manager_id', $this->id)->first();
+                $dept = Department::where('manager_id', $this->id)->pluck('id')->toArray();
 
                 if (!$dept) {
                     abort(406, 'Department is null in manager data');
                 }
 
-                $department_id = $dept->id;
+                $department_id = $dept;
             }
 
             // Get all team leaders in the department
-            $teamLeadIds = self::where('department_id', $department_id)
+            $teamLeadIds = self::whereIn('department_id', $department_id)
                 ->whereHas('roles', fn($query) => $query->where('name', 'Team leader'))
                 ->pluck('id');
 
             // Get sub-departments in the same department
-            $subDepartmentIds = SubDepartment::where('department_id', $department_id)->pluck('id');
+            $subDepartmentIds = SubDepartment::whereIn('department_id', $department_id)->pluck('id');
 
             // Get all employees in sub-departments (including team leaders of sub-departments)
             $subDeptEmployeeIds = self::whereIn('sub_department_id', $subDepartmentIds)
                 ->pluck('id');
 
             // Get all employees in the same department (excluding current user)
-            $departmentEmployeeIds = self::where('department_id', $department_id)
+            $departmentEmployeeIds = self::whereIn('department_id', $department_id)
                 ->where('id', '!=', $this->id)
                 ->pluck('id');
 

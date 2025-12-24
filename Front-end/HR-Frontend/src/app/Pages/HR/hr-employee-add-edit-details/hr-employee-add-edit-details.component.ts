@@ -895,34 +895,34 @@ onSubDepartmentChange() {
     }
   }
 
-  savePlan(): void {
-    if (!this.ensurePlanEditable()) {
-      return;
-    }
+  // savePlan(): void {
+  //   if (!this.ensurePlanEditable()) {
+  //     return;
+  //   }
 
-    this.planSaving = true;
-    this.planService.saveUserPlan(this.EmployeeId, this.planEditor.plan).subscribe({
-      next: ({ plan, effective_plan }) => {
-        this.initializePlan(plan, effective_plan);
-        this.planSaving = false;
-        Swal.fire({
-          icon: 'success',
-          text: 'Employee deduction plan saved successfully.',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#17253E',
-        });
-      },
-      error: () => {
-        this.planSaving = false;
-        Swal.fire({
-          icon: 'error',
-          text: 'Failed to save the deduction plan. Please try again later.',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#FF7519',
-        });
-      },
-    });
-  }
+  //   this.planSaving = true;
+  //   this.planService.saveUserPlan(this.EmployeeId, this.planEditor.plan).subscribe({
+  //     next: ({ plan, effective_plan }) => {
+  //       this.initializePlan(plan, effective_plan);
+  //       this.planSaving = false;
+  //       Swal.fire({
+  //         icon: 'success',
+  //         text: 'Employee deduction plan saved successfully.',
+  //         confirmButtonText: 'OK',
+  //         confirmButtonColor: '#17253E',
+  //       });
+  //     },
+  //     error: () => {
+  //       this.planSaving = false;
+  //       Swal.fire({
+  //         icon: 'error',
+  //         text: 'Failed to save the deduction plan. Please try again later.',
+  //         confirmButtonText: 'OK',
+  //         confirmButtonColor: '#FF7519',
+  //       });
+  //     },
+  //   });
+  // }
 
   trackRuleByIndex(index: number): number {
     return index;
