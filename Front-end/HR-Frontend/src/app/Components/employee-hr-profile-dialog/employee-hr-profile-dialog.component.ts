@@ -136,28 +136,64 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
     const newBalanceGroup = this.createBalanceGroup({
       vacation_type_id: null as any, // This allows null in the form
       vacation_type_name: undefined,
-      year: 0,
+      year: this.currentYear,
       allocated_days: 0,
       used_days: 0,
       remaining_days: 0,
     });
-
+    
     this.balances.push(newBalanceGroup);
-
+    
     // Mark the form as touched to show validation immediately
     newBalanceGroup.markAllAsTouched();
-
+    
     // Force change detection
     this.cdr.detectChanges();
   }
 
-  removeBalance(index: number): void {
-    const group = this.balances.at(index) as FormGroup;
-    const id = group.get('id')?.value;
-    if (id) {
-      this.balancesToDelete.push(id);
+  removeBalance(index: number, skipConfirmation: boolean = false): void {
+    const showConfirmation = () => {
+      const group = this.balances.at(index) as FormGroup;
+      const vacationTypeId = group.get('vacation_type_id')?.value;
+      const vacationTypeName = this.getVacationTypeName(vacationTypeId);
+      
+      Swal.fire({
+        title: 'Remove Balance?',
+        html: vacationTypeName 
+          ? `Are you sure you want to remove the <strong>${vacationTypeName}</strong> balance?`
+          : 'Are you sure you want to remove this balance?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, remove it',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#FF7519',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          performRemoval(index);
+          
+          // Trigger change detection after removal to update button state
+          this.cdr.detectChanges();
+        }
+      });
+    };
+
+    const performRemoval = (idx: number) => {
+      const group = this.balances.at(idx) as FormGroup;
+      const id = group.get('id')?.value;
+      if (id) {
+        this.balancesToDelete.push(id);
+      }
+      this.balances.removeAt(idx);
+    };
+
+    if (skipConfirmation) {
+      performRemoval(index);
+      this.cdr.detectChanges();
+    } else {
+      showConfirmation();
     }
-    this.balances.removeAt(index);
   }
 
   availableVacationTypes(excludeIndex: number | null = null): HrVacationTypeOption[] {
@@ -178,13 +214,14 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
   }
 
   canAddMoreBalances(): boolean {
-    return this.availableVacationTypes().length > 0;
+    // Check if the number of current balances is less than total vacation types
+    return this.balances.length < this.vacationTypeOptions.length;
   }
 
   save(): void {
     // Validate all form controls
     this.validateAllFormControls();
-
+    
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       Swal.fire({
@@ -197,7 +234,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
     }
 
     const payload = this.buildPayload();
-
+    
     // Log payload for debugging
     console.log('Saving payload:', payload);
 
@@ -210,7 +247,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
         this.patchDetail(response.profile.detail);
         this.setBalances(response.profile.vacation_balances ?? []);
         this.cdr.detectChanges();
-
+        
         Swal.fire({
           icon: 'success',
           title: 'Updated',
@@ -221,7 +258,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
       error: (error) => {
         this.isSaving = false;
         this.cdr.detectChanges();
-
+        
         console.error('Save error:', error);
         Swal.fire({
           icon: 'error',
@@ -256,7 +293,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
       allocated_days: [balance?.allocated_days ?? 0, [Validators.required, Validators.min(0)]],
       used_days: [balance?.used_days ?? 0, [Validators.min(0)]],
       remaining_days: [{ value: balance?.remaining_days ?? 0, disabled: true }],
-      year: [balance?.year ?? 0, [Validators.required, Validators.min(0)]],
+      year: [{ value: balance?.year ?? this.currentYear, disabled: true }],
     });
 
     // Calculate remaining days when values change
@@ -313,16 +350,16 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
     const balancesPayload = this.balances.controls
       .map((control) => {
         const raw = control.getRawValue();
-
+        
         // Skip if vacation_type_id is not valid
         if (!raw.vacation_type_id || raw.vacation_type_id <= 0) {
           return null;
         }
-
+        
         return {
           id: raw.id && raw.id > 0 ? raw.id : undefined,
           vacation_type_id: Number(raw.vacation_type_id),
-          year: Number(raw.year),
+          year: this.currentYear,
           allocated_days: Number(raw.allocated_days ?? 0),
           used_days: Number(raw.used_days ?? 0),
         };

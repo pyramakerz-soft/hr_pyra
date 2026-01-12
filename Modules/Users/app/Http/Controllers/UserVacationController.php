@@ -22,6 +22,7 @@ use Modules\Users\Models\Department;
 use Modules\Users\Models\SubDepartment;
 use Modules\Users\Models\LeaveAttachment;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 
 
@@ -1075,10 +1076,25 @@ class UserVacationController extends Controller
             $attachments = [$attachments];
         }
 
+        $destinationPath = public_path('storage/attachments');
+
+        if (!is_dir($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
+        }
+
         foreach ($attachments as $file) {
-            $fileName = $file->getClientOriginalName();
-            $filePath = $file->storeAs('attachments', $fileName, 'public');
-            $fileUrl = asset('storage/' . $filePath);
+            if (!$file || !$file->isValid()) {
+                continue;
+            }
+
+            $baseName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $file->getClientOriginalExtension();
+            $safeBaseName = Str::slug($baseName ?: 'attachment');
+            $uniqueName = $safeBaseName . '-' . uniqid();
+            $fileName = $extension ? "{$uniqueName}.{$extension}" : $uniqueName;
+
+            $file->move($destinationPath, $fileName);
+            $fileUrl = asset('storage/attachments/' . $fileName);
 
             LeaveAttachment::create([
                 'user_vacation_id' => $vacation->id,
