@@ -357,12 +357,12 @@ class UserVacationController extends Controller
                 }
             }
         }
-
         // Change vacation type to Exceptional Leave if future balance is allowed
         if ($allowFutureBalance && $status === 'approved' && $vacation->vacationType->name == self::UNPAID_LEAVE_NAME) {
             $exceptionalLeaveType = VacationType::where('name', self::EXCEPTIONAL_LEAVE_NAME)->first();
             if ($exceptionalLeaveType) {
-                $vacation->vacationType = $exceptionalLeaveType;
+                $vacation->setRelation('vacationType', $exceptionalLeaveType);
+                $vacation->vacation_type_id = $exceptionalLeaveType->id;
             }
         }
 
@@ -852,7 +852,7 @@ class UserVacationController extends Controller
         if (auth()->user()->hasRole('Hr')) {
             $types = VacationType::all();
         } else {
-            $types = VacationType::all()->where('name', '!=', 'Annual Leave')->where('name', '!=', 'Official Holiday');
+            $types = VacationType::all()->where('name', '!=', 'Annual Leave')->where('name', '!=', 'Official Holiday')->where('name', '!=', 'Exceptional Leave');
         }
         return $this->returnData('data', $types, 'Vacation Types');
     }
