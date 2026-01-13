@@ -114,6 +114,10 @@ class User extends Authenticatable implements JWTSubject
             // Check or retrieve department_id
             $department_id = $this->department_id;
 
+            if ($department_id && !is_array($department_id)) {
+                $department_id = [$department_id];
+            }
+
             if (!$department_id) {
                 $dept = Department::where('manager_id', $this->id)->pluck('id')->toArray();
 
