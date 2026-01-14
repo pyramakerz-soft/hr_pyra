@@ -480,9 +480,12 @@ class ClockController extends Controller
         // Start the query for the clocks
         $query = ClockInOut::where('user_id', $user->id);
 
-        // Apply filters if any
-        foreach ($this->filters as $filter) {
-            $query = $filter->apply($query, $request);
+
+        if ($request->has('from_day') && $request->has('to_day')) {
+            $query->whereBetween('clock_in', [
+                Carbon::parse($request->get('from_day'))->startOfDay(),
+                Carbon::parse($request->get('to_day'))->endOfDay()
+            ]);
         }
 
         // If there's an export request, we want to get all data (not paginated)
