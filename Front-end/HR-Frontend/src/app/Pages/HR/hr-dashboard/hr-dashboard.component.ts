@@ -45,14 +45,14 @@ export class HrDashboardComponent {
   recentNotifications: SystemNotificationRecord[] = [];
   recentServiceActions: ServiceActionRecord[] = [];
 
-  quickActions = [
-    {
-      label: 'Run service action',
-      description: 'Close open shifts, resolve issues, and keep attendance data clean.',
-      route: '/HR/HRServiceActions',
-      icon: 'fi fi-br-tools',
-    },
-  ];
+  // quickActions = [
+  //   {
+  //     label: 'Run service action',
+  //     description: 'Close open shifts, resolve issues, and keep attendance data clean.',
+  //     route: '/HR/HRServiceActions',
+  //     icon: 'fi fi-br-tools',
+  //   },
+  // ];
 
   constructor(
     public chartService: ChartsService,
