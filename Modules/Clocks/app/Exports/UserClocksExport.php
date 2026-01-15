@@ -12,10 +12,12 @@ use Modules\Clocks\Exports\Sheets\UserClocksSummarySheet;
 use Modules\Clocks\Exports\Sheets\UserClocksPlanSheet;
 use Modules\Clocks\Models\ClockInOut;
 use Modules\Users\Models\OverTime;
+use Modules\Users\Models\OverTime;
 use Modules\Users\Models\User;
 use Modules\Users\Models\CustomVacation;
 use Modules\Clocks\Support\DeductionPlanResolver;
 use Modules\Clocks\Support\DeductionRuleEngine;
+use Modules\Users\Models\VacationType;
 use Modules\Users\Models\VacationType;
 
 class UserClocksExport implements WithMultipleSheets
@@ -144,7 +146,9 @@ class UserClocksExport implements WithMultipleSheets
         $customVacationCache = [];
 
         $annualLeaveType = VacationType::where('name', 'Annual Leave')->first();
+        $annualLeaveType = VacationType::where('name', 'Annual Leave')->first();
         foreach ($this->users as $user) {
+            if (!$user instanceof User) {
             if (!$user instanceof User) {
                 continue;
             }
@@ -159,6 +163,7 @@ class UserClocksExport implements WithMultipleSheets
                 ->values()
                 ->all();
             $isPartTime = (bool) ($user->is_part_time ?? false);
+            if (!$isPartTime) {
             if (!$isPartTime) {
                 $isPartTime = in_array('part time', $userWorkTypes, true);
             }
@@ -220,7 +225,7 @@ class UserClocksExport implements WithMultipleSheets
                 ->where('status', 'approved')
                 ->whereDate('from_date', '<=', $userRangeEnd)
                 ->whereDate('to_date', '>=', $userRangeStart)
-                ->with(['vacationType', 'directApprover', 'headApprover'])
+                ->with(['vacationType', 'directApprover', 'headApprover', 'attachments'])
                 ->get();
 
             $requestedVacationsByDate = [];
@@ -295,15 +300,12 @@ class UserClocksExport implements WithMultipleSheets
                 ->get();
 
             $overtimeRecords = OverTime::where('user_id', $user->id)
-                ->where(function ($query) use ($startDate, $endDate) {
-                    $query->whereBetween('from', [$startDate->toDateString(), $endDate->toDateString()])
-                        ->orWhereBetween('to', [$startDate->toDateString(), $endDate->toDateString()]);
-                })
+                ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
                 ->where('status', 'approved')
                 ->with(['directApprovedBy', 'headApprovedBy'])
                 ->get()
                 ->keyBy(function ($record) {
-                    return Carbon::parse($record->from)->toDateString();
+                    return $record->date;
                 });
 
             $grouped = $clocks->groupBy(function ($clock) use ($userTimezoneName) {
@@ -334,20 +336,44 @@ class UserClocksExport implements WithMultipleSheets
                 $hasRequestedVacation = !empty($requestedForDay);
                 $hasCustomVacation = !empty($customForDay);
 
-                if ($hasRequestedVacation) {
-                    $totalVacationDays++;
-                }
+                // Check if this is a working day
+                $isFriday = $localDate->isFriday();
+                $isSaturday = $localDate->isSaturday();
+                $isNonWorkingDay = $isFriday || ($isSaturday && !$worksOnSaturday);
+
 
                 $vacationTags = [];
-                foreach ($requestedForDay as $vacation) {
-                    $typeName = optional($vacation->vacationType)->name;
-                    $vacationTags[] = $typeName
-                        ? 'Requested: ' . $typeName
-                        : 'Requested Vacation';
-                }
 
-                foreach ($customForDay as $vacation) {
-                    $vacationTags[] = 'Custom: ' . $vacation->name;
+                // Only add vacation tags if it's a working day
+                $vacationDirectApprover = '';
+                $vacationHeadApprover = '';
+                if (!$isNonWorkingDay) {
+                    if ($hasRequestedVacation && !empty($requestedForDay)) {
+                        $firstVacation = $requestedForDay[0];
+                        $vacationDirectApprover = $firstVacation->directApprover ? $firstVacation->directApprover->name : '';
+                        $vacationHeadApprover = $firstVacation->headApprover ? $firstVacation->headApprover->name : '';
+                    }
+                    if ($hasRequestedVacation) {
+                        $totalVacationDays++;
+                    }
+
+                    foreach ($requestedForDay as $vacation) {
+                        $typeName = optional($vacation->vacationType)->name;
+                        $label = $typeName
+                            ? 'Requested: ' . $typeName
+                            : 'Requested Vacation';
+
+                        if ($typeName === 'Sick Leave' && $vacation->attachments->isNotEmpty()) {
+                            $url = $vacation->attachments->first()->file_url;
+                            $label = '=HYPERLINK("' . $url . '", "' . $label . '")';
+                        }
+
+                        $vacationTags[] = $label;
+                    }
+
+                    foreach ($customForDay as $vacation) {
+                        $vacationTags[] = 'Custom: ' . $vacation->name;
+                    }
                 }
 
                 if ($vacationTags) {
@@ -358,13 +384,7 @@ class UserClocksExport implements WithMultipleSheets
                 $isVacation = $hasRequestedVacation || $hasCustomVacation;
 
                 // Extract vacation approver names (use first vacation if multiple)
-                $vacationDirectApprover = '';
-                $vacationHeadApprover = '';
-                if ($hasRequestedVacation && !empty($requestedForDay)) {
-                    $firstVacation = $requestedForDay[0];
-                    $vacationDirectApprover = $firstVacation->directApprover ? $firstVacation->directApprover->name : '';
-                    $vacationHeadApprover = $firstVacation->headApprover ? $firstVacation->headApprover->name : '';
-                }
+
 
                 // Handle days without clock entries
                 if ($dailyClocks->isEmpty()) {

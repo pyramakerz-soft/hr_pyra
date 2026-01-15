@@ -42,6 +42,10 @@ this.GetSubDepartment()
 
   }
 
+goBack() {
+  localStorage.removeItem('hrDepartmentState');
+  this.router.navigateByUrl('/HR/HRDepartment');
+}
 
   GetSubDepartment() {
     this.subDeptSer.getall(this.DeptId).subscribe(

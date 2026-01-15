@@ -11,11 +11,21 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('over_time', function (Blueprint $table) {
-            $table->unsignedInteger('overtime_minutes')->nullable();
-            $table->enum('approval_of_direct', ['pending', 'approved', 'declined'])->default('pending');
-            $table->enum('approval_of_head', ['pending', 'approved', 'declined'])->default('pending');
-            $table->foreignId('direct_approved_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('head_approved_by')->nullable()->constrained('users')->nullOnDelete();
+            if (!Schema::hasColumn('over_time', 'overtime_minutes')) {
+                $table->unsignedInteger('overtime_minutes')->nullable();
+            }
+            if (!Schema::hasColumn('over_time', 'approval_of_direct')) {
+                $table->enum('approval_of_direct', ['pending', 'approved', 'declined'])->default('pending');
+            }
+            if (!Schema::hasColumn('over_time', 'approval_of_head')) {
+                $table->enum('approval_of_head', ['pending', 'approved', 'declined'])->default('pending');
+            }
+            if (!Schema::hasColumn('over_time', 'direct_approved_by')) {
+                $table->foreignId('direct_approved_by')->nullable()->constrained('users')->nullOnDelete();
+            }
+            if (!Schema::hasColumn('over_time', 'head_approved_by')) {
+                $table->foreignId('head_approved_by')->nullable()->constrained('users')->nullOnDelete();
+            }
         });
     }
 

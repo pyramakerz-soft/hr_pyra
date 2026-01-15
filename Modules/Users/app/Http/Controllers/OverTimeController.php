@@ -56,21 +56,16 @@ class OverTimeController extends Controller
      */
     public function addStartUserOvertime(StartUserOverTimeRequest $request)
     {
+
         $request->validated();
         $authUser = Auth::user();
+        $date = now()->toDateString();
 
-        // Calculate overtime minutes if both from and to are provided
-        $overtimeMinutes = null;
-        if ($request->input('from') && $request->input('to')) {
-            $from = \Carbon\Carbon::parse($request->input('from'));
-            $to = \Carbon\Carbon::parse($request->input('to'));
-            $overtimeMinutes = $from->diffInMinutes($to); // Calculate from 'from' to 'to'
-        }
+        $overtimeMinutes = $request->input("minutes");
 
         // Create new overtime
         $userOvertime = OverTime::create([
-            'from' => $request->input('from'),
-            'to' => $request->input('to'),
+            'date' => $date,
             'status' => StatusEnum::Pending,
             'user_id' => $authUser->id,
             'reason' => $request->input('reason'),
@@ -86,78 +81,6 @@ class OverTimeController extends Controller
     }
 
 
-
-
-    /**
-     * @OA\Post(
-     *     path="/api/overtime/end_user_overtime",
-     *     tags={"Overtime"},
-     *     summary="end a overtime for the authenticated user",
-     *     operationId="endUserOvertime",
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={ "to","reason" },
-     *             @OA\Property(property="reason", type="string", format="reason", example="bla bla"),
-
-     *             @OA\Property(property="to", type="string", example="2025-02-27"),
-
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="User Overtime created successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="Overtime", type="object")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Invalid input"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
-     * )
-     */
-    public function addEndUserOvertime(EndUserOverTimeRequest $request)
-    {
-        $request->validated();
-
-        $authUser = Auth::user();
-
-        // Find the overtime record by its ID
-        $userOvertime = OverTime::find($request->input('overtime_id'));
-
-        if (!$userOvertime) {
-            return $this->returnError('Overtime record not found', 404);
-        }
-
-        // Validate end time is not before start time
-        if ($userOvertime->from && $request->input('to')) {
-            $from = \Carbon\Carbon::parse($userOvertime->from);
-            $to = \Carbon\Carbon::parse($request->input('to'));
-
-            if ($to->lessThan($from)) {
-                return $this->returnError('End time cannot be before start time', 422);
-            }
-
-            $overtimeMinutes = $from->diffInMinutes($to); // Calculate from 'from' to 'to'
-        } else {
-            $overtimeMinutes = null;
-        }
-
-        // Update the overtime record
-        $userOvertime->update([
-            'to' => $request->input('to'),
-            'user_id' => $authUser->id,
-            'overtime_minutes' => $overtimeMinutes,
-        ]);
-
-        // Return the updated overtime data
-        return $this->returnData('Overtime', $userOvertime, 'User Overtime Data');
-    }
 
 
     /**
@@ -188,15 +111,9 @@ class OverTimeController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(6);
 
-        // Fetch the ongoing overtime (if any) where the 'to' column is null
-        $ongoingOvertime = $authUser->overTimes()
-            ->whereNull('to')  // 'to' column is null, indicating it's an ongoing overtime
-            ->first();  // Get the first ongoing overtime (if any)
-
-        // Return the data along with the ongoing overtime if any
+        // Return the data
         return $this->returnData('OverTimeData', [
             'Overtimes' => $userOvertime,
-            'OngoingOvertime' => $ongoingOvertime,
         ], 'User Overtimes');
     }
 
@@ -241,7 +158,7 @@ class OverTimeController extends Controller
     public function changeOvertimeStatus(Request $request, $overtimeId)
     {
         $request->validate([
-            'status' => 'required|in:approved,declined',
+            'status' => 'required|in:approved,declined,rejected,refused',
             'approver' => 'nullable|in:direct,head',
         ]);
 

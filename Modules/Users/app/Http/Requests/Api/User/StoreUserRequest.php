@@ -49,14 +49,16 @@ class StoreUserRequest extends FormRequest
             'work_type_id' => ['required', 'exists:work_types,id'],
             'image' => $this->hasFile('image') ? ['image', 'mimes:jpeg,png,jpg', 'max:15360'] : ['nullable'],
             'serial_number' => ['nullable', 'string'],
-                        'timezone_id' => ['nullable', 'exists:timezones,id'],
+            'timezone_id' => ['nullable', 'exists:timezones,id'],
 
-            
-            
-            'department_id' => [ 'nullable','exists:departments,id'],
+
+
+            'department_id' => ['nullable', 'exists:departments,id'],
             'sub_department_id' => ['nullable', 'exists:sub_departments,id'],
             'is_part_time' => ['sometimes', 'boolean'],
             'works_on_saturday' => ['nullable', 'boolean'],
+            'bank_account_number' => ['nullable', 'string', 'min:5', 'max:50', 'regex:/^[0-9]+$/'],
+            'bank_name' => ['nullable', 'string', 'max:100'],
 
             // 'is_float' => ['nullable'],
         ];
