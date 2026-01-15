@@ -743,23 +743,6 @@ class UserVacationController extends Controller
     {
         $current = $this->statusValue($vacation->status);
 
-        // For Unpaid Leave with future balance, deduct from Annual Leave instead
-        if (
-            $allowFutureBalance &&
-            $vacation->vacationType->name === self::EXCEPTIONAL_LEAVE_NAME &&
-            $previousOverall !== StatusEnum::Approved->value &&
-            $current === StatusEnum::Approved->value
-        ) {
-
-            $annualType = VacationType::where('name', self::ANNUAL_LEAVE_NAME)->first();
-            if ($annualType) {
-                $annualBalance = $this->getOrCreateBalance($vacation->user, $annualType, Carbon::parse($vacation->from_date));
-                $annualBalance->used_days = ($annualBalance->used_days ?? 0) + ($vacation->days_count ?? 0);
-                $annualBalance->save();
-            }
-            return;
-        }
-
         // Skip balance updates for Unpaid Leave (unless using future balance above)
         if ($vacation->vacationType->name === self::UNPAID_LEAVE_NAME) {
             return;
@@ -793,7 +776,7 @@ class UserVacationController extends Controller
             $balance->used_days = max(0, ($balance->used_days ?? 0) - $days);
             $balance->save();
 
-            // Revert Annual Leave balance if Casual or Emergency
+            // Revert Annual Leave balance if Casual or Emergency or Exceptional
             $this->updateAnnualBalance($vacation, -$days);
 
             return;
@@ -804,14 +787,14 @@ class UserVacationController extends Controller
             $balance->used_days = ($balance->used_days ?? 0) + $days;
             $balance->save();
 
-            // Deduct from Annual Leave balance if Casual or Emergency
+            // Deduct from Annual Leave balance if Casual or Emergency or Exceptional
             $this->updateAnnualBalance($vacation, $days);
         }
     }
 
     protected function updateAnnualBalance(UserVacation $vacation, float $days): void
     {
-        if (in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME])) {
+        if (in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME, self::EXCEPTIONAL_LEAVE_NAME])) {
             $annualType = VacationType::where('name', self::ANNUAL_LEAVE_NAME)->first();
             if ($annualType) {
                 $annualBalance = $this->getOrCreateBalance($vacation->user, $annualType, Carbon::parse($vacation->from_date));
