@@ -65,6 +65,10 @@
       </div>
     </div>
 
+<div class="flex flex-col md:flex-row md:space-x-3 mt-6">
+  <app-card-chart [Data]="Data[0]"></app-card-chart>
+  <app-card-chart [Data]="Data[1]"></app-card-chart>
+</div>
     <div class="grid md:grid-cols-4 gap-4 mt-5">
       <div class="space-y-1">
         <p class="text-sm text-[#5F6D7E] uppercase">Employees</p>
@@ -110,10 +114,6 @@
   </div>
 </div>
 
-<div class="flex flex-col md:flex-row md:space-x-3 mt-6">
-  <app-card-chart [Data]="Data[0]"></app-card-chart>
-  <app-card-chart [Data]="Data[1]"></app-card-chart>
-</div>
 
 <!-- <section class="grid lg:grid-cols-2 gap-6 mt-8">
   <article class="bg-white border border-[#E0E7FF]/60 rounded-xl shadow px-6 py-5">
