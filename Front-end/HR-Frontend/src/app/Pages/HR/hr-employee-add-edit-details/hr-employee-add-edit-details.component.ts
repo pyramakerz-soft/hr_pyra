@@ -29,7 +29,7 @@ import { HrStateService } from '../../../Services/SaveState/hr-state.service';
   styleUrl: './hr-employee-add-edit-details.component.css'
 })
 export class HrEmployeeAddEditDetailsComponent {
-  EmployeeId:number = 0
+  EmployeeId: number = 0
   roles: RoleModel[] = [];
   workTypes: WorkType[] = [];
   Locations: AssignLocationToUser[] = [];
@@ -37,7 +37,7 @@ export class HrEmployeeAddEditDetailsComponent {
   imagePreview: string | ArrayBuffer | null = null;
   isSaved = false
   isFloatChecked: boolean = false;
-    timezones: Timezone[] = [];
+  timezones: Timezone[] = [];
 
   planEditor = new DeductionPlanEditor();
   employeePlan: DeductionPlan = this.planEditor.plan;
@@ -60,7 +60,7 @@ export class HrEmployeeAddEditDetailsComponent {
 
   employee: AddEmployee = new AddEmployee();
 
-   regexPhone = /^\d{11,}$/;
+  regexPhone = /^\d{11,}$/;
 
   regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   regexNationalID = /^\d{14}$/;
@@ -68,32 +68,32 @@ export class HrEmployeeAddEditDetailsComponent {
   maxFileSize = 15 * 1024 * 1024;
 
   validationErrors: { [key in keyof AddEmployee]?: string } = {};
-  
 
-  SelectDepartment:string="AllDepartment";
-  departments:Department[]=[]
+
+  SelectDepartment: string = "AllDepartment";
+  departments: Department[] = []
   subDepartments: any[] = [];
-  
+
   selectedDepartment: number | null = null;
   selectedSubDepartment: number | null = null;
   selectedTimezone: number | null = null;
 
 
-  constructor(private route: ActivatedRoute,  
-              public roleService: RolesService, 
-              public departmentService: DepartmentService,
-              public userService: UserServiceService, 
-              public workTypeService: WorkTypeService,
-              public locationService: LocationsService,
-              public timezoneService: TimeZoneService,
-              public router: Router,
-              public supDeptServ:SubDepartmentService,
-              private planService: DeductionPlanService,
-              private hrStateService: HrStateService 
+  constructor(private route: ActivatedRoute,
+    public roleService: RolesService,
+    public departmentService: DepartmentService,
+    public userService: UserServiceService,
+    public workTypeService: WorkTypeService,
+    public locationService: LocationsService,
+    public timezoneService: TimeZoneService,
+    public router: Router,
+    public supDeptServ: SubDepartmentService,
+    private planService: DeductionPlanService,
+    private hrStateService: HrStateService
 
-              
-            ){}
-  
+
+  ) { }
+
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       if (params['Id']) {
@@ -114,15 +114,15 @@ export class HrEmployeeAddEditDetailsComponent {
 
   }
 
-goBack() {
-  if (this.hrStateService) {
-    this.hrStateService.clearEmployeeState();
-  }
-  
-  this.router.navigateByUrl('HR/HREmployee');
-}
+  goBack() {
+    if (this.hrStateService) {
+      this.hrStateService.clearEmployeeState();
+    }
 
-  getTimezones(){
+    this.router.navigateByUrl('HR/HREmployee');
+  }
+
+  getTimezones() {
     this.timezoneService.getAllTimezones().subscribe(
       (timezones: any) => {
         this.timezones = timezones.data || timezones;
@@ -137,13 +137,13 @@ goBack() {
     this.employee.timezone_id = this.selectedTimezone;
   }
 
-  getRoles(){
-    
+  getRoles() {
+
     this.roleService.getall().subscribe(
       (roles: any) => {
-        
+
         this.roles = roles.roles
-        
+
       }
 
     );
@@ -179,7 +179,7 @@ goBack() {
 
 
 
-  GetAllDepartment(){
+  GetAllDepartment() {
     this.departmentService.getall().subscribe(
       (d: any) => {
         this.departments = d.data.departments;
@@ -191,35 +191,35 @@ goBack() {
 
 
 
-onDepartmentChange() {
+  onDepartmentChange() {
 
- this.subDepartments = [];
+    this.subDepartments = [];
 
- this.selectedSubDepartment=null;
+    this.selectedSubDepartment = null;
 
- if (this.selectedDepartment) {
-  this.supDeptServ.setDeptId(this.selectedDepartment);
+    if (this.selectedDepartment) {
+      this.supDeptServ.setDeptId(this.selectedDepartment);
 
-   this.getSubDepartments(this.selectedDepartment);
- }
-}
+      this.getSubDepartments(this.selectedDepartment);
+    }
+  }
 
-getSubDepartments(departmentId: number) {
-  
- this.supDeptServ.getall (departmentId).subscribe(
-   (res: any) => {
-     this.subDepartments = res.data || res;
-   },
-   (err) => {
-     console.error('Failed to fetch sub-departments', err);
-   }
- );
-}
+  getSubDepartments(departmentId: number) {
 
-onSubDepartmentChange() {
+    this.supDeptServ.getall(departmentId).subscribe(
+      (res: any) => {
+        this.subDepartments = res.data || res;
+      },
+      (err) => {
+        console.error('Failed to fetch sub-departments', err);
+      }
+    );
+  }
+
+  onSubDepartmentChange() {
 
 
-}
+  }
 
 
 
@@ -231,24 +231,24 @@ onSubDepartmentChange() {
     const input = event.target as HTMLInputElement;
     let previousValue = input.value;
 
-    input.addEventListener('input', function() {
-        let newValue = input.value.replace(/[^0-9.]/g, '');
+    input.addEventListener('input', function () {
+      let newValue = input.value.replace(/[^0-9.]/g, '');
 
-        if (newValue.split('.').length > 2) {
-            input.value = previousValue; 
-        } else {
-            input.value = newValue; 
-            previousValue = input.value; 
-        }
+      if (newValue.split('.').length > 2) {
+        input.value = previousValue;
+      } else {
+        input.value = newValue;
+        previousValue = input.value;
+      }
     });
-  }  
+  }
 
-  removeFromLocations(locationID:number, event: MouseEvent){
+  removeFromLocations(locationID: number, event: MouseEvent) {
     event.stopPropagation();
     this.employee.location_id = this.employee.location_id.filter(locarion_Id => locarion_Id !== locationID);
   }
-  
-  getEmployeeByID(id:number){
+
+  getEmployeeByID(id: number) {
     this.userService.getUserById(id).subscribe(
       (d: any) => {
         this.employee = d.User;
@@ -258,21 +258,21 @@ onSubDepartmentChange() {
         this.selectedSubDepartment = this.employee.sub_department_id
         this.selectedTimezone = this.employee.timezone_id
 
-        if( this.employee.department_id){
+        if (this.employee.department_id) {
           this.supDeptServ.setDeptId(this.employee.department_id!);
-          this.getSubDepartments(  this.employee.department_id)
+          this.getSubDepartments(this.employee.department_id)
 
         }
         // this.employee.role = this.employee.role || ''
         // this.employee.is_float == 1 ? this.isFloatChecked = true : this.isFloatChecked = false 
-        if(typeof this.employee.image == "string"){
+        if (typeof this.employee.image == "string") {
           this.imagePreview = this.employee.image
         }
       }
     );
   }
 
-  getDepartments(){
+  getDepartments() {
     this.departmentService.getall().subscribe(
       (departments: any) => {
         this.departments = departments.data.departments
@@ -280,8 +280,8 @@ onSubDepartmentChange() {
     );
   }
 
-  
-  getWorkType(){
+
+  getWorkType() {
     this.workTypeService.getall().subscribe(
       (workTypes: any) => {
         this.workTypes = (workTypes?.workTypes ?? []).map((work: any) => {
@@ -385,12 +385,12 @@ onSubDepartmentChange() {
     this.validationErrors['max_monthly_hours'] = '';
     return true;
   }
-  
-  getLocations(){
+
+  getLocations() {
     this.locationService.GetAllNames().subscribe(
       (locations: any) => {
         this.Locations = locations.locationNames
-      } 
+      }
     );
   }
 
@@ -408,7 +408,7 @@ onSubDepartmentChange() {
       }
     }
 
-    if(!this.isFloatChecked){
+    if (!this.isFloatChecked) {
       if (this.employee.location_id.length > 0) {
         this.validationErrors['location_id'] = '';
       } else {
@@ -437,23 +437,23 @@ onSubDepartmentChange() {
       this.selectedDepartment = null;
       this.selectedSubDepartment = null;
     }
-  
+
   }
-  
+
 
   onImageFileSelected(event: any) {
     const file: File = event.target.files[0];
-    
+
     if (file) {
       if (file.size > this.maxFileSize) {
         this.validationErrors['image'] = 'The file size exceeds the maximum limit of 15 MB.';
         this.imagePreview = null;
         this.employee.image = null;
-        return; 
+        return;
       }
       if (file.type === 'image/jpeg' || file.type === 'image/png') {
-        this.employee.image = file; 
-        this.validationErrors['image'] = ''; 
+        this.employee.image = file;
+        this.validationErrors['image'] = '';
 
         const reader = new FileReader();
         reader.onload = () => {
@@ -464,16 +464,16 @@ onSubDepartmentChange() {
         this.validationErrors['image'] = 'Invalid file type. Only JPEG, JPG and PNG are allowed.';
         this.imagePreview = null;
         this.employee.image = null;
-        return; 
+        return;
       }
     }
   }
 
   capitalizeField(field: keyof AddEmployee): string {
-    if(field == "emp_type"){
+    if (field == "emp_type") {
       return "Position";
     }
-    if(field == "timezone_id"){
+    if (field == "timezone_id") {
       return "Timezone";
     }
     return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
@@ -482,47 +482,47 @@ onSubDepartmentChange() {
   isFormValid(): boolean {
     let isValid = true;
 
-  
+
     // Convert to string for saving/debugging
     const employeeStr = JSON.stringify(this.employee);
-  
+
     for (const key in this.employee) {
       if (this.employee.hasOwnProperty(key)) {
         const field = key as keyof AddEmployee;
-  
+
         if (this.employee.role?.name === 'Employee') {
-  
+
           if (!this.selectedDepartment) {
             this.validationErrors['selectedDepartment' as keyof AddEmployee] = '*Department is required for Employees.';
             isValid = false;
           } else {
             this.validationErrors['selectedDepartment' as keyof AddEmployee] = '';
-            isValid = true;
+            // Don't reset isValid to true here - it would overwrite previous validation failures
           }
         }
 
 
 
 
-            // Skip validation for department_id and sub_department_id if role is not Employee
-            if (this.employee.role?.name !== 'Employee' && (
-                field === "deparment_name"||
-              field === "department_id" || field === "sub_department_id")) {
-              continue; // Skip this field from validation
-            }
+        // Skip validation for department_id and sub_department_id if role is not Employee
+        if (this.employee.role?.name !== 'Employee' && (
+          field === "deparment_name" ||
+          field === "department_id" || field === "sub_department_id")) {
+          continue; // Skip this field from validation
+        }
 
-    // Add validation: If role is 'Employee', department is required
-  if (this.employee.role?.name === 'Employee' && !this.selectedDepartment) {
-    this.validationErrors['department_id'] = '*Department is required for employees.';
-    isValid = false;
-  }
+        // Add validation: If role is 'Employee', department is required
+        if (this.employee.role?.name === 'Employee' && !this.selectedDepartment) {
+          this.validationErrors['department_id'] = '*Department is required for employees.';
+          isValid = false;
+        }
 
-        if (!this.employee[field] && field !== "code" && field !== 'work_home' && field !== "image" &&  field !== "working_hours_day" && field !== "timezone_id" && field !== "max_monthly_hours" && field !== "works_on_saturday") {
-  
+        if (!this.employee[field] && field !== "code" && field !== 'work_home' && field !== "image" && field !== "working_hours_day" && field !== "timezone_id" && field !== "max_monthly_hours" && field !== "works_on_saturday" && field !== "is_part_time") {
+
           if (this.EmployeeId !== 0) {
             continue;
           }
-  
+
           if (field === "start_time" || field === "end_time") {
             if (!this.isFloatChecked) {
               this.validationErrors[field] = `*${this.capitalizeField(field)} is required`;
@@ -537,7 +537,7 @@ onSubDepartmentChange() {
           }
         } else {
           this.validationErrors[field] = '';
-  
+
           switch (field) {
             case "name":
               if (this.employee.name.length < 3) {
@@ -552,24 +552,24 @@ onSubDepartmentChange() {
               }
               break;
             case "phone":
-              
+
               const cleanedPhone = this.employee.phone.replace(/[^\d]/g, ''); // keep only digits
 
-              if (!this.regexPhone .test(cleanedPhone)) {
+              if (!this.regexPhone.test(cleanedPhone)) {
                 this.validationErrors[field] = 'Invalid phone number.';
                 isValid = false;
               }
-              this.employee.phone=cleanedPhone
+              this.employee.phone = cleanedPhone
               break;
             case "contact_phone":
-            
+
               const cleanedContactPhone = this.employee.phone.replace(/[^\d]/g, ''); // keep only digits
 
-              if (!this.regexPhone .test(cleanedContactPhone)) {
+              if (!this.regexPhone.test(cleanedContactPhone)) {
                 this.validationErrors[field] = 'Invalid phone number.';
                 isValid = false;
               }
-              this.employee.contact_phone=cleanedContactPhone
+              this.employee.contact_phone = cleanedContactPhone
 
               break;
             case "password":
@@ -594,7 +594,7 @@ onSubDepartmentChange() {
         }
       }
     }
-  
+
     if (!this.employee.role) {
       this.validationErrors['role'] = '*Role is required.';
       isValid = false;
@@ -609,16 +609,16 @@ onSubDepartmentChange() {
     } else {
       this.validationErrors['timezone_id'] = '';
     }
-  
+
     if (!this.isFloatChecked) {
-  
+
       if (this.employee.work_type_id.length === 0) {
         this.validationErrors['work_type_id'] = '*Work Type is required.';
         isValid = false;
       } else {
         this.validationErrors['work_type_id'] = '';
       }
-  
+
       if (this.employee.location_id.length === 0) {
         this.validationErrors['location_id'] = '*Location is required.';
         isValid = false;
@@ -649,13 +649,13 @@ onSubDepartmentChange() {
 
         let [xHours, xMinutes] = this.employee.start_time.split(':').map(Number);
         let [yHours, yMinutes] = this.employee.end_time.split(':').map(Number);
-  
+
         const start_timeDate = new Date();
         const end_timeDate = new Date();
-  
+
         start_timeDate.setHours(xHours, xMinutes, 0, 0);
         end_timeDate.setHours(yHours, yMinutes, 0, 0);
-  
+
         const diffMilliseconds = end_timeDate.getTime() - start_timeDate.getTime();
         const diffHours = diffMilliseconds / (1000 * 60 * 60);
 
@@ -701,14 +701,14 @@ onSubDepartmentChange() {
         }
       }
     }
-  
+
     if (!this.updatePartTimeValidationState()) {
       isValid = false;
     }
 
     return isValid;
   }
-  
+
   onInputValueChange(event: { field: keyof AddEmployee, value: any }) {
     const { field, value } = event;
     if (field in this.employee) {
@@ -974,70 +974,76 @@ onSubDepartmentChange() {
     return editable;
   }
 
-SaveEmployee() {
+  SaveEmployee() {
+    console.log('SaveEmployee() called'); // Debug: confirm button click works
+
     if (!this.employee.is_part_time) {
-        this.employee.max_monthly_hours = null;
+      this.employee.max_monthly_hours = null;
     }
 
-    if (this.isFormValid()) {
-        this.isSaved = true;
-        this.employee.department_id =this.selectedDepartment==null? null:Number(this.selectedDepartment);
-        this.employee.sub_department_id =this.selectedSubDepartment==null?null: Number(this.selectedSubDepartment);
-        this.employee.timezone_id = this.selectedTimezone;
+    const formValid = this.isFormValid();
+    console.log('isFormValid() returned:', formValid); // Debug: check validation result
+    console.log('Validation Errors:', this.validationErrors); // Debug: show what failed
+
+    if (formValid) {
+      this.isSaved = true;
+      this.employee.department_id = this.selectedDepartment == null ? null : Number(this.selectedDepartment);
+      this.employee.sub_department_id = this.selectedSubDepartment == null ? null : Number(this.selectedSubDepartment);
+      this.employee.timezone_id = this.selectedTimezone;
 
 
 
-        // Log the payload for debugging
-        console.log('Employee Payload:', this.employee);
+      // Log the payload for debugging
+      console.log('Employee Payload:', this.employee);
 
-        if (this.EmployeeId === 0) {
-            this.userService.createUser(this.employee).subscribe(
-                (result: any) => {
-                    this.isSaved = false;
-                    Swal.fire({
-                        icon: "success",
-                        title: "Employee Created Successfully!",
-                        text: "The employee has been added to the system.",
-                        confirmButtonText: "OK",
-                        confirmButtonColor: "#FF7519",
-                    }).then(() => {
-                        this.router.navigateByUrl("HR/HREmployee");
-                    });
-                },
-                error => {
-                    this.isSaved = false;
-                    console.error('Create User Error:', error); // Log the full error
-                    this.handleServerErrors(error.error?.errors || {});
-                }
-            );
-        } else {
-            this.userService.updateUser(this.employee, this.EmployeeId).subscribe(
-                (result: any) => {
-                    this.isSaved = false;
-                    Swal.fire({
-                        icon: "success",
-                        title: "Employee Updated Successfully!",
-                        text: "The employee information has been updated.",
-                        confirmButtonText: "OK",
-                        confirmButtonColor: "#FF7519",
-                    }).then(() => {
-                        this.router.navigateByUrl("HR/HREmployee");
-                    });
-                },
-                error => {
-                  this.isSaved = false;
+      if (this.EmployeeId === 0) {
+        this.userService.createUser(this.employee).subscribe(
+          (result: any) => {
+            this.isSaved = false;
+            Swal.fire({
+              icon: "success",
+              title: "Employee Created Successfully!",
+              text: "The employee has been added to the system.",
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+            }).then(() => {
+              this.router.navigateByUrl("HR/HREmployee");
+            });
+          },
+          error => {
+            this.isSaved = false;
+            console.error('Create User Error:', error); // Log the full error
+            this.handleServerErrors(error.error?.errors || {});
+          }
+        );
+      } else {
+        this.userService.updateUser(this.employee, this.EmployeeId).subscribe(
+          (result: any) => {
+            this.isSaved = false;
+            Swal.fire({
+              icon: "success",
+              title: "Employee Updated Successfully!",
+              text: "The employee information has been updated.",
+              confirmButtonText: "OK",
+              confirmButtonColor: "#FF7519",
+            }).then(() => {
+              this.router.navigateByUrl("HR/HREmployee");
+            });
+          },
+          error => {
+            this.isSaved = false;
 
-                    console.error('Update User Error:', error); // Log the full error
-                    this.handleServerErrors(error.error?.errors || {});
-                }
-            );
-        }
+            console.error('Update User Error:', error); // Log the full error
+            this.handleServerErrors(error.error?.errors || {});
+          }
+        );
+      }
     }
-}
+  }
   private handleServerErrors(errors: Record<keyof AddEmployee, string[]>) {
     for (const key in errors) {
       if (errors.hasOwnProperty(key)) {
-        const field = key as keyof AddEmployee; 
+        const field = key as keyof AddEmployee;
         this.validationErrors[field] = errors[field].join(' ');
       }
     }
