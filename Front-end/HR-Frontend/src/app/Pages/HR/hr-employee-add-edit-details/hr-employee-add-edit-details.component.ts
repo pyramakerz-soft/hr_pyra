@@ -19,7 +19,7 @@ import { WorkTypeService } from '../../../Services/work-type.service';
 import { DeductionPlan, DeductionPlanSource, DeductionRule, ResolvedDeductionPlan } from '../../../Models/deduction-plan';
 import { DeductionPlanService } from '../../../Services/deduction-plan.service';
 import { DeductionPlanEditor, PLAN_CONDITION_OPTIONS, PLAN_PENALTY_TYPES, PLAN_RULE_CATEGORIES, PLAN_SCOPE_OPTIONS, WEEKDAY_OPTIONS, PlanConditionOption, PlanConditionType, getConditionLabel } from '../../../Helpers/deduction-plan-editor';
-// import { HrStateService } from '../../../Services/SaveState/hr-state.service';
+import { HrStateService } from '../../../Services/SaveState/hr-state.service';
 
 @Component({
   selector: 'app-hr-employee-add-edit-details',
@@ -88,8 +88,8 @@ export class HrEmployeeAddEditDetailsComponent {
               public timezoneService: TimeZoneService,
               public router: Router,
               public supDeptServ:SubDepartmentService,
-              private planService: DeductionPlanService
-              // private hrStateService: HrStateService 
+              private planService: DeductionPlanService,
+              private hrStateService: HrStateService 
 
               
             ){}
