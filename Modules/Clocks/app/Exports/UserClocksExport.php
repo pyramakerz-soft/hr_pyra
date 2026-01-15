@@ -12,12 +12,10 @@ use Modules\Clocks\Exports\Sheets\UserClocksSummarySheet;
 use Modules\Clocks\Exports\Sheets\UserClocksPlanSheet;
 use Modules\Clocks\Models\ClockInOut;
 use Modules\Users\Models\OverTime;
-use Modules\Users\Models\OverTime;
 use Modules\Users\Models\User;
 use Modules\Users\Models\CustomVacation;
 use Modules\Clocks\Support\DeductionPlanResolver;
 use Modules\Clocks\Support\DeductionRuleEngine;
-use Modules\Users\Models\VacationType;
 use Modules\Users\Models\VacationType;
 
 class UserClocksExport implements WithMultipleSheets
@@ -146,9 +144,7 @@ class UserClocksExport implements WithMultipleSheets
         $customVacationCache = [];
 
         $annualLeaveType = VacationType::where('name', 'Annual Leave')->first();
-        $annualLeaveType = VacationType::where('name', 'Annual Leave')->first();
         foreach ($this->users as $user) {
-            if (!$user instanceof User) {
             if (!$user instanceof User) {
                 continue;
             }
@@ -163,7 +159,6 @@ class UserClocksExport implements WithMultipleSheets
                 ->values()
                 ->all();
             $isPartTime = (bool) ($user->is_part_time ?? false);
-            if (!$isPartTime) {
             if (!$isPartTime) {
                 $isPartTime = in_array('part time', $userWorkTypes, true);
             }
