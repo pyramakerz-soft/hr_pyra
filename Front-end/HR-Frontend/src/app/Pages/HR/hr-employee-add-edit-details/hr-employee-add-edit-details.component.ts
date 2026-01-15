@@ -88,8 +88,8 @@ export class HrEmployeeAddEditDetailsComponent {
               public timezoneService: TimeZoneService,
               public router: Router,
               public supDeptServ:SubDepartmentService,
-              private planService: DeductionPlanService,
-              private hrStateService: HrStateService 
+              private planService: DeductionPlanService
+              // private hrStateService: HrStateService 
 
               
             ){}
