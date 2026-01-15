@@ -46,17 +46,19 @@ class HrUserProfileController extends Controller
                 'emp_type' => optional($user->user_detail)->emp_type,
                 'hiring_date' => optional($user->user_detail)->hiring_date,
             ],
-            'vacation_balances' => $user->vacationBalances->map(function (UserVacationBalance $balance) {
-                return [
-                    'id' => $balance->id,
-                    'vacation_type_id' => $balance->vacation_type_id,
-                    'vacation_type_name' => $balance->vacationType?->name,
-                    'year' => $balance->year,
-                    'allocated_days' => (float) ($balance->allocated_days ?? 0),
-                    'used_days' => (float) ($balance->used_days ?? 0),
-                    'remaining_days' => (float) $balance->remaining_days,
-                ];
-            })->values(),
+            'vacation_balances' => $user->vacationBalances
+                ->filter(fn(UserVacationBalance $balance) => $balance->vacationType?->name !== 'Exceptional Leave')
+                ->map(function (UserVacationBalance $balance) {
+                    return [
+                        'id' => $balance->id,
+                        'vacation_type_id' => $balance->vacation_type_id,
+                        'vacation_type_name' => $balance->vacationType?->name,
+                        'year' => $balance->year,
+                        'allocated_days' => (float) ($balance->allocated_days ?? 0),
+                        'used_days' => (float) ($balance->used_days ?? 0),
+                        'remaining_days' => (float) $balance->remaining_days,
+                    ];
+                })->values(),
             'vacation_types' => $vacationTypes,
         ], 'HR profile data retrieved successfully');
     }
