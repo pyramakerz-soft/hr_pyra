@@ -10,6 +10,7 @@ import { EmployeeDashboard } from '../../../Models/employee-dashboard';
 import { ClockService } from '../../../Services/clock.service';
 import { EmployeeDashService } from '../../../Services/employee-dash.service';
 import { UserServiceService } from '../../../Services/user-service.service';
+import { HrStateService } from '../../../Services/SaveState/hr-state.service';
 
 @Component({
   selector: 'app-hr-employee-attendance-details',
@@ -36,7 +37,7 @@ export class HrEmployeeAttendanceDetailsComponent {
   selectedMonth: string = "01";
   selectedYear: number = 0;
   DateString: string = "2019-01";
-  AddClockInButton:boolean=false;
+  AddClockInButton: boolean = false;
 
   months = [
     { name: 'January', value: "01" },
@@ -57,12 +58,12 @@ export class HrEmployeeAttendanceDetailsComponent {
 
 
   from_day: string = '';
-  to_day: string = '';  
+  to_day: string = '';
 
 
   constructor(public empDashserv: EmployeeDashService, public UserClocksService:
     ClockService, public activatedRoute: ActivatedRoute, public userService: UserServiceService,
-    public route: Router, public dialog: MatDialog) { }
+    public route: Router, public dialog: MatDialog, private hrStateService: HrStateService) { }
 
 
   ngOnInit() {
@@ -84,7 +85,12 @@ export class HrEmployeeAttendanceDetailsComponent {
         const id = params['Id'];
         this.UserID = id;
         if (id) {
-          this.getAllClocks(this.CurrentPageNumber);
+          // Read query params for date filters
+          this.activatedRoute.queryParams.subscribe((queryParams) => {
+            this.from_day = queryParams['from_day'] || '';
+            this.to_day = queryParams['to_day'] || '';
+            this.getAllClocks(this.CurrentPageNumber);
+          });
           this.getEmployeeByID(id)
         } else {
           Swal.fire({
@@ -97,13 +103,28 @@ export class HrEmployeeAttendanceDetailsComponent {
     });
   }
 
+  onDateChange() {
+    // Navigate to the same page with updated query params
+    if (this.from_day && this.to_day) {
+      this.route.navigate([], {
+        relativeTo: this.activatedRoute,
+        queryParams: { from_day: this.from_day, to_day: this.to_day },
+        queryParamsHandling: 'merge'
+      });
+    }
+  }
+
+  goBack() {
+    this.route.navigateByUrl('HR/HRAttendance');
+  }
+
   populateYears(): void {
     const startYear = 2019;
     let currentYear = new Date().getFullYear();
     const today = new Date().getDate();
     const currentMonth = new Date().getMonth() + 1;
     // console.log(today , currentMonth)
-    if(today>25&&currentMonth==12){
+    if (today > 25 && currentMonth == 12) {
       currentYear++;
     }
     for (let year = startYear; year <= currentYear; year++) {
@@ -168,13 +189,13 @@ export class HrEmployeeAttendanceDetailsComponent {
   }
 
   getAllClocks(PgNumber: number) {
-    this.CurrentPageNumber=PgNumber
+    this.CurrentPageNumber = PgNumber
     this.saveCurrentPageNumber();
-    this.UserClocksService.GetUserClocksById(this.UserID, PgNumber, this.DateString).subscribe(
+    this.UserClocksService.GetUserClocksById(this.UserID, PgNumber, this.DateString, this.from_day, this.to_day).subscribe(
       (d: any) => {
         this.tableData = d.data.clocks;
         console.log(d.data.clocks);
-        
+
         this.rowNumber = new Array(this.tableData.length).fill(false);
         this.PagesNumber = d.data.pagination.last_page;
         this.generatePages();
@@ -237,7 +258,7 @@ export class HrEmployeeAttendanceDetailsComponent {
 
   EditUserClock(Clock: any) {
 
-    this.route.navigate(['HR/HRAttendanceEmployeeEdit/'+Clock.id], { state: { data: Clock, UserId: this.UserID } });
+    this.route.navigate(['HR/HRAttendanceEmployeeEdit/' + Clock.id], { state: { data: Clock, UserId: this.UserID } });
   }
 
   ClearSearch() {
@@ -250,7 +271,7 @@ export class HrEmployeeAttendanceDetailsComponent {
   }
 
   openDialog() {
-    this.AddClockInButton=true;
+    this.AddClockInButton = true;
     const dialogRef = this.dialog.open(ClockInPopUpComponent, {
       data: { Name: this.employee.name, job_title: this.employee.emp_type, work_home: this.employee.work_home, isClockInFromHrToOtherUser: true, userId: this.UserID }
 
@@ -258,7 +279,7 @@ export class HrEmployeeAttendanceDetailsComponent {
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
         this.getAllClocks(1)
-        this.AddClockInButton=false;
+        this.AddClockInButton = false;
 
       }
     });

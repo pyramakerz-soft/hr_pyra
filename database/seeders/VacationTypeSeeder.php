@@ -53,6 +53,10 @@ class VacationTypeSeeder extends Seeder
                 'name' => 'Annual Leave',
                 'default_days' => 0,
             ],
+            [
+                'name' => 'Exceptional Leave',
+                'default_days' => 0,
+            ],
         ];
 
         // Insert or update the records in the database

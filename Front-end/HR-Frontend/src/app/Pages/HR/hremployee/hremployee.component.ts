@@ -10,6 +10,7 @@ import { UserServiceService } from '../../../Services/user-service.service';
 import Swal from 'sweetalert2';
 import { ClockService } from '../../../Services/clock.service';
 import { EmployeeHrProfileDialogComponent } from '../../../Components/employee-hr-profile-dialog/employee-hr-profile-dialog.component';
+import { HrStateService } from '../../../Services/SaveState/hr-state.service';
 
 interface data {
   Name: string,
@@ -30,7 +31,7 @@ interface data {
 })
 export class HREmployeeComponent {
 
-  constructor(public dialog: MatDialog, private router: Router, public userServ: UserServiceService , private clockService: ClockService) { }
+  constructor(public dialog: MatDialog, private router: Router, public userServ: UserServiceService , private clockService: ClockService, private hrStateService: HrStateService) { }
 
   tableData: UserModel[] = [];
   isMenuOpen: boolean = false;
@@ -45,23 +46,36 @@ export class HREmployeeComponent {
 
   isNavigateingToImportPopUp = false
 
-  ngOnInit() {
-
+ngOnInit() {
+  // Get saved state
+  const savedState = this.hrStateService.getEmployeeState();
+  
+  if (savedState.tableData && savedState.tableData.length > 0) {
+    this.selectedName = savedState.searchQuery;
+    this.CurrentPageNumber = savedState.currentPage;
+    this.tableData = savedState.tableData;
+    this.PagesNumber = savedState.pagesNumber;
+    // this.DisplayPagginationOrNot = savedState.displayPagination;
+    
+    // Clear the state so it doesn't persist on refresh
+    this.hrStateService.clearEmployeeState();
+  } else {
+    // Original initialization
     const savedPageNumber = localStorage.getItem('HrEmployeeCN');
     if (savedPageNumber) {
       this.CurrentPageNumber = parseInt(savedPageNumber, 10);
     } else {
-      this.CurrentPageNumber = 1; // Default value if none is saved
+      this.CurrentPageNumber = 1;
     }
     this.getAllEmployees(this.CurrentPageNumber);
-    this.getUsersName()
-
-    localStorage.setItem('HrLocationsCN', "1");
-    localStorage.setItem('HrAttendaceCN', "1");
-    localStorage.setItem('HrAttanceDetailsCN', "1");
-
-
   }
+  
+  this.getUsersName();
+  
+  localStorage.setItem('HrLocationsCN', "1");
+  localStorage.setItem('HrAttendaceCN', "1");
+  localStorage.setItem('HrAttanceDetailsCN', "1");
+}
 
    downloadExcelTemplate() {
     this.isLoading = true; // Show spinner
@@ -114,9 +128,17 @@ export class HREmployeeComponent {
     this.router.navigateByUrl("HR/HREmployeeDetailsAdd")
   }
 
-  NavigateToEmployeeDetails(id: number) {
-    this.router.navigateByUrl(`HR/HREmployeeDetails/${id}`)
-  }
+NavigateToEmployeeDetails(id: number) {
+  this.hrStateService.saveEmployeeState({
+    searchQuery: this.selectedName,
+    currentPage: this.CurrentPageNumber,
+    tableData: this.tableData,
+    pagesNumber: this.PagesNumber,
+    displayPagination: this.DisplayPagginationOrNot
+  });
+  
+  this.router.navigateByUrl(`HR/HREmployeeDetails/${id}`);
+}
 
   NavigateToEditEmployee(empId: number) {
     this.router.navigateByUrl(`HR/HREmployeeDetailsEdit/${empId}`)

@@ -22,7 +22,7 @@ class StartUserOverTimeRequest extends FormRequest
     public function rules()
     {
         return [
-            'from' => 'required|date',   // Validate time format
+            'minutes' => 'required|numeric',   // Validate time format
 
         ];
     }
