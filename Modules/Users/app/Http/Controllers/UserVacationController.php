@@ -714,7 +714,7 @@ class UserVacationController extends Controller
     }
 
 
-    protected function getOrCreateBalance(User $user, VacationType $vacationType, Carbon $date): UserVacationBalance
+    public static function getOrCreateBalance(User $user, VacationType $vacationType, Carbon $date): UserVacationBalance
     {
         return UserVacationBalance::firstOrCreate(
             [

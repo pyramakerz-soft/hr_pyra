@@ -2,6 +2,7 @@
 
 namespace Modules\Users\Http\Controllers;
 
+use Modules\Users\Http\Controllers\UserVacationController;
 use App\Http\Controllers\Controller;
 use App\Traits\ResponseTrait;
 use Illuminate\Support\Facades\DB;
@@ -10,10 +11,21 @@ use Modules\Users\Models\User;
 use Modules\Users\Models\UserDetail;
 use Modules\Users\Models\UserVacationBalance;
 use Modules\Users\Models\VacationType;
+use Carbon\Carbon;
 
 class HrUserProfileController extends Controller
 {
     use ResponseTrait;
+
+    const ANNUAL_LEAVE_NAME = 'Annual Leave';
+    const CASUAL_LEAVE_NAME = 'Casual Leave';
+    const EMERGENCY_LEAVE_NAME = 'Emergency Leave';
+    const UNPAID_LEAVE_NAME = 'Unpaid Leave';
+    const MATERNITY_LEAVE_NAME = 'Maternity Leave';
+    const MARRIAGE_LEAVE_NAME = 'Marriage Leave';
+    const HAJJ_LEAVE_NAME = 'Hajj / Umrah Leave';
+    const EXCEPTIONAL_LEAVE_NAME = 'Exceptional Leave';
+    const SICK_LEAVE_NAME = 'Sick Leave';
 
     public function show(User $user)
     {
@@ -87,6 +99,9 @@ class HrUserProfileController extends Controller
             }
 
             $balances = $payload['vacation_balances'] ?? [];
+            $annualBalanceAdjustment = 0; // Track adjustment from Casual/Emergency/Exceptional leaves
+            $annualBalanceYear = null;
+
             foreach ($balances as $balanceData) {
                 $id = $balanceData['id'] ?? null;
                 $year = (int) ($balanceData['year'] ?? now()->year);
@@ -104,10 +119,28 @@ class HrUserProfileController extends Controller
                 }
 
                 $balance->allocated_days = $allocated;
+                $previouslyUsed = (float) ($balance->used_days ?? 0);
                 $balance->used_days = $used;
                 $balance->year = $year;
                 $balance->vacation_type_id = $balanceData['vacation_type_id'] ?? $balance->vacation_type_id;
+                $vacation = VacationType::where('id', $balanceData['vacation_type_id'])->first();
+
+                // Accumulate adjustments for annual balance from Casual/Emergency/Exceptional leaves
+                if (in_array($vacation->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME, self::EXCEPTIONAL_LEAVE_NAME])) {
+                    $annualBalanceAdjustment += ($used - $previouslyUsed);
+                    $annualBalanceYear = $year;
+                }
                 $balance->save();
+            }
+
+            // Apply accumulated adjustment to Annual Leave balance after all balances are saved
+            if ($annualBalanceAdjustment != 0 && $annualBalanceYear !== null) {
+                $annualType = VacationType::where('name', self::ANNUAL_LEAVE_NAME)->first();
+                if ($annualType) {
+                    $annualBalance = UserVacationController::getOrCreateBalance($user, $annualType, Carbon::createFromDate($annualBalanceYear));
+                    $annualBalance->used_days = max(0, ($annualBalance->used_days ?? 0) + $annualBalanceAdjustment);
+                    $annualBalance->save();
+                }
             }
 
             $idsToDelete = $payload['vacation_balance_ids_to_delete'] ?? [];
