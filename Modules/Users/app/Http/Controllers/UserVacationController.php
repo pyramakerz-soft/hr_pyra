@@ -348,7 +348,7 @@ class UserVacationController extends Controller
                             return $this->returnError('Insufficient ' . self::ANNUAL_LEAVE_NAME . ' balance. Remaining days: ' . $annualBalance->remaining_days, 422);
                         }
                     }
-                } elseif ($vacation->vacationType->name !== self::UNPAID_LEAVE_NAME && $vacation->vacationType->name !== self::SICK_LEAVE_NAME) {
+                } elseif ($vacation->vacationType->name !== self::UNPAID_LEAVE_NAME && $vacation->vacationType->name !== self::SICK_LEAVE_NAME && $vacation->vacationType->name !== self::EXCEPTIONAL_LEAVE_NAME) {
                     // Standard check for other types (excluding Unpaid)
                     $balance = $this->getOrCreateBalance($vacation->user, $vacation->vacationType, Carbon::parse($vacation->from_date));
                     if ($balance->remaining_days < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value) {
