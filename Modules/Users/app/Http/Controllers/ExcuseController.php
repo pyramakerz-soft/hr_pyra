@@ -71,6 +71,7 @@ class ExcuseController extends Controller
 
         $excusesCount = Excuse::where('user_id', $authUser->id)
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
+            ->where('status', '!=', 'rejected')
             ->count();
 
         if ($excusesCount >= 2) {
