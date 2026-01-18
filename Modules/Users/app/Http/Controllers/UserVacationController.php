@@ -448,6 +448,13 @@ class UserVacationController extends Controller
   *             collectionFormat="multi"
   *         )
   *     ),
+  *     @OA\Parameter(
+  *         name="role",
+  *         in="query",
+  *         description="Filter by user role name (e.g. 'Team leader')",
+  *         required=false,
+  *         @OA\Schema(type="string", example="Team leader")
+  *     ),
   *     @OA\Response(
   *         response=200,
   *         description="List of vacations for employees in the manager's department",
@@ -534,10 +541,19 @@ class UserVacationController extends Controller
             $query->whereDate('to_date', '<=', $to);
         }
 
+        if ($role = request()->query('role')) {
+            $query->whereHas('user', function ($q) use ($role) {
+                $q->whereHas('roles', function ($q) use ($role) {
+                    $q->where('name', 'LIKE', '%' . $role . '%');
+                });
+            });
+        }
+
         $perPage = (int) request()->query('per_page', 6);
         if ($perPage < 1) {
             $perPage = 6;
         }
+
 
         $vacations = $query->orderByDesc('from_date')
             ->paginate($perPage, ['*'], 'page', request()->query('page', 1));
