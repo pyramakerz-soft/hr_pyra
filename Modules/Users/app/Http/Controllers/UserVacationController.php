@@ -348,7 +348,7 @@ class UserVacationController extends Controller
                             return $this->returnError('Insufficient ' . self::ANNUAL_LEAVE_NAME . ' balance. Remaining days: ' . $annualBalance->remaining_days, 422);
                         }
                     }
-                } elseif ($vacation->vacationType->name !== self::UNPAID_LEAVE_NAME && $vacation->vacationType->name !== self::SICK_LEAVE_NAME) {
+                } elseif ($vacation->vacationType->name !== self::UNPAID_LEAVE_NAME && $vacation->vacationType->name !== self::SICK_LEAVE_NAME && $vacation->vacationType->name !== self::EXCEPTIONAL_LEAVE_NAME) {
                     // Standard check for other types (excluding Unpaid)
                     $balance = $this->getOrCreateBalance($vacation->user, $vacation->vacationType, Carbon::parse($vacation->from_date));
                     if ($balance->remaining_days < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value) {
@@ -756,24 +756,6 @@ class UserVacationController extends Controller
             ->where('vacation_type_id', $vacation->vacation_type_id)
             ->where('year', Carbon::parse($vacation->from_date)->year)
             ->first();
-
-        // For Casual/Emergency, we only update Annual Leave balance
-        if (in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME])) {
-            $annualType = VacationType::where('name', self::ANNUAL_LEAVE_NAME)->first();
-            if (!$annualType) {
-                return;
-            }
-            $vacation->loadMissing('vacationType', 'user'); // Ensure user and vacationType are loaded
-            $type = $annualType;
-            $user = $vacation->user;
-
-            if (!$type || !$user) {
-                return;
-            }
-            // Re-fetch or create balance for annual leave
-            $balance = $this->getOrCreateBalance($user, $type, Carbon::parse($vacation->from_date));
-        }
-
 
         if (!$balance) {
             $vacation->loadMissing('vacationType', 'user');
