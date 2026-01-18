@@ -61,8 +61,13 @@ class ExcuseController extends Controller
         $authUser = Auth::user();
 
         $requestedDate = Carbon::parse($request->input('date'));
-        $startOfMonth = $requestedDate->copy()->startOfMonth();
-        $endOfMonth = $requestedDate->copy()->endOfMonth();
+        if ($requestedDate->day > 25) {
+            $startOfMonth = $requestedDate->copy()->day(26)->startOfDay();
+            $endOfMonth = $requestedDate->copy()->addMonth()->day(25)->endOfDay();
+        } else {
+            $startOfMonth = $requestedDate->copy()->subMonth()->day(26)->startOfDay();
+            $endOfMonth = $requestedDate->copy()->day(25)->endOfDay();
+        }
 
         $excusesCount = Excuse::where('user_id', $authUser->id)
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
@@ -166,7 +171,7 @@ class ExcuseController extends Controller
         $authUser = Auth::user();
 
 
-        $employeeIds =   $authUser->getManagedEmployeeIds();
+        $employeeIds = $authUser->getManagedEmployeeIds();
 
         if (!in_array($excuse->user_id, $employeeIds->toArray())) {
             return $this->returnError('You are not authorized to update this excuse', 403);
@@ -178,84 +183,84 @@ class ExcuseController extends Controller
         return $this->returnData('Excuse', $excuse, 'Excuse status updated successfully');
     }
 
-/**
- * @OA\Get(
- *     path="/api/excuse/get_excuses_of_manager_employees",
- *     tags={"Excuses"},
- *     summary="Get excuses of employees in the manager's department",
- *     operationId="getExcusesOfManagerEmployees",
- *     security={{ "bearerAuth": {} }},
- *     @OA\Parameter(
- *         name="page",
- *         in="query",
- *         description="Page number for pagination",
- *         required=false,
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *     @OA\Parameter(
- *         name="searchTerm",
- *         in="query",
- *         description="Filter by employee name (partial match allowed)",
- *         required=false,
- *         @OA\Schema(type="string", example="John")
- *     ),
- *     @OA\Parameter(
- *         name="status",
- *         in="query",
- *         description="Filter by status: pending, approved, rejected or 'all'. You can also pass multiple values (e.g. status[]=pending&status[]=approved)",
- *         required=false,
- *         @OA\Schema(
- *             type="array",
- *             @OA\Items(
- *                 type="string",
- *                 enum={"pending", "approved", "rejected", "all"},
- *                 example="pending"
- *             ),
- *             collectionFormat="multi"
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="List of excuses for employees in the manager's department",
- *         @OA\JsonContent(
- *             @OA\Property(property="status", type="string", example="success"),
- *             @OA\Property(property="Excuses", type="object",
- *                 @OA\Property(property="data", type="array",
- *                     @OA\Items(type="object",
- *                         @OA\Property(property="excuse", type="object",
- *                             @OA\Property(property="id", type="integer", example=1),
- *                             @OA\Property(property="user_id", type="integer", example=101),
- *                             @OA\Property(property="date", type="string", format="date", example="2024-08-01"),
- *                             @OA\Property(property="reason", type="string", example="Medical leave")
- *                         ),
- *                         @OA\Property(property="user", type="object",
- *                             @OA\Property(property="id", type="integer", example=101),
- *                             @OA\Property(property="name", type="string", example="John Doe"),
- *                             @OA\Property(property="email", type="string", format="email", example="john.doe@example.com")
- *                         )
- *                     )
- *                 ),
- *                 @OA\Property(property="pagination", type="object",
- *                     @OA\Property(property="total", type="integer", example=50),
- *                     @OA\Property(property="per_page", type="integer", example=6),
- *                     @OA\Property(property="current_page", type="integer", example=1),
- *                     @OA\Property(property="last_page", type="integer", example=9),
- *                     @OA\Property(property="next_page_url", type="string", nullable=true, example="http://yourapi.com/api/excuse/get_excuses_of_manager_employees?page=2"),
- *                     @OA\Property(property="prev_page_url", type="string", nullable=true, example=null)
- *                 )
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=403,
- *         description="Unauthorized"
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="Manager not assigned to any department or no employees found"
- *     )
- * )
- */
+    /**
+     * @OA\Get(
+     *     path="/api/excuse/get_excuses_of_manager_employees",
+     *     tags={"Excuses"},
+     *     summary="Get excuses of employees in the manager's department",
+     *     operationId="getExcusesOfManagerEmployees",
+     *     security={{ "bearerAuth": {} }},
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="searchTerm",
+     *         in="query",
+     *         description="Filter by employee name (partial match allowed)",
+     *         required=false,
+     *         @OA\Schema(type="string", example="John")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Filter by status: pending, approved, rejected or 'all'. You can also pass multiple values (e.g. status[]=pending&status[]=approved)",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="array",
+     *             @OA\Items(
+     *                 type="string",
+     *                 enum={"pending", "approved", "rejected", "all"},
+     *                 example="pending"
+     *             ),
+     *             collectionFormat="multi"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of excuses for employees in the manager's department",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="success"),
+     *             @OA\Property(property="Excuses", type="object",
+     *                 @OA\Property(property="data", type="array",
+     *                     @OA\Items(type="object",
+     *                         @OA\Property(property="excuse", type="object",
+     *                             @OA\Property(property="id", type="integer", example=1),
+     *                             @OA\Property(property="user_id", type="integer", example=101),
+     *                             @OA\Property(property="date", type="string", format="date", example="2024-08-01"),
+     *                             @OA\Property(property="reason", type="string", example="Medical leave")
+     *                         ),
+     *                         @OA\Property(property="user", type="object",
+     *                             @OA\Property(property="id", type="integer", example=101),
+     *                             @OA\Property(property="name", type="string", example="John Doe"),
+     *                             @OA\Property(property="email", type="string", format="email", example="john.doe@example.com")
+     *                         )
+     *                     )
+     *                 ),
+     *                 @OA\Property(property="pagination", type="object",
+     *                     @OA\Property(property="total", type="integer", example=50),
+     *                     @OA\Property(property="per_page", type="integer", example=6),
+     *                     @OA\Property(property="current_page", type="integer", example=1),
+     *                     @OA\Property(property="last_page", type="integer", example=9),
+     *                     @OA\Property(property="next_page_url", type="string", nullable=true, example="http://yourapi.com/api/excuse/get_excuses_of_manager_employees?page=2"),
+     *                     @OA\Property(property="prev_page_url", type="string", nullable=true, example=null)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Manager not assigned to any department or no employees found"
+     *     )
+     * )
+     */
     public function getExcusesOfManagerEmployees()
     {
         $manager = Auth::user();
@@ -267,14 +272,14 @@ class ExcuseController extends Controller
         }
 
         // Date range: 26th of previous month to 26th of current month
-            // $currentDate = Carbon::now();
-            // if ($currentDate->day > 26) {
-            //     $startDate = $currentDate->copy()->setDay(26);
-            //     $endDate = $currentDate->copy()->addMonth()->setDay(26);
-            // } else {
-            //     $startDate = $currentDate->copy()->subMonth()->setDay(26);
-            //     $endDate = $currentDate->copy()->setDay(26);
-            // }
+        // $currentDate = Carbon::now();
+        // if ($currentDate->day > 26) {
+        //     $startDate = $currentDate->copy()->setDay(26);
+        //     $endDate = $currentDate->copy()->addMonth()->setDay(26);
+        // } else {
+        //     $startDate = $currentDate->copy()->subMonth()->setDay(26);
+        //     $endDate = $currentDate->copy()->setDay(26);
+        // }
 
         $searchTerm = request()->query('searchTerm');
         $statusFilter = request()->query('status');
