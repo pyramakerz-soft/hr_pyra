@@ -35,7 +35,7 @@ class SubDepartment extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'users');
+        return $this->hasMany(User::class);
     }
 
     public function customVacations()
@@ -45,7 +45,9 @@ class SubDepartment extends Model
 
     public function employees()
     {
-        return $this->belongsToMany(User::class, 'users')
-            ->where('users.id', '!=', $this->manager_id);
+        return $this->hasMany(User::class)
+            // ->where('id', '!=', $this->manager_id); // Assuming manager_id exists, but based on User model teamlead_id is used.
+            // But let's just fix the relation type first.
+            ->where('id', '!=', $this->teamlead_id);
     }
 }
