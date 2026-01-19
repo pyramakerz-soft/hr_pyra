@@ -35,8 +35,9 @@ class NotificationController extends Controller
         $notifications = SystemNotification::query()
             ->with('createdBy:id,name')
             ->withCount('recipients as recipients_count')
-            ->when($request->filled('type'), fn (Builder $builder) => $builder->where('type', $request->string('type')))
-            ->when($request->filled('scope_type'), fn (Builder $builder) => $builder->where('scope_type', $request->string('scope_type')))
+            ->whereHas('recipients', fn(Builder $builder) => $builder->where('user_id', Auth::id()))
+            ->when($request->filled('type'), fn(Builder $builder) => $builder->where('type', $request->string('type')))
+            ->when($request->filled('scope_type'), fn(Builder $builder) => $builder->where('scope_type', $request->string('scope_type')))
             ->orderByDesc('created_at')
             ->limit($limit)
             ->get();
@@ -112,7 +113,7 @@ class NotificationController extends Controller
     {
         $userId = $request->integer('user_id', Auth::id());
 
-        if (! $userId) {
+        if (!$userId) {
             return $this->returnError('Unable to determine which employee should be updated.');
         }
 
@@ -121,11 +122,11 @@ class NotificationController extends Controller
             ->where('user_id', $userId)
             ->first();
 
-        if (! $recipient) {
+        if (!$recipient) {
             return $this->returnError('No notification record found for the supplied employee.');
         }
 
-        if (! $recipient->read_at) {
+        if (!$recipient->read_at) {
             $recipient->forceFill([
                 'status' => 'read',
                 'read_at' => Carbon::now(),
@@ -160,11 +161,11 @@ class NotificationController extends Controller
      */
     protected function applyFilters(Builder $query, array $filters): Builder
     {
-        if (! empty($filters['roles']) && is_array($filters['roles'])) {
-            $roles = array_filter($filters['roles'], fn ($role) => is_string($role) && $role !== '');
+        if (!empty($filters['roles']) && is_array($filters['roles'])) {
+            $roles = array_filter($filters['roles'], fn($role) => is_string($role) && $role !== '');
 
-            if (! empty($roles)) {
-                $query->whereHas('roles', fn (Builder $builder) => $builder->whereIn('name', $roles));
+            if (!empty($roles)) {
+                $query->whereHas('roles', fn(Builder $builder) => $builder->whereIn('name', $roles));
             }
         }
 
@@ -176,7 +177,7 @@ class NotificationController extends Controller
      */
     protected function usersForDepartment(?int $departmentId): Builder
     {
-        if (! $departmentId) {
+        if (!$departmentId) {
             return User::query()->whereRaw('1 = 0');
         }
 
@@ -197,7 +198,7 @@ class NotificationController extends Controller
      */
     protected function usersForSubDepartment(?int $subDepartmentId): Builder
     {
-        if (! $subDepartmentId) {
+        if (!$subDepartmentId) {
             return User::query()->whereRaw('1 = 0');
         }
 

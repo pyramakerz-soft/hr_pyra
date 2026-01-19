@@ -132,8 +132,12 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
       payload.user_ids = (formValue.user_ids ?? []).map((id: any) => Number(id)).filter((id: number) => !Number.isNaN(id));
     }
 
-    const rolesFilter = formValue.filters?.roles ?? [];
-    if (Array.isArray(rolesFilter) && rolesFilter.length > 0) {
+    const rawRoles = formValue.filters?.roles ?? [];
+    const rolesFilter: string[] = Array.isArray(rawRoles)
+      ? rawRoles.map((r: any) => String(r)).filter((r: string) => r.trim() !== '')
+      : [];
+
+    if (rolesFilter.length > 0) {
       payload.filters = { roles: rolesFilter };
     }
 

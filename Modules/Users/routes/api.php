@@ -169,7 +169,7 @@ Route::prefix('dashboard')->group(function () {
     Route::get('/presence', [DashboardInsightsController::class, 'presence']);
 });
 
-Route::prefix('notifications')->group(function () {
+Route::prefix('notifications')->middleware(['auth:api'])->group(function () {
     Route::get('/types', [NotificationController::class, 'types']);
     Route::get('/', [NotificationController::class, 'index']);
     Route::get('/{notification}', [NotificationController::class, 'show']);
