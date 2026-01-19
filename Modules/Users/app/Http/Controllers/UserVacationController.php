@@ -336,7 +336,7 @@ class UserVacationController extends Controller
                     $allocatedDays = $vacation->vacationType->default_days ?? 0;
                     $remainingDays = max(0, $allocatedDays - $usedDays);
 
-                    if ($remainingDays < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value) {
+                    if ($remainingDays < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value && $status !== StatusEnum::Rejected->value) {
                         return $this->returnError('Insufficient ' . $vacation->vacationType->name . ' balance. Remaining days: ' . $remainingDays, 422);
                     }
 
@@ -344,14 +344,14 @@ class UserVacationController extends Controller
                     $annualType = VacationType::where('name', self::ANNUAL_LEAVE_NAME)->first();
                     if ($annualType) {
                         $annualBalance = $this->getOrCreateBalance($vacation->user, $annualType, Carbon::parse($vacation->from_date));
-                        if ($annualBalance->remaining_days < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value) {
+                        if ($annualBalance->remaining_days < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value && $status !== StatusEnum::Rejected->value) {
                             return $this->returnError('Insufficient ' . self::ANNUAL_LEAVE_NAME . ' balance. Remaining days: ' . $annualBalance->remaining_days, 422);
                         }
                     }
                 } elseif ($vacation->vacationType->name !== self::UNPAID_LEAVE_NAME && $vacation->vacationType->name !== self::SICK_LEAVE_NAME && $vacation->vacationType->name !== self::EXCEPTIONAL_LEAVE_NAME) {
                     // Standard check for other types (excluding Unpaid)
                     $balance = $this->getOrCreateBalance($vacation->user, $vacation->vacationType, Carbon::parse($vacation->from_date));
-                    if ($balance->remaining_days < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value) {
+                    if ($balance->remaining_days < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value && $status !== StatusEnum::Rejected->value) {
                         return $this->returnError('Insufficient ' . $vacation->vacationType->name . ' balance. Remaining days: ' . $balance->remaining_days, 422);
                     }
                 }
@@ -501,7 +501,7 @@ class UserVacationController extends Controller
             return $this->returnError('No employees found under this manager', 404);
         }
 
-        $query = UserVacation::with(['user', 'vacationType', 'attachments'])
+        $query = UserVacation::with(['user.roles', 'vacationType', 'attachments'])
             ->whereIn('user_id', $employeeIds)->orderBy('created_at', 'desc');
 
         $searchTerm = request()->query('searchTerm');
@@ -537,6 +537,14 @@ class UserVacationController extends Controller
         $perPage = (int) request()->query('per_page', 6);
         if ($perPage < 1) {
             $perPage = 6;
+        }
+
+        if ($role = request()->query('role')) {
+            $query->whereHas('user', function ($q) use ($role) {
+                $q->whereHas('roles', function ($q2) use ($role) {
+                    $q2->where('name', 'like', '%' . $role . '%');
+                });
+            });
         }
 
         $vacations = $query->orderByDesc('from_date')
