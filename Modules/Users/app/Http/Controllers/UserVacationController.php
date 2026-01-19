@@ -337,7 +337,7 @@ class UserVacationController extends Controller
                     $remainingDays = max(0, $allocatedDays - $usedDays);
 
                     if ($remainingDays < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value && $status !== StatusEnum::Rejected->value && $status !== StatusEnum::Declined->value) {
-                        return $this->returnError('Insufficient ' . $vacation->vacationType->name . ' balance. Remaining days: ' . $remainingDays, 422);
+                        return $this->returnError('Cannot change status as' . $status . 'Insufficient ' . $vacation->vacationType->name . ' balance. Remaining days: ' . $remainingDays, 422);
                     }
 
                     // Check Annual Leave balance
@@ -345,14 +345,14 @@ class UserVacationController extends Controller
                     if ($annualType) {
                         $annualBalance = $this->getOrCreateBalance($vacation->user, $annualType, Carbon::parse($vacation->from_date));
                         if ($annualBalance->remaining_days < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value && $status !== StatusEnum::Rejected->value && $status !== StatusEnum::Declined->value) {
-                            return $this->returnError('Insufficient ' . self::ANNUAL_LEAVE_NAME . ' balance. Remaining days: ' . $annualBalance->remaining_days, 422);
+                            return $this->returnError('Cannot change status as' . $status . 'Insufficient ' . self::ANNUAL_LEAVE_NAME . ' balance. Remaining days: ' . $annualBalance->remaining_days, 422);
                         }
                     }
                 } elseif ($vacation->vacationType->name !== self::UNPAID_LEAVE_NAME && $vacation->vacationType->name !== self::SICK_LEAVE_NAME && $vacation->vacationType->name !== self::EXCEPTIONAL_LEAVE_NAME) {
                     // Standard check for other types (excluding Unpaid)
                     $balance = $this->getOrCreateBalance($vacation->user, $vacation->vacationType, Carbon::parse($vacation->from_date));
                     if ($balance->remaining_days < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value && $status !== StatusEnum::Rejected->value && $status !== StatusEnum::Declined->value) {
-                        return $this->returnError('Insufficient ' . $vacation->vacationType->name . ' balance. Remaining days: ' . $balance->remaining_days, 422);
+                        return $this->returnError('Cannot change status as' . $status . 'Insufficient ' . $vacation->vacationType->name . ' balance. Remaining days: ' . $balance->remaining_days, 422);
                     }
                 }
             }
