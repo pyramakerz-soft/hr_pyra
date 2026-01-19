@@ -220,4 +220,28 @@ export class UserServiceService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.post<any>(`${this.baseURL}/users/reset-vacation-balance`, payload, { headers });
   }
+
+  exportLeaveHistory(fromDate?: string, toDate?: string, departmentId?: number | 'none' | null, userId?: number | null, ids?: number[]): Observable<Blob> {
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    const params = new URLSearchParams();
+    if (fromDate) params.append('from_date', fromDate);
+    if (toDate) params.append('to_date', toDate);
+
+    if (departmentId !== null && departmentId !== undefined) {
+      params.append('department_id', String(departmentId));
+    }
+
+    if (userId) {
+      params.append('user_id', String(userId));
+    }
+
+    if (ids && ids.length > 0) {
+      ids.forEach(id => params.append('ids[]', String(id)));
+    }
+
+    const url = `${this.baseURL}/vacation/export-history?${params.toString()}`;
+    return this.http.get(url, { headers, responseType: 'blob' });
+  }
 }

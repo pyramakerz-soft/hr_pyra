@@ -1,59 +1,64 @@
 ﻿<div (click)="resetfilteredUsers()">
-  <div class="mb-2 flex flex-col md:flex-row justify-between md:items-center">
-    <div>
-      <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Attendance</p>
-    </div>
+  <div class="mb-4">
+    <!-- Top Row: Title -->
 
-    <div class="flex justify-end">
-      <div class="flex items-center gap-4">
-        <div class="w-full max-w-xs">
-          <label for="from_day" class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
-          <div class="rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
-            <input type="date" id="from_day" [(ngModel)]="from_day"
-              class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full"
-              (change)="getAllEmployees(1, from_day, to_day)" />
-          </div>
+
+    <!-- Second Row: Date Filters -->
+    <div class="flex items-end gap-4 flex-wrap mb-2">
+      <div class="mb-2">
+        <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Attendance</p>
+      </div>
+      <div class="w-full max-w-xs md:ml-auto">
+        <label for="from_day" class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+        <div class="rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
+          <input type="date" id="from_day" [(ngModel)]="from_day"
+            class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full"
+            (change)="getAllEmployees(1, from_day, to_day)" />
         </div>
-
-        <div class="w-full max-w-xs">
-          <label for="to_day" class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
-          <div class="rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
-            <input type="date" id="to_day" [(ngModel)]="to_day"
-              class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full"
-              (change)="getAllEmployees(1, from_day, to_day)" />
-          </div>
-        </div>
-
-
-        <button (click)="ImportOpeningBalanceSheet()" [disabled]="isLoading"
-          class="export-button bg-[#4F46E5] text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center mt-5 whitespace-nowrap">
-          <div *ngIf="isLoading" class="spinner"></div>
-          <span *ngIf="!isLoading">Import Opening Balance Sheet</span>
-        </button>
-        <input type="file" #balanceFileInput style="display: none;" (change)="onBalanceFileSelected($event)"
-          accept=".xlsx">
-
-        <button (click)="ExportData()" [disabled]="isLoading"
-          class="export-button bg-[#4F46E5] text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center mt-5">
-          <div *ngIf="isLoading" class="spinner"></div>
-          <span *ngIf="!isLoading">Export</span>
-        </button>
-
-
-
-        <button (click)="ExportAbsentUserData()" [disabled]="isLoading"
-          class="export-button bg-[#4F46E5] text-white font-medium rounded-lg flex items-center justify-center w-auto px-4 py-2 whitespace-nowrap mt-5">
-          <div *ngIf="isLoading" class="spinner mr-2"></div>
-          <span *ngIf="!isLoading">Export Absent Users</span>
-        </button>
-
-        <button (click)="openResetVacationBalanceDialog()"
-          class="export-button bg-[#FF7519] text-white font-medium rounded-lg flex items-center justify-center w-auto px-4 py-2 whitespace-nowrap mt-5">
-          <span>Reset Balance</span>
-        </button>
-
       </div>
 
+      <div class="w-full max-w-xs">
+        <label for="to_day" class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+        <div class="rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
+          <input type="date" id="to_day" [(ngModel)]="to_day"
+            class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full"
+            (change)="getAllEmployees(1, from_day, to_day)" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Third Row: Buttons -->
+    <div class="flex items-center gap-2 flex-wrap justify-end">
+      <button (click)="ImportOpeningBalanceSheet()" [disabled]="isLoading"
+        class="export-button bg-[#4F46E5] text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center whitespace-nowrap h-[46px]">
+        <div *ngIf="isLoading" class="spinner"></div>
+        <span *ngIf="!isLoading">Import Opening Balance Sheet</span>
+      </button>
+      <input type="file" #balanceFileInput style="display: none;" (change)="onBalanceFileSelected($event)"
+        accept=".xlsx">
+
+      <button (click)="ExportData()" [disabled]="isLoading"
+        class="export-button bg-[#4F46E5] text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center h-[46px]">
+        <div *ngIf="isLoading" class="spinner"></div>
+        <span *ngIf="!isLoading">Export</span>
+      </button>
+
+      <button (click)="ExportAbsentUserData()" [disabled]="isLoading"
+        class="export-button bg-[#4F46E5] text-white font-medium rounded-lg flex items-center justify-center w-auto px-4 py-2 whitespace-nowrap h-[46px]">
+        <div *ngIf="isLoading" class="spinner mr-2"></div>
+        <span *ngIf="!isLoading">Export Absent Users</span>
+      </button>
+
+      <button (click)="ExportLeaveHistory()" [disabled]="isLoading"
+        class="export-button bg-[#4F46E5] text-white font-medium rounded-lg flex items-center justify-center w-auto px-4 py-2 whitespace-nowrap h-[46px]">
+        <div *ngIf="isLoading" class="spinner mr-2"></div>
+        <span *ngIf="!isLoading">Export Leave History</span>
+      </button>
+
+      <button (click)="openResetVacationBalanceDialog()"
+        class="export-button bg-[#FF7519] text-white font-medium rounded-lg flex items-center justify-center w-auto px-4 py-2 whitespace-nowrap h-[46px]">
+        <span>Reset Balance</span>
+      </button>
     </div>
   </div>
   <div
@@ -168,13 +173,12 @@
 
   <div class="mt-5 flex justify-between items-center" *ngIf="DisplayPagginationOrNot ">
     <!-- Previous Button -->
-<button 
-    class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-    [disabled]="CurrentPageNumber === 1" 
-    (click)="getPrevPage()">
-    <i class="fa-solid fa-arrow-left"></i>
-    <span>Previous</span>
-  </button>
+    <button
+      class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      [disabled]="CurrentPageNumber === 1" (click)="getPrevPage()">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Previous</span>
+    </button>
 
     <div class="flex justify-center items-center space-x-2 md:space-x-4">
       <button *ngIf="CurrentPageNumber-1>0"
@@ -194,13 +198,12 @@
     </div>
 
     <!-- Next Button -->
-<button 
-    class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-    [disabled]="CurrentPageNumber === PagesNumber" 
-    (click)="getNextPage()">
-    <span>Next</span>
-    <i class="fa-solid fa-arrow-right"></i>
-  </button>
+    <button
+      class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      [disabled]="CurrentPageNumber === PagesNumber" (click)="getNextPage()">
+      <span>Next</span>
+      <i class="fa-solid fa-arrow-right"></i>
+    </button>
   </div>
 
 </div>

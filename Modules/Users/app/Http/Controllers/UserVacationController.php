@@ -1354,4 +1354,52 @@ class UserVacationController extends Controller
 
         return $this->returnSuccess("Vacation balances reset successfully for " . $userIds->count() . " users.", 200);
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/vacation/export-history",
+     *     tags={"Vacation"},
+     *     summary="Export leave history for users",
+     *     description="Downloads an Excel file containing the leave history of employees based on filters.",
+     *     operationId="exportLeaveHistory",
+     *     @OA\Parameter(name="user_id", in="query", @OA\Schema(type="integer"), description="Filter by user ID"),
+     *     @OA\Parameter(name="department_id", in="query", @OA\Schema(type="integer"), description="Filter by department ID"),
+     *     @OA\Parameter(name="ids", in="query", @OA\Schema(type="array", @OA\Items(type="integer")), description="Array of User IDs"),
+     *     @OA\Parameter(name="from_date", in="query", @OA\Schema(type="string", format="date"), description="Filter from date"),
+     *     @OA\Parameter(name="to_date", in="query", @OA\Schema(type="string", format="date"), description="Filter to date"),
+     *     @OA\Response(response=200, description="Excel file download"),
+     *     security={{"bearerAuth":{}}}
+     * )
+     */
+    public function exportLeaveHistory(Request $request)
+    {
+        $userIds = null;
+
+        $usersQuery = User::query();
+
+        // Filter by Department and User similar to ClockController
+        if ($request->filled('department_id') && $request->department_id !== 'none' && $request->department_id !== 'all') {
+            $usersQuery->where('department_id', $request->department_id);
+        } elseif ($request->department_id === 'none') {
+            $usersQuery->whereNull('department_id');
+        }
+
+        if ($request->filled('user_id')) {
+            $usersQuery->where('id', $request->user_id);
+        }
+
+        if ($request->filled('ids') && is_array($request->ids)) {
+            $usersQuery->whereIn('id', $request->ids);
+        }
+
+        if ($request->filled('department_id') || $request->filled('user_id') || $request->filled('ids')) {
+            $userIds = $usersQuery->pluck('id')->toArray();
+        }
+
+        return (new \Modules\Users\Exports\LeavesHistoryExport(
+            $userIds,
+            $request->get('from_date'),
+            $request->get('to_date')
+        ))->download('leaves_history.xlsx');
+    }
 }

@@ -67,6 +67,7 @@ Route::group(['prefix' => 'vacation'], function () {
 
         Route::post('/change_vacation_status/{vacation}', [UserVacationController::class, 'changeVacationStatus']);
         Route::get('/get_vacations_of_manager_employees', [UserVacationController::class, 'getVacationsOfManagerEmployees']);
+        Route::get('/export-history', [UserVacationController::class, 'exportLeaveHistory']);
 
     });
 });

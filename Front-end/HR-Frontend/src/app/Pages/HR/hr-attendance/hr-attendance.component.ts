@@ -80,53 +80,53 @@ export class HrAttendanceComponent {
 
   ) { }
 
-ngOnInit() {
-  const savedState = this.hrStateService.getAttendanceState();
-  
-  if (savedState.tableData && savedState.tableData.length > 0) {
-    this.selectedName = savedState.searchQuery;
-    this.CurrentPageNumber = savedState.currentPage;
-    this.tableData = savedState.tableData;
-    this.PagesNumber = savedState.pagesNumber;
-    this.from_day = savedState.from_day;
-    this.to_day = savedState.to_day;
-    this.selectedDepartment = savedState.selectedDepartment;
-    this.selectedSubDepartmentIds = savedState.selectedSubDepartmentIds;
-    this.DisplayPagginationOrNot = savedState.displayPagination;
-    
-    this.hrStateService.clearAttendanceState();
-    
-    if (typeof this.selectedDepartment === 'number') {
-      this.supDeptServ.setDeptId(this.selectedDepartment);
-      this.getSubDepartments(this.selectedDepartment, false);
-    }
-  } else {
-    const savedPageNumber = localStorage.getItem('HrAttendaceCN');
-    if (savedPageNumber) {
-      this.CurrentPageNumber = parseInt(savedPageNumber, 10);
+  ngOnInit() {
+    const savedState = this.hrStateService.getAttendanceState();
+
+    if (savedState.tableData && savedState.tableData.length > 0) {
+      this.selectedName = savedState.searchQuery;
+      this.CurrentPageNumber = savedState.currentPage;
+      this.tableData = savedState.tableData;
+      this.PagesNumber = savedState.pagesNumber;
+      this.from_day = savedState.from_day;
+      this.to_day = savedState.to_day;
+      this.selectedDepartment = savedState.selectedDepartment;
+      this.selectedSubDepartmentIds = savedState.selectedSubDepartmentIds;
+      this.DisplayPagginationOrNot = savedState.displayPagination;
+
+      this.hrStateService.clearAttendanceState();
+
+      if (typeof this.selectedDepartment === 'number') {
+        this.supDeptServ.setDeptId(this.selectedDepartment);
+        this.getSubDepartments(this.selectedDepartment, false);
+      }
     } else {
-      this.CurrentPageNumber = 1;
+      const savedPageNumber = localStorage.getItem('HrAttendaceCN');
+      if (savedPageNumber) {
+        this.CurrentPageNumber = parseInt(savedPageNumber, 10);
+      } else {
+        this.CurrentPageNumber = 1;
+      }
+
+      this.route.queryParamMap.subscribe((params) => {
+        this.applyQueryParams(params);
+        this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
+      });
     }
-    
-    this.route.queryParamMap.subscribe((params) => {
-      this.applyQueryParams(params);
-      this.getAllEmployees(this.CurrentPageNumber, this.from_day, this.to_day);
-    });
+
+    this.getUsersName();
+    this.GetAllDepartment();
+    this.populateYears();
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    this.selectedMonth = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
+    this.selectedYear = currentDate.getFullYear();
+    this.SelectDepartment = "AllDepartment";
+    this.DateString = this.selectedYear + "-" + this.selectedMonth;
+    localStorage.setItem('HrEmployeeCN', "1");
+    localStorage.setItem('HrLocationsCN', "1");
+    localStorage.setItem('HrAttanceDetailsCN', "1");
   }
-  
-  this.getUsersName();
-  this.GetAllDepartment();
-  this.populateYears();
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1;
-  this.selectedMonth = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
-  this.selectedYear = currentDate.getFullYear();
-  this.SelectDepartment = "AllDepartment";
-  this.DateString = this.selectedYear + "-" + this.selectedMonth;
-  localStorage.setItem('HrEmployeeCN', "1");
-  localStorage.setItem('HrLocationsCN', "1");
-  localStorage.setItem('HrAttanceDetailsCN', "1");
-}
 
   openResetVacationBalanceDialog() {
     this.dialog.open(ResetVacationBalancePopupComponent, {
@@ -190,7 +190,31 @@ ngOnInit() {
   ExportAbsentUserData() {
     this.isLoading = true;
 
-    this.clockService.ExportAbsentUserData(this.from_day, this.to_day)
+    // Logic similar to ExportData (Clocks)
+    // Gather details
+    let ids: number[] = [];
+    if (this.selectedUsers.length > 0) {
+      ids = this.selectedUsers.map(u => u.userId);
+    }
+
+    const departmentFilter = this.getDepartmentFilterValue();
+
+    // We pass filters to the service.
+    // If specific users are selected (ids), those take precedence in the backend usually, checking the implementation.
+    // Start/End date are this.from_day, this.to_day.
+
+    // Note: The service signature is (fromDate, toDate, departmentId, userId, ids)
+    // We don't have a specific single userId selected unless we consider filtering by name?
+    // In search/filterByName, we filter locally or via API but don't hold a single ID unless needed.
+    // passing null for userId.
+
+    this.clockService.ExportAbsentUserData(
+      this.from_day,
+      this.to_day,
+      departmentFilter,
+      null,
+      ids
+    )
       .subscribe((result: Blob) => {
         const url = window.URL.createObjectURL(result);
         const anchor = document.createElement('a');
@@ -205,6 +229,33 @@ ngOnInit() {
       );
   }
 
+  ExportLeaveHistory() {
+    this.isLoading = true;
+    let ids: number[] = [];
+    if (this.selectedUsers.length > 0) {
+      ids = this.selectedUsers.map(u => u.userId);
+    }
+    const departmentFilter = this.getDepartmentFilterValue();
+
+    this.userServ.exportLeaveHistory(
+      this.from_day,
+      this.to_day,
+      departmentFilter,
+      null,
+      ids
+    ).subscribe((result: Blob) => {
+      const url = window.URL.createObjectURL(result);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `leaves_history_${this.from_day || 'all'}_${this.to_day || 'all'}.xlsx`;
+      anchor.click();
+      window.URL.revokeObjectURL(url);
+      this.isLoading = false;
+    }, () => {
+      this.isLoading = false;
+    });
+  }
+
   NavigateToEmployeeAttendanceDetails(EmpId: number) {
     this.hrStateService.saveAttendanceState({
       searchQuery: this.selectedName,
@@ -217,7 +268,7 @@ ngOnInit() {
       selectedSubDepartmentIds: this.selectedSubDepartmentIds,
       displayPagination: this.DisplayPagginationOrNot
     });
-    
+
     this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/" + EmpId);
   }
 
