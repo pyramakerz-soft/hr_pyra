@@ -17,7 +17,7 @@ import { ServiceActionRecord } from '../../../Models/service-action';
 @Component({
   selector: 'app-hr-dashboard',
   standalone: true,
-  imports: [DashboardHeroComponent,DonutChartComponent,BarChartComponent, CardChartComponent, CommonModule, FormsModule, RouterLink],
+  imports: [DashboardHeroComponent, DonutChartComponent, BarChartComponent, CardChartComponent, CommonModule, FormsModule, RouterLink],
   templateUrl: './hr-dashboard.component.html',
   styleUrl: './hr-dashboard.component.css'
 })
@@ -27,8 +27,8 @@ export class HrDashboardComponent {
   readonly noDepartmentLabel = 'No Department';
 
   Data = [
-    { label: 'Work From Home', icon: 'fi fi-rs-chart-pie', percentage: ''},
-    { label: 'On Site', icon: 'fi fi-tr-dot-circle', percentage: ''},
+    { label: 'Work From Home', icon: 'fi fi-rs-chart-pie', percentage: '' },
+    { label: 'On Site', icon: 'fi fi-tr-dot-circle', percentage: '' },
   ];
 
   years: number[] = [];
@@ -45,27 +45,27 @@ export class HrDashboardComponent {
   recentNotifications: SystemNotificationRecord[] = [];
   recentServiceActions: ServiceActionRecord[] = [];
 
-  quickActions = [
-    {
-      label: 'Run service action',
-      description: 'Close open shifts, resolve issues, and keep attendance data clean.',
-      route: '/HR/HRServiceActions',
-      icon: 'fi fi-br-tools',
-    },
-  ];
+  // quickActions = [
+  //   {
+  //     label: 'Run service action',
+  //     description: 'Close open shifts, resolve issues, and keep attendance data clean.',
+  //     route: '/HR/HRServiceActions',
+  //     icon: 'fi fi-br-tools',
+  //   },
+  // ];
 
   constructor(
     public chartService: ChartsService,
     private readonly departmentService: DepartmentService,
     private readonly router: Router,
     private readonly dashboardInsights: DashboardInsightsService
-  ){}
+  ) { }
 
-  ngOnInit(){
+  ngOnInit() {
     this.populateYears()
     const currentDate = new Date();
     this.selectedYear = currentDate.getFullYear();
-    this.getDataPercentage()      
+    this.getDataPercentage()
     this.fetchDepartments();
     this.loadSummary();
     this.loadPresence();
@@ -91,7 +91,7 @@ export class HrDashboardComponent {
     const today = new Date().getDate();
     const currentMonth = new Date().getMonth() + 1;
     // console.log(today , currentMonth)
-    if(today>25&&currentMonth==12){
+    if (today > 25 && currentMonth == 12) {
       currentYear++;
     }
     for (let year = startYear; year <= currentYear; year++) {
@@ -99,7 +99,7 @@ export class HrDashboardComponent {
     }
   }
 
-  getDataPercentage(){
+  getDataPercentage() {
     this.Data = [
       {
         label: 'Work From Home',
@@ -113,9 +113,9 @@ export class HrDashboardComponent {
       }
     ];
     this.chartService.getEmployeesWorkTypesprecentage(this.selectedYear).subscribe(
-      (d:any)=>{
+      (d: any) => {
         this.userWorkTypes = d.userWorkTypes
-        
+
         Object.keys(this.userWorkTypes).forEach((key) => {
           const workTypeKey = key as keyof typeof this.userWorkTypes;
           this.formattedWorkTypes[key] = `${(this.userWorkTypes[workTypeKey]).toFixed(2)}%`;
