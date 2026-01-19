@@ -517,7 +517,7 @@ export class HrEmployeeAddEditDetailsComponent {
           isValid = false;
         }
 
-        if (!this.employee[field] && field !== "code" && field !== 'work_home' && field !== "image" && field !== "working_hours_day" && field !== "timezone_id" && field !== "max_monthly_hours" && field !== "works_on_saturday" && field !== "is_part_time") {
+        if (!this.employee[field] && field !== "code" && field !== 'work_home' && field !== "image" && field !== "working_hours_day" && field !== "timezone_id" && field !== "max_monthly_hours" && field !== "works_on_saturday" && field !== "is_part_time" && field !== "department_id" && field !== "sub_department_id" && field !== "deparment_name") {
 
           if (this.EmployeeId !== 0) {
             continue;
