@@ -9,9 +9,10 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Modules\Users\Models\UserVacation;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Carbon\Carbon;
 
-class LeavesHistoryExport implements FromCollection, WithHeadings, WithStyles, WithMapping
+class LeavesHistoryExport implements WithMultipleSheets
 {
     use \Maatwebsite\Excel\Concerns\Exportable;
 
@@ -22,85 +23,53 @@ class LeavesHistoryExport implements FromCollection, WithHeadings, WithStyles, W
     public function __construct($userIds = null, $fromDate = null, $toDate = null)
     {
         $this->userIds = $userIds;
-        $this->fromDate = $fromDate; // Optional filter start
-        $this->toDate = $toDate;     // Optional filter end
+        $this->fromDate = $fromDate;
+        $this->toDate = $toDate;
     }
 
-    public function collection()
+    public function sheets(): array
     {
-        $query = UserVacation::with(['user', 'vacationType'])
-            ->orderBy('from_date', 'desc');
+        $sheets = [];
 
+        // Determine years
+        $query = UserVacation::query();
         if ($this->userIds && is_array($this->userIds)) {
             $query->whereIn('user_id', $this->userIds);
-        } elseif ($this->userIds) { // Single ID
+        } elseif ($this->userIds) {
             $query->where('user_id', $this->userIds);
         }
-
         if ($this->fromDate) {
             $query->whereDate('from_date', '>=', $this->fromDate);
         }
-
         if ($this->toDate) {
-            $query->whereDate('to_date', '<=', $this->toDate);
+            $query->whereDate('from_date', '<=', $this->toDate);
         }
 
-        // "Approved" status usually implies "Taken", but let's just dump all history or maybe filter by not rejected?
-        // User said "all leave days taken", implying actual leaves. 
-        // Often 'pending' are not "taken" yet. 'rejected' definitely not.
-        // Let's filter for approved for now, or maybe all non-rejected?
-        // User request: "display all leave days taken". Usually means approved/completed.
-        // I will default to all for history purposes but maybe sorting/status will help.
-        // Actually, "History Report" usually implies a record of everything or at least approved.
-        // I'll stick to displaying all and include the Status column so they can filter in Excel. 
+        // Get distinct years
+        $yearsData = $query->selectRaw('YEAR(from_date) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year')
+            ->toArray();
 
-        return $query->get();
-    }
-
-    public function map($vacation): array
-    {
-        return [
-            $vacation->user ? $vacation->user->code : '',
-            $vacation->user ? $vacation->user->name : '',
-            $vacation->user && $vacation->user->department ? $vacation->user->department->name : '',
-            $vacation->vacationType ? $vacation->vacationType->name : '',
-            $vacation->from_date ? Carbon::parse($vacation->from_date)->format('Y-m-d') : '',
-            $vacation->to_date ? Carbon::parse($vacation->to_date)->format('Y-m-d') : '',
-            $vacation->days_count,
-            $vacation->status ? (is_string($vacation->status) ? $vacation->status : $vacation->status->value) : '', // Handle Enum or string
-            $vacation->note,
-            $vacation->created_at ? Carbon::parse($vacation->created_at)->format('Y-m-d H:i') : '',
-        ];
-    }
-
-    public function headings(): array
-    {
-        return [
-            'Code',
-            'Name',
-            'Department',
-            'Leave Type',
-            'From Date',
-            'To Date',
-            'Days Count',
-            'Status',
-            'Note',
-            'Created At',
-        ];
-    }
-
-    public function styles(Worksheet $sheet)
-    {
-        $sheet->getStyle('A1:J1')->applyFromArray([
-            'font' => ['bold' => true],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-        ]);
-
-        foreach (range('A', 'J') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
+        // If no data found but date range exists, maybe include those years? 
+        // Or if no data, just return empty?
+        if (empty($yearsData) && $this->fromDate && $this->toDate) {
+            $start = Carbon::parse($this->fromDate)->year;
+            $end = Carbon::parse($this->toDate)->year;
+            for ($y = $end; $y >= $start; $y--) {
+                $yearsData[] = $y;
+            }
         }
+
+        // Add Summary Sheet
+        $sheets[] = new LeavesHistorySummarySheet($this->userIds, $yearsData);
+
+        // Add Year Sheets
+        foreach ($yearsData as $year) {
+            $sheets[] = new LeavesHistoryYearSheet($year, $this->userIds);
+        }
+
+        return $sheets;
     }
 }
