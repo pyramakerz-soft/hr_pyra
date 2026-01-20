@@ -31,16 +31,25 @@ class NotificationController extends Controller
     {
         $limit = (int) $request->get('limit', 25);
         $limit = max(1, min(100, $limit));
+        $isNotRead = $request->boolean('is_not_read', false);
 
         $notifications = SystemNotification::query()
-            ->with('createdBy:id,name')
-            ->withCount('recipients as recipients_count')
+            ->with(['createdBy:id,name', 'recipients' => fn($q) => $q->where('user_id', Auth::id())])
             ->whereHas('recipients', fn(Builder $builder) => $builder->where('user_id', Auth::id()))
             ->when($request->filled('type'), fn(Builder $builder) => $builder->where('type', $request->string('type')))
             ->when($request->filled('scope_type'), fn(Builder $builder) => $builder->where('scope_type', $request->string('scope_type')))
             ->orderByDesc('created_at')
             ->limit($limit)
-            ->get();
+            ->get()
+            ->map(function ($notification) {
+                $recipient = $notification->recipients->first();
+                $notification->read_at = $recipient ? $recipient->read_at : null;
+                $notification->status = $recipient ? $recipient->status : null;
+                unset($notification->recipients);
+                return $notification;
+            })
+            ->when($isNotRead, fn($collection) => $collection->filter(fn($notification) => $notification->read_at === null))
+            ->values();
 
         return $this->returnData('notifications', $notifications);
     }
@@ -111,12 +120,11 @@ class NotificationController extends Controller
 
     public function markRead(Request $request, SystemNotification $notification)
     {
-        $userId = $request->integer('user_id', Auth::id());
+        $userId = Auth::id();
 
         if (!$userId) {
             return $this->returnError('Unable to determine which employee should be updated.');
         }
-
         $recipient = SystemNotificationRecipient::query()
             ->where('notification_id', $notification->id)
             ->where('user_id', $userId)
