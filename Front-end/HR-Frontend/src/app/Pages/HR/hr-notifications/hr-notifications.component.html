@@ -7,10 +7,8 @@
       </p>
     </div>
     <div class="flex items-center space-x-3">
-      <button
-        routerLink="/HR/HRDashboard"
-        class="px-4 py-2 rounded-md text-sm font-semibold bg-[#17253E] text-white shadow hover:bg-[#0f1a2d] transition"
-      >
+      <button routerLink="/HR/HRDashboard"
+        class="px-4 py-2 rounded-md text-sm font-semibold bg-[#17253E] text-white shadow hover:bg-[#0f1a2d] transition">
         Back to dashboard
       </button>
     </div>
@@ -23,8 +21,7 @@
           <label class="text-sm font-medium text-[#344054]">Notification type</label>
           <select
             class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-            formControlName="type"
-          >
+            formControlName="type">
             <option *ngFor="let option of notificationTypes" [value]="option.value">
               {{ option.label }}
             </option>
@@ -35,8 +32,7 @@
           <label class="text-sm font-medium text-[#344054]">Scope</label>
           <select
             class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-            formControlName="scope_type"
-          >
+            formControlName="scope_type">
             <option *ngFor="let option of scopeOptions" [value]="option.key">
               {{ option.label }}
             </option>
@@ -46,22 +42,16 @@
 
       <div class="space-y-2">
         <label class="text-sm font-medium text-[#344054]">Title</label>
-        <input
-          type="text"
+        <input type="text"
           class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-          formControlName="title"
-          placeholder="e.g. Attendance policy refresh"
-        />
+          formControlName="title" placeholder="e.g. Attendance policy refresh" />
       </div>
 
       <div class="space-y-2">
         <label class="text-sm font-medium text-[#344054]">Message</label>
-        <textarea
-          rows="4"
+        <textarea rows="4"
           class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7] resize-y"
-          formControlName="message"
-          placeholder="Provide context, timelines, and the action required."
-        ></textarea>
+          formControlName="message" placeholder="Provide context, timelines, and the action required."></textarea>
       </div>
 
       <div class="grid md:grid-cols-2 gap-6" *ngIf="scopeType === 'department'">
@@ -69,9 +59,7 @@
           <label class="text-sm font-medium text-[#344054]">Department</label>
           <select
             class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-            formControlName="scope_id"
-            (change)="onDepartmentChange($event)"
-          >
+            formControlName="scope_id" (change)="onDepartmentChange($event)">
             <option value="">Select department</option>
             <option *ngFor="let department of departments; trackBy: trackById" [value]="department.id">
               {{ department.name }}
@@ -85,8 +73,7 @@
           <label class="text-sm font-medium text-[#344054]">Department</label>
           <select
             class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-            (change)="onDepartmentChange($event)"
-          >
+            (change)="onDepartmentChange($event)">
             <option value="">Select department</option>
             <option *ngFor="let department of departments; trackBy: trackById" [value]="department.id">
               {{ department.name }}
@@ -98,8 +85,7 @@
           <label class="text-sm font-medium text-[#344054]">Sub department</label>
           <select
             class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-            formControlName="scope_id"
-          >
+            formControlName="scope_id">
             <option value="">Select sub department</option>
             <option *ngFor="let sub of subDepartments; trackBy: trackById" [value]="sub.id">
               {{ sub.name }}
@@ -112,8 +98,7 @@
         <label class="text-sm font-medium text-[#344054]">Employee</label>
         <select
           class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-          formControlName="scope_id"
-        >
+          formControlName="scope_id">
           <option value="">Select employee</option>
           <option *ngFor="let employee of employees; trackBy: trackById" [value]="employee.id">
             {{ employee.name }}
@@ -123,11 +108,9 @@
 
       <div class="space-y-3" *ngIf="scopeType === 'custom'">
         <label class="text-sm font-medium text-[#344054]">Targeted employees</label>
-        <select
-          multiple
+        <select multiple
           class="w-full min-h-[140px] border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-          formControlName="user_ids"
-        >
+          formControlName="user_ids">
           <option *ngFor="let employee of employees; trackBy: trackById" [value]="employee.id">
             {{ employee.name }}
           </option>
@@ -135,29 +118,10 @@
         <p class="text-xs text-[#5F6D7E]">Hold CTRL (or CMD on Mac) to select multiple employees.</p>
       </div>
 
-      <div class="space-y-2" formGroupName="filters">
-        <label class="text-sm font-medium text-[#344054]">Filter by role</label>
-        <select
-          multiple
-          class="w-full min-h-[120px] border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-          formControlName="roles"
-        >
-          <option value="">Include all roles</option>
-          <option *ngFor="let role of roles; trackBy: trackById" [value]="role.name">
-            {{ role.name }}
-          </option>
-        </select>
-        <p class="text-xs text-[#5F6D7E]">
-          Filter recipients by role to send more personalised updates.
-        </p>
-      </div>
-
       <div class="flex justify-end">
-        <button
-          type="submit"
+        <button type="submit"
           class="px-5 py-2 rounded-md text-sm font-semibold text-white bg-[#437EF7] hover:bg-[#3566c7] transition disabled:opacity-60 disabled:cursor-not-allowed"
-          [disabled]="isSubmitting"
-        >
+          [disabled]="isSubmitting">
           <span *ngIf="!isSubmitting">Send notification</span>
           <span *ngIf="isSubmitting">Sending...</span>
         </button>
@@ -173,10 +137,7 @@
           Track what has been shared recently with the organisation.
         </p>
       </div>
-      <button
-        class="text-sm text-[#437EF7] font-semibold hover:underline"
-        (click)="loadNotifications()"
-      >
+      <button class="text-sm text-[#437EF7] font-semibold hover:underline" (click)="loadNotifications()">
         Refresh
       </button>
     </div>
@@ -202,7 +163,8 @@
               {{ notification.title }}
             </td>
             <td class="py-3 pr-4">
-              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#E0EAFF] text-[#0037C5]">
+              <span
+                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#E0EAFF] text-[#0037C5]">
                 {{ notification.type | titlecase }}
               </span>
             </td>

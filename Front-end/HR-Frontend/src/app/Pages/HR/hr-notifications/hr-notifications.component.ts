@@ -48,7 +48,6 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
     private readonly departmentService: DepartmentService,
     private readonly subDepartmentService: SubDepartmentService,
     private readonly userService: UserServiceService,
-    private readonly rolesService: RolesService
   ) {
     this.notificationForm = this.fb.group({
       type: ['', Validators.required],
@@ -67,7 +66,6 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
     this.loadNotificationTypes();
     this.loadDepartments();
     this.loadEmployees();
-    this.loadRoles();
     this.loadNotifications();
 
     this.subscriptions.push(
@@ -132,12 +130,8 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
       payload.user_ids = (formValue.user_ids ?? []).map((id: any) => Number(id)).filter((id: number) => !Number.isNaN(id));
     }
 
-    const rawRoles = formValue.filters?.roles ?? [];
-    const rolesFilter: string[] = Array.isArray(rawRoles)
-      ? rawRoles.map((r: any) => String(r)).filter((r: string) => r.trim() !== '')
-      : [];
-
-    if (rolesFilter.length > 0) {
+    const rolesFilter = formValue.filters?.roles ?? [];
+    if (Array.isArray(rolesFilter) && rolesFilter.length > 0) {
       payload.filters = { roles: rolesFilter };
     }
 
@@ -206,12 +200,6 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
     });
   }
 
-  private loadRoles(): void {
-    this.rolesService.getall().subscribe((response: any) => {
-      const list = response?.data?.roles ?? response;
-      this.roles = Array.isArray(list) ? list : [];
-    });
-  }
 
   loadNotifications(): void {
     this.notificationCenter.getNotifications(15).subscribe((response) => {
