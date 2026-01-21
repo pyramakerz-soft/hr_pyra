@@ -199,7 +199,7 @@ trait ClockCalculationsHelperTrait
 
         // Group clocks by date
         $groupedClocks = $clocks->groupBy(function ($clock) {
-            $timezoneValue = $clock->user->timezone ?  $clock->user->timezone->value : 3;  // Default to +3 if no timezone
+            $timezoneValue = $clock->user->timezone ? $clock->user->timezone->value : 3;  // Default to +3 if no timezone
             return Carbon::parse($clock->clock_in)->addHours(value: $timezoneValue)->toDateString(); // Apply +3 offset
         });
 
@@ -279,13 +279,13 @@ trait ClockCalculationsHelperTrait
 
         // Try multiple FREE geocoding services in order of preference (no API keys required)
         $geocodingServices = [
-            'bigdatacloud' => function() use ($client, $latitude, $longitude) {
+            'bigdatacloud' => function () use ($client, $latitude, $longitude) {
                 return $this->tryBigDataCloudGeocoding($client, $latitude, $longitude);
             },
-            'photon' => function() use ($client, $latitude, $longitude) {
+            'photon' => function () use ($client, $latitude, $longitude) {
                 return $this->tryPhotonGeocoding($client, $latitude, $longitude);
             },
-            'nominatim' => function() use ($client, $latitude, $longitude) {
+            'nominatim' => function () use ($client, $latitude, $longitude) {
                 return $this->tryNominatimGeocoding($client, $latitude, $longitude);
             }
         ];
@@ -366,18 +366,22 @@ trait ClockCalculationsHelperTrait
         ]);
 
         $data = json_decode($response->getBody()->getContents(), true);
-        
+
         if ($data && isset($data['features']) && count($data['features']) > 0) {
             $feature = $data['features'][0];
             $properties = $feature['properties'] ?? [];
-            
+
             // Build display name from available properties
             $addressParts = [];
-            if (isset($properties['name'])) $addressParts[] = $properties['name'];
-            if (isset($properties['street'])) $addressParts[] = $properties['street'];
-            if (isset($properties['city'])) $addressParts[] = $properties['city'];
-            if (isset($properties['country'])) $addressParts[] = $properties['country'];
-            
+            if (isset($properties['name']))
+                $addressParts[] = $properties['name'];
+            if (isset($properties['street']))
+                $addressParts[] = $properties['street'];
+            if (isset($properties['city']))
+                $addressParts[] = $properties['city'];
+            if (isset($properties['country']))
+                $addressParts[] = $properties['country'];
+
             return [
                 'display_name' => implode(', ', $addressParts) ?: "Location: {$latitude}, {$longitude}",
                 'lat' => $latitude,
@@ -385,7 +389,7 @@ trait ClockCalculationsHelperTrait
                 'address' => $properties
             ];
         }
-        
+
         return null;
     }
 
@@ -404,15 +408,19 @@ trait ClockCalculationsHelperTrait
         ]);
 
         $data = json_decode($response->getBody()->getContents(), true);
-        
+
         if ($data && isset($data['locality'])) {
             // Build display name from BigDataCloud response
             $addressParts = [];
-            if (isset($data['locality'])) $addressParts[] = $data['locality'];
-            if (isset($data['city'])) $addressParts[] = $data['city'];
-            if (isset($data['principalSubdivision'])) $addressParts[] = $data['principalSubdivision'];
-            if (isset($data['countryName'])) $addressParts[] = $data['countryName'];
-            
+            if (isset($data['locality']))
+                $addressParts[] = $data['locality'];
+            if (isset($data['city']))
+                $addressParts[] = $data['city'];
+            if (isset($data['principalSubdivision']))
+                $addressParts[] = $data['principalSubdivision'];
+            if (isset($data['countryName']))
+                $addressParts[] = $data['countryName'];
+
             return [
                 'display_name' => implode(', ', $addressParts) ?: "Location: {$latitude}, {$longitude}",
                 'lat' => $latitude,
@@ -425,7 +433,7 @@ trait ClockCalculationsHelperTrait
                 ]
             ];
         }
-        
+
         return null;
     }
 
@@ -504,16 +512,6 @@ trait ClockCalculationsHelperTrait
 
     protected function validateClockTime($clockIn, $clockOut)
     {
-
-        if (!$clockIn->isSameDay($clockOut)) {
-
-            // Log the incoming clock-in and clock-out times
-            Log::info("Validating Clock Time", [
-                'clock_in' => $clockIn ? $clockIn->toDateTimeString() : 'null',
-                'clock_out' => $clockOut ? $clockOut->toDateTimeString() : 'null',
-            ]);
-            throw ValidationException::withMessages(['error' => 'Clock-out must be on the same day as clock-in.']);
-        }
         if ($clockOut->lessThanOrEqualTo($clockIn)) {
             throw ValidationException::withMessages(['error' => "You can't clock out before or at the same time as clock in."]);
         }

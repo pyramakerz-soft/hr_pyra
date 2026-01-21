@@ -24,10 +24,10 @@ export class AttendenceEditComponent {
   ClockId: number = 1;
 
 
-  FclockIn:string=""
-  Fclockout:string=""
+  FclockIn: string = ""
+  Fclockout: string = ""
 
-  constructor(private router: Router, public ClockServ: ClockService, private route: ActivatedRoute) {}
+  constructor(private router: Router, public ClockServ: ClockService, private route: ActivatedRoute) { }
   ngOnInit() {
     this.route.params.subscribe(params => {
       if (params['Id']) {
@@ -61,22 +61,11 @@ export class AttendenceEditComponent {
         confirmButtonColor: "#17253E",
       });
     }
-    else if (this.data.formattedClockIn.split(' ')[0] !== this.data.formattedClockOut.split(' ')[0]) {
-      Swal.fire({
-        icon: "error",
-        title: "Clock Out and Clock In must be in the same date",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#17253E",
-      });
-
-    }
     else {
-        
 
       this.FclockIn = this.data.formattedClockIn;
 
       this.Fclockout = this.data.formattedClockOut;
-
 
       this.SaveData();
     }
@@ -84,7 +73,7 @@ export class AttendenceEditComponent {
 
 
   SaveData() {
-    if(this.FclockIn== this.Fclockout){
+    if (this.FclockIn == this.Fclockout) {
       Swal.fire({
         icon: "error",
         title: "Clock Out and Clock In in the same Time",
@@ -94,14 +83,29 @@ export class AttendenceEditComponent {
 
       this.GetClocksById(this.data.userId)
 
-    }else{
-      this.ClockServ.UpdateUserClock(this.data.userId, this.data.id, this.FclockIn, this.Fclockout).subscribe(
-        (d: any) => {
-          this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/" + this.data.userId)
+    } else {
+      this.ClockServ.UpdateUserClock(this.data.userId, this.data.id, this.FclockIn, this.Fclockout).subscribe({
+        next: (d: any) => {
+          Swal.fire({
+            icon: "success",
+            title: "Clock Updated Successfully",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#17253E",
+          }).then(() => {
+            this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/" + this.data.userId)
+          });
+        },
+        error: (err: any) => {
+          Swal.fire({
+            icon: "error",
+            title: err.error?.message || "Failed to update clock",
+            confirmButtonText: "OK",
+            confirmButtonColor: "#17253E",
+          });
         }
-      );
+      });
     }
-  
+
   }
   Cancel() {
     this.router.navigateByUrl("HR/HRAttendanceEmployeeDetails/" + this.data.userId)
@@ -128,7 +132,7 @@ export class AttendenceEditComponent {
   //     hour12: false, // Use 24-hour format
   //     timeZone: 'Africa/Cairo'
   //   };
- 
+
   //   // Format the date into the desired output
   //   const egyptTimeFormatter = new Intl.DateTimeFormat('en-GB', options);
   //   const formattedDateParts = egyptTimeFormatter.formatToParts(utcDate);
