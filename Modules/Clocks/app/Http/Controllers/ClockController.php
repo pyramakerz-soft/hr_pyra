@@ -957,6 +957,19 @@ class ClockController extends Controller
         if (!$clock) {
             return $this->returnError("No clocks found for this user", 404);
         }
+        // Check if the month ended (payroll period: 26th to 25th)
+        $clockDate = Carbon::parse($clock->clock_in);
+        // Determine the end of the payroll period for this clock record
+        if ($clockDate->day <= 25) {
+            $periodEnd = $clockDate->copy()->day(25)->endOfDay();
+        } else {
+            $periodEnd = $clockDate->copy()->addMonth()->day(25)->endOfDay();
+        }
+
+        // If today is past the period end, prevent editing
+        if (Carbon::now()->gt($periodEnd)) {
+            return $this->returnError("Cannot update clock record as the month has ended.", 403);
+        }
 
         //2- Update the clock
         if ($clock->location_type == 'home') {
