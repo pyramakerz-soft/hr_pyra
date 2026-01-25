@@ -70,6 +70,7 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       this.notificationForm.get('scope_type')?.valueChanges.subscribe(() => {
+        this.subDepartments = [];
         this.notificationForm.patchValue(
           { scope_id: '', user_ids: [] },
           { emitEvent: false }
@@ -100,10 +101,14 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.scopeType === 'sub_department' || this.notificationForm.get('scope_type')?.value === 'sub_department') {
+      this.notificationForm.patchValue({ scope_id: '' }, { emitEvent: false });
+    }
+
     this.subDepartmentService.setDeptId(deptId);
     this.subDepartmentService.getall(deptId).subscribe((response: any) => {
-      const list = response?.data?.sub_departments ?? response;
-      this.subDepartments = Array.isArray(list) ? list : [];
+      const list = response?.data ?? response;
+      this.subDepartments = (Array.isArray(list) ? list : []).map((item: any) => SubDepartment.fromJson(item));
     });
   }
 
