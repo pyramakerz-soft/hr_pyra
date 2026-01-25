@@ -11,7 +11,6 @@ use Modules\Users\Models\User;
 
 class AccrueMonthlyVacationBalances extends Command
 {
-    // ... (Existing properties and signature)
     protected $signature = 'vacations:accrue-monthly {--date=} {--force}';
     protected $description = 'Increase each vacation balance by 1.75 days on the first day of every month, and handle year-end carryover.';
 
@@ -21,7 +20,7 @@ class AccrueMonthlyVacationBalances extends Command
             ? Carbon::parse($this->option('date'))->startOfDay()
             : Carbon::now()->startOfDay();
 
-        $isFirstOfMonth = $referenceDate->day === 1;
+        $isFirstOfMonth = $referenceDate->day === 26;
         $isYearEnd = $referenceDate->month === 12 && $referenceDate->day === 31;
 
         if (!$isFirstOfMonth && !$isYearEnd && !$this->option('force')) {
@@ -36,7 +35,6 @@ class AccrueMonthlyVacationBalances extends Command
         if ($isFirstOfMonth || $this->option('force')) {
             $this->info('Running monthly accrual and setup logic...');
             DB::transaction(function () use ($referenceDate, $year, $userIds) {
-                // ... (Your existing monthly accrual and setup logic goes here)
                 // The existing code block handles Annual Leave accrual and Casual Leave setup.
                 // It remains UNCHANGED from what you provided for monthly processing.
 
@@ -179,9 +177,9 @@ class AccrueMonthlyVacationBalances extends Command
 
 
         $vacationTypes = VacationType::all();
-        foreach( $vacationTypes as $vacationType ) {
-            
-        
+        foreach ($vacationTypes as $vacationType) {
+
+
             DB::transaction(function () use ($currentYear, $nextYear, $vacationType, $userIds) {
                 // 1. Get the final balance (allocated - used) for each user for the current year.
                 $carryoverBalances = UserVacationBalance::query()
@@ -266,7 +264,7 @@ class AccrueMonthlyVacationBalances extends Command
             });
         }
 
-    $this->info('--- Year-End Carryover Process Completed ---');
+        $this->info('--- Year-End Carryover Process Completed ---');
     }
 
     // ... (Your existing resetB2BDepartmentBalances function remains UNCHANGED)
