@@ -40,6 +40,10 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
   notifications: SystemNotificationRecord[] = [];
 
   isSubmitting = false;
+  isLoading = false;
+  currentPage = 1;
+  lastPage = 1;
+  totalNotifications = 0;
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -206,9 +210,26 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
   }
 
 
-  loadNotifications(): void {
-    this.notificationCenter.getNotifications(15).subscribe((response) => {
-      this.notifications = response.notifications ?? [];
+  loadNotifications(page = 1): void {
+    this.isLoading = true;
+    this.notificationCenter.getNotifications(page, 5).subscribe({
+      next: (response) => {
+        const paginated = response.notifications;
+        this.notifications = paginated.data ?? [];
+        this.currentPage = paginated.current_page;
+        this.lastPage = paginated.last_page;
+        this.totalNotifications = paginated.total;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      }
     });
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.lastPage && page !== this.currentPage) {
+      this.loadNotifications(page);
+    }
   }
 }

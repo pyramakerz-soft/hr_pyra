@@ -29,29 +29,37 @@ class NotificationController extends Controller
 
     public function index(Request $request)
     {
-        $limit = (int) $request->get('limit', 25);
+        $limit = (int) $request->get('limit', 5);
         $limit = max(1, min(100, $limit));
         $isNotRead = $request->boolean('is_not_read', false);
+        $userId = Auth::id();
 
-        $notifications = SystemNotification::query()
-            ->with(['createdBy:id,name', 'recipients' => fn($q) => $q->where('user_id', Auth::id())])
-            ->whereHas('recipients', fn(Builder $builder) => $builder->where('user_id', Auth::id()))
+        $query = SystemNotification::query()
+            ->with(['createdBy:id,name'])
             ->when($request->filled('type'), fn(Builder $builder) => $builder->where('type', $request->string('type')))
             ->when($request->filled('scope_type'), fn(Builder $builder) => $builder->where('scope_type', $request->string('scope_type')))
-            ->orderByDesc('created_at')
-            ->limit($limit)
-            ->get()
-            ->map(function ($notification) {
-                $recipient = $notification->recipients->first();
-                $notification->read_at = $recipient ? $recipient->read_at : null;
-                $notification->status = $recipient ? $recipient->status : null;
-                unset($notification->recipients);
-                return $notification;
-            })
-            ->when($isNotRead, fn($collection) => $collection->filter(fn($notification) => $notification->read_at === null))
-            ->values();
+            ->orderByDesc('created_at');
 
-        return $this->returnData('notifications', $notifications);
+        if (!Auth::user()->hasRole('Hr')) {
+            $query->whereHas('recipients', fn(Builder $builder) => $builder->where('user_id', $userId))
+                ->with(['recipients' => fn($q) => $q->where('user_id', $userId)]);
+        }
+
+        if ($isNotRead) {
+            $query->whereHas('recipients', fn(Builder $builder) => $builder->where('user_id', $userId)->whereNull('read_at'));
+        }
+
+        $paginator = $query->paginate($limit);
+
+        $paginator->getCollection()->transform(function ($notification) use ($userId) {
+            $recipient = $notification->recipients->first();
+            $notification->read_at = $recipient ? $recipient->read_at : null;
+            $notification->status = $recipient ? $recipient->status : null;
+            unset($notification->recipients);
+            return $notification;
+        });
+
+        return $this->returnData('notifications', $paginator);
     }
 
     public function show(SystemNotification $notification)
