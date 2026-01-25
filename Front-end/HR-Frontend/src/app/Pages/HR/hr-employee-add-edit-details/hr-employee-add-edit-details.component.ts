@@ -563,7 +563,7 @@ export class HrEmployeeAddEditDetailsComponent {
               break;
             case "contact_phone":
 
-              const cleanedContactPhone = this.employee.phone.replace(/[^\d]/g, ''); // keep only digits
+              const cleanedContactPhone = this.employee.contact_phone.replace(/[^\d]/g, ''); // keep only digits
 
               if (!this.regexPhone.test(cleanedContactPhone)) {
                 this.validationErrors[field] = 'Invalid phone number.';
