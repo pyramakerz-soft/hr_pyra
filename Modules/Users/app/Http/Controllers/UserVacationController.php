@@ -780,24 +780,6 @@ class UserVacationController extends Controller
             ->where('year', Carbon::parse($vacation->from_date)->year)
             ->first();
 
-        // For Casual/Emergency, we only update Annual Leave balance
-        if (in_array($vacation->vacationType->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME])) {
-            $annualType = VacationType::where('name', self::ANNUAL_LEAVE_NAME)->first();
-            if (!$annualType) {
-                return;
-            }
-            $vacation->loadMissing('vacationType', 'user'); // Ensure user and vacationType are loaded
-            $type = $annualType;
-            $user = $vacation->user;
-
-            if (!$type || !$user) {
-                return;
-            }
-            // Re-fetch or create balance for annual leave
-            $balance = $this->getOrCreateBalance($user, $type, Carbon::parse($vacation->from_date));
-        }
-
-
         if (!$balance) {
             $vacation->loadMissing('vacationType', 'user');
             $type = $vacation->vacationType;
@@ -1354,7 +1336,6 @@ class UserVacationController extends Controller
 
         return $this->returnSuccess("Vacation balances reset successfully for " . $userIds->count() . " users.", 200);
     }
-
     /**
      * @OA\Get(
      *     path="/api/vacation/export-history",
@@ -1403,3 +1384,4 @@ class UserVacationController extends Controller
         ))->download('leaves_history.xlsx');
     }
 }
+
