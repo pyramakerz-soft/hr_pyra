@@ -112,6 +112,12 @@ class UserVacationController extends Controller
                 return $this->returnError("Vacation type '{$defaultName}' is not configured", 422);
             }
         }
+        if ($vacationType->name === self::SICK_LEAVE_NAME) {
+            $attachments = $request->file('attachments');
+            if (!$attachments) {
+                return $this->returnError('Attachments are required for sick leave', 422);
+            }
+        }
 
         // Validate Special Leave Eligibility
         $eligibilityError = $this->validateSpecialLeaveEligibility($authUser, $vacationType, $daysCount);
@@ -145,7 +151,7 @@ class UserVacationController extends Controller
         // Calculate available days for this vacation type
         $availableDays = $this->calculateAvailableDays($authUser, $vacationType, $from, $daysCount);
 
-        $attachments = $request->file('attachments');
+
 
         // Create vacation(s) based on available balance
         return $this->createVacationRecords($authUser, $vacationType, $from, $to, $daysCount, $availableDays, $attachments);
