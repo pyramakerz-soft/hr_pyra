@@ -82,7 +82,7 @@ class CustomVacationController extends Controller
                 'created_by' => Auth::id(),
             ]);
 
-            if (array_key_exists('department_ids', $data) && !array_key_exists('sub_department_ids', $data)) {
+            if (array_key_exists('department_ids', $data) && empty($data['sub_department_ids'])) {
                 $vacation->departments()->sync($data['department_ids'] ?? []);
             }
 
