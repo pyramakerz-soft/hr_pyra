@@ -153,7 +153,6 @@
             <th class="py-3 pr-4">Title</th>
             <th class="py-3 pr-4">Type</th>
             <th class="py-3 pr-4">Scope</th>
-            <th class="py-3 pr-4">Recipients</th>
             <th class="py-3">Sent</th>
           </tr>
         </thead>
@@ -170,9 +169,6 @@
             </td>
             <td class="py-3 pr-4 text-[#5F6D7E]">
               {{ notification.scope_type | titlecase }}
-            </td>
-            <td class="py-3 pr-4 text-[#17253E]">
-              {{ notification.recipients_count || 0 }}
             </td>
             <td class="py-3 text-[#5F6D7E]">
               {{ notification.created_at | date: 'medium' }}
