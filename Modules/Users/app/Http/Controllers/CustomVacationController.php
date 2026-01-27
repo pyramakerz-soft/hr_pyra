@@ -128,7 +128,7 @@ class CustomVacationController extends Controller
                 'description' => $data['description'] ?? $customVacation->description,
             ])->save();
 
-            if (array_key_exists('department_ids', $data)) {
+            if (array_key_exists('department_ids', $data) && empty($data['sub_department_ids'])) {
                 $customVacation->departments()->sync($data['department_ids'] ?? []);
             }
 
