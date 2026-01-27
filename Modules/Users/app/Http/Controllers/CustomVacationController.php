@@ -134,6 +134,9 @@ class CustomVacationController extends Controller
 
             if (array_key_exists('sub_department_ids', $data)) {
                 $customVacation->subDepartments()->sync($data['sub_department_ids'] ?? []);
+                if (!empty($data['sub_department_ids'])) {
+                    $customVacation->departments()->detach();
+                }
             }
         });
 
