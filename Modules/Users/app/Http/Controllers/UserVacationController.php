@@ -112,8 +112,9 @@ class UserVacationController extends Controller
                 return $this->returnError("Vacation type '{$defaultName}' is not configured", 422);
             }
         }
+        $attachments = $request->file('attachments');
         if ($vacationType->name === self::SICK_LEAVE_NAME) {
-            $attachments = $request->file('attachments');
+
             if (!$attachments) {
                 return $this->returnError('Attachments are required for sick leave', 422);
             }
