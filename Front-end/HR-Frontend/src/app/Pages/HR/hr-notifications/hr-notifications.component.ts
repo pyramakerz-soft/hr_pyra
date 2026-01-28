@@ -46,6 +46,10 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
   totalNotifications = 0;
   private subscriptions: Subscription[] = [];
 
+  //search employee
+  filteredEmployees: Array<{ id: number; name: string }> = [];
+  searchQuery: string = '';
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly notificationCenter: NotificationCenterService,
@@ -206,7 +210,27 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
           name: String(item?.name ?? item ?? ''),
         }))
         .filter((item) => !!item.id && item.name.trim() !== '');
+
+      this.filteredEmployees = [...this.employees];
     });
+  }
+
+  //new methods for search
+  filterEmployees(): void {
+    if (!this.searchQuery.trim()) {
+      this.filteredEmployees = [...this.employees];
+      return;
+    }
+
+    const query = this.searchQuery.toLowerCase().trim();
+    this.filteredEmployees = this.employees.filter(employee =>
+      employee.name.toLowerCase().includes(query)
+    );
+  }
+
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.filteredEmployees = [...this.employees];
   }
 
 
