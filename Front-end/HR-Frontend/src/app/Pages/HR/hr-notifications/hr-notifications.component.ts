@@ -50,25 +50,25 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
   filteredEmployees: Array<{ id: number; name: string }> = [];
   searchQuery: string = '';
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly notificationCenter: NotificationCenterService,
-    private readonly departmentService: DepartmentService,
-    private readonly subDepartmentService: SubDepartmentService,
-    private readonly userService: UserServiceService,
-  ) {
-    this.notificationForm = this.fb.group({
-      type: ['', Validators.required],
-      title: ['', [Validators.required, Validators.maxLength(190)]],
-      message: ['', Validators.required],
-      scope_type: ['all', Validators.required],
-      scope_id: [''],
-      user_ids: [[]],
-      filters: this.fb.group({
-        roles: [[]],
-      }),
-    });
-  }
+constructor(
+  private readonly fb: FormBuilder,
+  private readonly notificationCenter: NotificationCenterService,
+  private readonly departmentService: DepartmentService,
+  private readonly subDepartmentService: SubDepartmentService,
+  private readonly userService: UserServiceService,
+) {
+  this.notificationForm = this.fb.group({
+    type: ['', Validators.required],
+    title: ['', [Validators.required, Validators.maxLength(190)]],
+    message: ['', [Validators.required, Validators.minLength(10)]],
+    scope_type: ['all', Validators.required],
+    scope_id: [''],
+    user_ids: [[]],
+    filters: this.fb.group({
+      roles: [[]],
+    }),
+  });
+}
 
   ngOnInit(): void {
     this.loadNotificationTypes();
@@ -90,6 +90,10 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
+
+  get messageControl() {
+  return this.notificationForm.get('message');
+}
 
   get scopeType(): string {
     return this.notificationForm.get('scope_type')?.value ?? '';
@@ -217,15 +221,27 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
 
   //new methods for search
   filterEmployees(): void {
+    const selectedIds = this.notificationForm.get('user_ids')?.value ?? [];
+    
     if (!this.searchQuery.trim()) {
       this.filteredEmployees = [...this.employees];
       return;
     }
 
     const query = this.searchQuery.toLowerCase().trim();
-    this.filteredEmployees = this.employees.filter(employee =>
+    
+    // Filter employees matching the search query
+    const matchingEmployees = this.employees.filter(employee =>
       employee.name.toLowerCase().includes(query)
     );
+    
+    // Get previously selected employees that don't match the search
+    const selectedEmployees = this.employees.filter(employee =>
+      selectedIds.includes(employee.id) && !employee.name.toLowerCase().includes(query)
+    );
+    
+    // Combine: selected employees first, then matching employees
+    this.filteredEmployees = [...selectedEmployees, ...matchingEmployees];
   }
 
   clearSearch(): void {

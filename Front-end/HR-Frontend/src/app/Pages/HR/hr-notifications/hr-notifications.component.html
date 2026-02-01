@@ -50,8 +50,30 @@
       <div class="space-y-2">
         <label class="text-sm font-medium text-[#344054]">Message</label>
         <textarea rows="4"
-          class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7] resize-y"
+          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 resize-y"
+          [class.border-[#D0D5DD]]="!messageControl?.touched || !messageControl?.errors"
+          [class.border-red-300]="messageControl?.touched && messageControl?.errors"
+          [class.focus:ring-[#437EF7]]="!messageControl?.touched || !messageControl?.errors"
+          [class.focus:ring-red-300]="messageControl?.touched && messageControl?.errors"
           formControlName="message" placeholder="Provide context, timelines, and the action required."></textarea>
+        
+        <!-- Validation error messages -->
+        <div *ngIf="messageControl?.touched && messageControl?.invalid" class="text-xs text-red-600 space-y-1">
+          <p *ngIf="messageControl?.errors?.['required']">
+            Message is required. Please enter notification content.
+          </p>
+          <p *ngIf="messageControl?.errors?.['minlength']">
+            Message must be at least 10 characters long.
+          </p>
+        </div>
+        
+        <!-- Character count (optional) -->
+        <div class="text-xs text-[#5F6D7E] flex justify-between">
+          <span>Provide clear instructions for recipients</span>
+          <span [class.text-red-600]="messageControl?.value?.length < 10">
+            {{ messageControl?.value?.length || 0 }} characters
+          </span>
+        </div>
       </div>
 
       <div class="grid md:grid-cols-2 gap-6" *ngIf="scopeType === 'department'">
@@ -159,8 +181,11 @@
 
       <div class="flex justify-end">
         <button type="submit"
-          class="px-5 py-2 rounded-md text-sm font-semibold text-white bg-[#437EF7] hover:bg-[#3566c7] transition disabled:opacity-60 disabled:cursor-not-allowed"
-          [disabled]="isSubmitting">
+          class="px-5 py-2 rounded-md text-sm font-semibold text-white transition disabled:opacity-60 disabled:cursor-not-allowed"
+          [class.bg-[#437EF7]]="notificationForm.valid"
+          [class.bg-[#C1C9D2]]="notificationForm.invalid"
+          [class.hover:bg-[#3566c7]]="notificationForm.valid"
+          [disabled]="isSubmitting || notificationForm.invalid">
           <span *ngIf="!isSubmitting">Send notification</span>
           <span *ngIf="isSubmitting">Sending...</span>
         </button>
