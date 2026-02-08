@@ -395,14 +395,37 @@ class ClockController extends Controller
 
         //  return $this->returnData("data", $query->get(), "All Clocks Data");
         if ($request->has('export')) {
-
             $fromDay = $request->get('from_day');
             $toDay = $request->get('to_day');
 
+            $usersQuery = User::query();
+
+            // Filter by Department
+            if ($request->filled('department_id') && $request->department_id !== 'none' && $request->department_id !== 'all') {
+                $usersQuery->where('department_id', $request->department_id);
+            } elseif ($request->department_id === 'none') {
+                $usersQuery->whereNull('department_id');
+            }
+
+            // Filter by Specific User parameter (if passed as single ID)
+            if ($request->filled('user_id')) {
+                $usersQuery->where('id', $request->user_id);
+            }
+
+            // Filter by list of IDs if passed (support multiple user selection like in Frontend)
+            if ($request->filled('ids') && is_array($request->ids)) {
+                $usersQuery->whereIn('id', $request->ids);
+            }
+
+            $users = null;
+            if ($request->filled('department_id') || $request->filled('user_id') || $request->filled('ids')) {
+                $users = $usersQuery->pluck('id')->toArray();
+            }
+
             return (new AbsentUsersExport(
                 $fromDay,
-                $toDay
-
+                $toDay,
+                $users
             ))
                 ->download('Absent_User.xlsx');
         }
@@ -957,6 +980,20 @@ class ClockController extends Controller
         if (!$clock) {
             return $this->returnError("No clocks found for this user", 404);
         }
+        // Check if the month ended (payroll period: 26th to 25th)
+        $clockDate = Carbon::parse($clock->clock_in);
+        // Determine the end of the payroll period for this clock record
+        if ($clockDate->day <= 25) {
+            $periodEnd = $clockDate->copy()->day(25)->endOfDay();
+        } else {
+            $periodEnd = $clockDate->copy()->addMonth()->day(25)->endOfDay();
+        }
+
+        // If today is past the period end, prevent editing
+        if (Carbon::now()->gt($periodEnd)) {
+            return $this->returnError("Cannot update clock record as the month has ended.", 403);
+        }
+
         // Check if the month ended (payroll period: 26th to 25th)
         $clockDate = Carbon::parse($clock->clock_in);
         // Determine the end of the payroll period for this clock record

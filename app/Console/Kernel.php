@@ -13,7 +13,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('check:clock_outs')->dailyAt('23:59:59');
-        $schedule->command('vacations:accrue-monthly')->monthlyOn(1, '01:00');
+        $schedule->command('vacations:accrue-monthly')->monthlyOn(26, '01:00');
+        $schedule->command('requests:remind-closure')->monthlyOn(25, '00:59');
     }
 
     /**

@@ -40,38 +40,45 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
   notifications: SystemNotificationRecord[] = [];
 
   isSubmitting = false;
+  isLoading = false;
+  currentPage = 1;
+  lastPage = 1;
+  totalNotifications = 0;
   private subscriptions: Subscription[] = [];
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly notificationCenter: NotificationCenterService,
-    private readonly departmentService: DepartmentService,
-    private readonly subDepartmentService: SubDepartmentService,
-    private readonly userService: UserServiceService,
-    private readonly rolesService: RolesService
-  ) {
-    this.notificationForm = this.fb.group({
-      type: ['', Validators.required],
-      title: ['', [Validators.required, Validators.maxLength(190)]],
-      message: ['', Validators.required],
-      scope_type: ['all', Validators.required],
-      scope_id: [''],
-      user_ids: [[]],
-      filters: this.fb.group({
-        roles: [[]],
-      }),
-    });
-  }
+  //search employee
+  filteredEmployees: Array<{ id: number; name: string }> = [];
+  searchQuery: string = '';
+
+constructor(
+  private readonly fb: FormBuilder,
+  private readonly notificationCenter: NotificationCenterService,
+  private readonly departmentService: DepartmentService,
+  private readonly subDepartmentService: SubDepartmentService,
+  private readonly userService: UserServiceService,
+) {
+  this.notificationForm = this.fb.group({
+    type: ['', Validators.required],
+    title: ['', [Validators.required, Validators.maxLength(190)]],
+    message: ['', [Validators.required, Validators.minLength(10)]],
+    scope_type: ['all', Validators.required],
+    scope_id: [''],
+    user_ids: [[]],
+    filters: this.fb.group({
+      roles: [[]],
+    }),
+  });
+}
 
   ngOnInit(): void {
     this.loadNotificationTypes();
     this.loadDepartments();
     this.loadEmployees();
-    this.loadRoles();
     this.loadNotifications();
 
     this.subscriptions.push(
       this.notificationForm.get('scope_type')?.valueChanges.subscribe(() => {
+        this.subDepartments = [];
         this.notificationForm.patchValue(
           { scope_id: '', user_ids: [] },
           { emitEvent: false }
@@ -83,6 +90,10 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
+
+  get messageControl() {
+  return this.notificationForm.get('message');
+}
 
   get scopeType(): string {
     return this.notificationForm.get('scope_type')?.value ?? '';
@@ -102,10 +113,14 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.scopeType === 'sub_department' || this.notificationForm.get('scope_type')?.value === 'sub_department') {
+      this.notificationForm.patchValue({ scope_id: '' }, { emitEvent: false });
+    }
+
     this.subDepartmentService.setDeptId(deptId);
     this.subDepartmentService.getall(deptId).subscribe((response: any) => {
-      const list = response?.data?.sub_departments ?? response;
-      this.subDepartments = Array.isArray(list) ? list : [];
+      const list = response?.data ?? response;
+      this.subDepartments = (Array.isArray(list) ? list : []).map((item: any) => SubDepartment.fromJson(item));
     });
   }
 
@@ -199,19 +214,62 @@ export class HrNotificationsComponent implements OnInit, OnDestroy {
           name: String(item?.name ?? item ?? ''),
         }))
         .filter((item) => !!item.id && item.name.trim() !== '');
+
+      this.filteredEmployees = [...this.employees];
     });
   }
 
-  private loadRoles(): void {
-    this.rolesService.getall().subscribe((response: any) => {
-      const list = response?.data?.roles ?? response;
-      this.roles = Array.isArray(list) ? list : [];
+  //new methods for search
+  filterEmployees(): void {
+    const selectedIds = this.notificationForm.get('user_ids')?.value ?? [];
+    
+    if (!this.searchQuery.trim()) {
+      this.filteredEmployees = [...this.employees];
+      return;
+    }
+
+    const query = this.searchQuery.toLowerCase().trim();
+    
+    // Filter employees matching the search query
+    const matchingEmployees = this.employees.filter(employee =>
+      employee.name.toLowerCase().includes(query)
+    );
+    
+    // Get previously selected employees that don't match the search
+    const selectedEmployees = this.employees.filter(employee =>
+      selectedIds.includes(employee.id) && !employee.name.toLowerCase().includes(query)
+    );
+    
+    // Combine: selected employees first, then matching employees
+    this.filteredEmployees = [...selectedEmployees, ...matchingEmployees];
+  }
+
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.filteredEmployees = [...this.employees];
+  }
+
+
+  loadNotifications(page = 1): void {
+    this.isLoading = true;
+    this.notificationCenter.getNotifications(page, 5).subscribe({
+      next: (response) => {
+        const paginated = response.notifications;
+        this.notifications = paginated.data ?? [];
+        this.currentPage = paginated.current_page;
+        this.lastPage = paginated.last_page;
+        this.totalNotifications = paginated.total;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      }
     });
   }
 
-  loadNotifications(): void {
-    this.notificationCenter.getNotifications(15).subscribe((response) => {
-      this.notifications = response.notifications ?? [];
-    });
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.lastPage && page !== this.currentPage) {
+      this.loadNotifications(page);
+    }
   }
 }

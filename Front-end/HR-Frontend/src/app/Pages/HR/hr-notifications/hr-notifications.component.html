@@ -7,10 +7,8 @@
       </p>
     </div>
     <div class="flex items-center space-x-3">
-      <button
-        routerLink="/HR/HRDashboard"
-        class="px-4 py-2 rounded-md text-sm font-semibold bg-[#17253E] text-white shadow hover:bg-[#0f1a2d] transition"
-      >
+      <button routerLink="/HR/HRDashboard"
+        class="px-4 py-2 rounded-md text-sm font-semibold bg-[#17253E] text-white shadow hover:bg-[#0f1a2d] transition">
         Back to dashboard
       </button>
     </div>
@@ -23,8 +21,7 @@
           <label class="text-sm font-medium text-[#344054]">Notification type</label>
           <select
             class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-            formControlName="type"
-          >
+            formControlName="type">
             <option *ngFor="let option of notificationTypes" [value]="option.value">
               {{ option.label }}
             </option>
@@ -35,8 +32,7 @@
           <label class="text-sm font-medium text-[#344054]">Scope</label>
           <select
             class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-            formControlName="scope_type"
-          >
+            formControlName="scope_type">
             <option *ngFor="let option of scopeOptions" [value]="option.key">
               {{ option.label }}
             </option>
@@ -46,22 +42,38 @@
 
       <div class="space-y-2">
         <label class="text-sm font-medium text-[#344054]">Title</label>
-        <input
-          type="text"
+        <input type="text"
           class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-          formControlName="title"
-          placeholder="e.g. Attendance policy refresh"
-        />
+          formControlName="title" placeholder="e.g. Attendance policy refresh" />
       </div>
 
       <div class="space-y-2">
         <label class="text-sm font-medium text-[#344054]">Message</label>
-        <textarea
-          rows="4"
-          class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7] resize-y"
-          formControlName="message"
-          placeholder="Provide context, timelines, and the action required."
-        ></textarea>
+        <textarea rows="4"
+          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 resize-y"
+          [class.border-[#D0D5DD]]="!messageControl?.touched || !messageControl?.errors"
+          [class.border-red-300]="messageControl?.touched && messageControl?.errors"
+          [class.focus:ring-[#437EF7]]="!messageControl?.touched || !messageControl?.errors"
+          [class.focus:ring-red-300]="messageControl?.touched && messageControl?.errors"
+          formControlName="message" placeholder="Provide context, timelines, and the action required."></textarea>
+        
+        <!-- Validation error messages -->
+        <div *ngIf="messageControl?.touched && messageControl?.invalid" class="text-xs text-red-600 space-y-1">
+          <p *ngIf="messageControl?.errors?.['required']">
+            Message is required. Please enter notification content.
+          </p>
+          <p *ngIf="messageControl?.errors?.['minlength']">
+            Message must be at least 10 characters long.
+          </p>
+        </div>
+        
+        <!-- Character count (optional) -->
+        <div class="text-xs text-[#5F6D7E] flex justify-between">
+          <span>Provide clear instructions for recipients</span>
+          <span [class.text-red-600]="messageControl?.value?.length < 10">
+            {{ messageControl?.value?.length || 0 }} characters
+          </span>
+        </div>
       </div>
 
       <div class="grid md:grid-cols-2 gap-6" *ngIf="scopeType === 'department'">
@@ -69,9 +81,7 @@
           <label class="text-sm font-medium text-[#344054]">Department</label>
           <select
             class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-            formControlName="scope_id"
-            (change)="onDepartmentChange($event)"
-          >
+            formControlName="scope_id" (change)="onDepartmentChange($event)">
             <option value="">Select department</option>
             <option *ngFor="let department of departments; trackBy: trackById" [value]="department.id">
               {{ department.name }}
@@ -85,8 +95,7 @@
           <label class="text-sm font-medium text-[#344054]">Department</label>
           <select
             class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-            (change)="onDepartmentChange($event)"
-          >
+            (change)="onDepartmentChange($event)">
             <option value="">Select department</option>
             <option *ngFor="let department of departments; trackBy: trackById" [value]="department.id">
               {{ department.name }}
@@ -98,8 +107,7 @@
           <label class="text-sm font-medium text-[#344054]">Sub department</label>
           <select
             class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-            formControlName="scope_id"
-          >
+            formControlName="scope_id">
             <option value="">Select sub department</option>
             <option *ngFor="let sub of subDepartments; trackBy: trackById" [value]="sub.id">
               {{ sub.name }}
@@ -112,8 +120,7 @@
         <label class="text-sm font-medium text-[#344054]">Employee</label>
         <select
           class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-          formControlName="scope_id"
-        >
+          formControlName="scope_id">
           <option value="">Select employee</option>
           <option *ngFor="let employee of employees; trackBy: trackById" [value]="employee.id">
             {{ employee.name }}
@@ -123,41 +130,62 @@
 
       <div class="space-y-3" *ngIf="scopeType === 'custom'">
         <label class="text-sm font-medium text-[#344054]">Targeted employees</label>
-        <select
-          multiple
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="filterEmployees()"
+            class="w-full border border-[#D0D5DD] rounded-lg px-3 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
+            placeholder="Search employees by name..." [ngModelOptions]="{standalone: true}">
+          <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#5F6D7E]" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <button *ngIf="searchQuery" (click)="clearSearch()"
+            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#5F6D7E] hover:text-[#344054]">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Employee Selection -->
+        <select multiple
           class="w-full min-h-[140px] border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-          formControlName="user_ids"
-        >
-          <option *ngFor="let employee of employees; trackBy: trackById" [value]="employee.id">
+          formControlName="user_ids">
+          <option *ngFor="let employee of filteredEmployees; trackBy: trackById" [value]="employee.id">
             {{ employee.name }}
           </option>
         </select>
+
+        <!-- Counter and Status Message -->
+        <div class="flex justify-between items-center text-xs text-[#5F6D7E]">
+          <div>
+            <span *ngIf="filteredEmployees.length === employees.length">
+              Showing all {{ employees.length }} employees
+            </span>
+            <span *ngIf="filteredEmployees.length !== employees.length">
+              Showing {{ filteredEmployees.length }} of {{ employees.length }} employees
+            </span>
+            <span *ngIf="searchQuery">
+              for "{{ searchQuery }}"
+            </span>
+          </div>
+          <div *ngIf="notificationForm.get('user_ids')?.value?.length">
+            {{ notificationForm.get('user_ids')?.value?.length }} selected
+          </div>
+        </div>
+
         <p class="text-xs text-[#5F6D7E]">Hold CTRL (or CMD on Mac) to select multiple employees.</p>
       </div>
 
-      <div class="space-y-2" formGroupName="filters">
-        <label class="text-sm font-medium text-[#344054]">Filter by role</label>
-        <select
-          multiple
-          class="w-full min-h-[120px] border border-[#D0D5DD] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#437EF7]"
-          formControlName="roles"
-        >
-          <option value="">Include all roles</option>
-          <option *ngFor="let role of roles; trackBy: trackById" [value]="role.name">
-            {{ role.name }}
-          </option>
-        </select>
-        <p class="text-xs text-[#5F6D7E]">
-          Filter recipients by role to send more personalised updates.
-        </p>
-      </div>
-
       <div class="flex justify-end">
-        <button
-          type="submit"
-          class="px-5 py-2 rounded-md text-sm font-semibold text-white bg-[#437EF7] hover:bg-[#3566c7] transition disabled:opacity-60 disabled:cursor-not-allowed"
-          [disabled]="isSubmitting"
-        >
+        <button type="submit"
+          class="px-5 py-2 rounded-md text-sm font-semibold text-white transition disabled:opacity-60 disabled:cursor-not-allowed"
+          [class.bg-[#437EF7]]="notificationForm.valid"
+          [class.bg-[#C1C9D2]]="notificationForm.invalid"
+          [class.hover:bg-[#3566c7]]="notificationForm.valid"
+          [disabled]="isSubmitting || notificationForm.invalid">
           <span *ngIf="!isSubmitting">Send notification</span>
           <span *ngIf="isSubmitting">Sending...</span>
         </button>
@@ -173,10 +201,7 @@
           Track what has been shared recently with the organisation.
         </p>
       </div>
-      <button
-        class="text-sm text-[#437EF7] font-semibold hover:underline"
-        (click)="loadNotifications()"
-      >
+      <button class="text-sm text-[#437EF7] font-semibold hover:underline" (click)="loadNotifications()">
         Refresh
       </button>
     </div>
@@ -192,7 +217,6 @@
             <th class="py-3 pr-4">Title</th>
             <th class="py-3 pr-4">Type</th>
             <th class="py-3 pr-4">Scope</th>
-            <th class="py-3 pr-4">Recipients</th>
             <th class="py-3">Sent</th>
           </tr>
         </thead>
@@ -202,15 +226,13 @@
               {{ notification.title }}
             </td>
             <td class="py-3 pr-4">
-              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#E0EAFF] text-[#0037C5]">
+              <span
+                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[#E0EAFF] text-[#0037C5]">
                 {{ notification.type | titlecase }}
               </span>
             </td>
             <td class="py-3 pr-4 text-[#5F6D7E]">
               {{ notification.scope_type | titlecase }}
-            </td>
-            <td class="py-3 pr-4 text-[#17253E]">
-              {{ notification.recipients_count || 0 }}
             </td>
             <td class="py-3 text-[#5F6D7E]">
               {{ notification.created_at | date: 'medium' }}
@@ -218,6 +240,52 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- Pagination Controls -->
+      <div class="flex items-center justify-between border-t border-[#E5E7EB] px-4 py-3 sm:px-6 mt-4">
+        <div class="flex flex-1 justify-between sm:hidden">
+          <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1"
+            class="relative inline-flex items-center rounded-md border border-[#D0D5DD] bg-white px-4 py-2 text-sm font-medium text-[#344054] hover:bg-[#F9FAFB] disabled:opacity-50">
+            Previous
+          </button>
+          <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === lastPage"
+            class="relative ml-3 inline-flex items-center rounded-md border border-[#D0D5DD] bg-white px-4 py-2 text-sm font-medium text-[#344054] hover:bg-[#F9FAFB] disabled:opacity-50">
+            Next
+          </button>
+        </div>
+        <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-[#5F6D7E]">
+              Showing page <span class="font-medium">{{ currentPage }}</span> of <span class="font-medium">{{ lastPage
+                }}</span>
+              (<span class="font-medium">{{ totalNotifications }}</span> total)
+            </p>
+          </div>
+          <div>
+            <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+              <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1"
+                class="relative inline-flex items-center rounded-l-md px-2 py-2 text-[#5F6D7E] ring-1 ring-inset ring-[#D0D5DD] hover:bg-[#F9FAFB] focus:z-20 focus:outline-offset-0 disabled:opacity-50">
+                <span class="sr-only">Previous</span>
+                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd"
+                    d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
+                    clip-rule="evenodd" />
+                </svg>
+              </button>
+
+              <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === lastPage"
+                class="relative inline-flex items-center rounded-r-md px-2 py-2 text-[#5F6D7E] ring-1 ring-inset ring-[#D0D5DD] hover:bg-[#F9FAFB] focus:z-20 focus:outline-offset-0 disabled:opacity-50">
+                <span class="sr-only">Next</span>
+                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd"
+                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                    clip-rule="evenodd" />
+                </svg>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 </section>
