@@ -31,7 +31,7 @@ class AccrueMonthlyVacationBalances extends Command
         $year = $referenceDate->year;
         $userIds = User::pluck('id');
 
-        // --- Core Monthly Accrual Logic (Only runs on the 1st of the month) ---
+        // --- Core Monthly Accrual Logic (Only runs on the 26th of the month) ---
         if ($isFirstOfMonth || $this->option('force')) {
             $this->info('Running monthly accrual and setup logic...');
             DB::transaction(function () use ($referenceDate, $year, $userIds) {
@@ -65,6 +65,7 @@ class AccrueMonthlyVacationBalances extends Command
 
                 UserVacationBalance::query()
                     ->where('year', $year)
+                    ->where('vacation_type_id', $annualLeaveVacationType->id)
                     ->with('user.user_detail') // Eager load user and their details
                     ->chunkById(500, function ($balances) use ($referenceDate) {
                         foreach ($balances as $balance) {
