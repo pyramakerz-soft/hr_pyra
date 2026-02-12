@@ -30,6 +30,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
   balancesToDelete: number[] = [];
   vacationTypeOptions: HrVacationTypeOption[] = [];
   loadError: string | null = null;
+  backendError: string | null = null;
   readonly currentYear = new Date().getFullYear();
 
   constructor(
@@ -246,6 +247,7 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
         this.profile = response.profile;
         this.patchDetail(response.profile.detail);
         this.setBalances(response.profile.vacation_balances ?? []);
+        this.backendError = null;
         this.cdr.detectChanges();
         
         Swal.fire({
@@ -260,10 +262,12 @@ export class EmployeeHrProfileDialogComponent implements OnInit {
         this.cdr.detectChanges();
         
         console.error('Save error:', error);
+        this.backendError = error.error?.message || 'Could not update the employee profile. Please try again.';
+        
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Could not update the employee profile. Please try again.',
+          text: this.backendError as string,
           confirmButtonColor: '#FF7519',
         });
       },

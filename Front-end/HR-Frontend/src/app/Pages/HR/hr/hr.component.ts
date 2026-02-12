@@ -18,15 +18,16 @@ export class HRComponent {
 
   menuItems = [
     { label: 'Dashboard', icon: 'fi fi-rr-table-rows', route: '/HR/HRDashboard', notificationCount: 0 },
-    { label: 'Employee', icon: 'fas fa-home', route: '/HR/HREmployee', notificationCount: 0 },
-    { label: 'Roles', icon: 'fi fi-rs-chart-pie', route: '/HR/HRRole', notificationCount: 0 },
-    { label: 'Attendance ', icon: 'fi fi-rr-chart-simple', route: '/HR/HRAttendance', notificationCount: 0 },
-    { label: 'Locations', icon: 'fi fi-rr-chart-simple', route: '/HR/HRBounders', notificationCount: 0 },
-    { label: 'Department', icon: 'fi fi-rr-chart-simple', route: '/HR/HRDepartment', notificationCount: 0 },
+    { label: 'Employees', icon: 'fi fi-rr-users', route: '/HR/HREmployee', notificationCount: 0 },
+    { label: 'Roles', icon: 'fi fi-rr-user', route: '/HR/HRRole', notificationCount: 0 },
+    { label: 'Attendance ', icon: 'fi fi-rr-clock', route: '/HR/HRAttendance', notificationCount: 0 },
+    { label: 'Locations', icon: 'fi fi-rr-map', route: '/HR/HRBounders', notificationCount: 0 },
+    { label: 'Departments', icon: 'fi fi-rr-building', route: '/HR/HRDepartment', notificationCount: 0 },
     // { label: 'Issues', icon: 'fi fi-rr-chart-simple', route: '/HR/HRIssues', notificationCount: this.count }, 
     { label: 'Custom Vacations', icon: 'fi fi-rr-calendar-star', route: '/HR/HRCustomVacations', notificationCount: 0 },
     // { label: 'Service Actions', icon: 'fi fi-rr-tools', route: '/HR/HRServiceActions', notificationCount: 0 },
-    { label: 'TimeZones', icon: 'fa-solid fa-clock-rotate-left', route: '/HR/ShowTimezones', notificationCount: 0 },
+    { label: 'TimeZones', icon: 'fi fi-rr-world', route: '/HR/ShowTimezones', notificationCount: 0 },
+    { label: 'Notifications', icon: 'fi fi-rr-bell', route: '/HR/HRNotifications', notificationCount: 0 },
     { label: 'Sign Out', icon: 'fi fi-bs-sign-out-alt transform rotate-180', route: '', notificationCount: 0 },
 
   ];

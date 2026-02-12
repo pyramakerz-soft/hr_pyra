@@ -108,21 +108,32 @@ export class ClockService {
   }
 
 
-  ExportAbsentUserData(fromDate?: string, toDate?: string) {
-
-
+  ExportAbsentUserData(fromDate?: string, toDate?: string, departmentId?: number | 'none' | null, userId?: number | null, ids?: number[]) {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    // Build the URL with the optional "fromDate" and "toDate" parameters
-    let url = `${this.baseUrl}/getAbsentUser/?export=true`;
+    // Build the URL with the optional parameters
+    const params = new URLSearchParams();
+    params.append('export', 'true');
 
-    if (fromDate && toDate) {
-      url += `&from_day=${fromDate}&to_day=${toDate}`;
+    if (fromDate) params.append('from_day', fromDate);
+    if (toDate) params.append('to_day', toDate);
+
+    if (departmentId !== null && departmentId !== undefined) {
+      params.append('department_id', String(departmentId));
     }
 
-    return this.http.get(url, { headers, responseType: 'blob' });
+    if (userId) {
+      params.append('user_id', String(userId));
+    }
 
+    if (ids && ids.length > 0) {
+      ids.forEach(id => params.append('ids[]', String(id)));
+    }
+
+    const url = `${this.baseUrl}/getAbsentUser/?${params.toString()}`;
+
+    return this.http.get(url, { headers, responseType: 'blob' });
   }
 
   ExportAllUserDataById(fromDay: string, toDay: string, departmentId: string): Observable<Blob> {

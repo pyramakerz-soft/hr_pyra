@@ -82,7 +82,7 @@ class CustomVacationController extends Controller
                 'created_by' => Auth::id(),
             ]);
 
-            if (array_key_exists('department_ids', $data)) {
+            if (array_key_exists('department_ids', $data) && empty($data['sub_department_ids'])) {
                 $vacation->departments()->sync($data['department_ids'] ?? []);
             }
 
@@ -128,12 +128,15 @@ class CustomVacationController extends Controller
                 'description' => $data['description'] ?? $customVacation->description,
             ])->save();
 
-            if (array_key_exists('department_ids', $data)) {
+            if (array_key_exists('department_ids', $data) && empty($data['sub_department_ids'])) {
                 $customVacation->departments()->sync($data['department_ids'] ?? []);
             }
 
             if (array_key_exists('sub_department_ids', $data)) {
                 $customVacation->subDepartments()->sync($data['sub_department_ids'] ?? []);
+                if (!empty($data['sub_department_ids'])) {
+                    $customVacation->departments()->detach();
+                }
             }
         });
 

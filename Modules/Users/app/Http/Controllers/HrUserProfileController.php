@@ -79,6 +79,11 @@ class HrUserProfileController extends Controller
     {
         $payload = $request->validated();
 
+        $validationError = $this->validateVacationBalances($user, $payload);
+        if ($validationError) {
+            return $this->returnError($validationError, 422);
+        }
+
         DB::transaction(function () use ($payload, $user) {
             $detailData = $payload['detail'] ?? [];
             if (!empty($detailData)) {
@@ -123,10 +128,10 @@ class HrUserProfileController extends Controller
                 $balance->used_days = $used;
                 $balance->year = $year;
                 $balance->vacation_type_id = $balanceData['vacation_type_id'] ?? $balance->vacation_type_id;
-                $vacation = VacationType::where('id', $balanceData['vacation_type_id'])->first();
+                $vacation = VacationType::where('id', $balance->vacation_type_id)->first();
 
                 // Accumulate adjustments for annual balance from Casual/Emergency/Exceptional leaves
-                if (in_array($vacation->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME, self::EXCEPTIONAL_LEAVE_NAME])) {
+                if ($vacation && in_array($vacation->name, [self::CASUAL_LEAVE_NAME, self::EMERGENCY_LEAVE_NAME, self::EXCEPTIONAL_LEAVE_NAME])) {
                     $annualBalanceAdjustment += ($used - $previouslyUsed);
                     $annualBalanceYear = $year;
                 }
@@ -154,6 +159,83 @@ class HrUserProfileController extends Controller
         $user->refresh();
 
         return $this->show($user);
+    }
+
+    private function validateVacationBalances(User $user, array $payload): ?string
+    {
+        $balances = $payload['vacation_balances'] ?? [];
+        $idsToDelete = $payload['vacation_balance_ids_to_delete'] ?? [];
+
+        $vacationTypes = VacationType::whereIn('name', [
+            self::ANNUAL_LEAVE_NAME,
+            self::CASUAL_LEAVE_NAME,
+            self::EMERGENCY_LEAVE_NAME
+        ])->get()->keyBy('name');
+
+        $types = [
+            'annual' => $vacationTypes[self::ANNUAL_LEAVE_NAME]?->id,
+            'casual' => $vacationTypes[self::CASUAL_LEAVE_NAME]?->id,
+            'emergency' => $vacationTypes[self::EMERGENCY_LEAVE_NAME]?->id,
+        ];
+
+        // Group processing years from payload
+        $yearsToCheck = [];
+        foreach ($balances as $balanceData) {
+            $year = (int) ($balanceData['year'] ?? now()->year);
+            $typeId = $balanceData['vacation_type_id'] ?? null;
+            
+            if (!$typeId && isset($balanceData['id'])) {
+                $typeId = UserVacationBalance::where('id', $balanceData['id'])->value('vacation_type_id');
+            }
+
+            // Only check years where Annual, Casual or Emergency balances are being modified
+            if (in_array($typeId, $types)) {
+                $yearsToCheck[$year] = true;
+            }
+        }
+
+        foreach (array_keys($yearsToCheck) as $year) {
+            $amounts = [];
+            foreach ($types as $key => $typeId) {
+                if (!$typeId) {
+                    $amounts[$key] = 0;
+                    continue;
+                }
+
+                $foundInPayload = false;
+                foreach ($balances as $balanceData) {
+                    $balanceTypeId = $balanceData['vacation_type_id'] ?? null;
+                    if (!$balanceTypeId && isset($balanceData['id'])) {
+                        $balanceTypeId = UserVacationBalance::where('id', $balanceData['id'])->value('vacation_type_id');
+                    }
+
+                    if ($balanceTypeId == $typeId && (int) ($balanceData['year'] ?? now()->year) == $year) {
+                        $amounts[$key] = (float) ($balanceData['allocated_days'] ?? 0);
+                        $foundInPayload = true;
+                        break;
+                    }
+                }
+
+                if (!$foundInPayload) {
+                    $dbBalance = UserVacationBalance::where('user_id', $user->id)
+                        ->where('vacation_type_id', $typeId)
+                        ->where('year', $year)
+                        ->first();
+
+                    if ($dbBalance && !in_array($dbBalance->id, $idsToDelete)) {
+                        $amounts[$key] = (float) ($dbBalance->allocated_days ?? 0);
+                    } else {
+                        $amounts[$key] = 0;
+                    }
+                }
+            }
+
+            if (round($amounts['casual'] + $amounts['emergency'], 2) != round($amounts['annual'], 2)) {
+                return "For year $year: Casual Leave ({$amounts['casual']}) + Emergency Leave ({$amounts['emergency']}) must equal Annual Leave ({$amounts['annual']}).";
+            }
+        }
+
+        return null;
     }
 }
 

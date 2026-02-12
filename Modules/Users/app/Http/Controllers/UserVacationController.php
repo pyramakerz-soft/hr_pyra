@@ -112,6 +112,13 @@ class UserVacationController extends Controller
                 return $this->returnError("Vacation type '{$defaultName}' is not configured", 422);
             }
         }
+        $attachments = $request->file('attachments');
+        if ($vacationType->name === self::SICK_LEAVE_NAME) {
+
+            if (!$attachments) {
+                return $this->returnError('Attachments are required for sick leave', 422);
+            }
+        }
 
         // Validate Special Leave Eligibility
         $eligibilityError = $this->validateSpecialLeaveEligibility($authUser, $vacationType, $daysCount);
@@ -145,7 +152,7 @@ class UserVacationController extends Controller
         // Calculate available days for this vacation type
         $availableDays = $this->calculateAvailableDays($authUser, $vacationType, $from, $daysCount);
 
-        $attachments = $request->file('attachments');
+
 
         // Create vacation(s) based on available balance
         return $this->createVacationRecords($authUser, $vacationType, $from, $to, $daysCount, $availableDays, $attachments);
@@ -336,23 +343,23 @@ class UserVacationController extends Controller
                     $allocatedDays = $vacation->vacationType->default_days ?? 0;
                     $remainingDays = max(0, $allocatedDays - $usedDays);
 
-                    if ($remainingDays < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value) {
-                        return $this->returnError('Insufficient ' . $vacation->vacationType->name . ' balance. Remaining days: ' . $remainingDays, 422);
+                    if ($remainingDays < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value && $status !== StatusEnum::Rejected->value && $status !== StatusEnum::Declined->value) {
+                        return $this->returnError('Cannot change status as ' . $status . ' Insufficient ' . $vacation->vacationType->name . ' balance. Remaining days: ' . $remainingDays, 422);
                     }
 
                     // Check Annual Leave balance
                     $annualType = VacationType::where('name', self::ANNUAL_LEAVE_NAME)->first();
                     if ($annualType) {
                         $annualBalance = $this->getOrCreateBalance($vacation->user, $annualType, Carbon::parse($vacation->from_date));
-                        if ($annualBalance->remaining_days < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value) {
-                            return $this->returnError('Insufficient ' . self::ANNUAL_LEAVE_NAME . ' balance. Remaining days: ' . $annualBalance->remaining_days, 422);
+                        if ($annualBalance->remaining_days < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value && $status !== StatusEnum::Rejected->value && $status !== StatusEnum::Declined->value) {
+                            return $this->returnError('Cannot change status as ' . $status . ' Insufficient ' . self::ANNUAL_LEAVE_NAME . ' balance. Remaining days: ' . $annualBalance->remaining_days, 422);
                         }
                     }
                 } elseif ($vacation->vacationType->name !== self::UNPAID_LEAVE_NAME && $vacation->vacationType->name !== self::SICK_LEAVE_NAME && $vacation->vacationType->name !== self::EXCEPTIONAL_LEAVE_NAME) {
                     // Standard check for other types (excluding Unpaid)
                     $balance = $this->getOrCreateBalance($vacation->user, $vacation->vacationType, Carbon::parse($vacation->from_date));
-                    if ($balance->remaining_days < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value) {
-                        return $this->returnError('Insufficient ' . $vacation->vacationType->name . ' balance. Remaining days: ' . $balance->remaining_days, 422);
+                    if ($balance->remaining_days < ($vacation->days_count ?? 0) && $status !== StatusEnum::Refused->value && $status !== StatusEnum::Rejected->value && $status !== StatusEnum::Declined->value) {
+                        return $this->returnError('Cannot change status as ' . $status . ' Insufficient ' . $vacation->vacationType->name . ' balance. Remaining days: ' . $balance->remaining_days, 422);
                     }
                 }
             }
@@ -448,6 +455,13 @@ class UserVacationController extends Controller
   *             collectionFormat="multi"
   *         )
   *     ),
+  *     @OA\Parameter(
+  *         name="role",
+  *         in="query",
+  *         description="Filter by user role name (e.g. 'Team leader')",
+  *         required=false,
+  *         @OA\Schema(type="string", example="Team leader")
+  *     ),
   *     @OA\Response(
   *         response=200,
   *         description="List of vacations for employees in the manager's department",
@@ -534,9 +548,25 @@ class UserVacationController extends Controller
             $query->whereDate('to_date', '<=', $to);
         }
 
+        if ($role = request()->query('role')) {
+            $query->whereHas('user', function ($q) use ($role) {
+                $q->whereHas('roles', function ($q) use ($role) {
+                    $q->where('name', 'LIKE', '%' . $role . '%');
+                });
+            });
+        }
+
         $perPage = (int) request()->query('per_page', 6);
         if ($perPage < 1) {
             $perPage = 6;
+        }
+
+        if ($role = request()->query('role')) {
+            $query->whereHas('user', function ($q) use ($role) {
+                $q->whereHas('roles', function ($q2) use ($role) {
+                    $q2->where('name', 'like', '%' . $role . '%');
+                });
+            });
         }
 
         $vacations = $query->orderByDesc('from_date')
@@ -1313,4 +1343,52 @@ class UserVacationController extends Controller
 
         return $this->returnSuccess("Vacation balances reset successfully for " . $userIds->count() . " users.", 200);
     }
+    /**
+     * @OA\Get(
+     *     path="/api/vacation/export-history",
+     *     tags={"Vacation"},
+     *     summary="Export leave history for users",
+     *     description="Downloads an Excel file containing the leave history of employees based on filters.",
+     *     operationId="exportLeaveHistory",
+     *     @OA\Parameter(name="user_id", in="query", @OA\Schema(type="integer"), description="Filter by user ID"),
+     *     @OA\Parameter(name="department_id", in="query", @OA\Schema(type="integer"), description="Filter by department ID"),
+     *     @OA\Parameter(name="ids", in="query", @OA\Schema(type="array", @OA\Items(type="integer")), description="Array of User IDs"),
+     *     @OA\Parameter(name="from_date", in="query", @OA\Schema(type="string", format="date"), description="Filter from date"),
+     *     @OA\Parameter(name="to_date", in="query", @OA\Schema(type="string", format="date"), description="Filter to date"),
+     *     @OA\Response(response=200, description="Excel file download"),
+     *     security={{"bearerAuth":{}}}
+     * )
+     */
+    public function exportLeaveHistory(Request $request)
+    {
+        $userIds = null;
+
+        $usersQuery = User::query();
+
+        // Filter by Department and User similar to ClockController
+        if ($request->filled('department_id') && $request->department_id !== 'none' && $request->department_id !== 'all') {
+            $usersQuery->where('department_id', $request->department_id);
+        } elseif ($request->department_id === 'none') {
+            $usersQuery->whereNull('department_id');
+        }
+
+        if ($request->filled('user_id')) {
+            $usersQuery->where('id', $request->user_id);
+        }
+
+        if ($request->filled('ids') && is_array($request->ids)) {
+            $usersQuery->whereIn('id', $request->ids);
+        }
+
+        if ($request->filled('department_id') || $request->filled('user_id') || $request->filled('ids')) {
+            $userIds = $usersQuery->pluck('id')->toArray();
+        }
+
+        return (new \Modules\Users\Exports\LeavesHistoryExport(
+            $userIds,
+            $request->get('from_date'),
+            $request->get('to_date')
+        ))->download('leaves_history.xlsx');
+    }
 }
+

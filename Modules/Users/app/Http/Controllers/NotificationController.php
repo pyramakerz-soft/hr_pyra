@@ -29,19 +29,37 @@ class NotificationController extends Controller
 
     public function index(Request $request)
     {
-        $limit = (int) $request->get('limit', 25);
+        $limit = (int) $request->get('limit', 5);
         $limit = max(1, min(100, $limit));
+        $isNotRead = $request->boolean('is_not_read', false);
+        $userId = Auth::id();
 
-        $notifications = SystemNotification::query()
-            ->with('createdBy:id,name')
-            ->withCount('recipients as recipients_count')
-            ->when($request->filled('type'), fn (Builder $builder) => $builder->where('type', $request->string('type')))
-            ->when($request->filled('scope_type'), fn (Builder $builder) => $builder->where('scope_type', $request->string('scope_type')))
-            ->orderByDesc('created_at')
-            ->limit($limit)
-            ->get();
+        $query = SystemNotification::query()
+            ->with(['createdBy:id,name'])
+            ->when($request->filled('type'), fn(Builder $builder) => $builder->where('type', $request->string('type')))
+            ->when($request->filled('scope_type'), fn(Builder $builder) => $builder->where('scope_type', $request->string('scope_type')))
+            ->orderByDesc('created_at');
 
-        return $this->returnData('notifications', $notifications);
+        if (!Auth::user()->hasRole('Hr')) {
+            $query->whereHas('recipients', fn(Builder $builder) => $builder->where('user_id', $userId))
+                ->with(['recipients' => fn($q) => $q->where('user_id', $userId)]);
+        }
+
+        if ($isNotRead) {
+            $query->whereHas('recipients', fn(Builder $builder) => $builder->where('user_id', $userId)->whereNull('read_at'));
+        }
+
+        $paginator = $query->paginate($limit);
+
+        $paginator->getCollection()->transform(function ($notification) use ($userId) {
+            $recipient = $notification->recipients->first();
+            $notification->read_at = $recipient ? $recipient->read_at : null;
+            $notification->status = $recipient ? $recipient->status : null;
+            unset($notification->recipients);
+            return $notification;
+        });
+
+        return $this->returnData('notifications', $paginator);
     }
 
     public function show(SystemNotification $notification)
@@ -110,22 +128,21 @@ class NotificationController extends Controller
 
     public function markRead(Request $request, SystemNotification $notification)
     {
-        $userId = $request->integer('user_id', Auth::id());
+        $userId = Auth::id();
 
-        if (! $userId) {
+        if (!$userId) {
             return $this->returnError('Unable to determine which employee should be updated.');
         }
-
         $recipient = SystemNotificationRecipient::query()
             ->where('notification_id', $notification->id)
             ->where('user_id', $userId)
             ->first();
 
-        if (! $recipient) {
+        if (!$recipient) {
             return $this->returnError('No notification record found for the supplied employee.');
         }
 
-        if (! $recipient->read_at) {
+        if (!$recipient->read_at) {
             $recipient->forceFill([
                 'status' => 'read',
                 'read_at' => Carbon::now(),
@@ -160,11 +177,11 @@ class NotificationController extends Controller
      */
     protected function applyFilters(Builder $query, array $filters): Builder
     {
-        if (! empty($filters['roles']) && is_array($filters['roles'])) {
-            $roles = array_filter($filters['roles'], fn ($role) => is_string($role) && $role !== '');
+        if (!empty($filters['roles']) && is_array($filters['roles'])) {
+            $roles = array_filter($filters['roles'], fn($role) => is_string($role) && $role !== '');
 
-            if (! empty($roles)) {
-                $query->whereHas('roles', fn (Builder $builder) => $builder->whereIn('name', $roles));
+            if (!empty($roles)) {
+                $query->whereHas('roles', fn(Builder $builder) => $builder->whereIn('name', $roles));
             }
         }
 
@@ -176,7 +193,7 @@ class NotificationController extends Controller
      */
     protected function usersForDepartment(?int $departmentId): Builder
     {
-        if (! $departmentId) {
+        if (!$departmentId) {
             return User::query()->whereRaw('1 = 0');
         }
 
@@ -197,7 +214,7 @@ class NotificationController extends Controller
      */
     protected function usersForSubDepartment(?int $subDepartmentId): Builder
     {
-        if (! $subDepartmentId) {
+        if (!$subDepartmentId) {
             return User::query()->whereRaw('1 = 0');
         }
 

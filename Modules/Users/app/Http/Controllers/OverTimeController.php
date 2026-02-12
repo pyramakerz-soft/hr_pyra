@@ -325,6 +325,7 @@ class OverTimeController extends Controller
 
         $searchTerm = request()->query('searchTerm');
         $statusFilter = request()->query('status');
+        $role = request()->query('role');
 
         // Build query
         $query = Overtime::whereIn('user_id', $employeeIds)
@@ -345,6 +346,14 @@ class OverTimeController extends Controller
             } else {
                 $query->where('status', $statusFilter);
             }
+        }
+
+        if (!empty($role)) {
+            $query->whereHas('user', function ($q) use ($role) {
+                $q->whereHas('roles', function ($q2) use ($role) {
+                    $q2->where('name', 'like', '%' . $role . '%');
+                });
+            });
         }
 
         // Sort by latest created

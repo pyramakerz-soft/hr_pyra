@@ -112,21 +112,17 @@ class User extends Authenticatable implements JWTSubject
                 ->pluck('id');
         } elseif ($role === 'Manager') {
             // Check or retrieve department_id
-            $department_id = $this->department_id;
 
-            if ($department_id && !is_array($department_id)) {
-                $department_id = [$department_id];
+
+
+            $dept = Department::where('manager_id', $this->id)->pluck('id')->toArray();
+
+            if (!$dept) {
+                abort(406, 'Department is null in manager data');
             }
 
-            if (!$department_id) {
-                $dept = Department::where('manager_id', $this->id)->pluck('id')->toArray();
+            $department_id = $dept;
 
-                if (!$dept) {
-                    abort(406, 'Department is null in manager data');
-                }
-
-                $department_id = $dept;
-            }
 
             // Get all team leaders in the department
             $teamLeadIds = self::whereIn('department_id', $department_id)
@@ -150,8 +146,8 @@ class User extends Authenticatable implements JWTSubject
                 ->merge($subDeptEmployeeIds)
                 ->merge($departmentEmployeeIds)
                 ->unique(); // prevent duplicates
-
             return $data;
+
         }
 
         return collect(); // Return an empty collection if the user is neither a team lead nor a manager

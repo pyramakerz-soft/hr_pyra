@@ -43,15 +43,21 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
             'Department',
             'Total Hours in That Day',
             'Total Over time in That Day',
+            'is_mission',
+            'OT Direct Approved By',
+            'OT Head Approved By',
             'Plan Deduction in That Day',
             'Deduction Details',
             'Excuse Deducted in That Day',
             'Excuse Remaining (Policy 4h)',
             'Total Excuses in That Day',
             'Is this date has vacation',
+            'Vacation Direct Approved By',
+            'Vacation Head Approved By',
             'Location In',
             'Location Out',
             'Attendance Over time in That Day',
+            'Plan Monetary Amount',
         ];
     }
 
@@ -90,11 +96,11 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
 
         foreach ($this->rowStyles as $mark) {
             $rowNumber = $mark['row'] ?? null;
-            if (! $rowNumber) {
+            if (!$rowNumber) {
                 continue;
             }
 
-            if (! empty($mark['ot_status'])) {
+            if (!empty($mark['ot_status'])) {
                 $statusKey = strtolower($mark['ot_status']);
                 if (isset($otStatusColors[$statusKey])) {
                     foreach (['H', 'O'] as $col) {
@@ -108,7 +114,7 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
                 }
             }
 
-            if (! empty($mark['weekend'])) {
+            if (!empty($mark['weekend'])) {
                 $sheet->getStyle('A' . $rowNumber)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
@@ -117,7 +123,7 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
                 ]);
             }
 
-            if (! empty($mark['multi_segment'])) {
+            if (!empty($mark['multi_segment'])) {
                 foreach (['C', 'D'] as $col) {
                     $sheet->getStyle($col . $rowNumber)->applyFromArray([
                         'fill' => [
@@ -128,7 +134,7 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
                 }
             }
 
-            if (! empty($mark['deduction_color'])) {
+            if (!empty($mark['deduction_color'])) {
                 $colorHex = strtoupper(ltrim($mark['deduction_color'], '#'));
                 foreach (['I', 'J'] as $col) {
                     $sheet->getStyle($col . $rowNumber)->applyFromArray([
@@ -140,7 +146,7 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
                 }
             }
 
-            if (! empty($mark['vacation'])) {
+            if (!empty($mark['vacation'])) {
                 $sheet->getStyle('N' . $rowNumber)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
@@ -149,7 +155,7 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
                 ]);
             }
 
-            if (! empty($mark['header_row'])) {
+            if (!empty($mark['header_row'])) {
                 $sheet->getStyle('A' . $rowNumber . ':Q' . $rowNumber)->applyFromArray([
                     'font' => [
                         'bold' => true,

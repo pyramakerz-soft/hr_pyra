@@ -63,6 +63,10 @@
 
   <!-- Vacation Balances Form -->
   <section class="dialog-section">
+    <div class="alert alert-danger mb-4" *ngIf="backendError">
+      <p class="m-0">{{ backendError }}</p>
+    </div>
+
     <header class="section-header">
       <h3 class="section-title">Vacation Balances</h3>
       <button type="button" class="link-btn" (click)="addBalance()" [disabled]="!canAddMoreBalances()">

@@ -9,7 +9,13 @@ interface NotificationTypesResponse {
 }
 
 interface NotificationIndexResponse {
-  notifications: SystemNotificationRecord[];
+  notifications: {
+    data: SystemNotificationRecord[];
+    current_page: number;
+    last_page: number;
+    total: number;
+    per_page: number;
+  };
 }
 
 interface NotificationStoreResponse {
@@ -32,8 +38,10 @@ export class NotificationCenterService {
     });
   }
 
-  getNotifications(limit = 20): Observable<NotificationIndexResponse> {
-    const params = new HttpParams().set('limit', limit.toString());
+  getNotifications(page = 1, limit = 5): Observable<NotificationIndexResponse> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
 
     return this.http.get<NotificationIndexResponse>(`${this.baseUrl}/notifications`, {
       headers: this.buildHeaders(),
