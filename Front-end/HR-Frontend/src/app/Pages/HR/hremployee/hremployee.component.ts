@@ -11,6 +11,7 @@ import Swal from 'sweetalert2';
 import { ClockService } from '../../../Services/clock.service';
 import { EmployeeHrProfileDialogComponent } from '../../../Components/employee-hr-profile-dialog/employee-hr-profile-dialog.component';
 import { HrStateService } from '../../../Services/SaveState/hr-state.service';
+import { BulkUpdateTimePopUpComponent } from '../../../Components/bulk-update-time-pop-up/bulk-update-time-pop-up.component';
 
 interface data {
   Name: string,
@@ -126,6 +127,18 @@ ngOnInit() {
 
   NavigateToAddEmployee() {
     this.router.navigateByUrl("HR/HREmployeeDetailsAdd")
+  }
+
+  OpenBulkUpdateTimePopUp() {
+    const dialogRef = this.dialog.open(BulkUpdateTimePopUpComponent, {
+      width: '500px',
+      maxWidth: '95vw'
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.getAllEmployees(this.CurrentPageNumber);
+      }
+    });
   }
 
 NavigateToEmployeeDetails(id: number) {

@@ -122,6 +122,7 @@ Route::group(['middleware' => 'role:Hr|Admin|Team leader'], function () {
     Route::group(['prefix' => 'hr', 'middleware' => 'role:Hr|Admin'], function () {
         Route::get('/users/{user}/profile', [HrUserProfileController::class, 'show']);
         Route::put('/users/{user}/profile', [HrUserProfileController::class, 'update']);
+        Route::post('/bulk-update-times', [HrUserProfileController::class, 'bulkUpdateTime']);
     });
 
 

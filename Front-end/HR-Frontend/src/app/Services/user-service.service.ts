@@ -244,4 +244,10 @@ export class UserServiceService {
     const url = `${this.baseURL}/vacation/export-history?${params.toString()}`;
     return this.http.get(url, { headers, responseType: 'blob' });
   }
+
+  bulkUpdateTime(payload: { department_id?: number, sub_department_id?: number, start_time?: string, end_time?: string }): Observable<any> {
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post(`${this.baseURL}/hr/bulk-update-times`, payload, { headers });
+  }
 }
