@@ -44,6 +44,10 @@ export class HrRoleAddComponent {
     });
   }
 
+  goBack() {
+    this.router.navigateByUrl("/HR/HRRole");
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
@@ -183,7 +187,10 @@ export class HrRoleAddComponent {
 
   cancel(){
     this.router.navigateByUrl("/HR/HRRole");
+  }
 
+  get hasSelectedPermissions(): boolean {
+    return this.permissions.some(p => p.selected);
   }
 }
 

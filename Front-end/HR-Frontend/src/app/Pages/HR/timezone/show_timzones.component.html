@@ -1,48 +1,64 @@
-<div>
-  <button (click)="addTimezone()"
-  class="bg-[#17253E] text-white font-medium text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
-  Add
-</button>
+<div class="page-container pb-10">
+  <!-- Page Header -->
+  <header class="page-header">
+    <h1 class="page-title">Timezone Configurations</h1>
+    
+    <button (click)="addTimezone()" class="btn-add">
+      <i class="fa-solid fa-plus"></i>
+      <span>Define New Timezone</span>
+    </button>
+  </header>
 
-  <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">
-    <table class="w-full md:table-fixed table-auto bg-[#FFFFFF] text-left text-[#475467]">
-      <thead class="bg-[#F9FAFB] text-sm md:text-base">
-        <tr>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">#</th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Timezone Name</th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Value</th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- No Data Row -->
-        <tr *ngIf="timezones.length === 0">
-          <td colspan="4" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-            No Data Found
-          </td>
-        </tr>
+  <!-- Timezone List Card -->
+  <div class="table-card">
+    <div class="overflow-x-auto">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th class="w-16">#</th>
+            <th>Temporal Identity</th>
+            <th>Offset Value</th>
+            <th class="text-right px-6" *ngIf="timezones.length !== 0">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty State -->
+          <tr *ngIf="timezones.length === 0">
+            <td colspan="4">
+              <div class="empty-state">
+                <i class="fa-solid fa-earth-americas"></i>
+                <p class="font-medium">No timezones configured</p>
+                <p class="text-xs mt-1">Sync your global operations here</p>
+              </div>
+            </td>
+          </tr>
 
-        <!-- Data Rows -->
-        <tr *ngFor="let timezone of timezones; let i = index"
-       
-            class="border-t border-gray-300 text-xs md:text-sm">
-          <td class="py-5 px-4">{{ i + 1 }}</td>
-          <td class="py-5 px-4">{{ timezone.name }}</td>
-          <td class="py-5 px-4">{{ timezone.value }}</td>
-
-          <td class="py-5 px-4">
-            <div class="px-2">
-              <button (click)="editTimezone(timezone.id!)"
-           >
-                <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
-              </button>
-              <button (click)="deleteTimezone(timezone.id!)">
-                <i class="fa fa-trash text-[#CC161D] ml-2 w-3 md:w-4"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          <!-- Data Rows -->
+          <tr *ngFor="let timezone of timezones; let i = index">
+            <td class="index-text">{{ i + 1 }}</td>
+            <td class="timezone-name">{{ timezone.name }}</td>
+            <td>
+              <div class="value-pill" *ngIf="timezone.value !== null && timezone.value !== undefined">
+                <i class="fa-regular fa-clock text-[10px] opacity-50"></i>
+                UTC {{ timezone.value.toString().startsWith('+') || timezone.value.toString().startsWith('-') ? timezone.value : '+' + timezone.value }}
+              </div>
+            </td>
+            
+            <td class="text-right px-6" *ngIf="timezones.length !== 0">
+              <div class="flex justify-end gap-2">
+                <button class="action-btn edit-btn" title="Modify Timezone"
+                        (click)="editTimezone(timezone.id!)">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn delete-btn" title="Remove Timezone" 
+                        (click)="deleteTimezone(timezone.id!)">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

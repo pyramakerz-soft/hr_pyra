@@ -1,283 +1,190 @@
-<div>
-    <div class="flex flex-col md:flex-row justify-between md:items-center">
-        <div class="flex items-center space-x-4">
-            <!-- Back Button -->
-            <button (click)="goBack()"
-                class="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                title="Go back">
-                <i class="fa-solid fa-arrow-left text-gray-600"></i>
-            </button>
+<div class="page-container pb-20">
+  
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="hero-profile">
+      <button (click)="goBack()" class="back-btn" title="Return to Attendance List">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
 
-            <div>
-                <p class="text-[#272D37] font-semibold text-2xl md:text-3xl capitalize">{{employee.name}}</p>
-                <p class="text-[#5F6D7E] text-xs md:text-base">{{employee.emp_type}}</p>
-            </div>
+      <div class="emp-info">
+        <h1 class="name">{{employee.name}}</h1>
+        <div class="meta">
+            <i class="fa-solid fa-id-card"></i>
+            <span>{{employee.emp_type}}</span>
         </div>
-        <div class="flex space-x-3 justify-between mt-3 md:mt-0">
-            <!-- <button (click)="openDialog()"
-            [disabled]="AddClockInButton"
-                class="bg-[#17253E] text-white font-medium text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">Add
-                Clock In</button> -->
-            <button (click)="ExportData()"
-                class="border border-[#FF7519] text-[#FF7519] font-medium text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
-                Export
-            </button>
-        </div>
+      </div>
     </div>
 
-
-    <div class="flex flex-row gap-20 mt-5">
-        <div class="w-full max-w-xs">
-            <label for="from_day" class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
-            <div class="rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
-                <input type="date" id="from_day" [(ngModel)]="from_day" (change)="onDateChange()"
-                    class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
-            </div>
-        </div>
-
-        <div class="w-full max-w-xs">
-            <label for="to_day" class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
-            <div class="rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
-                <input type="date" id="to_day" [(ngModel)]="to_day" (change)="onDateChange()"
-                    class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
-            </div>
-        </div>
+    <div class="actions">
+      <button (click)="ExportData()" class="btn-premium btn-outline-orange">
+        <i class="fa-solid fa-file-export mr-2"></i>
+        Export Detailed Log
+      </button>
     </div>
-    <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">
-        <table class="overflow-auto bg-[#FFFFFF] text-center text-[#475467] w-full">
-            <thead class="bg-[#F9FAFB]">
-                <tr>
-                    <th class="py-3 w-1/12 min-w-[120px] whitespace-nowrap">
-                        Day
-                    </th>
-                    <th class="py-3 min-w-[120px] whitespace-nowrap">
-                        Date
-                    </th>
-                    <th class="py-3 min-w-[120px] whitespace-nowrap">
-                        Clock In
-                    </th>
-                    <th class="py-3 min-w-[120px] whitespace-nowrap">
-                        Clock Out
-                    </th>
-                    <th class="py-3 min-w-[120px] whitespace-nowrap">
-                        Total Hours
-                    </th>
-                    <th
-                        class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
-                        Location In
-                    </th>
-                    <th
-                        class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
-                        Location Out
-                    </th>
-                    <th
-                        class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
-                        Site
-                    </th>
-                    <th
-                        class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
-                        Late Time
-                    </th>
-                    <th
-                        class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
-                        Leave Time
-                    </th>
-                    <th class="py-3 min-w-[120px] max-w-[150px] whitespace-nowrap">
-                        Actions
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- No Data Row -->
-                <tr *ngIf="tableData.length === 0">
-                    <td colspan="11" class="px-4 py-2 h-[72px] text-center border-t border-gray-300">
-                        No Data Found
-                    </td>
-                </tr>
+  </header>
 
-                <!-- Data Rows -->
-                <tr *ngFor="let row of tableData; let i = index"
-                    [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}" class="border-t border-gray-300">
-                    <td class="py-5">
-
-                        {{ row.Day }}
-                    </td>
-
-                    <td>{{ row.Date }}</td>
-
-
-
-
-                    <td>
-                        <div>
-                            <div
-                                class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] m-auto">
-                                {{ row.clockIn }}
-                            </div>
-                        </div>
-
-                        <!-- <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
-                            <div *ngFor="let cl of row.otherClocks; let j = index"
-                                class=" text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
-                                {{ convertUTCToEgyptLocalTime(cl.clockIn)}}
-                            </div>
-                        </div> -->
-                    </td>
-
-
-                    <td>
-                        <div class="flex justify-center">
-                            <div *ngIf="row.clockOut; else emptyState"
-                                class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] m-auto">
-                                {{ row.clockOut }}
-                            </div>
-                            <ng-template #emptyState>
-                                <div
-                                    class="w-[97px] h-[36px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[8px] flex items-center justify-center">
-                                    <div class="w-[50px] h-[1px] bg-[#475467]"></div>
-                                </div>
-                            </ng-template>
-                        </div>
-                        <!-- <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
-                            <div *ngFor="let cl of row.otherClocks; let j = index">
-                                <ng-container *ngIf="cl.clockOut; else emptyClockState">
-                                    <div
-                                        class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
-                                        {{ convertUTCToEgyptLocalTime(cl.clockOut) }}
-                                    </div>
-                                </ng-container>
-                                <ng-template #emptyClockState>
-                                    <div
-                                        class="w-[97px] h-[36px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[8px] flex items-center justify-center">
-                                        <div class="w-[50px] h-[1px] bg-[#475467]"></div>
-                                    </div>
-                                </ng-template>
-                            </div>
-                        </div> -->
-                    </td>
-
-                    <td>{{ row.totalHours }}</td>
-
-                    <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
-                        <div *ngIf="!row.locationIn">
-                            <div class="flex justify-center">
-                                <div class="w-[90%] h-[1px] bg-[#475467]"></div>
-                            </div>
-                        </div>
-                        <div *ngIf="row.locationIn&&row.site=='site'">
-                            <div class="truncate" title="{{ row.locationIn }}">
-                                {{ row.locationName }}
-                            </div>
-                        </div>
-                        <div *ngIf="row.locationIn&&row.site!='site'">
-                            <div class="truncate" title="{{ row.locationIn }}">
-                                {{ row.locationIn}}
-                            </div>
-                        </div>
-                    </td>
-
-                    <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
-                        <div *ngIf="!row.locationOut">
-                            <div class="flex justify-center">
-                                <div class="w-[90%] h-[1px] bg-[#475467]"></div>
-                            </div>
-                        </div>
-                        <div *ngIf="row.locationOut&&row.site=='site'">
-                            <div class="truncate" title="{{ row.locationOut }}">
-                                {{ row.locationName }}
-                            </div>
-                        </div>
-                        <div *ngIf="row.locationOut&&row.site!='site'">
-                            <div class="truncate" title="{{ row.locationOut }}">
-                                {{ row.locationOut}}
-                            </div>
-                        </div>
-                    </td>
-
-                    <td>
-                        <div>
-                            <div
-                                class="text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px] m-auto">
-                                {{ row.site }}
-                            </div>
-                        </div>
-                        <!-- <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
-                            <div *ngFor="let cl of row.otherClocks; let j = index"
-                                class="  text-center w-[97px] rounded-[10px] border border-[#D0D5DD] bg-[#FFFFFF] py-[8px]">
-                                <p *ngIf="cl.clockOut">{{cl.site}}</p>
-                            </div>
-                        </div> -->
-                    </td>
-                    <!-- <td>{{row.lateArrive}}</td> -->
-                    <td class="min-w-[120px] lg:max-w-[150px] overflow-hidden">
-                        <div *ngIf="row.site=='site'||row.site=='home'; else emptylateArrive">
-                            <div class="truncate" title="{{ row.lateArrive }}">
-                                {{ row.lateArrive }}
-                            </div>
-                        </div>
-                        <ng-template #emptylateArrive>
-                            <div class="flex justify-center">
-                                <div class="w-[90%] h-[1px] bg-[#475467]"></div>
-                            </div>
-                        </ng-template>
-                    </td>
-
-                    <td>{{row.earlyLeave}}</td>
-
-
-
-                    <td class="py-5 px-4">
-                        <div class="px-2">
-                            <button (click)="EditUserClock(row)">
-                                <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
-                            </button>
-                        </div>
-                        <!-- <div *ngIf="showOtherClocks && rowNumber[i]" class="flex flex-col mt-1 space-y-1 items-center">
-                            <div *ngFor="let cl of row.otherClocks; let j = index"
-                                class=" text-center w-[97px]  py-[8px]">
-                                <button (click)="EditUserClock(cl)">
-                                    <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
-                                </button>
-                            </div>
-                        </div> -->
-                    </td>
-
-                </tr>
-            </tbody>
-        </table>
+  <!-- Filter & Period Selector -->
+  <section class="control-tray">
+    <div class="filter-group">
+      <label class="filter-label">Monitoring Period</label>
+      <div class="flex items-center gap-2">
+        <input type="date" [(ngModel)]="from_day" (change)="onDateChange()" class="premium-date">
+        <span class="text-gray-300 font-bold">/</span>
+        <input type="date" [(ngModel)]="to_day" (change)="onDateChange()" class="premium-date">
+      </div>
     </div>
-    <div class="mt-5 flex justify-between items-center" *ngIf="DisplayPagginationOrNot">
-        <button
-            class="h-[44px] md:w-[119px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] md:gap-[8px] md:flex items-center"
-            [ngClass]="{'disabled': CurrentPageNumber === 1, 'opacity-50 cursor-not-allowed': CurrentPageNumber === 1}"
-            [disabled]="CurrentPageNumber === 1" (click)="getPrevPage()">
-            <i class="fa-solid fa-arrow-left"></i>
-            <p class="hidden md:flex">Previous</p>
-        </button>
+  </section>
 
+  <!-- Detailed Attendance Log -->
+  <div class="table-card">
+    <div class="overflow-x-auto">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Period</th>
+            <th>Activity Log</th>
+            <th>Total Work</th>
+            <th>Environmental Context</th>
+            <th>Geo-Location</th>
+            <th>Temporal Compliance</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty State -->
+          <tr *ngIf="tableData.length === 0">
+            <td colspan="7" class="h-[300px] text-center">
+              <div class="flex flex-col items-center justify-center text-gray-400 gap-3">
+                <i class="fa-solid fa-calendar-xmark text-5xl opacity-20"></i>
+                <p class="font-medium">No activity records for this window</p>
+                <p class="text-xs">Adjust dates to view historical logs.</p>
+              </div>
+            </td>
+          </tr>
 
-        <div class="flex justify-center items-center space-x-2 md:space-x-4">
-            <button *ngIf="CurrentPageNumber-1>0"
-                class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
-                (click)="getAllClocks(CurrentPageNumber-1)">
-                {{ CurrentPageNumber-1 }}
-            </button>
-            <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#D0D5DD]"
-                *ngIf="CurrentPageNumber<PagesNumber" (click)="getAllClocks(CurrentPageNumber)">
-                {{ CurrentPageNumber }}
-            </button>
-            <span *ngIf="PagesNumber>1" class="text-gray-800 text-sm md:text-base font-semibold">...</span>
-            <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
-                [ngClass]="{ 'selectedPage': CurrentPageNumber === PagesNumber }" (click)="getAllClocks(PagesNumber)">
-                {{ PagesNumber }}
-            </button>
-        </div>
+          <!-- Log Rows -->
+          <tr *ngFor="let row of tableData; let i = index">
+            <!-- Period Info -->
+            <td class="text-left !pl-8">
+              <p class="day-text">{{ row.Day }}</p>
+              <p class="date-text text-[10px]">{{ row.Date }}</p>
+            </td>
 
-        <button
-            class="h-[44px] md:w-[92px] rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-[16px] py-[12px] md:gap-[8px] md:flex items-center"
-            [ngClass]="{'disabled': CurrentPageNumber === PagesNumber, 'opacity-50 cursor-not-allowed': CurrentPageNumber === PagesNumber}"
-            [disabled]="CurrentPageNumber === PagesNumber" (click)="getNextPage()">
-            <p class="hidden md:flex">Next</p> <i class="fa-solid fa-arrow-right"></i>
-        </button>
+            <!-- Activity Times -->
+            <td>
+              <div class="flex items-center justify-center gap-3">
+                <div class="flex flex-col items-center gap-1">
+                  <span class="text-[9px] font-bold text-emerald-500 uppercase">Entry</span>
+                  <div class="time-pill">{{ row.clockIn }}</div>
+                </div>
+                <i class="fa-solid fa-arrow-right text-gray-200 text-xs mt-3"></i>
+                <div class="flex flex-col items-center gap-1">
+                  <span class="text-[9px] font-bold text-rose-500 uppercase">Exit</span>
+                  <div class="time-pill" [class.empty]="!row.clockOut">
+                    {{ row.clockOut || '---' }}
+                  </div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Total Hours -->
+            <td>
+              <div class="flex flex-col items-center">
+                <span class="text-[9px] font-bold text-gray-400 uppercase mb-1">Duration</span>
+                <span class="font-mono text-sm font-extrabold text-[#17253e]">{{ row.totalHours }}</span>
+              </div>
+            </td>
+
+            <!-- Environment Type -->
+            <td>
+              <div class="flex flex-col items-center">
+                <span class="site-badge">{{ row.site }}</span>
+              </div>
+            </td>
+
+            <!-- Geolocation Context -->
+            <td>
+              <div class="flex flex-col items-center gap-2">
+                <!-- Location In -->
+                <div *ngIf="row.locationIn" class="flex items-start gap-1.5 justify-center">
+                    <i class="fa-solid fa-location-dot text-emerald-500 mt-0.5 text-[10px]"></i>
+                    <span class="location-text truncate" title="{{ row.locationIn }}">
+                        {{ row.site === 'site' ? row.locationName : row.locationIn }}
+                    </span>
+                </div>
+                <div *ngIf="!row.locationIn" class="text-[10px] text-gray-300 italic">No GPS Log</div>
+
+                <div class="w-8 h-[1px] bg-gray-100" *ngIf="row.locationIn && row.locationOut"></div>
+
+                <!-- Location Out -->
+                <div *ngIf="row.locationOut" class="flex items-start gap-1.5 justify-center">
+                    <i class="fa-solid fa-location-dot text-rose-500 mt-0.5 text-[10px]"></i>
+                    <span class="location-text truncate" title="{{ row.locationOut }}">
+                        {{ row.site === 'site' ? row.locationName : row.locationOut }}
+                    </span>
+                </div>
+                <div *ngIf="row.clockOut && !row.locationOut" class="text-[10px] text-gray-300 italic">No GPS Log</div>
+              </div>
+            </td>
+
+            <!-- Temporal Compliance -->
+            <td>
+                <div class="flex flex-col gap-1.5 items-center">
+                    <div class="flex items-center gap-2 text-[11px]" *ngIf="row.lateArrive && row.lateArrive !== '00:00:00'">
+                        <span class="text-gray-400 font-bold uppercase text-[9px]">Late</span>
+                        <span class="text-amber-600 font-mono font-bold">{{ row.lateArrive }}</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-[11px]" *ngIf="row.earlyLeave && row.earlyLeave !== '00:00:00'">
+                        <span class="text-gray-400 font-bold uppercase text-[9px]">Early</span>
+                        <span class="text-rose-600 font-mono font-bold">{{ row.earlyLeave }}</span>
+                    </div>
+                    <div *ngIf="(row.lateArrive === '00:00:00' || !row.lateArrive) && (row.earlyLeave === '00:00:00' || !row.earlyLeave)" 
+                         class="text-[10px] text-emerald-500 font-bold px-2 py-1 bg-emerald-50 rounded-md">
+                        COMPLIANT
+                    </div>
+                </div>
+            </td>
+
+            <!-- Modern Management Actions -->
+            <td class="text-center !pr-8">
+              <button (click)="EditUserClock(row)" class="edit-btn" title="Modify Record">
+                <i class="fas fa-edit"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+  </div>
+
+  <!-- Modern Pagination Tray -->
+  <footer class="pagination-tray" *ngIf="DisplayPagginationOrNot">
+    <button class="page-btn" [disabled]="CurrentPageNumber === 1" (click)="getPrevPage()">
+      <i class="fa-solid fa-chevron-left"></i>
+      <span>Previous</span>
+    </button>
+
+    <div class="flex items-center gap-2">
+      <button *ngIf="CurrentPageNumber - 1 > 0" class="page-btn !w-11 !p-0 justify-center" (click)="getAllClocks(CurrentPageNumber - 1)">
+        {{ CurrentPageNumber - 1 }}
+      </button>
+      
+      <button class="page-btn active !w-11 !p-0 justify-center">
+        {{ CurrentPageNumber }}
+      </button>
+
+      <span *ngIf="PagesNumber > CurrentPageNumber" class="text-gray-300 font-bold px-1">...</span>
+      
+      <button *ngIf="PagesNumber > CurrentPageNumber" class="page-btn !w-11 !p-0 justify-center" (click)="getAllClocks(PagesNumber)">
+        {{ PagesNumber }}
+      </button>
+    </div>
+
+    <button class="page-btn" [disabled]="CurrentPageNumber === PagesNumber" (click)="getNextPage()">
+        <span>Next</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+  </footer>
+
 </div>

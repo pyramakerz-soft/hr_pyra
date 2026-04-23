@@ -1,209 +1,212 @@
-﻿<div (click)="resetfilteredUsers()">
-  <div class="mb-4">
-    <!-- Top Row: Title -->
+<div class="page-container pb-20" (click)="resetfilteredUsers()">
+  
+  <!-- Page Header & Utility Tray -->
+  <header class="attendance-header">
+    <h1 class="page-title">Attendance</h1>
 
-
-    <!-- Second Row: Date Filters -->
-    <div class="flex items-end gap-4 flex-wrap mb-2">
-      <div class="mb-2">
-        <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Attendance</p>
-      </div>
-      <div class="w-full max-w-xs md:ml-auto">
-        <label for="from_day" class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
-        <div class="rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
-          <input type="date" id="from_day" [(ngModel)]="from_day"
-            class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full"
-            (change)="getAllEmployees(1, from_day, to_day)" />
-        </div>
-      </div>
-
-      <div class="w-full max-w-xs">
-        <label for="to_day" class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
-        <div class="rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 flex items-center">
-          <input type="date" id="to_day" [(ngModel)]="to_day"
-            class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full"
-            (change)="getAllEmployees(1, from_day, to_day)" />
-        </div>
-      </div>
-    </div>
-
-    <!-- Third Row: Buttons -->
-    <div class="flex items-center gap-2 flex-wrap justify-end">
-      <button (click)="ImportOpeningBalanceSheet()" [disabled]="isLoading"
-        class="export-button bg-[#4F46E5] text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center whitespace-nowrap h-[46px]">
+    <div class="utility-tray">
+      <!-- Import Balances -->
+      <button (click)="ImportOpeningBalanceSheet()" [disabled]="isLoading" class="btn-utility btn-primary">
         <div *ngIf="isLoading" class="spinner"></div>
-        <span *ngIf="!isLoading">Import Opening Balance Sheet</span>
+        <i class="fa-solid fa-file-import" *ngIf="!isLoading"></i>
+        <span>Import Balances</span>
       </button>
-      <input type="file" #balanceFileInput style="display: none;" (change)="onBalanceFileSelected($event)"
-        accept=".xlsx">
+      <input type="file" #balanceFileInput class="hidden" (change)="onBalanceFileSelected($event)" accept=".xlsx">
 
-      <button (click)="ExportData()" [disabled]="isLoading"
-        class="export-button bg-[#4F46E5] text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center h-[46px]">
+      <!-- Export Actions -->
+      <button (click)="ExportData()" [disabled]="isLoading" class="btn-utility">
         <div *ngIf="isLoading" class="spinner"></div>
-        <span *ngIf="!isLoading">Export</span>
+        <i class="fa-solid fa-download text-[#4F46E5]" *ngIf="!isLoading"></i>
+        <span>Export Attendance</span>
       </button>
 
-      <button (click)="ExportAbsentUserData()" [disabled]="isLoading"
-        class="export-button bg-[#4F46E5] text-white font-medium rounded-lg flex items-center justify-center w-auto px-4 py-2 whitespace-nowrap h-[46px]">
-        <div *ngIf="isLoading" class="spinner mr-2"></div>
-        <span *ngIf="!isLoading">Export Absent Users</span>
+      <button (click)="ExportAbsentUserData()" [disabled]="isLoading" class="btn-utility">
+        <div *ngIf="isLoading" class="spinner"></div>
+        <i class="fa-solid fa-user-xmark text-red-500" *ngIf="!isLoading"></i>
+          <span>Absent Users</span>
       </button>
 
-      <button (click)="ExportLeaveHistory()" [disabled]="isLoading"
-        class="export-button bg-[#4F46E5] text-white font-medium rounded-lg flex items-center justify-center w-auto px-4 py-2 whitespace-nowrap h-[46px]">
-        <div *ngIf="isLoading" class="spinner mr-2"></div>
-        <span *ngIf="!isLoading">Export Leave History</span>
+      <button (click)="ExportLeaveHistory()" [disabled]="isLoading" class="btn-utility">
+        <div *ngIf="isLoading" class="spinner"></div>
+        <i class="fa-solid fa-clock-rotate-left text-teal-500" *ngIf="!isLoading"></i>
+        <span>Leave History</span>
       </button>
 
-      <button (click)="openResetVacationBalanceDialog()"
-        class="export-button bg-[#FF7519] text-white font-medium rounded-lg flex items-center justify-center w-auto px-4 py-2 whitespace-nowrap h-[46px]">
-        <span>Reset Balance</span>
+      <!-- Advanced Reset -->
+      <button (click)="openResetVacationBalanceDialog()" class="btn-utility btn-action">
+        <i class="fa-solid fa-rotate-right"></i>
+        <span>Reset Balances</span>
       </button>
     </div>
-  </div>
-  <div
-    class="mt-5 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 space-x-2 flex items-center relative">
-    <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]" (click)="Search()"></i>
-    <input type="text" [(ngModel)]="selectedName" (input)="filterByName()" placeholder="Enter Employee Name..."
-      (keydown.enter)="Search()"
-      class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
+  </header>
 
-    <div *ngIf="filteredUsers.length > 0"
-      class="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
-      <ul>
-        <li *ngFor="let user of filteredUsers" (click)="selectUser(user)"
-          class="px-4 py-2 cursor-pointer hover:bg-gray-200">
-          {{ user }}
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="mt-3 flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-4">
-    <!-- Department Dropdown -->
-    <select class="border border-[#D0D5DD] rounded-md px-3 py-2 w-full md:w-auto" [(ngModel)]="selectedDepartment"
-      (change)="onDepartmentChange()">
-      <option [ngValue]="null" disabled>Select Department</option>
-      <option [ngValue]="allDepartmentsValue">All Departments</option>
-      <option [ngValue]="noDepartmentValue">No Department</option>
-      <option *ngFor="let dept of departments" [ngValue]="dept.id">{{ dept.name }}</option>
-    </select>
-
-    <!-- Sub-Department Dropdown -->
-    <div *ngIf="subDepartments.length > 0" class="relative w-full">
-      <div class="border border-[#D0D5DD] rounded-md px-3 py-2 bg-white" (click)="toggleSubDepartmentDropdown($event)">
-        <span *ngIf="selectedSubDepartmentIds.length === 0" class="text-[#667085]">Select Sub Departments</span>
-        <span *ngIf="selectedSubDepartmentIds.length > 0" class="font-medium text-[#17253E]">
-          {{ selectedSubDepartmentIds.length }} selected
-        </span>
-      </div>
-      <div *ngIf="isSubDepartmentDropdownOpen"
-        class="absolute z-20 mt-1 w-full max-h-60 overflow-y-auto bg-white border border-[#D0D5DD] rounded-md shadow-lg"
-        (click)="$event.stopPropagation()">
-        <div class="px-3 py-2 border-b text-sm text-[#475467]">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" [checked]="areAllSubDepartmentsSelected()"
-              (change)="toggleAllSubDepartments($any($event.target).checked)" />
-            Select All
-          </label>
-        </div>
-        <div class="py-2 max-h-48 overflow-y-auto">
-          <label class="flex items-center gap-2 px-3 py-1 text-sm text-[#475467] hover:bg-[#F2F4F7] cursor-pointer"
-            *ngFor="let sub of subDepartments" (click)="$event.stopPropagation()">
-            <input type="checkbox" [checked]="selectedSubDepartmentIds.includes(sub.id)"
-              (change)="onSubDepartmentToggle(sub.id, $any($event.target).checked)" />
-            {{ sub.name }}
-          </label>
+  <!-- Filter Control Center -->
+  <section class="control-center">
+    <div class="filter-grid">
+      <!-- Date Range -->
+      <div class="filter-group">
+        <label class="filter-label">Registration Range</label>
+        <div class="flex gap-2">
+            <input type="date" [(ngModel)]="from_day" class="premium-input flex-1" (change)="getAllEmployees(1, from_day, to_day)">
+            <input type="date" [(ngModel)]="to_day" class="premium-input flex-1" (change)="getAllEmployees(1, from_day, to_day)">
         </div>
       </div>
+
+      <!-- Employee Search -->
+      <div class="filter-group col-span-1 lg:col-span-1 relative">
+        <label class="filter-label">Search Identity</label>
+        <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="text" [(ngModel)]="selectedName" (input)="filterByName()" (keydown.enter)="Search()"
+                   placeholder="Enter Name or Code..." class="premium-input w-full !pl-9">
+            
+            <!-- Autocomplete Results -->
+            <div *ngIf="filteredUsers.length > 0" class="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-xl shadow-2xl z-50 mt-2 overflow-hidden">
+                <ul class="py-1">
+                    <li *ngFor="let user of filteredUsers" (click)="selectUser(user)" 
+                        class="px-4 py-2.5 text-sm cursor-pointer hover:bg-gray-50 flex items-center gap-2 border-b border-gray-50 last:border-0">
+                        <i class="fa-solid fa-user text-xs text-gray-300"></i>
+                        {{ user }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+      </div>
+
+      <!-- Organizational Context -->
+      <div class="filter-group">
+        <label class="filter-label">Department</label>
+        <select class="premium-select" [(ngModel)]="selectedDepartment" (change)="onDepartmentChange()">
+          <option [ngValue]="null" disabled>Choose Dept</option>
+          <option [ngValue]="allDepartmentsValue">All Departments</option>
+          <option [ngValue]="noDepartmentValue">No Department</option>
+          <option *ngFor="let dept of departments" [ngValue]="dept.id">{{ dept.name }}</option>
+        </select>
+      </div>
+
+      <!-- Sub-Departments (Conditional) -->
+      <div class="filter-group" *ngIf="subDepartments.length > 0">
+        <label class="filter-label">Sub-Units</label>
+        <div class="relative">
+            <div class="premium-select flex justify-between items-center cursor-pointer" (click)="toggleSubDepartmentDropdown($event)">
+                <span class="text-sm" [class.text-gray-400]="selectedSubDepartmentIds.length === 0">
+                    {{ selectedSubDepartmentIds.length > 0 ? selectedSubDepartmentIds.length + ' Selected' : 'Choose Units' }}
+                </span>
+                <i class="fa-solid fa-chevron-down text-gray-400 text-[10px]"></i>
+            </div>
+            
+            <div *ngIf="isSubDepartmentDropdownOpen" class="absolute top-full left-0 w-full bg-white border border-gray-100 rounded-xl shadow-2xl z-50 mt-2 py-2 p-3" (click)="$event.stopPropagation()">
+                <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer border-b border-gray-50 mb-1">
+                    <input type="checkbox" [checked]="areAllSubDepartmentsSelected()" (change)="toggleAllSubDepartments($any($event.target).checked)" class="accent-[#17253e]">
+                    <span class="text-xs font-bold text-[#17253e]">Select All Units</span>
+                </label>
+                <div class="max-h-48 overflow-y-auto">
+                    <label *ngFor="let sub of subDepartments" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+                        <input type="checkbox" [checked]="selectedSubDepartmentIds.includes(sub.id)" (change)="onSubDepartmentToggle(sub.id, $any($event.target).checked)" class="accent-[#17253e]">
+                        <span class="text-xs">{{ sub.name }}</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Attendance Log Dashboard -->
+  <div class="table-dashboard">
+    <div class="overflow-x-auto">
+      <table class="attendance-table">
+        <thead>
+          <tr>
+            <th class="!pr-0 !pl-6 w-10">
+              <input type="checkbox" [(ngModel)]="isSelectAllChecked" (change)="toggleSelectAll()" class="accent-[#17253e]">
+            </th>
+            <th class="w-16">#</th>
+            <th class="w-24">Code</th>
+            <th>Employee Dossier</th>
+            <th>Org Group</th>
+            <th>Position</th>
+            <th>Clock In Time</th>
+            <th>Clock Out Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty State -->
+          <tr *ngIf="tableData.length === 0">
+            <td colspan="8" class="h-[300px] text-center">
+              <div class="flex flex-col items-center justify-center text-gray-400 gap-3">
+                  <i class="fa-solid fa-clipboard-user text-5xl opacity-20"></i>
+                  <p class="font-medium">Directives yielded no attendance records</p>
+                  <p class="text-xs">Adjust your date range or filters to view specific data.</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Data Rows -->
+          <tr *ngFor="let row of tableData; let i = index">
+            <td class="!pr-0 !pl-6">
+              <input type="checkbox" [(ngModel)]="row.selected" (change)="onUserSelectionChange(row)" [checked]="isUserSelected(row.id)" class="accent-[#17253e]">
+            </td>
+            <td class="text-xs font-mono text-gray-400">{{ (CurrentPageNumber - 1) * 5 + i + 1 }}</td>
+            <td class="font-bold text-gray-500 whitespace-nowrap">{{ row.code }}</td>
+            <td>
+              <button (click)="NavigateToEmployeeAttendanceDetails(row.id)" class="emp-name-btn max-w-[200px] truncate text-left">
+                {{ row.name }}
+              </button>
+            </td>
+            <td class="text-xs font-medium text-gray-600">{{ row.department }}</td>
+            <td class="text-xs font-medium text-gray-600">{{ row.position }}</td>
+            <td>
+              <div class="time-badge" *ngIf="row.clock_in_time">
+                <i class="fa-solid fa-right-to-bracket text-emerald-500"></i>
+                <span>{{ row.clock_in_time }}</span>
+              </div>
+              <span *ngIf="!row.clock_in_time" class="text-gray-300 text-[10px] italic">Not Logged</span>
+            </td>
+            <td>
+              <div class="time-badge" *ngIf="row.clock_out_time">
+                <i class="fa-solid fa-right-from-bracket text-rose-500"></i>
+                <span>{{ row.clock_out_time }}</span>
+              </div>
+              <span *ngIf="!row.clock_out_time" class="text-gray-300 text-[10px] italic">In Progress</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">
-    <table class="w-full table-auto bg-[#FFFFFF] text-left text-[#475467]">
-      <thead class="bg-[#F9FAFB] text-sm md:text-base">
-        <tr>
-          <!-- Select All Checkbox -->
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            <input type="checkbox" [(ngModel)]="isSelectAllChecked" (change)="toggleSelectAll()" />
-          </th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">#</th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Code</th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Employees</th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Department</th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Position</th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Clock In Today Time</th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">Clock Out Today Time</th>
-
-        </tr>
-      </thead>
-      <tbody>
-        <!-- No Data Row -->
-        <tr *ngIf="tableData.length === 0">
-          <td colspan="4" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-            No Data Found
-          </td>
-        </tr>
-
-        <!-- Data Rows -->
-        <tr *ngFor="let row of tableData; let i = index"
-          [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}"
-          class="border-t border-gray-300 text-xs md:text-sm">
-          <td class="py-5 px-4">
-            <!-- Row checkbox -->
-            <input type="checkbox" [(ngModel)]="row.selected" (change)="onUserSelectionChange(row)"
-              [checked]="isUserSelected(row.id)" />
-          </td>
-          <td class="py-5 px-4">{{ (CurrentPageNumber - 1) * 5 + i + 1 }}</td>
-          <td class="py-5 px-4">{{ row.code }}</td>
-          <td class="py-5 px-4">
-            <button (click)="NavigateToEmployeeAttendanceDetails(row.id)">{{ row.name }}</button>
-          </td>
-          <td class="py-5 px-4">{{ row.department }}</td>
-          <td class="py-5 px-4">{{ row.position }}</td>
-          <td class="py-5 px-4">{{ row.clock_in_time }}</td>
-          <td class="py-5 px-4">{{ row.clock_out_time }}</td>
-
-        </tr>
-
-      </tbody>
-    </table>
-  </div>
-
-
-  <div class="mt-5 flex justify-between items-center" *ngIf="DisplayPagginationOrNot ">
-    <!-- Previous Button -->
-    <button
-      class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      [disabled]="CurrentPageNumber === 1" (click)="getPrevPage()">
-      <i class="fa-solid fa-arrow-left"></i>
+  <!-- Modern Pagination Tray -->
+  <footer class="pagination-tray" *ngIf="DisplayPagginationOrNot">
+    <!-- Prev Navigation -->
+    <button class="page-btn" [disabled]="CurrentPageNumber === 1" (click)="getPrevPage()">
+      <i class="fa-solid fa-chevron-left"></i>
       <span>Previous</span>
     </button>
 
-    <div class="flex justify-center items-center space-x-2 md:space-x-4">
-      <button *ngIf="CurrentPageNumber-1>0"
-        class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
-        (click)="getAllEmployees(CurrentPageNumber-1)">
-        {{ CurrentPageNumber-1 }}
+    <!-- Page Number Group -->
+    <div class="flex items-center gap-2">
+      <!-- Logic for neighbors -->
+      <button *ngIf="CurrentPageNumber - 1 > 0" class="page-btn !w-11 !p-0 justify-center" (click)="getAllEmployees(CurrentPageNumber - 1)">
+        {{ CurrentPageNumber - 1 }}
       </button>
-      <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#D0D5DD]"
-        *ngIf="CurrentPageNumber<PagesNumber" (click)="getAllEmployees(CurrentPageNumber)">
+      
+      <button class="page-btn active !w-11 !p-0 justify-center">
         {{ CurrentPageNumber }}
       </button>
-      <span *ngIf="PagesNumber>1" class="text-gray-800 text-sm md:text-base font-semibold">...</span>
-      <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
-        [ngClass]="{ 'selectedPage': CurrentPageNumber === PagesNumber }" (click)="getAllEmployees(PagesNumber)">
+
+      <span *ngIf="PagesNumber > CurrentPageNumber" class="nav-dot px-1">...</span>
+      
+      <button *ngIf="PagesNumber > CurrentPageNumber" class="page-btn !w-11 !p-0 justify-center" (click)="getAllEmployees(PagesNumber)">
         {{ PagesNumber }}
       </button>
     </div>
 
-    <!-- Next Button -->
-    <button
-      class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      [disabled]="CurrentPageNumber === PagesNumber" (click)="getNextPage()">
+    <!-- Next Navigation -->
+    <button class="page-btn" [disabled]="CurrentPageNumber === PagesNumber" (click)="getNextPage()">
       <span>Next</span>
-      <i class="fa-solid fa-arrow-right"></i>
+      <i class="fa-solid fa-chevron-right"></i>
     </button>
-  </div>
+  </footer>
 
 </div>

@@ -36,6 +36,10 @@ export class TimezoneAddEditComponent {
       }
     });
   }
+
+  goBack(): void {
+    this.router.navigateByUrl('/HR/ShowTimezones');
+  }
 getTimezoneByID(id: number): void {
   this.timezoneService.getTimezoneById(id).subscribe(
     (response: any) => {

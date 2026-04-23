@@ -1,44 +1,267 @@
-.selectedPage{
-    background-color: #D0D5DD;
+:host {
+    --primary-navy: #17253e;
+    --accent-orange: #fb923c;
+    --text-primary: #17253e;
+    --text-secondary: #667085;
+    --bg-light: #f9fafb;
+    --border-color: #eaecf0;
+    --card-radius: 20px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: block;
+    height: 100%;
 }
+
+/* Header & Action Bar */
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.title-text {
+    color: var(--text-primary);
+    font-size: 1.875rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.btn-premium {
+    padding: 0.625rem 1.25rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.btn-outline {
+    border: 1px solid var(--primary-navy);
+    color: var(--primary-navy);
+    background: transparent;
+}
+
+.btn-outline:hover {
+    background: var(--primary-navy);
+    color: white;
+}
+
+.btn-primary {
+    background: var(--primary-navy);
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #1e293b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(23, 37, 62, 0.2);
+}
+
+.btn-orange-outline {
+    border: 1px solid var(--accent-orange);
+    color: var(--accent-orange);
+    background: transparent;
+}
+
+.btn-orange-outline:hover {
+    background: var(--accent-orange);
+    color: white;
+}
+
+/* Search Bar */
+.search-container {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: var(--transition);
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+.search-container:focus-within {
+    border-color: var(--primary-navy);
+    box-shadow: 0 0 0 4px rgba(23, 37, 62, 0.05);
+}
+
+.search-input {
+    border: none;
+    outline: none;
+    width: 100%;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+}
+
+.search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* Data Table Card */
+.table-card {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin-top: 1.5rem;
+}
+
+.premium-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.premium-table th {
+    background: var(--bg-light);
+    padding: 1rem 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.premium-table td {
+    padding: 1.25rem 1.5rem;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.premium-table tr:last-child td {
+    border-bottom: none;
+}
+
+.premium-table tr:hover td {
+    background: rgba(23, 37, 62, 0.02);
+}
+
+/* Department Badges */
+.dept-badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+    border: 1px solid transparent;
+}
+
+.dept-software {
+    background: #ecfdf5;
+    color: #065f46;
+    border-color: #d1fae5;
+}
+
+.dept-academic {
+    background: #fdf2f8;
+    color: #9d174d;
+    border-color: #fce7f3;
+}
+
+.dept-default {
+    background: #f9fafb;
+    color: #374151;
+    border-color: #f3f4f6;
+}
+
+/* Action Icons */
+.action-icon {
+    font-size: 1rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.action-icon:hover {
+    background: rgba(23, 37, 62, 0.05);
+}
+
+.icon-profile { color: var(--primary-navy); }
+.icon-edit { color: #5f6d7e; }
+.icon-delete { color: #dc2626; }
+
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding: 0 0.5rem;
+}
+
+.page-link {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--text-secondary);
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.page-link:hover {
+    border-color: var(--primary-navy);
+    color: var(--primary-navy);
+}
+
+.page-link.active {
+    background: var(--primary-navy);
+    color: white;
+    border-color: var(--primary-navy);
+    box-shadow: 0 4px 12px rgba(23, 37, 62, 0.2);
+}
+
+.btn-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: var(--transition);
+}
+
+.btn-nav:hover:not(:disabled) {
+    background: var(--bg-light);
+}
+
+.btn-nav:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* Spinner Styling */
 .spinner {
-  border: 3px solid rgba(255, 255, 255, 0.3); /* Light border */
-  border-top: 3px solid #17253E;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  animation: spin 1s linear infinite; /* Spin animation */
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    width: 14px;
+    height: 14px;
+    animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.export-button {
-  border: 2px solid #17253E;
-  color: #17253E;
-  font-weight: 500;
-  font-size: 14px;
-  padding: 10px 16px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-}
-
-/* Hover Effect */
-.export-button:hover {
-  background-color: #17253E;
-  color: white;
-}
-
-/* Disabled State */
-.export-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }

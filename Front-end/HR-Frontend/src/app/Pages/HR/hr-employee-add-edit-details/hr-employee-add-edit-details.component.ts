@@ -325,8 +325,8 @@ export class HrEmployeeAddEditDetailsComponent {
     }
   }
 
-  onWorkTypeChange(workTypeId: number, event: Event): void {
-    const isChecked = (event.target as HTMLInputElement).checked;
+  onWorkTypeChange(workTypeId: number, event: any): void {
+    const isChecked = event.target ? (event.target as HTMLInputElement).checked : event;
     const numericId = Number(workTypeId);
 
     if (isChecked) {
@@ -394,8 +394,8 @@ export class HrEmployeeAddEditDetailsComponent {
     );
   }
 
-  onLocationChange(Location: number, event: Event) {
-    const isChecked = (event.target as HTMLInputElement).checked;
+  onLocationChange(Location: number, event: any) {
+    const isChecked = event.target ? (event.target as HTMLInputElement).checked : event;
 
     if (isChecked) {
       if (!this.employee.location_id.includes(Location)) {

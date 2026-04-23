@@ -1,207 +1,204 @@
-<div>
-    <div class="flex justify-between mb-5 items-center">
-        <div class="flex items-center space-x-4">
-            <button (click)="goBack()" 
-                    class="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                    title="Go back">
-                <i class="fa-solid fa-arrow-left text-gray-600"></i>
-            </button>
-            
+<div class="page-container pb-10">
+  <!-- Page Navigation & Global Actions -->
+  <header class="header-nav">
+    <div class="flex items-center gap-4">
+      <button (click)="goBack()" class="back-btn" title="Return to List">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <h1 class="text-xl font-bold text-[#17253E] hidden md:block">Employee Dossier</h1>
+    </div>
+
+    <button (click)="NavigateToEditEmployee(empId)" class="btn-edit">
+      <i class="fa-solid fa-user-pen mr-2"></i>
+      Edit Profile
+    </button>
+  </header>
+
+  <!-- Profile Hero Section -->
+  <section class="profile-hero">
+    <img *ngIf="!employee.image" src="../../../../assets/images/blueAvatar.png" class="hero-avatar" alt="Avatar">
+    <img *ngIf="employee.image" [src]="employee.image" class="hero-avatar" alt="Employee Photo">
+
+    <div class="hero-info">
+      <h2 class="name">{{ employee.name }}</h2>
+      <div class="meta">
+        <i class="fa-solid fa-id-badge mr-1 text-[#fb923c]"></i> 
+        <span>ID Code: {{ employee.code }}</span>
+        <span class="mx-3 opacity-20">|</span>
+        <i class="fa-solid fa-briefcase mr-1 text-[#fb923c]"></i>
+        <span class="capitalize">{{ employee.emp_type }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Details Grid -->
+  <div class="details-grid">
+    
+    <!-- Card 1: Communication & Private Identity -->
+    <article class="detail-card">
+      <header class="card-header">
+        <i class="fa-solid fa-address-book"></i>
+        <span>Communication & Identity</span>
+      </header>
+
+      <div class="card-body">
+        <div class="grid grid-cols-2 gap-6">
+          <div class="attr-group">
+            <span class="attr-label">Primary Phone</span>
+            <span class="attr-value">{{ employee.phone }}</span>
+          </div>
+          <div class="attr-group">
+            <span class="attr-label">Emergency Contact</span>
+            <span class="attr-value">{{ employee.contact_phone }}</span>
+          </div>
+        </div>
+
+        <div class="attr-group">
+          <span class="attr-label">Official Email</span>
+          <span class="attr-value">{{ employee.email }}</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+          <div class="attr-group">
+            <span class="attr-label">Gender</span>
+            <span class="attr-value">{{ employee.gender === 'm' ? 'Male' : 'Female' }}</span>
+          </div>
+          <div class="attr-group">
+            <span class="attr-label">National ID</span>
+            <span class="attr-value">{{ employee.national_id }}</span>
+          </div>
+        </div>
+
+        <!-- Integrated Password Tool -->
+        <div class="password-section mt-4">
+          <div class="flex items-center justify-between">
             <div>
-                <p class="text-[#272D37] font-semibold text-2xl md:text-3xl capitalize">{{employee.name.split(" ")[0]}}</p>
-                <p class="text-[#5F6D7E] text-xs md:text-base">{{employee.emp_type}}</p>
+                <p class="text-sm font-bold text-[#9a3412]">Access Management</p>
+                <p class="text-xs text-[#c2410c] opacity-80">Change employee system password</p>
             </div>
+            <button *ngIf="!isChange" class="btn-password" (click)="toggleChangePassword()">
+               Change Password
+            </button>
+          </div>
+
+          <div *ngIf="isChange" class="mt-4 pt-4 border-t border-[#fed7aa]">
+            <input type="text" class="premium-input mb-3" placeholder="Enter new secured password" [(ngModel)]="password" (input)="onPasswordChange()">
+            <div class="flex gap-2">
+              <button class="btn-password flex-1" (click)="UpdatePassword()">Update Access</button>
+              <button class="btn-edit flex-1 !bg-white !text-gray-700 !border-gray-200 border" (click)="CancelUpdatePassword()">Cancel</button>
+            </div>
+            <p *ngIf="PasswordError" class="text-red-600 text-xs mt-2 font-bold">{{ PasswordError }}</p>
+          </div>
         </div>
-        <button (click)="NavigateToEditEmployee(empId)"
-            class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
-            Edit
-        </button>
-    </div>
+      </div>
+    </article>
 
-    <div class="border border-[#ECECEC] rounded-lg p-4 md:p-8 shadow-md shadow-[#0000001F]">
-        <p class="font-semibold text-sm md:text-lg mb-3">Information's</p>
+    <!-- Card 2: Organizational Placement -->
+    <article class="detail-card">
+      <header class="card-header">
+        <i class="fa-solid fa-sitemap"></i>
+        <span>Organizational Placement</span>
+      </header>
 
-        <div class="mt-5">
-            <div class="flex flex-col md:flex-row">
-                <span class="flex-1 flex items-center space-x-8">
-                    <img *ngIf="!employee.image" src="../../../../assets/images/blueAvatar.png"
-                        class="rounded-full w-14 bg-blue-100">
-                    <img *ngIf="employee.image" [src]="employee.image" class="rounded-full w-14 h-14 object-cover">
-                    <div>
-                        <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Name</p>
-                        <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.name}}</p>
-                    </div>
+      <div class="card-body">
+        <div class="grid grid-cols-2 gap-6">
+          <div class="attr-group">
+            <span class="attr-label">Department</span>
+            <span class="attr-value font-bold text-[#437ef7]">{{ employee.deparment_name }}</span>
+          </div>
+          <div class="attr-group">
+            <span class="attr-label">Current Role</span>
+            <span class="attr-value">{{ employee.emp_type }}</span>
+          </div>
+        </div>
+
+        <div class="attr-group">
+            <span class="attr-label">Assigned Work Environments</span>
+            <div class="flex flex-wrap gap-2 mt-2">
+                <span *ngFor="let work of employee.work_type_name" class="value-badge !bg-blue-50 !text-blue-700 !border-blue-100 text-xs font-bold">
+                    {{ work }}
                 </span>
-                <div class="w-full md:w-1/2">
-                    <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Code</p>
-                    <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.code}}</p>
-                </div>
-            </div>
-            <hr class="my-5 border border-[#E5E5EA]">
-        </div>
-
-        <div class="flex flex-col md:flex-row mt-5 flex-wrap">
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Department</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{ employee.deparment_name}}</p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Position</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.emp_type}}</p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA]">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Phone</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.phone}} </p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Contact Phone</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.contact_phone}}</p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA]">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Email</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.email}}</p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Password</p>
-                <button *ngIf="!isChange" class="bg-[#FF7519] text-white p-2 rounded-lg text-sm md:text-base"
-                    (click)="toggleChangePassword()">Change Password</button>
-                <button *ngIf="isChange" class="bg-[#FF7519] text-white p-2 rounded-lg text-sm md:text-base"
-                    (click)="UpdatePassword()">Update</button>
-                <button *ngIf="isChange" class="bg-[#17253E] text-white p-2 rounded-lg text-sm md:text-base ml-3"
-                    (click)="CancelUpdatePassword()">Cancel</button>
-
-                <input *ngIf="isChange" type="text" class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl mt-2"
-                    placeholder="Enter the password" (input)="onPasswordChange()" [(ngModel)]="password">
-                <span *ngIf="PasswordError" class="text-red-500 text-sm font-normal">{{ PasswordError }}</span>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA]">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">National ID</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.national_id}}</p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Hiring Date</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.hiring_date}}</p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA]">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Salary</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.salary}}</p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Bank Name</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.bank_name || 'N/A'}}</p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA]">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Bank Account Number</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.bank_account_number || 'N/A'}}</p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Over time Hours</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.overtime_hours}}</p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA]">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Working Hours Day</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.working_hours_day}}</p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Gender</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.gender == "m" ? "Male" :
-                    "Female"}}</p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA]">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Start Time</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.start_time}}</p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">End Time</p>
-                <p class="font-medium text-sm md:text-base text-[#282727]">{{employee.end_time}}</p>
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA]">
-
-            <!-- <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Role</p>
-                <div *ngFor="let role of employee.roles; let i = index" class="flex space-x-4 font-medium text-sm md:text-base text-[#282727]">
-                    <p [ngClass]="{'mb-1': i !== employee.roles.length - 1}" class="bg-slate-200 p-3 rounded-md">{{role}}</p>
-                </div>
-            </div> -->
-
-            <hr class="my-5 w-full border border-[#E5E5EA] md:hidden">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Work Type</p>
-                <div *ngFor="let work of employee.work_type_name; let i = index"
-                    class="flex space-x-4 font-medium text-sm md:text-base text-[#282727]">
-                    <p [ngClass]="{'mb-1': i !== employee.work_type_name.length - 1}"
-                        class="bg-slate-200 p-3 rounded-md">{{work}}</p>
-                </div>
-                <!-- <div class="flex space-x-4 font-medium text-sm md:text-base text-[#282727]">
-                    <p *ngIf="employee.is_float" class="mt-1 bg-slate-200 p-3 rounded-md">Float</p>
-                </div> -->
-            </div>
-
-            <hr class="my-5 w-full border border-[#E5E5EA]">
-
-            <div class="w-full md:w-1/2">
-                <p class="font-semibold text-xs md:text-sm text-[#909090] mb-2">Location</p>
-                <div *ngFor="let location of employee.location; let i = index"
-                    class="flex space-x-4 font-medium text-sm md:text-base text-[#282727]">
-                    <p [ngClass]="{'mb-1': i !==employee.location.length - 1}" class="bg-slate-200 p-3 rounded-md">
-                        {{location}}</p>
-                </div>
             </div>
         </div>
 
-        <div *ngIf="has_serial_number">
-            <hr class="my-5 border border-[#E5E5EA]">
+        <div class="attr-group">
+            <span class="attr-label">Operational Locations</span>
+            <div class="flex flex-wrap gap-2 mt-2">
+                <span *ngFor="let location of employee.location" class="value-badge !bg-emerald-50 !text-emerald-700 !border-emerald-100 text-xs font-bold">
+                    {{ location }}
+                </span>
+            </div>
+        </div>
+      </div>
+    </article>
 
-            <button class="bg-red-500 text-white p-2 rounded-lg text-sm md:text-base" (click)="DeleteSerialNum()">Delete
-                Serial Number</button>
+    <!-- Card 3: Financial & Payroll Profile -->
+    <article class="detail-card">
+      <header class="card-header">
+        <i class="fa-solid fa-wallet"></i>
+        <span>Financial & Payroll Profile</span>
+      </header>
+
+      <div class="card-body">
+        <div class="attr-group">
+          <span class="attr-label">Base Monthly Salary</span>
+          <span class="attr-value text-xl text-emerald-600 font-bold">{{ employee.salary | currency:'EGP ':'symbol':'1.0-0' }}</span>
         </div>
 
-    </div>
+        <div class="grid grid-cols-2 gap-6">
+          <div class="attr-group">
+            <span class="attr-label">Bank Institution</span>
+            <span class="attr-value">{{ employee.bank_name || 'Not Recorded' }}</span>
+          </div>
+          <div class="attr-group">
+            <span class="attr-label">Account Identification</span>
+            <span class="attr-value">{{ employee.bank_account_number || 'Not Recorded' }}</span>
+          </div>
+        </div>
+
+        <div class="attr-group">
+            <span class="attr-label">Accrued Overtime Ceiling</span>
+            <span class="attr-value">{{ employee.overtime_hours }} Hours</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- Card 4: Schedule & Contract Policy -->
+    <article class="detail-card">
+      <header class="card-header">
+        <i class="fa-solid fa-user-clock"></i>
+        <span>Schedule & Contract Policy</span>
+      </header>
+
+      <div class="card-body">
+        <div class="attr-group">
+          <span class="attr-label">Official Hiring Date</span>
+          <span class="attr-value">{{ employee.hiring_date | date:'longDate' }}</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+          <div class="attr-group">
+            <span class="attr-label">Daily Shift Window</span>
+            <span class="attr-value">{{ employee.start_time }} - {{ employee.end_time }}</span>
+          </div>
+          <div class="attr-group">
+            <span class="attr-label">Shift Duration</span>
+            <span class="attr-value">{{ employee.working_hours_day }} Hours</span>
+          </div>
+        </div>
+
+        <!-- Serial Number Management -->
+        <div class="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between" *ngIf="has_serial_number">
+           <div>
+               <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Device Security</p>
+               <p class="text-sm font-medium text-gray-700">Hardware Serial Registered</p>
+           </div>
+           <button class="btn-danger !py-2 !px-4 text-xs" (click)="DeleteSerialNum()">
+               Wipe Hardware ID
+           </button>
+        </div>
+      </div>
+    </article>
+
+  </div>
 </div>

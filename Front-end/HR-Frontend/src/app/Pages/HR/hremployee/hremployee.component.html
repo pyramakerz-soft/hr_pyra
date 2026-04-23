@@ -1,172 +1,145 @@
-<div (click)="resetfilteredUsers()">
-  <div class="flex flex-col md:flex-row justify-between md:items-center space-y-3 md:space-y-0">
-    <div>
-      <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Employee</p>
-    </div>
-<div class="flex space-x-6 items-center justify-between md:justify-normal">
-
-      <button (click)="downloadExcelTemplate()" [disabled]="isLoading" class="export-button">
+<div (click)="resetfilteredUsers()" class="page-container">
+  <!-- Page Header -->
+  <header class="flex flex-col md:flex-row justify-between md:items-center gap-4 page-header">
+    <h1 class="title-text">Employees</h1>
+    
+    <div class="action-buttons">
+      <button (click)="downloadExcelTemplate()" [disabled]="isLoading" class="btn-premium btn-outline">
         <div *ngIf="isLoading" class="spinner"></div>
-        <span *ngIf="!isLoading">Download Excel Template</span>
+        <i *ngIf="!isLoading" class="fa-solid fa-download"></i>
+        <span>Download Template</span>
       </button>
 
-      <!-- <button (click)="OpenImportPopUp()"
-      [disabled]="isNavigateingToImportPopUp"
-        class="border border-[#FF7519] text-[#FF7519] font-medium text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
-        Import Employee
-      </button> -->
-      <button (click)="OpenBulkUpdateTimePopUp()"
-        class="border border-[#FF7519] text-[#FF7519] font-medium text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg hover:bg-[#FF7519] hover:text-white transition-colors">
-        Bulk Update Times
+      <button (click)="OpenBulkUpdateTimePopUp()" class="btn-premium btn-orange-outline">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span>Bulk Update</span>
       </button>
-      <button (click)="NavigateToAddEmployee()"
-        class="bg-[#17253E] text-white font-medium text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg active:scale-95 transition-transform">
-        Add
+
+      <button (click)="NavigateToAddEmployee()" class="btn-premium btn-primary">
+        <i class="fa-solid fa-plus"></i>
+        <span>Add Employee</span>
       </button>
     </div>
-  </div>
+  </header>
 
-  <div
-    class="mt-5 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 space-x-2 flex items-center relative">
-    <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]" (click)="Search()"></i>
-    <input type="text" [(ngModel)]="selectedName" (input)="filterByName()" (keydown.enter)="Search()"
-      placeholder="Enter Employee Name..."
-      class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
+  <!-- Search & Filter Bar -->
+  <div class="search-container">
+    <i class="fa-solid fa-magnifying-glass text-[#667085]"></i>
+    <input 
+      type="text" 
+      [(ngModel)]="selectedName" 
+      (input)="filterByName()" 
+      (keydown.enter)="Search()"
+      placeholder="Search by name or department..."
+      class="search-input" />
 
+    <!-- Search Suggestions Dropdown -->
     <div *ngIf="filteredUsers.length > 0"
-      class="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
+      class="absolute top-full left-0 w-full bg-white border border-gray-100 rounded-xl shadow-2xl z-20 mt-2 max-h-60 overflow-y-auto py-2">
       <ul>
         <li *ngFor="let user of filteredUsers" (click)="selectUser(user)"
-          class="px-4 py-2 cursor-pointer hover:bg-gray-200">
-          {{ user }}
+          class="px-5 py-3 cursor-pointer hover:bg-gray-50 flex items-center justify-between group">
+          <span class="font-medium text-[#17253E]">{{ user }}</span>
+          <i class="fa-solid fa-arrow-right text-transparent group-hover:text-gray-300 transform group-hover:translate-x-1 transition-all"></i>
         </li>
       </ul>
     </div>
   </div>
 
-
-  <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">
-    <table class="w-full table-auto bg-[#FFFFFF] text-left text-[#475467]">
-      <thead class="bg-[#F9FAFB] text-sm md:text-base">
-        <tr>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            #  
-          </th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            Name  
-          </th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            Code  
-          </th> <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            Role  
-          </th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            Department  
-          </th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            Position  
-          </th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            Phone  
-          </th>
-          <th class="py-3 px-4 min-w-[120px] max-w-[150px] whitespace-nowrap overflow-hidden truncate text-ellipsis">
-            Email  
-          </th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            User Name  
-          </th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            Actions
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- No Data Row -->
-        <tr *ngIf="tableData.length === 0">
-          <td colspan="8" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-            No Data Found
-          </td>
-        </tr>
-
-        <!-- Data Rows -->
-        <tr *ngFor="let row of tableData; let i = index"
-          [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}"
-          class="border-t border-gray-300 text-xs md:text-sm">
-
-          <td class="py-5 px-4">{{ (CurrentPageNumber - 1) * 5 + i + 1 }}</td>
-          <td class="py-5 px-4"><button (click)="NavigateToEmployeeDetails(row.id)">{{ row.name }}</button></td>
-          <td class="py-5 px-4">{{ row.code }}</td>
-          <td class="py-5 px-4">{{ row.role }}</td>
-
-          <td class="py-5 px-4">
-            <div class="text-center w-[80%] rounded-lg border border-[#D0D5DD] py-2 text-[#FFFFFF] " [ngClass]="{
-                  'bg-[#1B5724]': row.department === 'Software',
-                  'bg-[#63233C]': row.department === 'Academic',
-                  'bg-[#57571B]': row.department !== 'Software' && row.department !== 'Academic'
-
-                }">
-                {{ row.department ? row.department : 'No department assigned' }}
+  <!-- Data Table Section -->
+  <div class="table-card">
+    <div class="overflow-x-auto">
+      <table class="premium-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Code</th>
+            <th>Role</th>
+            <th>Department</th>
+            <th>Phone</th>
+            <th class="hidden xl:table-cell">Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- No Data View -->
+          <tr *ngIf="tableData.length === 0">
+            <td colspan="8" class="text-center py-20">
+              <div class="flex flex-col items-center text-gray-400">
+                <i class="fa-solid fa-users-slash text-4xl mb-3"></i>
+                <p>No employees found matching your criteria</p>
               </div>
-          </td>
-          <td class="py-5 px-4">{{ row.position }}</td>
-          <td class="py-5 px-4">{{ row.phone }}</td>
-          <td class="py-5 px-4">{{ row.email }}</td>
-          <td class="py-5 px-4">{{ row.name }}</td>
-          <td class="py-5 px-4">
-            <div class="px-2">
-              <button (click)="openHrProfileDialog(row.id)" title="HR Profile">
-                <i class="fa-solid fa-address-card text-[#17253E] mr-2 w-3 md:w-4"></i>
+            </td>
+          </tr>
+
+          <!-- Employee Rows -->
+          <tr *ngFor="let row of tableData; let i = index">
+            <td class="font-medium text-[#667085]">{{ (CurrentPageNumber - 1) * 5 + i + 1 }}</td>
+            <td class="font-bold">
+              <button (click)="NavigateToEmployeeDetails(row.id)" class="hover:text-[#437EF7] transition-colors">
+                {{ row.name }}
               </button>
-              <button (click)="NavigateToEditEmployee(row.id)">
-                <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
-              </button>
-              <button (click)="DeleteEmp(row.id)">
-                <i class="fa fa-trash text-[#CC161D] ml-2 w-3 md:w-4"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            </td>
+            <td><code class="bg-gray-50 px-2 py-1 rounded text-xs font-mono">{{ row.code }}</code></td>
+            <td>{{ row.role }}</td>
+            <td>
+              <span class="dept-badge" [ngClass]="{
+                'dept-software': row.department === 'Software',
+                'dept-academic': row.department === 'Academic',
+                'dept-default': row.department !== 'Software' && row.department !== 'Academic'
+              }">
+                {{ row.department ? row.department : 'Unassigned' }}
+              </span>
+            </td>
+            <td class="text-xs">{{ row.phone }}</td>
+            <td class="hidden xl:table-cell text-xs opacity-75">{{ row.email }}</td>
+            <td>
+              <div class="flex gap-1">
+                <button (click)="openHrProfileDialog(row.id)" class="action-icon icon-profile" title="HR Profile">
+                  <i class="fa-solid fa-id-card"></i>
+                </button>
+                <button (click)="NavigateToEditEmployee(row.id)" class="action-icon icon-edit" title="Edit">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button (click)="DeleteEmp(row.id)" class="action-icon icon-delete" title="Delete">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <div class="mt-5 flex justify-between items-center" *ngIf="DisplayPagginationOrNot ">
-    <!-- Previous Button -->
-<button 
-    class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-    [disabled]="CurrentPageNumber === 1" 
-    (click)="getPrevPage()">
-    <i class="fa-solid fa-arrow-left"></i>
-    <span>Previous</span>
-  </button>
+  <!-- Pagination Controls -->
+  <div class="pagination-container" *ngIf="DisplayPagginationOrNot && PagesNumber > 1">
+    <button class="btn-nav" [disabled]="CurrentPageNumber === 1" (click)="getPrevPage()">
+      <i class="fa-solid fa-chevron-left"></i>
+      <span>Previous</span>
+    </button>
 
-    <div class="flex justify-center items-center space-x-2 md:space-x-4">
-      <button *ngIf="CurrentPageNumber-1>0"
-        class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
-        (click)="getAllEmployees(CurrentPageNumber-1)">
-        {{ CurrentPageNumber-1 }}
+    <div class="flex items-center gap-2">
+      <!-- Logic to show limited page numbers if needed, but keeping current binding -->
+      <button *ngIf="CurrentPageNumber > 1" class="page-link" (click)="getAllEmployees(CurrentPageNumber - 1)">
+        {{ CurrentPageNumber - 1 }}
       </button>
-      <button 
-        class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#D0D5DD]"
-        *ngIf="CurrentPageNumber<PagesNumber"
-        (click)="getAllEmployees(CurrentPageNumber)">
+      
+      <button class="page-link active">
         {{ CurrentPageNumber }}
       </button>
-      <span *ngIf="PagesNumber>1" class="text-gray-800 text-sm md:text-base font-semibold">...</span>
-      <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
-      [ngClass]="{ 'selectedPage': CurrentPageNumber === PagesNumber }"
-        (click)="getAllEmployees(PagesNumber)">
+
+      <span *ngIf="CurrentPageNumber < PagesNumber - 1" class="text-gray-300">...</span>
+
+      <button *ngIf="CurrentPageNumber < PagesNumber" class="page-link" (click)="getAllEmployees(PagesNumber)">
         {{ PagesNumber }}
       </button>
     </div>
-    
-    <!-- Next Button -->
- <button 
-    class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-    [disabled]="CurrentPageNumber === PagesNumber" 
-    (click)="getNextPage()">
-    <span>Next</span>
-    <i class="fa-solid fa-arrow-right"></i>
-  </button>
-  </div>  
+
+    <button class="btn-nav" [disabled]="CurrentPageNumber === PagesNumber" (click)="getNextPage()">
+      <span>Next</span>
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </div>
 </div>

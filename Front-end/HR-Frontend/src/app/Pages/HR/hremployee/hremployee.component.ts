@@ -289,6 +289,7 @@ NavigateToEmployeeDetails(id: number) {
       data: { userId },
       width: '900px',
       maxWidth: '95vw',
+      panelClass: 'employee-hr-profile-dialog-panel'
     });
   }
 }

@@ -1,135 +1,124 @@
-<div (click)="resetfilteredLocations()">
-  <div class="flex justify-between mb-2 items-center">
-    <div>
-      <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Locations</p>
-    </div>
-    <button (click)="openDialog()"
-    [disabled]="AddButton"
-      class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg">
-      Add
+<div class="page-container pb-10" (click)="resetfilteredLocations()">
+  <!-- Page Header -->
+  <header class="page-header">
+    <h1 class="page-title">Boundaries & Locations</h1>
+    
+    <button (click)="openDialog()" [disabled]="AddButton" class="btn-add">
+      <i class="fa-solid fa-plus"></i>
+      <span>Add New Location</span>
     </button>
-  </div>
+  </header>
 
-  <div
-    class="mt-5 rounded-[8px] border border-[#D0D5DD] bg-[#FFFFFF] px-2 md:px-4 py-1 md:py-3 space-x-2 flex items-center relative">
-    <i class="fa-solid fa-search text-[#667085] w-[16.02px] h-[16.02px]" (click)="Search()"></i>
-
+  <!-- Search Tray -->
+  <div class="search-tray">
+    <i class="fa-solid fa-magnifying-glass" (click)="Search()"></i>
     <input type="text" [(ngModel)]="selectedName" (input)="filterByName()" (keydown.enter)="Search()"
-      placeholder="Enter Location Name..."
-      class="outline-none border-none placeholder-[#667085] bg-transparent text-sm md:text-base w-full" />
-    <div *ngIf="filteredLocations.length > 0"
-      class="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
-      <ul>
+           placeholder="Enter Location Name..." class="premium-input" />
+    
+    <!-- Autocomplete dropdown -->
+    <div *ngIf="filteredLocations.length > 0" class="autocomplete-dropdown shadow-2xl border-none">
+      <ul class="py-1">
         <li *ngFor="let location of filteredLocations" (click)="selectLocation(location)"
-          class="px-4 py-2 cursor-pointer hover:bg-gray-200">
+            class="autocomplete-item hover:bg-orange-50 hover:text-orange-600 font-medium border-b border-gray-50 last:border-0">
+          <i class="fa-solid fa-location-dot mr-2 opacity-50"></i>
           {{ location }}
         </li>
       </ul>
     </div>
   </div>
 
+  <!-- Locations List Card -->
+  <div class="table-card">
+    <div class="overflow-x-auto">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th class="w-16">#</th>
+            <th>Location Identity</th>
+            <th>Active window</th>
+            <th>Operational Range</th>
+            <th class="text-right px-6" *ngIf="tableData.length !== 0">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty State -->
+          <tr *ngIf="tableData.length === 0">
+            <td colspan="5">
+              <div class="empty-state">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <p class="font-medium">No locations defined yet</p>
+                <p class="text-xs mt-1">Add a location to manage attendance geofencing</p>
+              </div>
+            </td>
+          </tr>
 
-
-
-
-
-  <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">
-    <table class="w-full tabe inset-0 bg-[#FFFFFF] text-left text-[#475467]">
-      <thead class="bg-[#F9FAFB] text-sm md:text-base">
-        <tr>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            #  
-          </th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            Location  
-          </th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            Start Time
-          </th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            End Time
-          </th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-            Range
-          </th>
-          <th class="py-3 px-4 min-w-[120px] whitespace-nowrap" *ngIf="tableData.length !== 0">
-            Action
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- No Data Row -->
-        <tr *ngIf="tableData.length === 0">
-          <td colspan="6" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-            No Data Found
-          </td>
-        </tr>
-
-        <!-- Data Rows -->
-        <tr *ngFor="let row of tableData; let i = index"
-          [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}"
-          class="border-t border-gray-300 text-xs md:text-sm">
-
-          <td class="py-5 px-4">{{ (CurrentPageNumber - 1) * 5 + i + 1 }}</td>
-          <td class="py-5 px-4">{{ row.name }}</td>
-          <td class="py-5 px-4">{{ formatTime(row.start_time) }}</td>
-          <td class="py-5 px-4">{{ formatTime(row.end_time) }}</td>
-          <td class="py-5 px-4">{{ row.range }}</td>
-          <td class="py-5 px-4">
-            <div class="px-2">
-              <button 
-              [disabled]="AddButton"
-              (click)="openDialog(row.latitude ,row.longitude ,row.name,row.id , row.address ,row.start_time ,row.end_time, row.range)">
-                <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
-              </button>
-              <i class="fa fa-trash text-[#CC161D] ml-2 w-3 md:w-4" (click)="deleteLocation(row.id)"></i>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          <!-- Data Rows -->
+          <tr *ngFor="let row of tableData; let i = index">
+            <td class="text-xs font-mono text-gray-400">{{ (CurrentPageNumber - 1) * 5 + i + 1 }}</td>
+            <td class="location-name">{{ row.name }}</td>
+            <td>
+              <div class="flex items-center gap-2">
+                <span class="time-badge">
+                  <i class="fa-regular fa-clock"></i>
+                  {{ formatTime(row.start_time) }}
+                </span>
+                <span class="text-gray-300">→</span>
+                <span class="time-badge">
+                  <i class="fa-regular fa-clock"></i>
+                  {{ formatTime(row.end_time) }}
+                </span>
+              </div>
+            </td>
+            <td>
+              <span class="range-badge">
+                <i class="fa-solid fa-bullseye mr-1 opacity-50"></i>
+                {{ row.range }} <span class="text-[10px] font-normal text-gray-400">meters</span>
+              </span>
+            </td>
+            
+            <td class="text-right px-6" *ngIf="tableData.length !== 0">
+              <div class="flex justify-end gap-2">
+                <button [disabled]="AddButton" class="action-btn edit-btn" title="Modify Location"
+                        (click)="openDialog(row.latitude ,row.longitude ,row.name,row.id , row.address ,row.start_time ,row.end_time, row.range)">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn delete-btn" title="Remove Location" (click)="deleteLocation(row.id)">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <div class="mt-5 flex justify-between items-center" *ngIf="DisplayPagginationOrNot">
-<button 
-    class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-    [disabled]="CurrentPageNumber === 1" 
-    (click)="getPrevPage()">
-    <i class="fa-solid fa-arrow-left"></i>
-    <span>Previous</span>
-  </button>
+  <!-- Modern Pagination Tray -->
+  <footer class="pagination-tray" *ngIf="DisplayPagginationOrNot">
+    <button class="page-btn" [disabled]="CurrentPageNumber === 1" (click)="getPrevPage()">
+      <i class="fa-solid fa-chevron-left"></i>
+      <span>Previous</span>
+    </button>
 
-   
-
-    <div class="flex justify-center items-center space-x-2 md:space-x-4">
-      <button *ngIf="CurrentPageNumber-1>0"
-        class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
-        (click)="getAllLocations(CurrentPageNumber-1)">
-        {{ CurrentPageNumber-1 }}
+    <div class="flex items-center gap-2">
+      <button *ngIf="CurrentPageNumber - 1 > 0" class="page-btn !w-11 !p-0 justify-center" (click)="getAllLocations(CurrentPageNumber - 1)">
+        {{ CurrentPageNumber - 1 }}
       </button>
-      <button 
-        class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#D0D5DD]"
-        *ngIf="CurrentPageNumber<PagesNumber"
-        (click)="getAllLocations(CurrentPageNumber)">
+      
+      <button class="page-btn active !w-11 !p-0 justify-center">
         {{ CurrentPageNumber }}
       </button>
-      <span *ngIf="PagesNumber>1" class="text-gray-800 text-sm md:text-base font-semibold">...</span>
-      <button class="border border-[#D0D5DD] h-[40px] md:h-[50px] w-[40px] md:w-[50px] rounded-xl bg-[#FFFFFF]"
-      [ngClass]="{ 'selectedPage': CurrentPageNumber === PagesNumber }"
-        (click)="getAllLocations(PagesNumber)">
+
+      <span *ngIf="PagesNumber > CurrentPageNumber" class="nav-dot px-1">...</span>
+      
+      <button *ngIf="PagesNumber > CurrentPageNumber" class="page-btn !w-11 !p-0 justify-center" (click)="getAllLocations(PagesNumber)">
         {{ PagesNumber }}
       </button>
     </div>
 
-
-    <!-- Next Button -->
-<button 
-    class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-    [disabled]="CurrentPageNumber === PagesNumber" 
-    (click)="getNextPage()">
-    <span>Next</span>
-    <i class="fa-solid fa-arrow-right"></i>
-  </button>
-  </div>
-
+    <button class="page-btn" [disabled]="CurrentPageNumber === PagesNumber" (click)="getNextPage()">
+      <span>Next</span>
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </footer>
 </div>
