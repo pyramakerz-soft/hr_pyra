@@ -150,6 +150,7 @@ class UserClocksExport implements WithMultipleSheets
             }
 
             $user->loadMissing(['work_types', 'subDepartment', 'user_detail', 'department']);
+            $totalSchoolVisits = 0;
             $userWorkTypes = $user->work_types
                 ->pluck('name')
                 ->map(function ($name) {
@@ -336,8 +337,19 @@ class UserClocksExport implements WithMultipleSheets
                 $isSaturday = $localDate->isSaturday();
                 $isNonWorkingDay = $isFriday || ($isSaturday && !$worksOnSaturday);
 
+                $hiringDate = $userDetail->hiring_date ?? 'N/A';
+                $workType = $isPartTime ? 'Part-Time' : 'Full-Time';
+
+                $transportationStatus = '';
+                if (str_contains(strtolower($user->department?->name ?? ''), 'b2b')) {
+                    $hasBusRule = collect($resolvedPlan['rules'])->contains('template_key', 'academic_bus_users');
+                    $transportationStatus = $hasBusRule ? 'Bus' : 'No Bus';
+                }
 
                 $vacationTags = [];
+                $remarksTags = [];
+                $hasRequestedVacationFlag = false;
+                $hasCustomVacationFlag = false;
 
                 // Only add vacation tags if it's a working day
                 $vacationDirectApprover = '';
@@ -354,9 +366,11 @@ class UserClocksExport implements WithMultipleSheets
 
                     foreach ($requestedForDay as $vacation) {
                         $typeName = optional($vacation->vacationType)->name;
+                        $isHalf = ($vacation->days_count == 0.5);
+                        $halfDaySuffix = $isHalf ? ' (Half Day)' : '';
                         $label = $typeName
-                            ? 'Requested: ' . $typeName
-                            : 'Requested Vacation';
+                            ? $typeName . $halfDaySuffix
+                            : 'Vacation' . $halfDaySuffix;
 
                         if ($typeName === 'Sick Leave' && $vacation->attachments->isNotEmpty()) {
                             $url = $vacation->attachments->first()->file_url;
@@ -364,19 +378,48 @@ class UserClocksExport implements WithMultipleSheets
                         }
 
                         $vacationTags[] = $label;
+                        if ($isHalf) {
+                            $remarksTags[] = $label;
+                        }
+                        $hasRequestedVacationFlag = true;
                     }
 
                     foreach ($customForDay as $vacation) {
-                        $vacationTags[] = 'Custom: ' . $vacation->name;
+                        $label = $vacation->name;
+                        $vacationTags[] = $label;
+                        $remarksTags[] = $label;
+                        $hasCustomVacationFlag = true;
                     }
                 }
 
                 if ($vacationTags) {
                     $vacationTags = array_values(array_unique($vacationTags));
                 }
+                if ($remarksTags) {
+                    $remarksTags = array_values(array_unique($remarksTags));
+                }
 
-                $vacationLabel = $vacationTags ? implode(' | ', $vacationTags) : 'NO';
+                $vacationLabel = $vacationTags ? implode(' | ', $vacationTags) : '';
+                $remarksLabel = $remarksTags ? implode(' | ', $remarksTags) : '';
                 $isVacation = $hasRequestedVacation || $hasCustomVacation;
+
+                $isHalfDay = false;
+                if ($isVacation) {
+                    foreach ($requestedForDay as $vacation) {
+                        if ($vacation->days_count == 0.5) {
+                            $isHalfDay = true;
+                            break;
+                        }
+                    }
+                    if (!$isHalfDay) {
+                        foreach ($customForDay as $vacation) {
+                            if (!$vacation->is_full_day) {
+                                $isHalfDay = true;
+                                break;
+                            }
+                        }
+                    }
+                }
 
                 // Extract vacation approver names (use first vacation if multiple)
 
@@ -395,10 +438,13 @@ class UserClocksExport implements WithMultipleSheets
                         'row_data' => [
                             'Date' => $formattedDate,
                             'Name' => $user->name,
-                            'Clock In' => '',
-                            'Clock Out' => '',
+                            'Clock In' => ($isVacation ? $vacationLabel : ''),
+                            'Clock Out' => ($isVacation ? $vacationLabel : ''),
                             'Code' => $user->code,
                             'Department' => $user->department?->name ?? 'N/A',
+                            'Hiring Date' => $hiringDate,
+                            'Work Type' => $workType,
+                            'Transportation Status' => $transportationStatus,
                             'Total Hours in That Day' => '00:00',
                             'Total Over time in That Day' => $this->formatMinutes($recordedOtMinutes),
                             'is_mission' => $mission_flag,
@@ -406,10 +452,12 @@ class UserClocksExport implements WithMultipleSheets
                             'OT Head Approved By' => $headApprover,
                             'Plan Deduction in That Day' => '00:00',
                             'Deduction Details' => '',
+                            'Deduction Days' => '',
                             'Excuse Deducted in That Day' => '00:00',
                             'Excuse Remaining (Policy 4h)' => '',
                             'Total Excuses in That Day' => '00:00',
-                            'Is this date has vacation' => $vacationLabel,
+                            'Is this date has vacation' => $remarksLabel,
+                            'Vacation Label' => $vacationLabel,
                             'Vacation Direct Approved By' => $vacationDirectApprover,
                             'Vacation Head Approved By' => $vacationHeadApprover,
                             'Location In' => '',
@@ -417,7 +465,7 @@ class UserClocksExport implements WithMultipleSheets
                             'Attendance Over time in That Day' => '00:00',
                         ],
                         'segments' => [],
-                        'weekend' => $date->isFriday() || $date->isSaturday(),
+                        'weekend' => $localDate->isFriday() || $localDate->isSaturday(),
                         'ot_status' => $recordedOtMinutes > 0
                             ? strtolower($overtimeRecord?->overall_status ?? 'pending')
                             : null,
@@ -426,12 +474,17 @@ class UserClocksExport implements WithMultipleSheets
                         'chargeable_deduction_minutes' => 0,
                         'deduction_rules' => [],
                         'deduction_detail' => '',
-                        'plan_monetary_amount' => 0,
+                        'plan_monetary_amount' => null,
                         'deduction_color' => null,
                         'is_vacation' => $isVacation,
+                        'has_requested_vacation' => $hasRequestedVacationFlag,
+                        'has_custom_vacation' => $hasCustomVacationFlag,
+                        'is_half_day' => $isHalfDay,
                         'worked_minutes' => 0,
-                        'required_minutes' => 0,
+                        'required_minutes' => $requiredMinutesPerDay,
                         'issue_columns' => [],
+                        'is_school_visit' => false,
+                        'multi_segment' => false,
                     ];
 
                     // Add to totals if there's overtime
@@ -498,6 +551,7 @@ class UserClocksExport implements WithMultipleSheets
                         $segments[] = [
                             'in' => $clockIn ? $clockIn->copy()->setTimezone($userTimezoneName)->format('h:i A') : '',
                             'out' => $clockOut ? $clockOut->copy()->setTimezone($userTimezoneName)->format('h:i A') : '',
+                            'is_missing_out' => !$clockOut && $clockIn,
                         ];
                     }
                 }
@@ -689,14 +743,57 @@ class UserClocksExport implements WithMultipleSheets
                 $totalRawDeductionMinutes += $rawDeductionMinutes;
                 $totalLatenessBeyondGrace += $latenessBeyondGrace;
 
+
+                $isSchoolVisit = false;
+                if (!$isNonWorkingDay && !$isVacation && $dailyClocks->isNotEmpty()) {
+                    $excludedLocations = ['pyramakerz', 'cairo', 'alexandria zizinia', 'ciramakerz', 'office', 'company'];
+                    foreach ($dailyClocks as $clock) {
+                        $locName = '';
+                        if ($clock->location_type === 'site' && $clock->location) {
+                            $locName = strtolower($clock->location->name);
+                        } elseif ($clock->location_type === 'float') {
+                            $locName = strtolower($clock->address_clock_in ?? '');
+                        }
+                        
+                        if ($locName !== '') {
+                            $isExcluded = false;
+                            foreach ($excludedLocations as $excluded) {
+                                if (str_contains($locName, $excluded)) {
+                                    $isExcluded = true;
+                                    break;
+                                }
+                            }
+                            if (!$isExcluded) {
+                                $isSchoolVisit = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if ($isSchoolVisit) {
+                    $totalSchoolVisits = ($totalSchoolVisits ?? 0) + 1;
+                }
+
+                $clockInValue = $earliestIn ? $earliestIn->copy()->setTimezone($userTimezoneName)->format('h:i A') : '';
+                $clockOutValue = $latestOut ? $latestOut->copy()->setTimezone($userTimezoneName)->format('h:i A') : '';
+
+                if ($isVacation) {
+                    $clockInValue = $vacationLabel;
+                    $clockOutValue = $vacationLabel;
+                }
+
                 $dailyEntries[] = [
                     'row_data' => [
                         'Date' => $formattedDate,
                         'Name' => $user->name,
-                        'Clock In' => $dailyClocks->count() > 1 ? '' : ($earliestIn ? $earliestIn->copy()->setTimezone($userTimezoneName)->format('h:i A') : ''),
-                        'Clock Out' => $dailyClocks->count() > 1 ? '' : ($latestOut ? $latestOut->copy()->setTimezone($userTimezoneName)->format('h:i A') : ''),
+                        'Clock In' => $clockInValue,
+                        'Clock Out' => $clockOutValue,
                         'Code' => $user->code,
                         'Department' => $user->department?->name ?? 'N/A',
+                        'Hiring Date' => $hiringDate,
+                        'Work Type' => $workType,
+                        'Transportation Status' => $transportationStatus,
                         'Total Hours in That Day' => $this->formatMinutes($workedMinutes),
                         'Total Over time in That Day' => $this->formatMinutes($recordedOtMinutes),
                         'is_mission' => $mission_flag,
@@ -704,6 +801,7 @@ class UserClocksExport implements WithMultipleSheets
                         'OT Head Approved By' => $headApprover,
                         'Plan Deduction in That Day' => $this->formatMinutes($rawDeductionMinutes),
                         'Deduction Details' => $deductionDetailSummary,
+                        'Deduction Days' => '', // Blank column as requested
                         'Excuse Deducted in That Day' => '',
                         'Excuse Remaining (Policy 4h)' => '',
                         'Total Excuses in That Day' => $this->formatMinutes($dailyExcuseMinutes),
@@ -715,7 +813,7 @@ class UserClocksExport implements WithMultipleSheets
                         'Attendance Over time in That Day' => $this->formatMinutes($attendanceOvertimeMinutes),
                     ],
                     'segments' => $dailyClocks->count() > 1 ? $segments : [],
-                    'weekend' => Carbon::parse($formattedDate)->isFriday() || Carbon::parse($formattedDate)->isSaturday(),
+                    'weekend' => $localDate->isFriday() || $localDate->isSaturday(),
                     'ot_status' => $recordedOtMinutes > 0
                         ? strtolower($overtimeRecord?->overall_status ?? 'pending')
                         : ($attendanceOvertimeMinutes > 0 ? 'pending' : null),
@@ -727,51 +825,17 @@ class UserClocksExport implements WithMultipleSheets
                     'plan_monetary_amount' => $planMonetaryDeduction,
                     'deduction_color' => $appliedRules[0]['color'] ?? null,
                     'is_vacation' => $isVacation,
+                    'has_requested_vacation' => $hasRequestedVacationFlag,
+                    'has_custom_vacation' => $hasCustomVacationFlag,
+                    'is_half_day' => $isHalfDay,
                     'worked_minutes' => $workedMinutes,
                     'required_minutes' => $requiredMinutes,
                     'issue_columns' => $issueColumns,
+                    'is_school_visit' => $isSchoolVisit,
+                    'multi_segment' => $dailyClocks->count() > 1,
                 ];
             }
 
-            array_unshift($dailyEntries, [
-                'row_data' => [
-                    'Date' => 'Employee: ' . $user->name,
-                    'Name' => 'Code: ' . ($user->code ?? 'N/A'),
-                    'Clock In' => '',
-                    'Clock Out' => '',
-                    'Code' => '',
-                    'Department' => 'Department: ' . ($user->department?->name ?? 'N/A'),
-                    'Total Hours in That Day' => '',
-                    'Total Over time in That Day' => '',
-                    'is_mission' => '',
-                    'OT Direct Approved By' => '',
-                    'OT Head Approved By' => '',
-                    'Plan Deduction in That Day' => '',
-                    'Deduction Details' => '',
-                    'Excuse Deducted in That Day' => '',
-                    'Excuse Remaining (Policy 4h)' => '',
-                    'Total Excuses in That Day' => '',
-                    'Is this date has vacation' => 'Vacation Days Left: ' . number_format($vacationDaysLeft, 2),
-                    'Vacation Direct Approved By' => '',
-                    'Vacation Head Approved By' => '',
-                    'Location In' => '',
-                    'Location Out' => '',
-                    'Attendance Over time in That Day' => '',
-                ],
-                'segments' => [],
-                'weekend' => false,
-                'ot_status' => null,
-                'raw_deduction_minutes' => 0,
-                'excuse_applied_minutes' => 0,
-                'chargeable_deduction_minutes' => 0,
-                'deduction_rules' => [],
-                'deduction_detail' => '',
-                'plan_monetary_amount' => null,
-                'deduction_color' => null,
-                'is_vacation' => false,
-                'issue_columns' => [],
-                'header_row' => true,
-            ]);
 
             $excuseMinutesRemaining = 240;
             $dailyIndicesByDeduction = collect($dailyEntries)
@@ -792,21 +856,6 @@ class UserClocksExport implements WithMultipleSheets
             }
 
             foreach ($dailyEntries as $entry) {
-                if (!empty($entry['header_row'])) {
-                    $row = $entry['row_data'];
-                    $aggregatedRow = $row;
-                    $aggregatedRow['Plan Monetary Amount'] = null;
-                    $this->aggregatedRows->push($aggregatedRow);
-
-                    $this->detailedRows->push($row);
-                    $rowNumber = 1 + $this->detailedRows->count();
-                    $this->rowStyles[] = [
-                        'row' => $rowNumber,
-                        'header_row' => true,
-                    ];
-
-                    continue;
-                }
 
                 $totalExcuseMinutesApplied += $entry['excuse_applied_minutes'];
                 $totalChargeableDeductionMinutes += $entry['chargeable_deduction_minutes'];
@@ -833,74 +882,27 @@ class UserClocksExport implements WithMultipleSheets
                     'deduction_color' => $entry['deduction_color'] ?? null,
                     'deduction_rules' => $entry['deduction_rules'] ?? [],
                     'vacation' => $entry['is_vacation'] ?? false,
+                    'has_requested_vacation' => $entry['has_requested_vacation'] ?? false,
+                    'has_custom_vacation' => $entry['has_custom_vacation'] ?? false,
+                    'is_half_day' => $entry['is_half_day'] ?? false,
+                    'multi_segment' => $entry['multi_segment'] ?? false,
+                    'is_school_visit' => $entry['is_school_visit'] ?? false,
+                    'row_data' => $row,
                 ];
 
-                foreach ($entry['segments'] as $segment) {
-                    $this->detailedRows->push([
-                        'Date' => '',
-                        'Name' => '',
-                        'Clock In' => $segment['in'],
-                        'Clock Out' => $segment['out'],
-                        'Code' => '',
-                        'Department' => '',
-                        'Total Hours in That Day' => '',
-                        'Total Over time in That Day' => '',
-                        'is_mission' => '',
-                        'OT Direct Approved By' => '',
-                        'OT Head Approved By' => '',
-                        'Plan Deduction in That Day' => '',
-                        'Deduction Details' => '',
-                        'Excuse Deducted in That Day' => '',
-                        'Excuse Remaining (Policy 4h)' => '',
-                        'Total Excuses in That Day' => '',
-                        'Is this date has vacation' => '',
-                        'Location In' => '',
-                        'Location Out' => '',
-                        'Attendance Over time in That Day' => '',
-                    ]);
-
-                    $this->aggregatedRows->push([
-                        'Date' => '',
-                        'Name' => '',
-                        'Clock In' => $segment['in'],
-                        'Clock Out' => $segment['out'],
-                        'Code' => '',
-                        'Department' => '',
-                        'Total Hours in That Day' => '',
-                        'Total Over time in That Day' => '',
-                        'is_mission' => '',
-                        'OT Direct Approved By' => '',
-                        'OT Head Approved By' => '',
-                        'Plan Deduction in That Day' => '',
-                        'Deduction Details' => '',
-                        'Excuse Deducted in That Day' => '',
-                        'Excuse Remaining (Policy 4h)' => '',
-                        'Total Excuses in That Day' => '',
-                        'Is this date has vacation' => '',
-                        'Vacation Direct Approved By' => '',
-                        'Vacation Head Approved By' => '',
-                        'Location In' => '',
-                        'Location Out' => '',
-                        'Attendance Over time in That Day' => '',
-                        'Plan Monetary Amount' => null,
-                    ]);
-
-                    $rowNumber = 1 + $this->detailedRows->count();
-                    $this->rowStyles[] = [
-                        'row' => $rowNumber,
-                        'multi_segment' => true,
-                        'issue_columns' => [],
-                    ];
-                }
+                // Segment rows removed per user request: "just show the first in and last out"
             }
 
             $this->detailedRows->push([
-                'Date' => '---TOTAL for ' . $user->name . '----',
+                'Date' => '---TOTAL for ' . $user->name . '---',
                 'Name' => $user->name,
-                'Clock In' => 'N/A',
-                'Clock Out' => 'N/A',
+                'Clock In' => '-',
+                'Clock Out' => '-',
                 'Code' => $user->code,
                 'Department' => $user->department?->name ?? 'N/A',
+                'Hiring Date' => $hiringDate,
+                'Work Type' => $workType,
+                'Transportation Status' => $transportationStatus,
                 'Total Hours in That Day' => $this->formatMinutes($totalWorkedMinutes),
                 'Total Over time in That Day' => $this->formatMinutes($totalRecordedOtMinutes),
                 'is_mission' => '',
@@ -908,16 +910,24 @@ class UserClocksExport implements WithMultipleSheets
                 'OT Head Approved By' => '',
                 'Plan Deduction in That Day' => $this->formatMinutes($totalRawDeductionMinutes),
                 'Deduction Details' => '',
+                'Deduction Days' => '0',
                 'Excuse Deducted in That Day' => $this->formatMinutes($totalExcuseMinutesApplied),
                 'Excuse Remaining (Policy 4h)' => $this->formatMinutes(max(0, $excuseMinutesRemaining)),
                 'Total Excuses in That Day' => $this->formatMinutes($totalApprovedExcuseMinutes),
-                'Is this date has vacation' => $totalVacationDays === 0 ? 'NO VACATIONS' : $totalVacationDays . ' Days',
+                'Is this date has vacation' => '',
                 'Vacation Direct Approved By' => '',
                 'Vacation Head Approved By' => '',
-                'Location In' => 'N/A',
-                'Location Out' => 'N/A',
+                'Location In' => '',
+                'Location Out' => '',
                 'Attendance Over time in That Day' => $this->formatMinutes($totalAttendanceOtMinutes),
+                'School Visits' => $totalSchoolVisits ?? 0,
             ]);
+
+            $rowNumber = 1 + $this->detailedRows->count();
+            $this->rowStyles[] = [
+                'row' => $rowNumber,
+                'row_data' => $this->detailedRows->last(),
+            ];
 
             $this->aggregatedRows->push([
                 'Date' => '---TOTAL for ' . $user->name . '----',
@@ -926,6 +936,9 @@ class UserClocksExport implements WithMultipleSheets
                 'Clock Out' => 'N/A',
                 'Code' => $user->code,
                 'Department' => $user->department?->name ?? 'N/A',
+                'Hiring Date' => '',
+                'Work Type' => '',
+                'Transportation Status' => '',
                 'Total Hours in That Day' => $this->formatMinutes($totalWorkedMinutes),
                 'Total Over time in That Day' => $this->formatMinutes($totalRecordedOtMinutes),
                 'is_mission' => '',
@@ -933,16 +946,18 @@ class UserClocksExport implements WithMultipleSheets
                 'OT Head Approved By' => '',
                 'Plan Deduction in That Day' => $this->formatMinutes($totalRawDeductionMinutes),
                 'Deduction Details' => '',
+                'Deduction Days' => '',
                 'Excuse Deducted in That Day' => $this->formatMinutes($totalExcuseMinutesApplied),
                 'Excuse Remaining (Policy 4h)' => $this->formatMinutes(max(0, $excuseMinutesRemaining)),
                 'Total Excuses in That Day' => $this->formatMinutes($totalApprovedExcuseMinutes),
-                'Is this date has vacation' => $totalVacationDays === 0 ? 'NO VACATIONS' : $totalVacationDays . ' Days',
+                'Is this date has vacation' => '',
                 'Vacation Direct Approved By' => '',
                 'Vacation Head Approved By' => '',
                 'Location In' => 'N/A',
                 'Location Out' => 'N/A',
                 'Attendance Over time in That Day' => $this->formatMinutes($totalAttendanceOtMinutes),
                 'Plan Monetary Amount' => round($totalPlanMonetaryAmount, 2),
+                'School Visits' => $totalSchoolVisits ?? 0,
             ]);
 
             $this->detailedRows->push([

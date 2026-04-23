@@ -12,7 +12,9 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyles, WithColumnFormatting, WithTitle
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+
+class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyles, WithColumnFormatting, WithTitle, ShouldAutoSize
 {
     protected Collection $rows;
     protected array $rowStyles;
@@ -80,7 +82,7 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
         ]);
 
         foreach (range('A', 'Q') as $col) {
-            $sheet->getColumnDimension($col)->setWidth(30);
+            $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
         $sheet->getRowDimension(1)->setRowHeight(40);
