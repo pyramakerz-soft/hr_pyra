@@ -106,6 +106,10 @@
             <span class="attr-label">Department</span>
             <span class="attr-value font-bold text-[#437ef7]">{{ employee.deparment_name }}</span>
           </div>
+          <div class="attr-group" *ngIf="employee.sub_department_name">
+            <span class="attr-label">Sub-department</span>
+            <span class="attr-value font-bold text-[#437ef7]">{{ employee.sub_department_name }}</span>
+          </div>
           <div class="attr-group">
             <span class="attr-label">Current Role</span>
             <span class="attr-value">{{ employee.emp_type }}</span>

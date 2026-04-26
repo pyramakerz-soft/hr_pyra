@@ -88,7 +88,9 @@
                 'dept-academic': row.department === 'Academic',
                 'dept-default': row.department !== 'Software' && row.department !== 'Academic'
               }">
-                {{ row.department ? row.department : 'Unassigned' }}
+                {{ row.department ? row.department : (row.sub_department ? '' : 'Unassigned') }}
+                <span *ngIf="row.department && row.sub_department"> / </span>
+                {{ row.sub_department }}
               </span>
             </td>
             <td class="text-xs">{{ row.phone }}</td>

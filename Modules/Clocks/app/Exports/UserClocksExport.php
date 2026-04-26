@@ -153,6 +153,7 @@ class UserClocksExport implements WithMultipleSheets
 
             $user->loadMissing(['work_types', 'subDepartment', 'user_detail', 'department']);
             $totalSchoolVisits = 0;
+            $excuseTokensUsed = 0;
             $userWorkTypes = $user->work_types
                 ->pluck('name')
                 ->map(function ($name) {
@@ -843,7 +844,7 @@ class UserClocksExport implements WithMultipleSheets
                         'Deduction Days' => '', // Blank column as requested
                         'Excuse Deducted in That Day' => '',
                         'Excuse Remaining (Policy 4h)' => '',
-                        'Total Excuses in That Day' => $this->formatMinutes($dailyExcuseMinutes),
+                        'Total Excuses in That Day' => $this->formatMinutes($dailyApprovedExcuseMinutes),
                         'Is this date has vacation' => $vacationLabel,
                         'Vacation Direct Approved By' => $vacationDirectApprover,
                         'Vacation Head Approved By' => $vacationHeadApprover,
@@ -1054,6 +1055,7 @@ class UserClocksExport implements WithMultipleSheets
             }
 
             $excuseStats = $this->collectExcuseStats($user, $startDate->copy(), $endDate->copy(), $userTimezoneName);
+            $excuseTokensUsed = $excuseStats['approved']['count'] ?? 0;
             $excuseSummaryForNotes = $this->summarizeExcuseStatsForNotes($excuseStats);
 
             $hourlyRate = $userDetail->hourly_rate;

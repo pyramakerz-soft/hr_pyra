@@ -71,10 +71,8 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'code' => $this->code,
-            'department' => $this->department != null ? $this->department->name :
-                ($this->subDepartment != null ?
-                    $this->subDepartment->name :
-                    null),
+            'department' => $this->department?->name,
+            'sub_department' => $this->subDepartment?->name,
             'position' => $this->user_detail->emp_type ?? null,
             'role' => $this->getRoleName(),
             'email' => $this->email,
