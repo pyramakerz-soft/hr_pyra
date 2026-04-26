@@ -24,6 +24,7 @@ export class BoundersPopUpComponent {
   Boundname: string = '';
   address: string = '';
   radius: string = '';
+  isSchool: boolean = true;
   map: any;
   marker: any;
 
@@ -56,6 +57,7 @@ export class BoundersPopUpComponent {
       this.StartTime=data.startTime
       this.EndTime=data.endTime
       this.radius=String(data.range)
+      this.isSchool = data.isSchool !== undefined ? data.isSchool : true;
     }
   }
 
@@ -232,7 +234,7 @@ export class BoundersPopUpComponent {
       if(this.ETime>this.STime){
       if (this.mode === 'edit' && this.lat && this.long) {
 
-        this.LocationServ.EditByID(this.Boundname, this.address, Number(this.lat), Number(this.long), this.id ,this.STime,this.ETime, this.radius).subscribe(
+        this.LocationServ.EditByID(this.Boundname, this.address, Number(this.lat), Number(this.long), this.id ,this.STime,this.ETime, this.radius, this.isSchool).subscribe(
           (d: any) => {
             this.dialogRef.close();
           },
@@ -254,7 +256,7 @@ export class BoundersPopUpComponent {
           }
         );
       } else if (this.mode === 'add' && this.lat && this.long) {
-        this.LocationServ.CreateAddress(this.Boundname, this.address, Number(this.lat), Number(this.long) ,this.STime,this.ETime, this.radius).subscribe(
+        this.LocationServ.CreateAddress(this.Boundname, this.address, Number(this.lat), Number(this.long) ,this.STime,this.ETime, this.radius, this.isSchool).subscribe(
           (d: any) => {
             this.dialogRef.close();
           },

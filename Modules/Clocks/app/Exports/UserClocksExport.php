@@ -17,6 +17,8 @@ use Modules\Users\Models\CustomVacation;
 use Modules\Clocks\Support\DeductionPlanResolver;
 use Modules\Clocks\Support\DeductionRuleEngine;
 use Modules\Users\Models\VacationType;
+use Modules\Users\Models\Excuse;
+use Modules\Users\Enums\StatusEnum;
 
 class UserClocksExport implements WithMultipleSheets
 {
@@ -165,6 +167,11 @@ class UserClocksExport implements WithMultipleSheets
             }
 
             $resolvedPlan = $planResolver->resolveForUser($user);
+
+            $departmentName = strtoupper($user->department?->name ?? '');
+            $isB2B = str_contains($departmentName, 'B2B');
+            $isB2C = str_contains($departmentName, 'B2C');
+
             $deductionEngine = new DeductionRuleEngine($resolvedPlan);
             $planGraceMinutes = $resolvedPlan['grace_minutes'] ?? 15;
             $ruleState = [];
@@ -322,6 +329,13 @@ class UserClocksExport implements WithMultipleSheets
             $totalApprovedExcuseMinutes = 0;
             $totalIssueDays = 0;
             $totalWorkedDays = 0;
+
+            $monthlyUsedExcuseMinutesAccumulator = 0;
+            $monthlyExcuseLimit = 120; // 2 hours default
+            if ($isB2B) {
+                $monthlyExcuseLimit += 240; // + 4 hours fixed permission = 6 hours total
+            }
+            $excuseMinutesRemaining = $monthlyExcuseLimit;
 
             for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
                 $localDate = $date->copy()->setTimezone($userTimezoneName);
@@ -609,11 +623,18 @@ class UserClocksExport implements WithMultipleSheets
                 $workedMeetsExpected = $expectedScheduledMinutes > 0 && $workedMinutes >= $expectedScheduledMinutes;
                 $workedMeetsRequired = $requiredMinutes > 0 && $workedMinutes >= $requiredMinutes;
 
-                $dailyExcuseMinutes = $user->excuses()->where('status', 'approved')
+                $dailyApprovedExcuseMinutes = $user->excuses()->where('status', StatusEnum::Approved)
                     ->whereDate('date', $formattedDate)
                     ->get()
                     ->sum(fn($excuse) => Carbon::parse($excuse->from)->diffInMinutes(Carbon::parse($excuse->to)));
-                $totalApprovedExcuseMinutes += $dailyExcuseMinutes;
+
+                $totalApprovedExcuseMinutes += $dailyApprovedExcuseMinutes;
+
+                // Monthly cap logic
+                $remainingPool = max(0, $monthlyExcuseLimit - $monthlyUsedExcuseMinutesAccumulator);
+                $applicableExcuseMinutes = min($dailyApprovedExcuseMinutes, $remainingPool);
+                $monthlyUsedExcuseMinutesAccumulator += $applicableExcuseMinutes;
+                $excuseMinutesRemaining = max(0, $monthlyExcuseLimit - $monthlyUsedExcuseMinutesAccumulator);
 
                 $attendanceOvertimeMinutes = $this->computeAttendanceOvertimeMinutes($workedMinutes, $formattedDate);
 
@@ -630,7 +651,7 @@ class UserClocksExport implements WithMultipleSheets
                     $latenessBeyondGrace = 0;
                 }
 
-                $shortfall = max(0, $requiredMinutes - $workedMinutes);
+                $shortfall = max(0, $requiredMinutes - $workedMinutes - $applicableExcuseMinutes);
 
                 $dailyLocationTypes = $dailyClocks
                     ->pluck('location_type')
@@ -650,6 +671,7 @@ class UserClocksExport implements WithMultipleSheets
                     'expected_minutes' => $expectedScheduledMinutes,
                     'worked_minutes' => $workedMinutes,
                     'shortfall_minutes' => $shortfall,
+                    'excuse_applied_minutes' => $applicableExcuseMinutes,
                     'lateness_minutes_actual' => $latenessMinutesActual ?? 0,
                     'lateness_beyond_grace' => $latenessBeyondGrace,
                     'attendance_overtime_minutes' => $attendanceOvertimeMinutes,
@@ -673,6 +695,8 @@ class UserClocksExport implements WithMultipleSheets
                     'is_part_time' => $isPartTime,
                     'overtime_locked' => $isPartTime,
                 ];
+
+                $evaluationMetrics['excuse_applied_minutes'] = $applicableExcuseMinutes;
 
                 $appliedRules = [];
                 $planMonetaryDeduction = 0.0;
@@ -746,24 +770,23 @@ class UserClocksExport implements WithMultipleSheets
 
                 $isSchoolVisit = false;
                 if (!$isNonWorkingDay && !$isVacation && $dailyClocks->isNotEmpty()) {
-                    $excludedLocations = ['pyramakerz', 'cairo', 'alexandria zizinia', 'ciramakerz', 'office', 'company'];
                     foreach ($dailyClocks as $clock) {
-                        $locName = '';
                         if ($clock->location_type === 'site' && $clock->location) {
-                            $locName = strtolower($clock->location->name);
+                            if ($clock->location->is_school) {
+                                $isSchoolVisit = true;
+                                break;
+                            }
                         } elseif ($clock->location_type === 'float') {
                             $locName = strtolower($clock->address_clock_in ?? '');
-                        }
-                        
-                        if ($locName !== '') {
+                            $excludedKeywords = ['pyramakerz', 'office', 'company', 'home'];
                             $isExcluded = false;
-                            foreach ($excludedLocations as $excluded) {
-                                if (str_contains($locName, $excluded)) {
+                            foreach ($excludedKeywords as $keyword) {
+                                if (str_contains($locName, $keyword)) {
                                     $isExcluded = true;
                                     break;
                                 }
                             }
-                            if (!$isExcluded) {
+                            if (!$isExcluded && $locName !== '') {
                                 $isSchoolVisit = true;
                                 break;
                             }
@@ -837,23 +860,11 @@ class UserClocksExport implements WithMultipleSheets
             }
 
 
-            $excuseMinutesRemaining = 240;
-            $dailyIndicesByDeduction = collect($dailyEntries)
-                ->filter(fn($entry) => $entry['raw_deduction_minutes'] >= 120)
-                ->sortByDesc('raw_deduction_minutes')
-                ->keys();
-
-            $excuseTokensUsed = 0;
-            foreach ($dailyIndicesByDeduction as $index) {
-                if ($excuseMinutesRemaining < 120) {
-                    break;
-                }
-
-                $dailyEntries[$index]['excuse_applied_minutes'] = 120;
-                $dailyEntries[$index]['chargeable_deduction_minutes'] = max(0, $dailyEntries[$index]['raw_deduction_minutes'] - 120);
-                $excuseMinutesRemaining -= 120;
-                $excuseTokensUsed++;
+            // Apply monthly cumulative excuse tracking to entries
+            foreach ($dailyEntries as &$entry) {
+                $entry['chargeable_deduction_minutes'] = $entry['raw_deduction_minutes'];
             }
+            unset($entry);
 
             foreach ($dailyEntries as $entry) {
 

@@ -29,6 +29,7 @@ class StoreLocationRequest extends FormRequest
             'start_time' => ['required', 'date_format:H:i'],
             'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
             'range' => ['required', 'integer'],
+            'is_school' => ['sometimes', 'boolean'],
         ];
     }
 }

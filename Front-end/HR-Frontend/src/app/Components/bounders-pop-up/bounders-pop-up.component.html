@@ -67,6 +67,19 @@
                     </div>
                     <span *ngIf="radiusError" class="error-text">{{ radiusError }}</span>
                 </div>
+
+                <!-- School Visit Toggle -->
+                <div class="input-group mt-2">
+                    <div class="flex items-center gap-3 py-3 bg-gray-50 rounded-xl px-4 border border-gray-100">
+                        <div class="form-check form-switch mb-0 flex items-center">
+                            <input class="form-check-input h-6 w-11 cursor-pointer" type="checkbox" [(ngModel)]="isSchool" id="isSchoolSwitch">
+                            <label class="form-check-label text-sm font-bold text-gray-600 ml-3 cursor-pointer" for="isSchoolSwitch">
+                                Mark as School Visit
+                            </label>
+                        </div>
+                        <i class="fa-solid fa-graduation-cap text-gray-300 ml-auto text-lg" title="When enabled, visits to this location will be counted as school visits in reports."></i>
+                    </div>
+                </div>
             </div>
         </main>
 

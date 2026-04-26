@@ -77,7 +77,7 @@ public departmentServ: DepartmentService
     }
   }
 
-  openDialog(lat?: string, long?: string, EditedLocationName?: string, id?: number, EditedLocationAddress?: string , StartTime?:string, EndTime?:string, Range?:string): void {
+  openDialog(lat?: string, long?: string, EditedLocationName?: string, id?: number, EditedLocationAddress?: string , StartTime?:string, EndTime?:string, Range?:string, isSchool?: boolean): void {
     this.AddButton=true;
     const dialogRef = this.dialog.open(BoundersPopUpComponent, {
       data: EditedLocationName
@@ -91,6 +91,7 @@ public departmentServ: DepartmentService
           startTime:StartTime,
           endTime:EndTime,
           range:Range,
+          isSchool: isSchool
         }
         : {
           mode: 'add',

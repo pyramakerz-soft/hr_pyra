@@ -37,6 +37,7 @@
             <th>Location Identity</th>
             <th>Active window</th>
             <th>Operational Range</th>
+            <th>School Visit</th>
             <th class="text-right px-6" *ngIf="tableData.length !== 0">Actions</th>
           </tr>
         </thead>
@@ -75,11 +76,17 @@
                 {{ row.range }} <span class="text-[10px] font-normal text-gray-400">meters</span>
               </span>
             </td>
+            <td>
+              <span class="school-badge" [class.is-school]="row.is_school">
+                <i class="fa-solid" [ngClass]="row.is_school ? 'fa-school' : 'fa-building'"></i>
+                {{ row.is_school ? 'Yes' : 'No' }}
+              </span>
+            </td>
             
             <td class="text-right px-6" *ngIf="tableData.length !== 0">
               <div class="flex justify-end gap-2">
                 <button [disabled]="AddButton" class="action-btn edit-btn" title="Modify Location"
-                        (click)="openDialog(row.latitude ,row.longitude ,row.name,row.id , row.address ,row.start_time ,row.end_time, row.range)">
+                        (click)="openDialog(row.latitude ,row.longitude ,row.name,row.id , row.address ,row.start_time ,row.end_time, row.range, row.is_school)">
                   <i class="fas fa-edit"></i>
                 </button>
                 <button class="action-btn delete-btn" title="Remove Location" (click)="deleteLocation(row.id)">

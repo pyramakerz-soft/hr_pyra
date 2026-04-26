@@ -131,6 +131,8 @@
     font-size: 0.875rem;
     color: var(--text-primary);
     transition: var(--transition);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .premium-input:focus {
@@ -172,4 +174,88 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem;
+    width: 100%;
+}
+
+.grid-cols-2 > * {
+    min-width: 0;
+}
+
+/* Utility Classes */
+.relative {
+    position: relative;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.right-4 {
+    right: 1rem;
+}
+
+.top-1/2 {
+    top: 50%;
+}
+
+.-translate-y-1/2 {
+    transform: translateY(-50%);
+}
+
+.pr-12 {
+    padding-right: 3rem !important;
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.gap-3 {
+    gap: 0.75rem;
+}
+
+.py-3 {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.bg-gray-50 {
+    background-color: #f9fafb;
+}
+
+.rounded-xl {
+    border-radius: 0.75rem;
+}
+
+.border {
+    border-width: 1px;
+}
+
+.border-gray-100 {
+    border-color: #f1f5f9;
+}
+
+.ml-auto {
+    margin-left: auto;
+}
+
+.ml-3 {
+    margin-left: 0.75rem;
 }
