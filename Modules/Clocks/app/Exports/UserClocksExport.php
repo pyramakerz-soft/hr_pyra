@@ -331,9 +331,9 @@ class UserClocksExport implements WithMultipleSheets
             $totalWorkedDays = 0;
 
             $monthlyUsedExcuseMinutesAccumulator = 0;
-            $monthlyExcuseLimit = 120; // 2 hours default
+            $monthlyExcuseLimit = 240; // 4 hours default (e.g. 2 excuses x 2h each)
             if ($isB2B) {
-                $monthlyExcuseLimit += 240; // + 4 hours fixed permission = 6 hours total
+                $monthlyExcuseLimit += 120; // + 4 hours fixed permission = 6 hours total
             }
             $excuseMinutesRemaining = $monthlyExcuseLimit;
 
@@ -709,6 +709,22 @@ class UserClocksExport implements WithMultipleSheets
                 } else {
                     $evaluation = $deductionEngine->evaluate($evaluationMetrics, $ruleState);
                     $appliedRules = $evaluation['applied_rules'] ?? [];
+
+                    if ($applicableExcuseMinutes > 0 && !empty($appliedRules)) {
+                        $remainingExcuse = $applicableExcuseMinutes;
+                        foreach ($appliedRules as &$rule) {
+                            $ruleDeduction = $rule['deduction_minutes'] ?? 0;
+                            if ($ruleDeduction > 0 && $remainingExcuse > 0) {
+                                $offset = min($ruleDeduction, $remainingExcuse);
+                                $rule['deduction_minutes'] -= $offset;
+                                $remainingExcuse -= $offset;
+                            }
+                        }
+                        unset($rule);
+                        
+                        $evaluation['deduction_minutes'] = array_sum(array_column($appliedRules, 'deduction_minutes'));
+                    }
+
                     $planMonetaryDeduction = $evaluation['monetary_amount'] ?? 0.0;
                     $totalPlanMonetaryAmount += $planMonetaryDeduction;
                     $rawDeductionMinutes = $hasIssue ? 0 : (int) ($evaluation['deduction_minutes'] ?? 0);

@@ -296,6 +296,10 @@ class ClockController extends Controller
             ]);
         }
 
+        if ($request->has('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
         if ($request->has('export')) {
             $clocksForExport = $query->orderBy('clock_in', 'desc')->get();
             return (new clocksExport($clocksForExport, $fromDay, $toDay))->download('all_user_clocks.xlsx');
@@ -352,7 +356,7 @@ class ClockController extends Controller
                 $defaultEndDate->endOfDay()
             ]);
         }
-
+        
         if ($request->has('user_id')) {
             $query->where('user_id', $request->user_id);
         }
@@ -379,7 +383,7 @@ class ClockController extends Controller
             return $this->returnError('No managed employees found.', 404);
         }
 
-        $users = User::whereIn('id', $managedIds)->get(['id', 'name']);
+        $users = User::whereIn('id', $managedIds)->get(['id', 'name', 'code']);
 
         return $this->returnData('data', $users, 'Managed Employees List');
     }
@@ -1642,4 +1646,6 @@ class ClockController extends Controller
         // Return the users based on the selected filter
         return $this->returnData('data', $usersData, $message);
     }
+
+    
 }

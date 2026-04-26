@@ -60,6 +60,20 @@ class ExcuseController extends Controller
         //TODO make a limit two excuses per month DONE
         $authUser = Auth::user();
 
+        $from = Carbon::parse($request->input('from'));
+        $to = Carbon::parse($request->input('to'));
+        
+        if ($from->greaterThan($to)) {
+             // Handle cases where time crosses midnight if applicable, or just reject
+             $to->addDay();
+        }
+        
+        $durationMinutes = $from->diffInMinutes($to);
+
+        if ($durationMinutes > 120) {
+            return $this->returnError('An excuse cannot exceed 2 hours.', 422);
+        }
+
         $requestedDate = Carbon::parse($request->input('date'));
         if ($requestedDate->day > 25) {
             $startOfMonth = $requestedDate->copy()->day(26)->startOfDay();

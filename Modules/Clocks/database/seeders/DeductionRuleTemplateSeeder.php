@@ -313,6 +313,119 @@ class DeductionRuleTemplateSeeder extends Seeder
                     ],
                 ],
             ],
+            [
+                'key' => 'b2c_flexible_arrival',
+                'name' => 'B2C Flexible Arrival Window (Until 12PM)',
+                'category' => 'lateness',
+                'scope' => 'daily',
+                'description' => 'B2C Dept: Flexible arrival up to 11:00 AM. 11:01-12:00: 1 hour deduction. After 12:00: Half-day deduction.',
+                'rule' => [
+                    [
+                        'label' => 'B2C Arrival: Up to 11:00',
+                        'category' => 'lateness',
+                        'scope' => 'daily',
+                        'when' => [
+                            'first_clock_in_lte' => '11:00',
+                        ],
+                        'penalty' => [
+                            'type' => 'fixed_minutes',
+                            'value' => 0,
+                        ],
+                        'notes' => 'Clocked in at {{metrics.first_clock_in_time}} => no deduction.',
+                        'color' => '#C6EFCE',
+                        'stop_processing' => true,
+                        'meta' => [
+                            'template_key' => 'b2c_flexible_arrival',
+                            'band' => 'up-to-11',
+                        ],
+                    ],
+                    [
+                        'label' => 'B2C Arrival: 11:01-12:00 (1 Hour)',
+                        'category' => 'lateness',
+                        'scope' => 'daily',
+                        'when' => [
+                            'first_clock_in_gt' => '11:00',
+                            'first_clock_in_lte' => '12:00',
+                        ],
+                        'penalty' => [
+                            'type' => 'fixed_hours',
+                            'value' => 1,
+                        ],
+                        'notes' => 'Clocked in at {{metrics.first_clock_in_time}} => deduct 1 hour.',
+                        'color' => '#FFC7CE',
+                        'stop_processing' => true,
+                        'meta' => [
+                            'template_key' => 'b2c_flexible_arrival',
+                            'band' => '11-12_one_hour',
+                        ],
+                    ],
+                    [
+                        'label' => 'B2C Arrival: After 12:00 (Half Day)',
+                        'category' => 'lateness',
+                        'scope' => 'daily',
+                        'when' => [
+                            'first_clock_in_gt' => '12:00',
+                        ],
+                        'penalty' => [
+                            'type' => 'fraction_day',
+                            'value' => 0.5,
+                        ],
+                        'notes' => 'Clocked in at {{metrics.first_clock_in_time}} => half-day deduction.',
+                        'color' => '#FFC7CE',
+                        'stop_processing' => true,
+                        'meta' => [
+                            'template_key' => 'b2c_flexible_arrival',
+                            'band' => 'after-12_half_day',
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'key' => 'shortfall_strict',
+                'name' => 'Shortfall Completion (8 Hours)',
+                'category' => 'shortfall',
+                'scope' => 'daily',
+                'description' => 'Required 8 hours. Shortfall < 1hr => 1hr deduction. Shortfall >= 1hr => exact shortfall.',
+                'rule' => [
+                    [
+                        'label' => 'Shortfall: < 1 Hour',
+                        'category' => 'shortfall',
+                        'scope' => 'daily',
+                        'when' => [
+                            'shortfall_minutes_gt' => 0,
+                            'shortfall_minutes_lt' => 60,
+                        ],
+                        'penalty' => [
+                            'type' => 'fixed_hours',
+                            'value' => 1,
+                        ],
+                        'notes' => 'Shortfall of {{metrics.shortfall_minutes}} min (< 1hr) => deduct 1 hour.',
+                        'color' => '#F3E5AB',
+                        'stop_processing' => true,
+                        'meta' => [
+                            'template_key' => 'shortfall_strict',
+                        ],
+                    ],
+                    [
+                        'label' => 'Shortfall: >= 1 Hour',
+                        'category' => 'shortfall',
+                        'scope' => 'daily',
+                        'when' => [
+                            'shortfall_minutes_gte' => 60,
+                        ],
+                        'penalty' => [
+                            'type' => 'metric_minutes',
+                            'metric' => 'shortfall_minutes',
+                        ],
+                        'notes' => 'Shortfall of {{metrics.shortfall_minutes}} min (>= 1hr) => deduct actual minutes.',
+                        'color' => '#F3E5AB',
+                        'stop_processing' => true,
+                        'meta' => [
+                            'template_key' => 'shortfall_strict',
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         foreach ($templates as $templateData) {

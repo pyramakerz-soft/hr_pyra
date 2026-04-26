@@ -23,6 +23,7 @@ export class HRComponent {
     { label: 'Attendance ', icon: 'fi fi-rr-clock', route: '/HR/HRAttendance', notificationCount: 0 },
     { label: 'Locations', icon: 'fi fi-rr-map', route: '/HR/HRBounders', notificationCount: 0 },
     { label: 'Departments', icon: 'fi fi-rr-building', route: '/HR/HRDepartment', notificationCount: 0 },
+    { label: 'Deductions', icon: 'fi fi-rr-percentage', route: '/HR/HRDeductions', notificationCount: 0 },
     // { label: 'Issues', icon: 'fi fi-rr-chart-simple', route: '/HR/HRIssues', notificationCount: this.count }, 
     { label: 'Custom Vacations', icon: 'fi fi-rr-calendar-star', route: '/HR/HRCustomVacations', notificationCount: 0 },
     // { label: 'Service Actions', icon: 'fi fi-rr-tools', route: '/HR/HRServiceActions', notificationCount: 0 },

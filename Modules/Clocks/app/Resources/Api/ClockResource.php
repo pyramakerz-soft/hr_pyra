@@ -64,6 +64,7 @@ class ClockResource extends JsonResource
             'earlyLeave' => $this->early_leave,
             'is_issue' => $this->is_issue ? true : false,
             'userName' => $this->user->name,
+            'userCode' => $this->user->code,
 
         ];
     }
