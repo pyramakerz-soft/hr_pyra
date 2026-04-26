@@ -63,6 +63,7 @@ class ClockResource extends JsonResource
             'lateArrive' => $this->late_arrive,
             'earlyLeave' => $this->early_leave,
             'is_issue' => $this->is_issue ? true : false,
+            'userName' => $this->user->name,
 
         ];
     }

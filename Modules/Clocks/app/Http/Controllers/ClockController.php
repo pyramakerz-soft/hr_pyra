@@ -262,29 +262,29 @@ class ClockController extends Controller
 
     public function allClocks(Request $request)
     {
+        $authUser = Auth::user();
+        if ($authUser->getRoleName() !== 'Hr') {
+            return $this->returnError('Unauthorized access. Only HR can view all clocks.', 403);
+        }
+
         $query = ClockInOut::query();
 
         foreach ($this->filters as $filter) {
             $query = $filter->apply($query, $request);
         }
 
-        //  return $this->returnData("data", $query->get(), "All Clocks Data");
-
         $fromDay = $request->get('from_day');
         $toDay = $request->get('to_day');
 
         if ($fromDay && $toDay) {
             if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $fromDay) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $toDay)) {
-
-                $defaultStartDate = Carbon::parse($fromDay)->startOfDay();  // Parse and set start of day
-                $defaultEndDate = Carbon::parse($toDay)->endOfDay();        // Parse and set end of day
-
+                $defaultStartDate = Carbon::parse($fromDay)->startOfDay();
+                $defaultEndDate = Carbon::parse($toDay)->endOfDay();
             } else {
                 return $this->returnError('Invalid Date Format. Expected YYYY-MM-DD.');
             }
         } else {
             $now = Carbon::now();
-
             $defaultStartDate = $now->copy()->subMonth()->day(26)->startOfDay();
             $defaultEndDate = $now->copy()->day(26)->endOfDay();
         }
@@ -298,15 +298,9 @@ class ClockController extends Controller
 
         if ($request->has('export')) {
             $clocksForExport = $query->orderBy('clock_in', 'desc')->get();
-
-            return (new clocksExport(
-                $clocksForExport,
-                $fromDay,
-                $toDay
-
-            ))
-                ->download('all_user_clocks.xlsx');
+            return (new clocksExport($clocksForExport, $fromDay, $toDay))->download('all_user_clocks.xlsx');
         }
+
         $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
 
         if ($clocks->isEmpty()) {
@@ -319,6 +313,75 @@ class ClockController extends Controller
         }
 
         return $this->returnData("data", $data, "All Clocks Data");
+    }
+
+    public function managedEmployeesClocks(Request $request)
+    {
+        $authUser = Auth::user();
+        $managedIds = $authUser->getManagedEmployeeIds();
+
+        if ($managedIds->isEmpty()) {
+            return $this->returnError('No managed employees found.', 404);
+        }
+
+        $query = ClockInOut::whereIn('user_id', $managedIds);
+
+        foreach ($this->filters as $filter) {
+            $query = $filter->apply($query, $request);
+        }
+
+        $fromDay = $request->get('from_day');
+        $toDay = $request->get('to_day');
+
+        if ($fromDay && $toDay) {
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $fromDay) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $toDay)) {
+                $defaultStartDate = Carbon::parse($fromDay)->startOfDay();
+                $defaultEndDate = Carbon::parse($toDay)->endOfDay();
+            } else {
+                return $this->returnError('Invalid Date Format. Expected YYYY-MM-DD.');
+            }
+        } else {
+            $now = Carbon::now();
+            $defaultStartDate = $now->copy()->subMonth()->day(26)->startOfDay();
+            $defaultEndDate = $now->copy()->day(26)->endOfDay();
+        }
+
+        if ($defaultStartDate && $defaultEndDate) {
+            $query->whereBetween('clock_in', [
+                $defaultStartDate->startOfDay(),
+                $defaultEndDate->endOfDay()
+            ]);
+        }
+
+        if ($request->has('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        $clocks = $query->orderBy('clock_in', 'desc')->paginate(7);
+
+        if ($clocks->isEmpty()) {
+            return $this->returnError('No Clocks Found');
+        }
+
+        $data = $this->prepareClockData($clocks);
+        if (!isset($data['clocks'])) {
+            return $this->returnError('No Clocks Found');
+        }
+
+        return $this->returnData("data", $data, "Managed Employees Clocks Data");
+    }
+    public function getManagedEmployees()
+    {
+        $authUser = Auth::user();
+        $managedIds = $authUser->getManagedEmployeeIds();
+
+        if ($managedIds->isEmpty()) {
+            return $this->returnError('No managed employees found.', 404);
+        }
+
+        $users = User::whereIn('id', $managedIds)->get(['id', 'name']);
+
+        return $this->returnData('data', $users, 'Managed Employees List');
     }
 
 
@@ -500,6 +563,16 @@ class ClockController extends Controller
 
     public function getUserClocksById(Request $request, User $user)
     {
+        $authUser = Auth::user();
+        $role = $authUser->getRoleName();
+
+        if ($role !== 'Hr') {
+            $managedIds = $authUser->getManagedEmployeeIds();
+            if (!$managedIds->contains($user->id)) {
+                return $this->returnError('You are not authorized to view this user\'s clock records.', 403);
+            }
+        }
+
         // Start the query for the clocks
         $query = ClockInOut::where('user_id', $user->id);
 
@@ -1113,8 +1186,17 @@ class ClockController extends Controller
 
     public function getCountIssues()
     {
-        $totalIssueCount['count'] = ClockInOut::where('is_issue', true)
-            ->count();
+        $authUser = Auth::user();
+        $role = $authUser->getRoleName();
+
+        $query = ClockInOut::where('is_issue', true);
+
+        if ($role !== 'Hr') {
+            $managedIds = $authUser->getManagedEmployeeIds();
+            $query->whereIn('user_id', $managedIds);
+        }
+
+        $totalIssueCount['count'] = $query->count();
         return $this->returnData('data', $totalIssueCount, 'Count of Issues');
     }
 
@@ -1160,6 +1242,9 @@ class ClockController extends Controller
 
     public function getClockIssues(Request $request)
     {
+        $authUser = Auth::user();
+        $role = $authUser->getRoleName();
+
         if ($request->has('month')) {
             $month = Carbon::parse($request->get('month'));
             $startOfMonth = (clone $month)->startOfMonth()->startOfDay();
@@ -1169,8 +1254,14 @@ class ClockController extends Controller
             $endOfMonth = Carbon::now()->endOfMonth()->endOfDay();
         }
         $query = ClockInOut::where('is_issue', true)
-            ->whereBetween('clock_in', [$startOfMonth, $endOfMonth])
-            ->orderBy('clock_in', 'Desc');
+            ->whereBetween('clock_in', [$startOfMonth, $endOfMonth]);
+
+        if ($role !== 'Hr') {
+            $managedIds = $authUser->getManagedEmployeeIds();
+            $query->whereIn('user_id', $managedIds);
+        }
+
+        $query->orderBy('clock_in', 'Desc');
 
         $filtersApplied = $request->has('date');
 
@@ -1187,9 +1278,15 @@ class ClockController extends Controller
         if ($clocks->isEmpty()) {
             return $this->returnError('No Clock Issues Found');
         }
-        $totalIssueCount = ClockInOut::where('is_issue', true)
-            ->whereBetween('clock_in', [$startOfMonth, $endOfMonth])
-            ->count();
+        $issueCountQuery = ClockInOut::where('is_issue', true)
+            ->whereBetween('clock_in', [$startOfMonth, $endOfMonth]);
+
+        if ($role !== 'Hr') {
+            $managedIds = $authUser->getManagedEmployeeIds();
+            $issueCountQuery->whereIn('user_id', $managedIds);
+        }
+
+        $totalIssueCount = $issueCountQuery->count();
         $response = [
             'clockIssues' => $filtersApplied
                 ? IssueResource::collection($clocks)
@@ -1301,20 +1398,29 @@ class ClockController extends Controller
      */
     public function getUsersClockInStatus(Request $request)
     {
+        $authUser = Auth::user();
+        $role = $authUser->getRoleName();
+
         $date = $request->has('date') ? Carbon::parse($request->get('date')) : Carbon::today();
         $startOfDay = $date->copy()->startOfDay();
         $endOfDay = $date->copy()->endOfDay();
 
         $type = $request->get('type', 'no_clock_in');
 
+        $userQuery = User::query();
+        if ($role !== 'Hr') {
+            $managedIds = $authUser->getManagedEmployeeIds();
+            $userQuery->whereIn('id', $managedIds);
+        }
+
         if ($type === 'no_clock_in') {
-            $users = User::whereDoesntHave('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
+            $users = $userQuery->whereDoesntHave('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
                 $query->whereBetween('clock_in', [$startOfDay, $endOfDay]);
             })->get();
 
             $message = 'Users who did not clock in on this day';
         } elseif ($type === 'clocked_in') {
-            $users = User::whereHas('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
+            $users = $userQuery->whereHas('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
                 $query->whereBetween('clock_in', [$startOfDay, $endOfDay]);
             })->get();
 
@@ -1440,27 +1546,32 @@ class ClockController extends Controller
 
     public function getUsersClockOutStatus(Request $request)
     {
+        $authUser = Auth::user();
+        $role = $authUser->getRoleName();
+
         $date = $request->has('date') ? Carbon::parse($request->get('date')) : Carbon::today();
         $startOfDay = $date->copy()->startOfDay(); // Ensure startOfDay() does not affect the original $date
         $endOfDay = $date->copy()->endOfDay();     // Ensure endOfDay() does not affect the original $date
 
-
-
         // Default type is 'no_clock_in' if not provided
         $type = $request->get('type', 'no_clock_in');
+
+        $userQuery = User::query();
+        if ($role !== 'Hr') {
+            $managedIds = $authUser->getManagedEmployeeIds();
+            $userQuery->whereIn('id', $managedIds);
+        }
 
         // Retrieve users based on clock-in status
         if ($type === 'no_clock_out') {
             // Get users who have not clocked in on the given day
-            $users = User::whereDoesntHave('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
+            $users = $userQuery->whereDoesntHave('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
                 $query->whereBetween('clock_in', [$startOfDay, $endOfDay]);
             })->get();
 
             $message = 'Users who did not clock in on this day';
         } elseif ($type === 'clocked_out') {
-
-            $users = User::whereHas('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
-
+            $users = $userQuery->whereHas('user_clocks', function ($query) use ($startOfDay, $endOfDay) {
                 $query->where('clock_out', '>=', $startOfDay)
                     ->where('clock_out', '<=', $endOfDay);
             })->get();

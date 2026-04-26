@@ -18,7 +18,7 @@ use Modules\Clocks\Http\Controllers\ServiceActionController;
  *
 */
 
-Route::group(['middleware' => ['auth:api', 'role:Hr|Team leader']], function () {
+Route::group(['middleware' => ['auth:api', 'role:Hr|Team leader|Manager']], function () {
 
 
     Route::prefix('deduction-plans')->group(function () {
@@ -41,6 +41,8 @@ Route::group(['middleware' => ['auth:api', 'role:Hr|Team leader']], function () 
     //Clocks Management
 
     Route::get('/all_clocks', [ClockController::class, 'allClocks'])->name('clocks.allClocks'); //HR role
+    Route::get('/managed_clocks', [ClockController::class, 'managedEmployeesClocks'])->name('clocks.managed');
+    Route::get('/managed_employees', [ClockController::class, 'getManagedEmployees']);
     Route::get('/clocks/user/{user}', [ClockController::class, 'getUserClocksById'])->name('clocks.userById'); //HR role
 
     Route::get('/clock_by_id/{clock}', [ClockController::class, 'getClockById']); //HR role
