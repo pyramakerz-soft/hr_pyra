@@ -14,6 +14,7 @@ use Modules\Users\Http\Controllers\HrUserProfileController;
 use Modules\Users\Http\Controllers\CustomVacationController;
 use Modules\Users\Http\Controllers\NotificationController;
 use Modules\Users\Http\Controllers\DashboardInsightsController;
+use Modules\Users\Http\Controllers\SalaryAdjustmentController;
 
 /*
  *--------------------------------------------------------------------------
@@ -177,4 +178,9 @@ Route::prefix('notifications')->middleware(['auth:api'])->group(function () {
     Route::get('/{notification}', [NotificationController::class, 'show']);
     Route::post('/', [NotificationController::class, 'store']);
     Route::post('/{notification}/read', [NotificationController::class, 'markRead']);
+});
+
+Route::middleware(['auth:api'])->group(function () {
+    Route::get('adjustments/export', [SalaryAdjustmentController::class, 'export']);
+    Route::apiResource('adjustments', SalaryAdjustmentController::class);
 });

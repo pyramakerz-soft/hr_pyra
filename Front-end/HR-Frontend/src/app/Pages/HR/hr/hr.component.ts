@@ -29,6 +29,7 @@ export class HRComponent {
     // { label: 'Service Actions', icon: 'fi fi-rr-tools', route: '/HR/HRServiceActions', notificationCount: 0 },
     { label: 'TimeZones', icon: 'fi fi-rr-world', route: '/HR/ShowTimezones', notificationCount: 0 },
     { label: 'Notifications', icon: 'fi fi-rr-bell', route: '/HR/HRNotifications', notificationCount: 0 },
+    { label: 'Adjustments', icon: 'fi fi-rr-settings-sliders', route: '/HR/HRAdjustments', notificationCount: 0 },
     { label: 'Sign Out', icon: 'fi fi-bs-sign-out-alt transform rotate-180', route: '', notificationCount: 0 },
 
   ];

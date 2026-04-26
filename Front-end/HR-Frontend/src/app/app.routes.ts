@@ -30,6 +30,7 @@ import { HrCustomVacationsComponent } from './Pages/HR/hr-custom-vacations/hr-cu
 import { HrServiceActionsComponent } from './Pages/HR/hr-service-actions/hr-service-actions.component';
 import { HrNotificationsComponent } from './Pages/HR/hr-notifications/hr-notifications.component';
 import { HrDeductionsComponent } from './Pages/HR/hr-deductions/hr-deductions.component';
+import { HrAdjustmentsComponent } from './Pages/HR/hr-adjustments/hr-adjustments.component';
 
 export const routes: Routes = [
     { 
@@ -81,6 +82,7 @@ export const routes: Routes = [
             { path: "HRServiceActions", component: HrServiceActionsComponent, title: "HRServiceActions" },
             { path: "HRNotifications", component: HrNotificationsComponent, title: "HRNotifications" },
             { path: "HRDeductions", component: HrDeductionsComponent, title: "HRDeductions" },
+            { path: "HRAdjustments", component: HrAdjustmentsComponent, title: "HRAdjustments" },
             
             { path: "ShowTimezones", component: ShowTimezonesComponent, title: "ShowTimezones" },
             { path: "ShowTimezonesAdd", component: TimezoneAddEditComponent, title: "ShowTimezonesAdd" },

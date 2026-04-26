@@ -1,0 +1,168 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <header class="flex flex-col md:flex-row justify-between md:items-center gap-4 page-header">
+    <h1 class="title-text">Salary Adjustments</h1>
+    
+    <div class="action-buttons">
+      <button (click)="exportData()" [disabled]="isLoading" class="btn-premium btn-outline">
+        <i class="fa-solid fa-file-export mr-2"></i>
+        <span>Export Data</span>
+      </button>
+
+      <button (click)="openAddModal()" class="btn-premium btn-primary">
+        <i class="fa-solid fa-plus mr-2"></i>
+        <span>Add Adjustment</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar-container">
+    <div class="filter-group">
+      <div class="input-group">
+        <label class="label-text">From Date</label>
+        <input type="date" [(ngModel)]="fromDate" (change)="onFilterChange()" class="premium-input-small">
+      </div>
+      <div class="input-group">
+        <label class="label-text">To Date</label>
+        <input type="date" [(ngModel)]="toDate" (change)="onFilterChange()" class="premium-input-small">
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card mt-6">
+    <div class="overflow-x-auto">
+      <table class="premium-table">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Code</th>
+            <th>Amount (EGP)</th>
+            <th>Reason</th>
+            <th>Date</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Loading State -->
+          <tr *ngIf="isLoading">
+            <td colspan="6" class="text-center py-20">
+              <div class="spinner-container">
+                <div class="spinner"></div>
+                <p class="mt-4 text-gray-500">Loading adjustments...</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- No Data State -->
+          <tr *ngIf="!isLoading && adjustments.length === 0">
+            <td colspan="6" class="text-center py-20">
+              <div class="flex flex-col items-center text-gray-400">
+                <i class="fa-solid fa-receipt text-4xl mb-3"></i>
+                <p>No adjustments found for the selected period</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Data Rows -->
+          <tr *ngFor="let adj of adjustments">
+            <td class="font-bold text-[#17253E]">{{ adj.user?.name }}</td>
+            <td><code class="bg-gray-50 px-2 py-1 rounded text-xs font-mono">{{ adj.user?.code }}</code></td>
+            <td [ngClass]="{'text-green-600': adj.amount > 0, 'text-red-600': adj.amount < 0}" class="font-bold">
+              {{ adj.amount | number:'1.2-2' }}
+            </td>
+            <td class="text-sm opacity-80">{{ adj.reason }}</td>
+            <td class="text-xs">{{ adj.adjustment_date | date:'mediumDate' }}</td>
+            <td>
+              <div class="flex justify-center gap-2">
+                <button (click)="openEditModal(adj)" class="btn-icon btn-edit" title="Edit">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button (click)="deleteAdjustment(adj.id!)" class="btn-icon btn-delete" title="Delete">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-container" *ngIf="totalPages > 1">
+    <button class="btn-nav" [disabled]="currentPage === 1" (click)="getPrevPage()">
+      <i class="fa-solid fa-chevron-left"></i>
+      <span>Previous</span>
+    </button>
+
+    <div class="flex items-center gap-2">
+      <span class="text-sm font-medium text-gray-600">Page {{ currentPage }} of {{ totalPages }}</span>
+    </div>
+
+    <button class="btn-nav" [disabled]="currentPage === totalPages" (click)="getNextPage()">
+      <span>Next</span>
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div *ngIf="isModalOpen" class="modal-overlay z-[100]">
+    <div class="modal-card animate-fade-in-up">
+      <header class="modal-header">
+        <div class="header-title">
+          <div class="icon-box" [ngClass]="isEditMode ? 'bg-blue-50 text-blue-600' : 'bg-orange-50 text-orange-600'">
+            <i class="fa-solid" [ngClass]="isEditMode ? 'fa-pen-to-square' : 'fa-plus'"></i>
+          </div>
+          <h2>{{ isEditMode ? 'Edit Adjustment' : 'New Adjustment' }}</h2>
+        </div>
+        <button class="close-btn" (click)="closeModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </header>
+
+      <main class="modal-body">
+        <div class="form-section">
+          <!-- Employee Select -->
+          <div class="input-group">
+            <label class="label-text">Select Employee *</label>
+            <select [(ngModel)]="currentAdjustment.user_id" class="premium-input" [disabled]="isEditMode">
+              <option [ngValue]="0" disabled>-- Select Employee --</option>
+              <option *ngFor="let user of users" [ngValue]="user.id">{{ user.name }} ({{ user.code }})</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Amount -->
+            <div class="input-group">
+              <label class="label-text">Amount (EGP) *</label>
+              <input type="number" [(ngModel)]="currentAdjustment.amount" class="premium-input" placeholder="e.g. 500 or -200">
+              <p class="text-[10px] text-gray-400 mt-1">Positive for bonus, negative for deduction.</p>
+            </div>
+
+            <!-- Date -->
+            <div class="input-group">
+              <label class="label-text">Adjustment Date *</label>
+              <input type="date" [(ngModel)]="currentAdjustment.adjustment_date" class="premium-input">
+            </div>
+          </div>
+
+          <!-- Reason -->
+          <div class="input-group">
+            <label class="label-text">Reason/Note *</label>
+            <textarea [(ngModel)]="currentAdjustment.reason" class="premium-input min-h-[100px]" placeholder="Explain the reason for this adjustment..."></textarea>
+          </div>
+        </div>
+      </main>
+
+      <footer class="modal-footer">
+        <button (click)="closeModal()" class="btn-premium btn-outline text-sm">Cancel</button>
+        <button (click)="saveAdjustment()" [disabled]="isSaving" class="btn-premium btn-primary text-sm flex items-center justify-center min-w-[140px]">
+          <div *ngIf="isSaving" class="spinner-small mr-2"></div>
+          <span>{{ isEditMode ? 'Update' : 'Confirm' }} Adjustment</span>
+        </button>
+      </footer>
+    </div>
+  </div>
+</div>
