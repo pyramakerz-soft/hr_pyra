@@ -896,7 +896,19 @@ class UserClocksExport implements WithMultipleSheets
                 $aggregatedRow['Plan Monetary Amount'] = $entry['plan_monetary_amount'] !== null
                     ? round($entry['plan_monetary_amount'], 2)
                     : null;
-                $this->aggregatedRows->push($aggregatedRow);
+
+                if (!empty($entry['segments']) && count($entry['segments']) > 0) {
+                    foreach ($entry['segments'] as $index => $segment) {
+                        $segmentRow = $aggregatedRow;
+                        $segmentRow['Clock In'] = $segment['in'] ?? '';
+                        $segmentRow['Clock Out'] = $segment['out'] ?? '';
+                        // For secondary segments, we might want to clear some daily totals to avoid confusion, 
+                        // but usually users want to see the context. Let's keep it for now.
+                        $this->aggregatedRows->push($segmentRow);
+                    }
+                } else {
+                    $this->aggregatedRows->push($aggregatedRow);
+                }
 
                 $this->detailedRows->push($row);
                 $rowNumber = 1 + $this->detailedRows->count();

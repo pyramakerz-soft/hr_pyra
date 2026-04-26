@@ -39,7 +39,7 @@ class UserClocksSheet implements FromCollection, WithHeadings, WithStyles, WithC
         $defaultStartDate = $now->copy()->subMonth()->day(26)->startOfDay();
         $defaultEndDate = $now->copy()->day(26)->endOfDay();
 
-        $timezoneValue = $user->timezone ? $user->timezone->value : 3;
+        $userTimezone = $user->timezone ? $user->timezone->name : 'Africa/Cairo';
         $startDate = $this->startDate ? Carbon::parse($this->startDate)->startOfDay() : $defaultStartDate;
         $endDate = $this->endDate ? Carbon::parse($this->endDate)->endOfDay() : $defaultEndDate;
 
@@ -125,8 +125,8 @@ class UserClocksSheet implements FromCollection, WithHeadings, WithStyles, WithC
             $accVacation += $isVacation;
 
             $hasMultipleSegments = $dailyClocks->count() > 1;
-            $clockInFormatted = $hasMultipleSegments ? '' : ($earliestIn ? $earliestIn->copy()->addHours($timezoneValue)->format('h:i A') : '');
-            $clockOutFormatted = $hasMultipleSegments ? '' : ($latestOut ? $latestOut->copy()->addHours($timezoneValue)->format('h:i A') : '');
+            $clockInFormatted = $hasMultipleSegments ? '' : ($earliestIn ? $earliestIn->copy()->setTimezone($userTimezone)->format('h:i A') : '');
+            $clockOutFormatted = $hasMultipleSegments ? '' : ($latestOut ? $latestOut->copy()->setTimezone($userTimezone)->format('h:i A') : '');
 
             // Row index for styling: headings at row 2, so first data row is row 3
             $rowIndex = 3 + $final->count();
@@ -158,8 +158,8 @@ class UserClocksSheet implements FromCollection, WithHeadings, WithStyles, WithC
 
             if ($hasMultipleSegments) {
                 foreach ($dailyClocks as $seg) {
-                    $segIn = $seg->clock_in ? Carbon::parse($seg->clock_in)->addHours($timezoneValue)->format('h:i A') : '';
-                    $segOut = $seg->clock_out ? Carbon::parse($seg->clock_out)->addHours($timezoneValue)->format('h:i A') : '';
+                    $segIn = $seg->clock_in ? Carbon::parse($seg->clock_in)->setTimezone($userTimezone)->format('h:i A') : '';
+                    $segOut = $seg->clock_out ? Carbon::parse($seg->clock_out)->setTimezone($userTimezone)->format('h:i A') : '';
                     $final->push([
                         'Date' => '',
                         'Clock In' => $segIn,
