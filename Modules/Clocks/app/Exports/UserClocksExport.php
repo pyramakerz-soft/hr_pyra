@@ -1416,11 +1416,11 @@ class UserClocksExport implements WithMultipleSheets
             }
         }
 
-        if ($dailyWorkedMinutes < 535) {
+        if ($dailyWorkedMinutes < 540) {
             return 0;
         }
 
-        $extraAfterNine = $dailyWorkedMinutes - 535;
+        $extraAfterNine = $dailyWorkedMinutes - 540;
 
 
         return 60 + $extraAfterNine;
