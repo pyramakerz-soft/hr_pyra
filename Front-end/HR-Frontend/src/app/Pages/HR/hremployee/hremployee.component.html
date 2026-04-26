@@ -46,9 +46,8 @@
     </div>
   </div>
 
-  <!-- Data Table Section -->
   <div class="table-card">
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto pb-40">
       <table class="premium-table">
         <thead>
           <tr>
@@ -95,16 +94,38 @@
             <td class="text-xs">{{ row.phone }}</td>
             <td class="hidden xl:table-cell text-xs opacity-75">{{ row.email }}</td>
             <td>
-              <div class="flex gap-1">
-                <button (click)="openHrProfileDialog(row.id)" class="action-icon icon-profile" title="HR Profile">
-                  <i class="fa-solid fa-id-card"></i>
+              <div class="relative action-dropdown-container">
+                <button (click)="toggleDropdown(row.id, $event)" class="text-gray-400 hover:text-[#437EF7] p-2 rounded-lg transition-colors">
+                  <i class="fa-solid fa-ellipsis-vertical"></i>
                 </button>
-                <button (click)="NavigateToEditEmployee(row.id)" class="action-icon icon-edit" title="Edit">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </button>
-                <button (click)="DeleteEmp(row.id)" class="action-icon icon-delete" title="Delete">
-                  <i class="fa-solid fa-trash-can"></i>
-                </button>
+
+                <!-- Dropdown Menu -->
+                <div *ngIf="activeDropdownId === row.id" 
+                  class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 z-50 py-1 overflow-hidden"
+                  (click)="$event.stopPropagation()">
+                  
+                  <button (click)="openHrProfileDialog(row.id); activeDropdownId = null" class="w-full text-left px-4 py-2.5 text-sm text-[#17253E] hover:bg-gray-50 flex items-center gap-3">
+                    <i class="fa-solid fa-id-card text-gray-400 w-4"></i>
+                    <span>HR Profile</span>
+                  </button>
+
+                  <button (click)="NavigateToEditEmployee(row.id); activeDropdownId = null" class="w-full text-left px-4 py-2.5 text-sm text-[#17253E] hover:bg-gray-50 flex items-center gap-3">
+                    <i class="fa-solid fa-pen-to-square text-blue-500 w-4"></i>
+                    <span>Edit</span>
+                  </button>
+
+                  <button (click)="openVacationModal(row.id)" class="w-full text-left px-4 py-2.5 text-sm text-[#17253E] hover:bg-gray-50 flex items-center gap-3">
+                    <i class="fa-solid fa-calendar-plus text-green-500 w-4"></i>
+                    <span>Add Vacation</span>
+                  </button>
+
+                  <div class="h-px bg-gray-100 my-1"></div>
+
+                  <button (click)="DeleteEmp(row.id); activeDropdownId = null" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3">
+                    <i class="fa-solid fa-trash-can w-4 text-center"></i>
+                    <span>Delete</span>
+                  </button>
+                </div>
               </div>
             </td>
           </tr>
@@ -141,5 +162,74 @@
       <span>Next</span>
       <i class="fa-solid fa-chevron-right"></i>
     </button>
+  </div>
+
+  <!-- Add Vacation Modal -->
+  <div *ngIf="isVacationModalOpen" class="modal-overlay z-[100]">
+    <div class="modal-card animate-fade-in-up">
+      <!-- Modal Header -->
+      <header class="modal-header">
+        <div class="header-title">
+          <div class="icon-box">
+            <i class="fa-solid fa-calendar-plus text-lg"></i>
+          </div>
+          <h2>Add Vacation</h2>
+        </div>
+        <button class="close-btn" (click)="closeVacationModal()" title="Close Dialog">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </header>
+
+      <!-- Modal Body -->
+      <main class="modal-body">
+        <div class="form-section">
+          <!-- Vacation Type -->
+          <div class="input-group">
+            <label class="label-text">Vacation Type</label>
+            <select [(ngModel)]="vacationData.vacation_type_id" class="premium-input">
+              <option [ngValue]="null" disabled>Select Vacation Type</option>
+              <option *ngFor="let type of vacationTypes" [value]="type.id">{{ type.name }}</option>
+            </select>
+          </div>
+
+          <div class="grid-cols-2">
+            <!-- From Date -->
+            <div class="input-group">
+              <label class="label-text">From Date *</label>
+              <input type="date" [(ngModel)]="vacationData.from_date" class="premium-input" />
+            </div>
+
+            <!-- To Date -->
+            <div class="input-group">
+              <label class="label-text">To Date *</label>
+              <input type="date" [(ngModel)]="vacationData.to_date" [disabled]="vacationData.is_half_day" class="premium-input disabled:opacity-50" />
+            </div>
+          </div>
+
+          <!-- Half Day Checkbox -->
+          <div class="input-group mt-2">
+            <div class="flex items-center gap-3 py-3 bg-gray-50 rounded-xl px-4 border border-gray-100">
+              <div class="form-check form-switch mb-0 flex items-center">
+                <input class="form-check-input h-6 w-11 cursor-pointer" type="checkbox" [(ngModel)]="vacationData.is_half_day" id="isHalfDaySwitch">
+                <label class="form-check-label text-sm font-bold text-gray-600 ml-3 cursor-pointer" for="isHalfDaySwitch">
+                  Half Day Request
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Modal Footer -->
+      <footer class="modal-footer">
+        <button (click)="closeVacationModal()" class="btn-premium btn-outline text-sm">
+          Cancel
+        </button>
+        <button (click)="submitVacation()" [disabled]="isLoading" class="btn-primary text-sm flex items-center justify-center min-w-[140px]">
+          <div *ngIf="isLoading" class="spinner w-4 h-4 mr-2"></div>
+          <span *ngIf="!isLoading">Add Vacation</span>
+        </button>
+      </footer>
+    </div>
   </div>
 </div>

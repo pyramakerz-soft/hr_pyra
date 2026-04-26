@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AddEmployee } from '../Models/add-employee';
@@ -88,6 +88,32 @@ export class UserServiceService {
     emp.work_type_id.forEach((id, index) => formData.append(`work_type_id[${index}]`, id.toString()));
 
     return this.http.post<any>(this.baseURL + "/users/create_user", formData, { headers });
+  }
+
+  exportClocks(params: HttpParams): Observable<Blob> {
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+
+    return this.http.post(`${this.baseURL}/users/export-clocks`, null, {
+      headers: headers,
+      params: params,
+      responseType: 'blob'
+    });
+  }
+
+  getVacationTypes(): Observable<any> {
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<any>(this.baseURL + "/vacation/types", { headers });
+  }
+
+  addUserVacation(payload: any): Observable<any> {
+    const token = localStorage.getItem("token");
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post<any>(this.baseURL + "/vacation/add_user_vacation", payload, { headers });
   }
 
   importVacationBalances(file: File): Observable<any> {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SideBarComponent } from '../../../Components/Core/side-bar/side-bar.component';
 import { CommonModule } from '@angular/common';
@@ -44,6 +44,17 @@ export class HREmployeeComponent {
   UsersNames: string[] = [];
   filteredUsers: string[] = [];
   isLoading: boolean = false; // Add isLoading state
+  
+  activeDropdownId: number | null = null;
+  isVacationModalOpen: boolean = false;
+  selectedEmployeeForVacation: number | null = null;
+  vacationTypes: any[] = [];
+  vacationData = {
+    vacation_type_id: null,
+    from_date: '',
+    to_date: '',
+    is_half_day: false
+  };
 
   isNavigateingToImportPopUp = false
 
@@ -72,10 +83,79 @@ ngOnInit() {
   }
   
   this.getUsersName();
+  this.getVacationTypes();
   
   localStorage.setItem('HrLocationsCN', "1");
   localStorage.setItem('HrAttendaceCN', "1");
   localStorage.setItem('HrAttanceDetailsCN', "1");
+}
+
+@HostListener('document:click', ['$event'])
+onDocumentClick(event: MouseEvent) {
+  const target = event.target as HTMLElement;
+  if (!target.closest('.action-dropdown-container')) {
+    this.activeDropdownId = null;
+  }
+}
+
+getVacationTypes() {
+  this.userServ.getVacationTypes().subscribe(
+    (res: any) => {
+      this.vacationTypes = res.data;
+    },
+    (err) => console.error('Error fetching vacation types', err)
+  );
+}
+
+toggleDropdown(id: number, event: Event) {
+  event.stopPropagation();
+  if (this.activeDropdownId === id) {
+    this.activeDropdownId = null;
+  } else {
+    this.activeDropdownId = id;
+  }
+}
+
+openVacationModal(id: number) {
+  this.selectedEmployeeForVacation = id;
+  this.isVacationModalOpen = true;
+  this.activeDropdownId = null; // close dropdown
+  this.vacationData = {
+    vacation_type_id: null,
+    from_date: '',
+    to_date: '',
+    is_half_day: false
+  };
+}
+
+closeVacationModal() {
+  this.isVacationModalOpen = false;
+  this.selectedEmployeeForVacation = null;
+}
+
+submitVacation() {
+  if (!this.selectedEmployeeForVacation || !this.vacationData.from_date || !this.vacationData.to_date) {
+    Swal.fire('Error', 'Please fill all required fields', 'error');
+    return;
+  }
+
+  const payload = {
+    user_id: this.selectedEmployeeForVacation,
+    ...this.vacationData
+  };
+
+  this.isLoading = true;
+  this.userServ.addUserVacation(payload).subscribe(
+    (res: any) => {
+      this.isLoading = false;
+      this.closeVacationModal();
+      Swal.fire('Success', 'Vacation successfully added and approved', 'success');
+    },
+    (err: any) => {
+      this.isLoading = false;
+      Swal.fire('Error', err.error?.message || 'Failed to add vacation', 'error');
+    }
+  );
 }
 
    downloadExcelTemplate() {
