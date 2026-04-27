@@ -18,7 +18,7 @@
 
   <!-- Filter Bar -->
   <div class="filter-bar-container">
-    <div class="filter-group">
+    <div class="filter-group flex items-end">
       <div class="input-group">
         <label class="label-text">From Date</label>
         <input type="date" [(ngModel)]="fromDate" (change)="onFilterChange()" class="premium-input-small">
@@ -27,6 +27,10 @@
         <label class="label-text">To Date</label>
         <input type="date" [(ngModel)]="toDate" (change)="onFilterChange()" class="premium-input-small">
       </div>
+      <button *ngIf="fromDate || toDate" (click)="clearFilters()" class="text-xs text-[#FF7519] hover:text-[#17253E] transition-colors flex items-center gap-1 h-[38px] px-2 mb-[1px]">
+        <i class="fa-solid fa-circle-xmark"></i>
+        <span>Clear</span>
+      </button>
     </div>
   </div>
 

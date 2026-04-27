@@ -39,7 +39,6 @@ export class HrAdjustmentsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.setDefaultDateRange();
     this.loadAdjustments();
     this.loadUsers();
   }
@@ -181,6 +180,12 @@ export class HrAdjustmentsComponent implements OnInit {
   }
 
   onFilterChange(): void {
+    this.loadAdjustments(1);
+  }
+
+  clearFilters(): void {
+    this.fromDate = '';
+    this.toDate = '';
     this.loadAdjustments(1);
   }
 

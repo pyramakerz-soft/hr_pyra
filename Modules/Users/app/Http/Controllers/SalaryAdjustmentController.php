@@ -21,19 +21,8 @@ class SalaryAdjustmentController extends Controller
     {
         $query = SalaryAdjustment::with('user:id,name,code');
 
-        if ($request->has('from_date') && $request->has('to_date')) {
+        if ($request->filled(['from_date', 'to_date'])) {
             $query->whereBetween('adjustment_date', [$request->from_date, $request->to_date]);
-        } else {
-            // Default logic: 26th of previous month to 25th of current month
-            $today = Carbon::today();
-            if ($today->day >= 26) {
-                $startDate = $today->copy()->day(26);
-                $endDate = $today->copy()->addMonth()->day(25);
-            } else {
-                $startDate = $today->copy()->subMonth()->day(26);
-                $endDate = $today->copy()->day(25);
-            }
-            $query->whereBetween('adjustment_date', [$startDate, $endDate]);
         }
 
         $adjustments = $query->latest('adjustment_date')->paginate($request->get('per_page', 10));
@@ -83,16 +72,7 @@ class SalaryAdjustmentController extends Controller
         $fromDate = $request->from_date;
         $toDate = $request->to_date;
 
-        if (!$fromDate || !$toDate) {
-            $today = Carbon::today();
-            if ($today->day >= 26) {
-                $fromDate = $today->copy()->day(26)->toDateString();
-                $toDate = $today->copy()->addMonth()->day(25)->toDateString();
-            } else {
-                $fromDate = $today->copy()->subMonth()->day(26)->toDateString();
-                $toDate = $today->copy()->day(25)->toDateString();
-            }
-        }
+
 
         return Excel::download(new SalaryAdjustmentExport($fromDate, $toDate), "Salary_Adjustments_{$fromDate}_to_{$toDate}.xlsx");
     }

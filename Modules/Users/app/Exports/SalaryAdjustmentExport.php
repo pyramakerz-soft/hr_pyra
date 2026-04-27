@@ -21,9 +21,13 @@ class SalaryAdjustmentExport implements FromQuery, WithHeadings, WithMapping, Sh
 
     public function query()
     {
-        return SalaryAdjustment::with('user')
-            ->whereBetween('adjustment_date', [$this->fromDate, $this->toDate])
-            ->orderBy('adjustment_date', 'asc');
+        $query = SalaryAdjustment::with('user');
+        
+        if ($this->fromDate && $this->toDate) {
+            $query->whereBetween('adjustment_date', [$this->fromDate, $this->toDate]);
+        }
+        
+        return $query->orderBy('adjustment_date', 'asc');
     }
 
     public function headings(): array
