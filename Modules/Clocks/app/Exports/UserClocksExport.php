@@ -187,6 +187,7 @@ class UserClocksExport implements WithMultipleSheets
                 }
             }
 
+            $timezoneOffset = optional($user->timezone)->value ?? 0;
             $userTimezoneName = optional($user->timezone)->name ?? 'Africa/Cairo';
             $department = optional($user->department);
             $subDepartment = optional($user->subDepartment);
@@ -216,14 +217,14 @@ class UserClocksExport implements WithMultipleSheets
             $defaultEndDate = $now->copy()->day(26)->endOfDay();
 
             $startDate = $this->startDate
-                ? Carbon::parse($this->startDate, $userTimezoneName)->startOfDay()->setTimezone('UTC')
+                ? Carbon::parse($this->startDate, 'UTC')->startOfDay()
                 : $defaultStartDate->copy();
             $endDate = $this->endDate
-                ? Carbon::parse($this->endDate, $userTimezoneName)->endOfDay()->setTimezone('UTC')
+                ? Carbon::parse($this->endDate, 'UTC')->endOfDay()
                 : $defaultEndDate->copy();
 
-            $userRangeStart = $startDate->copy()->setTimezone($userTimezoneName)->toDateString();
-            $userRangeEnd = $endDate->copy()->setTimezone($userTimezoneName)->toDateString();
+            $userRangeStart = $startDate->copy()->addHours($timezoneOffset)->toDateString();
+            $userRangeEnd = $endDate->copy()->addHours($timezoneOffset)->toDateString();
 
             $approvedVacations = $user->user_vacations()
                 ->where('status', 'approved')
@@ -312,8 +313,9 @@ class UserClocksExport implements WithMultipleSheets
                     return $record->date;
                 });
 
-            $grouped = $clocks->groupBy(function ($clock) use ($userTimezoneName) {
-                return Carbon::parse($clock->clock_in, $userTimezoneName)
+            $grouped = $clocks->groupBy(function ($clock) use ($timezoneOffset) {
+                return Carbon::parse($clock->clock_in, 'UTC')
+                    ->addHours($timezoneOffset)
                     ->format('Y-m-d');
             });
 
@@ -563,22 +565,23 @@ class UserClocksExport implements WithMultipleSheets
                                     : ($clock->location_type === 'site' && $clock->clock_out ? optional($clock->location)->name : ''));
                         }
 
+                        $timezoneOffset = optional($user->timezone)->value ?? 0;
                         $segments[] = [
-                            'in' => $clockIn ? $clockIn->copy()->setTimezone($userTimezoneName)->format('h:i A') : '',
-                            'out' => $clockOut ? $clockOut->copy()->setTimezone($userTimezoneName)->format('h:i A') : '',
+                            'in' => $clockIn ? $clockIn->copy()->addHours($timezoneOffset)->format('h:i A') : '',
+                            'out' => $clockOut ? $clockOut->copy()->addHours($timezoneOffset)->format('h:i A') : '',
                             'is_missing_out' => !$clockOut && $clockIn,
                         ];
                     }
                 }
 
-                $earliestInLocal = $earliestIn ? $earliestIn->copy()->setTimezone($userTimezoneName) : null;
-                $latestOutLocal = $latestOut ? $latestOut->copy()->setTimezone($userTimezoneName) : null;
+                $earliestInLocal = $earliestIn ? $earliestIn->copy()->addHours($timezoneOffset) : null;
+                $latestOutLocal = $latestOut ? $latestOut->copy()->addHours($timezoneOffset) : null;
 
                 $effectiveSchedule = $this->resolveEffectiveSchedule(
                     $user,
                     $baselineClockForSchedule,
                     $localDate,
-                    $userTimezoneName,
+                    $timezoneOffset,
                     $scheduledStartTime,
                     $requiredMinutesPerDay,
                     $isFlexibleSchedule
@@ -815,8 +818,9 @@ class UserClocksExport implements WithMultipleSheets
                     $totalSchoolVisits = ($totalSchoolVisits ?? 0) + 1;
                 }
 
-                $clockInValue = $earliestIn ? $earliestIn->copy()->setTimezone($userTimezoneName)->format('h:i A') : '';
-                $clockOutValue = $latestOut ? $latestOut->copy()->setTimezone($userTimezoneName)->format('h:i A') : '';
+                $timezoneOffset = optional($user->timezone)->value ?? 0;
+                $clockInValue = $earliestIn ? $earliestIn->copy()->addHours($timezoneOffset)->format('h:i A') : '';
+                $clockOutValue = $latestOut ? $latestOut->copy()->addHours($timezoneOffset)->format('h:i A') : '';
 
                 if ($isVacation) {
                     $clockInValue = $vacationLabel;
@@ -1328,12 +1332,12 @@ class UserClocksExport implements WithMultipleSheets
         User $user,
         ?ClockInOut $baselineClock,
         Carbon $localDate,
-        string $userTimezoneName,
+        int $timezoneOffset,
         ?string $scheduledStartTime,
         int $defaultRequiredMinutes,
         bool $isFlexibleSchedule
     ): array {
-        $makeDateTime = static function (Carbon $date, ?string $time, string $tz): ?Carbon {
+        $makeDateTime = static function (Carbon $date, ?string $time, int $offset): ?Carbon {
             if ($time === null) {
                 return null;
             }
@@ -1346,7 +1350,8 @@ class UserClocksExport implements WithMultipleSheets
             $dateString = $date->toDateString() . ' ' . $time;
 
             try {
-                return Carbon::parse($dateString, $tz);
+                // Parse as UTC then subtract offset to get the actual UTC time of this local schedule
+                return Carbon::parse($dateString, 'UTC')->subHours($offset);
             } catch (\Throwable $throwable) {
                 return null;
             }
@@ -1354,13 +1359,13 @@ class UserClocksExport implements WithMultipleSheets
 
         $dateForCalculation = $localDate->copy();
         $defaultStartString = $scheduledStartTime ?: '08:00:00';
-        $defaultStart = $makeDateTime($dateForCalculation, $defaultStartString, $userTimezoneName)
-            ?? Carbon::parse($dateForCalculation->toDateString() . ' 08:00:00', $userTimezoneName);
+        $defaultStart = $makeDateTime($dateForCalculation, $defaultStartString, $timezoneOffset)
+            ?? Carbon::parse($dateForCalculation->toDateString() . ' 08:00:00', 'UTC')->subHours($timezoneOffset);
 
         $userDetail = optional($user->user_detail);
         $defaultEndString = $userDetail->end_time ?? null;
         $defaultEnd = $defaultEndString
-            ? $makeDateTime($dateForCalculation, $defaultEndString, $userTimezoneName)
+            ? $makeDateTime($dateForCalculation, $defaultEndString, $timezoneOffset)
             : null;
 
         if (!$defaultEnd) {
@@ -1386,8 +1391,8 @@ class UserClocksExport implements WithMultipleSheets
             $locationType = strtolower((string) $baselineClock->location_type);
             if ($locationType === 'site') {
                 $location = $baselineClock->location;
-                $locationStart = $location ? $makeDateTime($dateForCalculation, $location->start_time ?? null, $userTimezoneName) : null;
-                $locationEnd = $location ? $makeDateTime($dateForCalculation, $location->end_time ?? null, $userTimezoneName) : null;
+                $locationStart = $location ? $makeDateTime($dateForCalculation, $location->start_time ?? null, $timezoneOffset) : null;
+                $locationEnd = $location ? $makeDateTime($dateForCalculation, $location->end_time ?? null, $timezoneOffset) : null;
 
                 if ($locationStart) {
                     $start = $locationStart;
@@ -1403,8 +1408,8 @@ class UserClocksExport implements WithMultipleSheets
                     $source = 'location_site';
                 }
             } elseif ($locationType === 'home') {
-                $homeStart = $makeDateTime($dateForCalculation, $userDetail->start_time ?? null, $userTimezoneName);
-                $homeEnd = $makeDateTime($dateForCalculation, $userDetail->end_time ?? null, $userTimezoneName);
+                $homeStart = $makeDateTime($dateForCalculation, $userDetail->start_time ?? null, $timezoneOffset);
+                $homeEnd = $makeDateTime($dateForCalculation, $userDetail->end_time ?? null, $timezoneOffset);
 
                 if ($homeStart) {
                     $start = $homeStart;
@@ -1427,7 +1432,7 @@ class UserClocksExport implements WithMultipleSheets
                 ?? optional($user->department)->flexible_start_time
                 ?? null;
 
-            $flexibleStart = $makeDateTime($dateForCalculation, $flexibleStartTime, $userTimezoneName);
+            $flexibleStart = $makeDateTime($dateForCalculation, $flexibleStartTime, $timezoneOffset);
             if ($flexibleStart) {
                 $start = $flexibleStart;
                 $source = 'flexible';

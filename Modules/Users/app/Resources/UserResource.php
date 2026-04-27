@@ -15,7 +15,7 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $timezoneValue = $this->timezone ? $this->timezone->value : 3;  // Default to +3 if no timezone
+        $timezoneValue = $this->timezone ? $this->timezone->value : 0;  // Default to 0 if no timezone
 
         // Support date filtering
         $from_day = $request->get('from_day');

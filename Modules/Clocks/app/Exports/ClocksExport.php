@@ -34,11 +34,11 @@ class ClocksExport implements FromCollection, WithHeadings, WithStyles, WithColu
     public function collection()
     {
         return $this->clocks->map(function ($clock) {
-            $userTimezone = $clock->user->timezone ? $clock->user->timezone->name : 'Africa/Cairo';
+            $timezoneOffset = $clock->user->timezone ? $clock->user->timezone->value : 0;
 
-            // Convert clock_in and clock_out to user's local time
-            $clockIn = $clock->clock_in ?  Carbon::parse($clock->clock_in)->setTimezone($userTimezone) : null;
-            $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out)->setTimezone($userTimezone) : null;
+            // Convert clock_in and clock_out to user's local time using manual offset from UTC
+            $clockIn = $clock->clock_in ?  Carbon::parse($clock->clock_in, 'UTC')->addHours($timezoneOffset) : null;
+            $clockOut = $clock->clock_out ? Carbon::parse($clock->clock_out, 'UTC')->addHours($timezoneOffset) : null;
 
             // Check if both clock_in and clock_out are not null
             if ($clockIn && $clockOut) {

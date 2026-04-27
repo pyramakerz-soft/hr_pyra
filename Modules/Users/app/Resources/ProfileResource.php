@@ -94,7 +94,7 @@ class ProfileResource extends JsonResource
     {
 
 
-        $timezoneValue = $this->timezone ? $this->timezone->value : 3;  // Default to +3 if no timezone
+        $timezoneValue = $this->timezone ? $this->timezone->value : 0;  // Default to 0 if no timezone
 
         $user_clock = $this->getUserClock($authUser);
         return $user_clock ? Carbon::parse($user_clock['clock_in'])->addHours($timezoneValue)->format('H:i:s') : null;
