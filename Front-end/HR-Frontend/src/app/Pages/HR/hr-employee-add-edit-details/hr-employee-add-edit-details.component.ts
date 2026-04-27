@@ -60,7 +60,7 @@ export class HrEmployeeAddEditDetailsComponent {
 
   employee: AddEmployee = new AddEmployee();
 
-  regexPhone = /^\d{11,}$/;
+  regexPhone = /^01[0125][0-9]{8}$/;
 
   regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   regexNationalID = /^\d{14}$/;
@@ -635,13 +635,6 @@ export class HrEmployeeAddEditDetailsComponent {
           this.validationErrors['end_time'] = '*End time is required.';
         }
         isValid = false;
-        Swal.fire({
-          icon: "error",
-          title: "Missing Time Information",
-          text: "Both start time and end time are required for non-float employees.",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#FF7519",
-        });
       } else if (this.employee.start_time && this.employee.end_time) {
         // Clear validation errors if both times are provided
         this.validationErrors['start_time'] = '';
@@ -665,25 +658,13 @@ export class HrEmployeeAddEditDetailsComponent {
           const adjustedDiffHours = diffHours + 24;
           if (adjustedDiffHours < 4) {
             isValid = false;
-            Swal.fire({
-              icon: "warning",
-              title: "Invalid Working Hours",
-              text: "Working hours must be at least 4 hours.",
-              confirmButtonText: "OK",
-              confirmButtonColor: "#FF7519",
-            });
+            this.validationErrors['working_hours_day'] = 'Working hours must be at least 4 hours.';
           } else {
             this.employee.working_hours_day = adjustedDiffHours;
           }
         } else if (diffHours < 4) {
           isValid = false;
-          Swal.fire({
-            icon: "warning",
-            title: "Invalid Working Hours",
-            text: "Working hours must be at least 4 hours.",
-            confirmButtonText: "OK",
-            confirmButtonColor: "#FF7519",
-          });
+          this.validationErrors['working_hours_day'] = 'Working hours must be at least 4 hours.';
         } else {
           this.employee.working_hours_day = diffHours;
         }
@@ -691,13 +672,7 @@ export class HrEmployeeAddEditDetailsComponent {
         // Validate that start time is different from end time
         if (this.employee.start_time === this.employee.end_time) {
           isValid = false;
-          Swal.fire({
-            icon: "error",
-            title: "Invalid Time Range",
-            text: "Start time and end time cannot be the same.",
-            confirmButtonText: "OK",
-            confirmButtonColor: "#FF7519",
-          });
+          this.validationErrors['end_time'] = 'Start time and end time cannot be the same.';
         }
       }
     }
@@ -1038,14 +1013,74 @@ export class HrEmployeeAddEditDetailsComponent {
           }
         );
       }
+    } else {
+      const errorList = Object.values(this.validationErrors)
+        .filter(err => err && err.length > 0)
+        .map(err => `
+          <div class="error-item">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>${err}</span>
+          </div>
+        `)
+        .join('');
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Errors',
+        html: `
+          <div class="error-list">
+            ${errorList}
+          </div>
+        `,
+        customClass: {
+          popup: 'premium-swal-popup',
+          title: 'premium-swal-title',
+          htmlContainer: 'premium-swal-html',
+          confirmButton: 'premium-swal-button'
+        },
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#FF7519',
+        buttonsStyling: false
+      });
     }
   }
   private handleServerErrors(errors: Record<keyof AddEmployee, string[]>) {
+    let errorMessages: string[] = [];
     for (const key in errors) {
       if (errors.hasOwnProperty(key)) {
         const field = key as keyof AddEmployee;
-        this.validationErrors[field] = errors[field].join(' ');
+        const message = errors[field].join(' ');
+        this.validationErrors[field] = message;
+        errorMessages.push(message);
       }
+    }
+
+    if (errorMessages.length > 0) {
+      const errorList = errorMessages.map(err => `
+        <div class="error-item">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>${err}</span>
+        </div>
+      `).join('');
+
+      Swal.fire({
+        icon: 'error',
+        title: 'System Validation',
+        html: `
+          <div class="error-list">
+            ${errorList}
+          </div>
+        `,
+        customClass: {
+          popup: 'premium-swal-popup',
+          title: 'premium-swal-title',
+          htmlContainer: 'premium-swal-html',
+          confirmButton: 'premium-swal-button'
+        },
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#FF7519',
+        buttonsStyling: false
+      });
     }
   }
 }
