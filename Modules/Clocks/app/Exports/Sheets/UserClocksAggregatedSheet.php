@@ -33,6 +33,9 @@ class UserClocksAggregatedSheet implements FromCollection, WithHeadings, WithTit
             'Clock Out',
             'Code',
             'Department',
+            'Hiring Date',
+            'Work Type',
+            'Transportation Status',
             'Total Hours in That Day',
             'Total Over time in That Day',
             'is_mission',
@@ -40,6 +43,7 @@ class UserClocksAggregatedSheet implements FromCollection, WithHeadings, WithTit
             'OT Head Approved By',
             'Plan Deduction in That Day',
             'Deduction Details',
+            'Deduction Days',
             'Excuse Deducted in That Day',
             'Excuse Remaining (Policy 4h)',
             'Total Excuses in That Day',
@@ -49,6 +53,7 @@ class UserClocksAggregatedSheet implements FromCollection, WithHeadings, WithTit
             'Location In',
             'Location Out',
             'Attendance Over time in That Day',
+            'School Visits',
             'Plan Monetary Amount',
         ];
     }
@@ -56,7 +61,7 @@ class UserClocksAggregatedSheet implements FromCollection, WithHeadings, WithTit
     public function columnFormats(): array
     {
         return [
-            'R' => NumberFormat::FORMAT_NUMBER_00,
+            'AB' => NumberFormat::FORMAT_NUMBER_00,
         ];
     }
 

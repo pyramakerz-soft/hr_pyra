@@ -729,6 +729,17 @@ class UserClocksExport implements WithMultipleSheets
                         $evaluation['deduction_minutes'] = array_sum(array_column($appliedRules, 'deduction_minutes'));
                     }
 
+                    // Special Waiver: If there is an excuse and (lateness <= 2h OR shortfall <= 2h), waive the deduction
+                    if ($applicableExcuseMinutes > 0 && ($latenessMinutesActual <= 120 || $shortfall <= 120)) {
+                        $evaluation['deduction_minutes'] = 0;
+                        $evaluation['monetary_amount'] = 0.0;
+                        foreach ($appliedRules as &$rule) {
+                            $rule['deduction_minutes'] = 0;
+                            $rule['monetary_amount'] = 0.0;
+                        }
+                        unset($rule);
+                    }
+
                     $planMonetaryDeduction = $evaluation['monetary_amount'] ?? 0.0;
                     $totalPlanMonetaryAmount += $planMonetaryDeduction;
                     $rawDeductionMinutes = $hasIssue ? 0 : (int) ($evaluation['deduction_minutes'] ?? 0);
@@ -855,6 +866,7 @@ class UserClocksExport implements WithMultipleSheets
                         'Location In' => $firstLocIn,
                         'Location Out' => $lastLocOut,
                         'Attendance Over time in That Day' => $this->formatMinutes($attendanceOvertimeMinutes),
+                        'School Visits' => $isSchoolVisit ? 1 : 0,
                     ],
                     'segments' => $dailyClocks->count() > 1 ? $segments : [],
                     'weekend' => $localDate->isFriday() || $localDate->isSaturday(),
@@ -1000,8 +1012,8 @@ class UserClocksExport implements WithMultipleSheets
                 'Location In' => 'N/A',
                 'Location Out' => 'N/A',
                 'Attendance Over time in That Day' => $this->formatMinutes($totalAttendanceOtMinutes),
-                'Plan Monetary Amount' => round($totalPlanMonetaryAmount, 2),
                 'School Visits' => $totalSchoolVisits ?? 0,
+                'Plan Monetary Amount' => round($totalPlanMonetaryAmount, 2),
             ]);
 
             $this->detailedRows->push([

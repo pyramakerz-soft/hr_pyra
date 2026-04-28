@@ -43,6 +43,9 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
             'Clock Out',
             'Code',
             'Department',
+            'Hiring Date',
+            'Work Type',
+            'Transportation Status',
             'Total Hours in That Day',
             'Total Over time in That Day',
             'is_mission',
@@ -50,6 +53,7 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
             'OT Head Approved By',
             'Plan Deduction in That Day',
             'Deduction Details',
+            'Deduction Days',
             'Excuse Deducted in That Day',
             'Excuse Remaining (Policy 4h)',
             'Total Excuses in That Day',
@@ -59,13 +63,13 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
             'Location In',
             'Location Out',
             'Attendance Over time in That Day',
-            'Plan Monetary Amount',
+            'School Visits',
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:Q1')->applyFromArray([
+        $sheet->getStyle('A1:AA1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -81,12 +85,13 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
             ],
         ]);
 
-        foreach (range('A', 'Q') as $col) {
+        foreach (range('A', 'Z') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
+        $sheet->getColumnDimension('AA')->setAutoSize(true);
 
         $sheet->getRowDimension(1)->setRowHeight(40);
-        $sheet->setAutoFilter('A1:Q1');
+        $sheet->setAutoFilter('A1:AA1');
 
         $otStatusColors = [
             'pending' => 'FFF2CC',
@@ -105,7 +110,7 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
             if (!empty($mark['ot_status'])) {
                 $statusKey = strtolower($mark['ot_status']);
                 if (isset($otStatusColors[$statusKey])) {
-                    foreach (['H', 'O'] as $col) {
+                    foreach (['K', 'Z'] as $col) {
                         $sheet->getStyle($col . $rowNumber)->applyFromArray([
                             'fill' => [
                                 'fillType' => Fill::FILL_SOLID,
@@ -138,7 +143,7 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
 
             if (!empty($mark['deduction_color'])) {
                 $colorHex = strtoupper(ltrim($mark['deduction_color'], '#'));
-                foreach (['I', 'J'] as $col) {
+                foreach (['O', 'P'] as $col) {
                     $sheet->getStyle($col . $rowNumber)->applyFromArray([
                         'fill' => [
                             'fillType' => Fill::FILL_SOLID,
@@ -149,7 +154,7 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
             }
 
             if (!empty($mark['vacation'])) {
-                $sheet->getStyle('N' . $rowNumber)->applyFromArray([
+                $sheet->getStyle('U' . $rowNumber)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'BDD7EE'],
@@ -158,7 +163,7 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
             }
 
             if (!empty($mark['header_row'])) {
-                $sheet->getStyle('A' . $rowNumber . ':Q' . $rowNumber)->applyFromArray([
+                $sheet->getStyle('A' . $rowNumber . ':AA' . $rowNumber)->applyFromArray([
                     'font' => [
                         'bold' => true,
                     ],
@@ -172,7 +177,7 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
             $requiredMinutes = isset($mark['required_minutes']) ? (int) $mark['required_minutes'] : 0;
             $workedMinutes = isset($mark['worked_minutes']) ? (int) $mark['worked_minutes'] : 0;
             if ($requiredMinutes > 0 && $workedMinutes < $requiredMinutes) {
-                $sheet->getStyle('G' . $rowNumber)->applyFromArray([
+                $sheet->getStyle('J' . $rowNumber)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => $this->workedHoursWarningColor],
