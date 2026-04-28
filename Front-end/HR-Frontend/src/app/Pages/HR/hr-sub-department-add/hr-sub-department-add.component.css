@@ -192,3 +192,48 @@
     font-size: 0.75rem;
     font-weight: 600;
 }
+
+/* Toggle Switches */
+.premium-checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-light);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-bottom: 2rem;
+}
+
+.premium-checkbox-group:hover {
+    background: #f1f5f9;
+}
+
+.custom-check {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    background: #ffffff;
+    flex-shrink: 0;
+}
+
+.checked .custom-check {
+    background: var(--accent-orange);
+    border-color: var(--accent-orange);
+}
+
+.custom-check i {
+    color: #ffffff;
+    font-size: 0.875rem;
+    display: none;
+}
+
+.checked .custom-check i {
+    display: block;
+}

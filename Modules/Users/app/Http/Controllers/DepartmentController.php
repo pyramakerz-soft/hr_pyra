@@ -335,7 +335,8 @@ class DepartmentController extends Controller
         // Validate the request
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'teamlead_id' => 'integer|exists:users,id',
+            'teamlead_id' => 'nullable|integer|exists:users,id',
+            'use_department_manager' => 'nullable|boolean',
         ]);
 
         // Check if the parent department exists
@@ -344,19 +345,27 @@ class DepartmentController extends Controller
             return $this->returnError('Department not found');
         }
 
+        $teamleadId = $validatedData['teamlead_id'];
+        
+        if (isset($validatedData['use_department_manager']) && $validatedData['use_department_manager'] == true) {
+            $teamleadId = $parentDepartment->manager_id;
+        }
+
         // Create the sub-department
         $subDepartment =  SubDepartment::create([
             'name' => $validatedData['name'],
-            'teamlead_id' => $validatedData['teamlead_id'],
+            'teamlead_id' => $teamleadId,
             'department_id' => $departmentId,
 
         ]);
         
         Log::info('/////////');
         Log::info( $subDepartment->id);
-        User::where('id', $request->teamlead_id)->update([
-            'sub_department_id' => $subDepartment->id
-        ]);
+        if ($teamleadId) {
+            User::where('id', $teamleadId)->update([
+                'sub_department_id' => $subDepartment->id
+            ]);
+        }
 
         return $this->returnData("sub_department", $subDepartment, "Sub-department stored successfully");
     }
@@ -514,7 +523,8 @@ class DepartmentController extends Controller
     {
         $request->validate([
             'name' => 'sometimes|string|max:255',
-            'teamlead_id' => 'sometimes|integer|exists:users,id',
+            'teamlead_id' => 'nullable|integer|exists:users,id',
+            'use_department_manager' => 'nullable|boolean',
         ]);
 
         // Find the sub-department manually
@@ -538,14 +548,23 @@ class DepartmentController extends Controller
         }
 
 
+        $teamleadId = $request->teamlead_id;
+        if ($request->has('use_department_manager') && $request->use_department_manager == true) {
+            $teamleadId = $department->manager_id;
+        }
+
         // Update fields
         $subDepartment->name = $request->name ?? $subDepartment->name;
-        $subDepartment->teamlead_id = $request->teamlead_id ?? $subDepartment->teamlead_id;
+        if ($teamleadId) {
+            $subDepartment->teamlead_id = $teamleadId;
+        }
 
 
-        User::where('id', $request->teamlead_id)->update([
-            'sub_department_id' => $subDepartment->id
-        ]);
+        if ($teamleadId) {
+            User::where('id', $teamleadId)->update([
+                'sub_department_id' => $subDepartment->id
+            ]);
+        }
 
         if ($subDepartment->save()) {
             return $this->returnData("sub_department", $subDepartment, "Sub-department updated successfully");

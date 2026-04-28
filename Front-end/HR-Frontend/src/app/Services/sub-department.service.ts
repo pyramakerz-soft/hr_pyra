@@ -41,14 +41,18 @@ export class SubDepartmentService {
   }
 
 
-  createDepartment(name: string, teamLeadId: number,): Observable<SubDepartment> {
+  createDepartment(name: string, teamLeadId: number | null, useDepartmentManager?: boolean): Observable<SubDepartment> {
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    const body = {
+    const body: any = {
       name: name,
       teamlead_id: teamLeadId,
     };
+
+    if (useDepartmentManager !== undefined) {
+      body.use_department_manager = useDepartmentManager;
+    }
 
     return this.http.post<SubDepartment>(this.baseurl, body, { headers });
   }
@@ -59,16 +63,19 @@ export class SubDepartmentService {
     return this.http.get<SubDepartment[]>(`${this.baseurl}/${ID}`, { headers });
   }
 
-  UpdateDept(ID: number, name: string, teamLeadId: number,) {
+  UpdateDept(ID: number, name: string, teamLeadId: number | null, useDepartmentManager?: boolean) {
     const token = localStorage.getItem("token");
-    const body = {
+    const body: any = {
       name: name,
       teamlead_id: teamLeadId,
-
     };
+
+    if (useDepartmentManager !== undefined) {
+      body.use_department_manager = useDepartmentManager;
+    }
+
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.post<SubDepartment[]>(`${this.baseurl}/${ID}`, body, { headers });
-
   }
 
 }

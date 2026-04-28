@@ -37,7 +37,17 @@
           <span *ngIf="TeamLeadError" class="error-text ml-2">{{ TeamLeadError }}</span>
         </label>
         
-        <div class="relative">
+        <div class="premium-checkbox-group mb-3" [class.checked]="useDepartmentManager" (click)="useDepartmentManager = !useDepartmentManager">
+          <div class="custom-check">
+            <i class="fa-solid fa-check"></i>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-sm font-bold">Assign Department Manager as Team Leader</span>
+            <span class="text-[10px] text-gray-400 italic">This will use the parent Department's Manager</span>
+          </div>
+        </div>
+
+        <div class="relative" *ngIf="!useDepartmentManager">
           <div class="lead-selector" (click)="toggleDropdown()">
             <span [class.text-gray-400]="!nameSelected">{{ nameSelected || 'Assign a lead...' }}</span>
             <i class="fa-solid fa-chevron-down text-gray-400"></i>

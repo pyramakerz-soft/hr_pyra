@@ -10,15 +10,7 @@
   <!-- Attendance Snapshot Section -->
   <ng-container *ngIf="presenceSnapshot as snapshot">
     <section class="section-card mb-8">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 border-b border-gray-50 pb-4">
-        <div>
-          <h2 class="text-xl font-bold text-[#17253E]">Attendance Pulse</h2>
-          <p class="text-sm text-[#5F6D7E]">Live snapshot of current presence across the organization</p>
-        </div>
-        <div class="text-sm font-medium text-[#5F6D7E] bg-gray-50 px-4 py-2 rounded-full">
-          Last updated: {{ snapshot.date | date: 'mediumDate' }}
-        </div>
-      </div>
+      
 
       <div class="flex flex-col md:flex-row md:space-x-4 mb-10">
         <div class="w-full md:w-1/2">
@@ -68,12 +60,10 @@
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2 chart-card">
-      <h3 class="chart-title">Attendance Trends</h3>
       <app-bar-chart [Year]="selectedYear"></app-bar-chart>
     </div>
 
     <div class="chart-card">
-      <h3 class="chart-title">Department Distribution</h3>
       <app-donut-chart [Year]="selectedYear" (segmentSelected)="onDepartmentSegmentSelected($event)"></app-donut-chart>
     </div>
   </div>
