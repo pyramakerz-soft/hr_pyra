@@ -335,10 +335,18 @@ class UserClocksExport implements WithMultipleSheets
 
             $monthlyUsedExcuseMinutesAccumulator = 0;
             $monthlyExcuseLimit = 240; // 4 hours default (e.g. 2 excuses x 2h each)
-            if ($isB2B) {
-                $monthlyExcuseLimit += 120; // + 4 hours fixed permission = 6 hours total
-            }
             $excuseMinutesRemaining = $monthlyExcuseLimit;
+
+            $activeSlot = null;
+            if ($isB2B) {
+                $activeSlot = \Modules\Clocks\Models\B2bFixedPermissionSlot::where('user_id', $user->id)
+                    ->where('is_active', true)
+                    ->where(function ($q) use ($startDate) {
+                        $q->whereNull('expires_at')
+                            ->orWhere('expires_at', '>=', $startDate->toDateString());
+                    })
+                    ->first();
+            }
 
             for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
                 $localDate = $date->copy()->setTimezone($userTimezoneName);
@@ -655,7 +663,15 @@ class UserClocksExport implements WithMultipleSheets
                     $latenessBeyondGrace = 0;
                 }
 
-                $shortfall = max(0, $requiredMinutes - $workedMinutes - $applicableExcuseMinutes);
+                $slotMinutesToday = 0;
+                if ($activeSlot && !$isVacation && !$isNonWorkingDay) {
+                    $localDayName = strtolower($localDate->format('l'));
+                    if ($localDayName === $activeSlot->day_of_week) {
+                        $slotMinutesToday = 60; // fixed 1h
+                    }
+                }
+
+                $shortfall = max(0, $requiredMinutes - $workedMinutes - $applicableExcuseMinutes - $slotMinutesToday);
 
                 $dailyLocationTypes = $dailyClocks
                     ->pluck('location_type')

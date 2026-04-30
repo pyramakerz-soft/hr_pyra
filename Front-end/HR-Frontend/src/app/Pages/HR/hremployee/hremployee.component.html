@@ -121,6 +121,11 @@
                     <span>Add Vacation</span>
                   </button>
 
+                  <button *ngIf="isB2BEmployee(row)" (click)="openFixedExcusePopup(row)" class="w-full text-left px-4 py-2.5 text-sm text-[#17253E] hover:bg-amber-50 flex items-center gap-3">
+                    <i class="fa-solid fa-clock-rotate-left text-amber-500 w-4"></i>
+                    <span>Add Fixed Excuse</span>
+                  </button>
+
                   <div class="h-px bg-gray-100 my-1"></div>
 
                   <button (click)="DeleteEmp(row.id); activeDropdownId = null" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3">
@@ -222,15 +227,126 @@
         </div>
       </main>
 
-      <!-- Modal Footer -->
       <footer class="modal-footer">
-        <button (click)="closeVacationModal()" class="btn-premium btn-outline text-sm">
+        <button (click)="closeVacationModal()" class="btn-base btn-secondary text-sm">
           Cancel
         </button>
-        <button (click)="submitVacation()" [disabled]="isLoading" class="btn-primary text-sm flex items-center justify-center min-w-[140px]">
+        <button (click)="submitVacation()" [disabled]="isLoading" class="btn-base btn-primary text-sm min-w-[140px]">
           <div *ngIf="isLoading" class="spinner w-4 h-4 mr-2"></div>
           <span *ngIf="!isLoading">Add Vacation</span>
         </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- B2B Fixed Excuse Modal -->
+  <div *ngIf="showFixedExcusePopup" class="modal-overlay z-[100]">
+    <div class="modal-card animate-fade-in-up">
+      <!-- Modal Header -->
+      <header class="modal-header">
+        <div class="header-title">
+          <div class="icon-box !bg-amber-100">
+            <i class="fa-solid fa-clock-rotate-left text-amber-600 text-lg"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold">Fixed Excuse Slot</h2>
+            <p class="text-xs text-gray-500">{{ selectedB2BEmployee?.name }}</p>
+          </div>
+        </div>
+        <button class="close-btn" (click)="closeFixedExcusePopup()" title="Close Dialog">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </header>
+
+      <!-- Modal Body -->
+      <main class="modal-body">
+        <!-- Current Active Slot Info -->
+        <div *ngIf="activeSlotForEmployee" class="mb-6 p-4 bg-amber-50 border border-amber-100 rounded-xl">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-amber-800 uppercase tracking-wider">Current Active Slot</span>
+            <span class="px-2 py-0.5 bg-amber-200 text-amber-900 text-[10px] font-bold rounded-full">ACTIVE</span>
+          </div>
+          <div class="flex flex-wrap gap-3 items-center">
+            <span class="text-sm font-bold capitalize text-amber-900">{{ activeSlotForEmployee.day_of_week }}</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-300"></span>
+            <span class="text-sm font-medium text-amber-800 capitalize">{{ activeSlotForEmployee.position }} of shift</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-300"></span>
+            <span class="text-sm font-mono font-bold text-amber-900">{{ activeSlotForEmployee.slot_from }} - {{ activeSlotForEmployee.slot_to }}</span>
+          </div>
+          <p *ngIf="activeSlotForEmployee.expires_at" class="text-[10px] text-amber-600 mt-2 font-medium">
+            Valid until: {{ activeSlotForEmployee.expires_at | date:'longDate' }}
+          </p>
+        </div>
+
+        <div class="form-section">
+          <!-- Day of Week -->
+          <div class="input-group">
+            <label class="label-text">Weekday</label>
+            <select [(ngModel)]="slotForm.day_of_week" class="premium-input">
+              <option value="sunday">Sunday</option>
+              <option value="monday">Monday</option>
+              <option value="tuesday">Tuesday</option>
+              <option value="wednesday">Wednesday</option>
+              <option value="thursday">Thursday</option>
+              <option value="saturday">Saturday</option>
+            </select>
+          </div>
+
+          <!-- Position -->
+          <div class="input-group">
+            <label class="label-text">Position in Shift</label>
+            <div class="flex gap-2">
+              <button 
+                (click)="slotForm.position = 'start'" 
+                class="flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all"
+                [ngClass]="slotForm.position === 'start' ? 'bg-[#17253E] text-white border-[#17253E]' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'">
+                Start of Shift
+              </button>
+              <button 
+                (click)="slotForm.position = 'end'" 
+                class="flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all"
+                [ngClass]="slotForm.position === 'end' ? 'bg-[#17253E] text-white border-[#17253E]' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'">
+                End of Shift
+              </button>
+            </div>
+          </div>
+
+          <div class="grid-cols-2">
+            <!-- Start Time -->
+            <div class="input-group">
+              <label class="label-text">From Time *</label>
+              <input type="time" [(ngModel)]="slotForm.slot_from" class="premium-input" />
+            </div>
+
+            <!-- Expiry Date -->
+            <div class="input-group">
+              <label class="label-text">Expiry Date (Optional)</label>
+              <input type="date" [(ngModel)]="slotForm.expires_at" class="premium-input" />
+            </div>
+          </div>
+
+          <p class="text-[10px] text-gray-400 italic mt-2">
+            * The permission duration is fixed at 60 minutes.
+          </p>
+        </div>
+      </main>
+
+      <!-- Modal Footer -->
+      <footer class="modal-footer justify-between">
+        <div class="flex gap-2">
+          <button *ngIf="activeSlotForEmployee" (click)="deactivateFixedExcuse()" [disabled]="slotFormLoading" class="btn-base !bg-red-50 !text-red-600 !border-red-100 text-sm">
+            Deactivate
+          </button>
+        </div>
+        <div class="flex gap-2">
+          <button (click)="closeFixedExcusePopup()" class="btn-base btn-secondary text-sm">
+            Cancel
+          </button>
+          <button (click)="saveFixedExcuse()" [disabled]="slotFormLoading" class="btn-base btn-primary text-sm min-w-[140px]">
+            <div *ngIf="slotFormLoading" class="spinner w-4 h-4 mr-2"></div>
+            <span *ngIf="!slotFormLoading">{{ activeSlotForEmployee ? 'Update Slot' : 'Save Slot' }}</span>
+          </button>
+        </div>
       </footer>
     </div>
   </div>

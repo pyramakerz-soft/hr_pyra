@@ -149,6 +149,19 @@
         </div>
       </div>
 
+      <div class="input-group">
+        <label class="label-text">System Role <span class="text-red-500">*</span></label>
+        <div class="selection-group mt-2">
+          <div *ngFor="let role of roles" class="selection-toggle" 
+               [class.active]="employee.role?.id === role?.id"
+               (click)="toggleSingleRole(role)">
+            <i class="fa-solid" [class.fa-circle-check]="employee.role?.id === role?.id" [class.fa-circle]="employee.role?.id !== role?.id"></i>
+            {{ role.name }}
+          </div>
+        </div>
+        <span *ngIf="validationErrors['role']" class="error-msg mt-1">{{ validationErrors['role'] }}</span>
+      </div>
+
       <div class="input-group col-span-full">
         <label class="label-text">Assigned Work Types</label>
         <div class="selection-group mt-2">
@@ -161,6 +174,24 @@
           <p *ngIf="workTypes.length === 0" class="text-xs text-gray-400 italic">No operational work types defined.</p>
         </div>
         <span *ngIf="validationErrors['work_type_id']" class="error-msg">{{ validationErrors['work_type_id'] }}</span>
+      </div>
+
+      <div class="input-group col-span-full">
+        <label class="label-text">Works on Saturday</label>
+        <div class="selection-group mt-2">
+          <div class="selection-toggle" [class.active]="employee.works_on_saturday === null" (click)="onWorksOnSaturdayChange(null)">
+            <i class="fa-solid" [class.fa-circle-check]="employee.works_on_saturday === null" [class.fa-circle]="employee.works_on_saturday !== null"></i>
+            Inherit from Department/Sub-Department
+          </div>
+          <div class="selection-toggle" [class.active]="employee.works_on_saturday === true" (click)="onWorksOnSaturdayChange(true)">
+            <i class="fa-solid" [class.fa-circle-check]="employee.works_on_saturday === true" [class.fa-circle]="employee.works_on_saturday !== true"></i>
+            Works on Saturday
+          </div>
+          <div class="selection-toggle" [class.active]="employee.works_on_saturday === false" (click)="onWorksOnSaturdayChange(false)">
+            <i class="fa-solid" [class.fa-circle-check]="employee.works_on_saturday === false" [class.fa-circle]="employee.works_on_saturday !== false"></i>
+            Does not Work on Saturday
+          </div>
+        </div>
       </div>
 
       <div class="input-group col-span-full" *ngIf="isPartTimeSelected()">
@@ -293,36 +324,6 @@
         <span *ngIf="validationErrors['end_time']" class="error-msg">{{ validationErrors['end_time'] }}</span>
       </div>
 
-      <div class="input-group col-span-full">
-        <label class="label-text">Works on Saturday</label>
-        <div class="selection-group mt-2">
-          <div class="selection-toggle" [class.active]="employee.works_on_saturday === null" (click)="onWorksOnSaturdayChange(null)">
-            <i class="fa-solid" [class.fa-circle-check]="employee.works_on_saturday === null" [class.fa-circle]="employee.works_on_saturday !== null"></i>
-            Inherit from Department/Sub-Department
-          </div>
-          <div class="selection-toggle" [class.active]="employee.works_on_saturday === true" (click)="onWorksOnSaturdayChange(true)">
-            <i class="fa-solid" [class.fa-circle-check]="employee.works_on_saturday === true" [class.fa-circle]="employee.works_on_saturday !== true"></i>
-            Works on Saturday
-          </div>
-          <div class="selection-toggle" [class.active]="employee.works_on_saturday === false" (click)="onWorksOnSaturdayChange(false)">
-            <i class="fa-solid" [class.fa-circle-check]="employee.works_on_saturday === false" [class.fa-circle]="employee.works_on_saturday !== false"></i>
-            Does not Work on Saturday
-          </div>
-        </div>
-      </div>
-
-      <div class="input-group">
-        <label class="label-text">System Role <span class="text-red-500">*</span></label>
-        <div class="selection-group mt-2">
-          <div *ngFor="let role of roles" class="selection-toggle" 
-               [class.active]="employee.role?.id === role?.id"
-               (click)="toggleSingleRole(role)">
-            <i class="fa-solid" [class.fa-circle-check]="employee.role?.id === role?.id" [class.fa-circle]="employee.role?.id !== role?.id"></i>
-            {{ role.name }}
-          </div>
-        </div>
-        <span *ngIf="validationErrors['role']" class="error-msg mt-1">{{ validationErrors['role'] }}</span>
-      </div>
     </div>
   </article>
 

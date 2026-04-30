@@ -67,6 +67,14 @@ Route::group(['middleware' => ['auth:api', 'role:Hr|Team leader|Manager']], func
         Route::post('/revert', [ServiceActionController::class, 'revertLast']);
     });
 
+    Route::prefix('b2b-slots')->group(function () {
+        Route::get('/', [\Modules\Clocks\Http\Controllers\B2bFixedPermissionSlotController::class, 'index']);
+        Route::get('/user/{user}', [\Modules\Clocks\Http\Controllers\B2bFixedPermissionSlotController::class, 'forUser']);
+        Route::post('/', [\Modules\Clocks\Http\Controllers\B2bFixedPermissionSlotController::class, 'store']);
+        Route::put('/{slot}', [\Modules\Clocks\Http\Controllers\B2bFixedPermissionSlotController::class, 'update']);
+        Route::delete('/{slot}', [\Modules\Clocks\Http\Controllers\B2bFixedPermissionSlotController::class, 'destroy']);
+    });
+
 
 
 });

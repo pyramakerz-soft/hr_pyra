@@ -12,6 +12,7 @@ import { ClockService } from '../../../Services/clock.service';
 import { EmployeeHrProfileDialogComponent } from '../../../Components/employee-hr-profile-dialog/employee-hr-profile-dialog.component';
 import { HrStateService } from '../../../Services/SaveState/hr-state.service';
 import { BulkUpdateTimePopUpComponent } from '../../../Components/bulk-update-time-pop-up/bulk-update-time-pop-up.component';
+import { B2bSlotService } from '../../../Services/b2b-slot.service';
 
 interface data {
   Name: string,
@@ -32,7 +33,7 @@ interface data {
 })
 export class HREmployeeComponent {
 
-  constructor(public dialog: MatDialog, private router: Router, public userServ: UserServiceService , private clockService: ClockService, private hrStateService: HrStateService) { }
+  constructor(public dialog: MatDialog, private router: Router, public userServ: UserServiceService , private clockService: ClockService, private hrStateService: HrStateService, private b2bSlotService: B2bSlotService) { }
 
   tableData: UserModel[] = [];
   isMenuOpen: boolean = false;
@@ -55,6 +56,132 @@ export class HREmployeeComponent {
     to_date: '',
     is_half_day: false
   };
+
+  // B2B Fixed Excuse logic
+  showFixedExcusePopup = false;
+  selectedB2BEmployee: any = null;
+  activeSlotForEmployee: any = null;
+  slotFormLoading = false;
+  slotForm = {
+    day_of_week: 'sunday',
+    position: 'start',
+    slot_from: '09:00',
+    expires_at: ''
+  };
+
+  isB2BEmployee(row: any): boolean {
+    return (row.department ?? '').toUpperCase().includes('B2B');
+  }
+
+  openFixedExcusePopup(row: any) {
+    this.selectedB2BEmployee = row;
+    this.activeSlotForEmployee = null;
+    this.showFixedExcusePopup = true;
+    this.activeDropdownId = null;
+    
+    this.b2bSlotService.getActiveSlotForUser(row.id).subscribe({
+      next: (res: any) => {
+        this.activeSlotForEmployee = res.slot ?? null;
+        if (this.activeSlotForEmployee) {
+          this.slotForm.day_of_week = this.activeSlotForEmployee.day_of_week;
+          this.slotForm.position = this.activeSlotForEmployee.position;
+          this.slotForm.slot_from = this.activeSlotForEmployee.slot_from.substring(0, 5);
+          this.slotForm.expires_at = this.activeSlotForEmployee.expires_at ? this.activeSlotForEmployee.expires_at.split('T')[0] : '';
+        } else {
+          this.slotForm = {
+            day_of_week: 'sunday',
+            position: 'start',
+            slot_from: '09:00',
+            expires_at: ''
+          };
+        }
+      },
+      error: () => {
+        this.activeSlotForEmployee = null;
+      }
+    });
+  }
+
+  closeFixedExcusePopup() {
+    this.showFixedExcusePopup = false;
+    this.selectedB2BEmployee = null;
+    this.activeSlotForEmployee = null;
+    this.slotForm = {
+      day_of_week: 'sunday',
+      position: 'start',
+      slot_from: '09:00',
+      expires_at: ''
+    };
+  }
+
+  saveFixedExcuse() {
+    if (!this.selectedB2BEmployee) return;
+    this.slotFormLoading = true;
+    const payload = {
+      user_id: this.selectedB2BEmployee.id,
+      ...this.slotForm
+    };
+    this.b2bSlotService.createSlot(payload).subscribe({
+      next: () => {
+        this.slotFormLoading = false;
+        this.closeFixedExcusePopup();
+        Swal.fire({
+          title: 'Saved',
+          text: 'Fixed excuse slot assigned successfully.',
+          icon: 'success',
+          confirmButtonColor: '#FF7519'
+        });
+      },
+      error: (err: any) => {
+        this.slotFormLoading = false;
+        Swal.fire({
+          title: 'Error',
+          text: err.error?.message || 'Failed to save slot.',
+          icon: 'error',
+          confirmButtonColor: '#FF7519'
+        });
+      }
+    });
+  }
+
+  deactivateFixedExcuse() {
+    if (!this.activeSlotForEmployee) return;
+    
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You want to deactivate this fixed excuse slot?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#FF7519',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Yes, deactivate it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.slotFormLoading = true;
+        this.b2bSlotService.deactivateSlot(this.activeSlotForEmployee.id).subscribe({
+          next: () => {
+            this.slotFormLoading = false;
+            this.closeFixedExcusePopup();
+            Swal.fire({
+              title: 'Deactivated!',
+              text: 'The fixed excuse slot has been deactivated.',
+              icon: 'success',
+              confirmButtonColor: '#FF7519'
+            });
+          },
+          error: (err: any) => {
+            this.slotFormLoading = false;
+            Swal.fire({
+              title: 'Error',
+              text: err.error?.message || 'Failed to deactivate slot.',
+              icon: 'error',
+              confirmButtonColor: '#FF7519'
+            });
+          }
+        });
+      }
+    });
+  }
 
   isNavigateingToImportPopUp = false
 
