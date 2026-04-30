@@ -7,28 +7,35 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
 use Modules\Users\Models\UserVacationBalance;
 use Modules\Users\Models\VacationType;
 use Modules\Users\Models\UserVacation;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Cell\Hyperlink;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class LeavesHistorySummarySheet implements FromCollection, WithHeadings, WithStyles, WithMapping, WithTitle
+class LeavesHistorySummarySheet implements FromCollection, WithHeadings, WithStyles, WithMapping, WithTitle, WithEvents
 {
     protected $userIds;
     protected $years;
 
+    /** Track row => [userId, year] so we can add hyperlinks after sheet is written */
+    protected array $rowMeta = [];
+
     public function __construct($userIds = null, $years = [])
     {
         $this->userIds = $userIds;
-        $this->years = $years;
+        $this->years   = $years;
     }
 
     public function collection()
     {
-        // 1. Get Leave History Data
         $query = UserVacation::with(['user', 'vacationType', 'user.department'])
             ->select(
                 'user_id',
@@ -52,12 +59,11 @@ class LeavesHistorySummarySheet implements FromCollection, WithHeadings, WithSty
 
         $data = $query->get();
 
-        // 2. Get Annual Vacation Type ID
-        $annualType = VacationType::where('name', 'like', '%Annual leave%')->first();
+        $annualType   = VacationType::where('name', 'like', '%Annual leave%')->first();
         $annualTypeId = $annualType ? $annualType->id : null;
-        // 3. Get Balances for these users/years
+
         $userIdsInResult = $data->pluck('user_id')->unique()->toArray();
-        $yearsInResult = $data->pluck('year')->unique()->toArray();
+        $yearsInResult   = $data->pluck('year')->unique()->toArray();
 
         $balances = [];
         if ($annualTypeId && !empty($userIdsInResult) && !empty($yearsInResult)) {
@@ -65,40 +71,33 @@ class LeavesHistorySummarySheet implements FromCollection, WithHeadings, WithSty
                 ->whereIn('year', $yearsInResult)
                 ->where('vacation_type_id', $annualTypeId)
                 ->get()
-                ->keyBy(function ($item) {
-                    return $item->user_id . '-' . $item->year;
-                });
+                ->keyBy(fn($item) => $item->user_id . '-' . $item->year);
         }
 
-        // 4. Transform and Merge
         $grouped = [];
         foreach ($data as $row) {
             $key = $row->user_id . '-' . $row->year;
             if (!isset($grouped[$key])) {
-                $balanceRec = isset($balances[$key]) ? $balances[$key] : null;
-                $allocated = $balanceRec ? $balanceRec->allocated_days : 0;
-                // We can use the used_days from DB or our calculated. 
-                // Let's use our calculated 'Annual' sum for consistency with the columns, 
-                // but for "Balance" calculation, maybe allocated is enough?
-                // User asked for "balance" and "used days".
-                // I'll show Allocated (Base Balance) and Calculated Used.
+                $balanceRec = $balances[$key] ?? null;
+                $allocated  = $balanceRec ? $balanceRec->allocated_days : 0;
 
                 $grouped[$key] = [
-                    'user' => $row->user,
-                    'year' => $row->year,
+                    'user'             => $row->user,
+                    'user_id'          => $row->user_id,
+                    'year'             => $row->year,
                     'annual_allocated' => $allocated,
-                    'annual' => 0,
-                    'sick' => 0,
-                    'casual' => 0,
-                    'emergency' => 0,
-                    'unpaid' => 0,
-                    'other' => 0,
-                    'total_taken' => 0
+                    'annual'           => 0,
+                    'sick'             => 0,
+                    'casual'           => 0,
+                    'emergency'        => 0,
+                    'unpaid'           => 0,
+                    'other'            => 0,
+                    'total_taken'      => 0,
                 ];
             }
 
             $typeName = $row->vacationType ? strtolower($row->vacationType->name) : 'other';
-            $days = $row->total_days;
+            $days     = $row->total_days;
             $grouped[$key]['total_taken'] += $days;
 
             if (str_contains($typeName, 'sick')) {
@@ -108,7 +107,7 @@ class LeavesHistorySummarySheet implements FromCollection, WithHeadings, WithSty
                 $grouped[$key]['annual'] += $days;
             } elseif (str_contains($typeName, 'emergency')) {
                 $grouped[$key]['emergency'] += $days;
-                $grouped[$key]['annual'] += $days;
+                $grouped[$key]['annual']    += $days;
             } elseif (str_contains($typeName, 'unpaid') || str_contains($typeName, 'deduction')) {
                 $grouped[$key]['unpaid'] += $days;
             } else {
@@ -116,7 +115,17 @@ class LeavesHistorySummarySheet implements FromCollection, WithHeadings, WithSty
             }
         }
 
-        return collect(array_values($grouped));
+        $rows = array_values($grouped);
+
+        // Store row metadata (data row 2 = index 0, row 3 = index 1 …)
+        foreach ($rows as $i => $row) {
+            $this->rowMeta[$i + 2] = [
+                'user_id' => $row['user_id'],
+                'year'    => $row['year'],
+            ];
+        }
+
+        return collect($rows);
     }
 
     public function map($row): array
@@ -126,15 +135,15 @@ class LeavesHistorySummarySheet implements FromCollection, WithHeadings, WithSty
             $row['user'] ? $row['user']->name : '',
             $row['user'] && $row['user']->department ? $row['user']->department->name : '',
             $row['year'],
-            $row['annual_allocated'],   // Balance (Allocated)
-            $row['annual'],             // Used (Annual)
-            $row['annual_allocated'] - $row['annual'], // Remaining (Calculated)
+            $row['annual_allocated'],
+            $row['annual'],                                    // Column F – will get hyperlink
+            $row['annual_allocated'] - $row['annual'],
             $row['sick'],
             $row['casual'],
             $row['emergency'],
             $row['unpaid'],
             $row['other'],
-            $row['total_taken']
+            $row['total_taken'],
         ];
     }
 
@@ -146,25 +155,32 @@ class LeavesHistorySummarySheet implements FromCollection, WithHeadings, WithSty
             'Department',
             'Year',
             'Annual Allocated',
-            'Annual Used',
+            'Annual Used ↗',      // hint that it's clickable
             'Annual Remaining',
             'Sick Leaves',
             'Casual Leaves',
             'Emergency Leaves',
             'Unpaid Leaves',
             'Other Leaves',
-            'Total All Leaves'
+            'Total All Leaves',
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
+        // Header row style
         $sheet->getStyle('A1:M1')->applyFromArray([
-            'font' => ['bold' => true],
+            'font'      => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
+            'fill'      => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => 'FF17253E']],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
+                'vertical'   => Alignment::VERTICAL_CENTER,
             ],
+        ]);
+
+        // Column F header highlight to signal interactivity
+        $sheet->getStyle('F1')->applyFromArray([
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => 'FFFF7519']],
         ]);
 
         foreach (range('A', 'M') as $col) {
@@ -172,8 +188,37 @@ class LeavesHistorySummarySheet implements FromCollection, WithHeadings, WithSty
         }
     }
 
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+
+                foreach ($this->rowMeta as $excelRow => $meta) {
+                    $year        = $meta['year'];
+                    $sheetName   = "Year {$year}";
+                    $cell        = $sheet->getCell("F{$excelRow}");
+
+                    // Internal hyperlink to the Year sheet (# prefix = same-workbook navigation)
+                    $cell->setHyperlink(
+                        new Hyperlink("#'{$sheetName}'!A1", "View breakdown for {$year}")
+                    );
+
+                    // Style the cell to look like a hyperlink
+                    $sheet->getStyle("F{$excelRow}")->applyFromArray([
+                        'font' => [
+                            'color'     => ['argb' => 'FF0563C1'],
+                            'underline' => \PhpOffice\PhpSpreadsheet\Style\Font::UNDERLINE_SINGLE,
+                            'bold'      => true,
+                        ],
+                    ]);
+                }
+            },
+        ];
+    }
+
     public function title(): string
     {
-        return "Annual Summary";
+        return 'Annual Summary';
     }
 }

@@ -1004,7 +1004,7 @@ export class HrEmployeeAddEditDetailsComponent {
           error => {
             this.isSaved = false;
             console.error('Create User Error:', error); // Log the full error
-            this.handleServerErrors(error.error?.errors || {});
+            this.handleServerErrors(error.error);
           }
         );
       } else {
@@ -1025,7 +1025,7 @@ export class HrEmployeeAddEditDetailsComponent {
             this.isSaved = false;
 
             console.error('Update User Error:', error); // Log the full error
-            this.handleServerErrors(error.error?.errors || {});
+            this.handleServerErrors(error.error);
           }
         );
       }
@@ -1060,15 +1060,23 @@ export class HrEmployeeAddEditDetailsComponent {
       });
     }
   }
-  private handleServerErrors(errors: Record<keyof AddEmployee, string[]>) {
+  private handleServerErrors(errorResponse: any) {
+    const errors = errorResponse?.errors || {};
+    const message = errorResponse?.message;
     let errorMessages: string[] = [];
+
     for (const key in errors) {
       if (errors.hasOwnProperty(key)) {
         const field = key as keyof AddEmployee;
-        const message = errors[field].join(' ');
-        this.validationErrors[field] = message;
-        errorMessages.push(message);
+        const msg = errors[field].join(' ');
+        this.validationErrors[field] = msg;
+        errorMessages.push(msg);
       }
+    }
+
+    // If no specific field errors but we have a general message
+    if (errorMessages.length === 0 && message) {
+      errorMessages.push(message);
     }
 
     if (errorMessages.length > 0) {
