@@ -50,12 +50,14 @@ export class HREmployeeComponent {
   isVacationModalOpen: boolean = false;
   selectedEmployeeForVacation: number | null = null;
   vacationTypes: any[] = [];
-  vacationData = {
+  vacationData: any = {
     vacation_type_id: null,
     from_date: '',
     to_date: '',
-    is_half_day: false
+    is_half_day: false,
+    allow_future_balance: false
   };
+  selectedFile: File | null = null;
 
   // B2B Fixed Excuse logic
   showFixedExcusePopup = false;
@@ -228,7 +230,10 @@ onDocumentClick(event: MouseEvent) {
 getVacationTypes() {
   this.userServ.getVacationTypes().subscribe(
     (res: any) => {
-      this.vacationTypes = res.data;
+      // Filter out Annual Leave, Official Holiday, and Exceptional Leave
+      this.vacationTypes = res.data.filter((type: any) => 
+        !['Annual Leave', 'Official Holiday', 'Exceptional Leave'].includes(type.name)
+      );
     },
     (err) => console.error('Error fetching vacation types', err)
   );
@@ -247,32 +252,60 @@ openVacationModal(id: number) {
   this.selectedEmployeeForVacation = id;
   this.isVacationModalOpen = true;
   this.activeDropdownId = null; // close dropdown
+  this.selectedFile = null;
   this.vacationData = {
     vacation_type_id: null,
     from_date: '',
     to_date: '',
-    is_half_day: false
+    is_half_day: false,
+    allow_future_balance: false
   };
 }
 
 closeVacationModal() {
   this.isVacationModalOpen = false;
   this.selectedEmployeeForVacation = null;
+  this.selectedFile = null;
+}
+
+onFileSelected(event: any) {
+  const file = event.target.files[0];
+  if (file) {
+    this.selectedFile = file;
+  }
+}
+
+getSelectedVacationTypeName(): string {
+  const type = this.vacationTypes.find(t => t.id == this.vacationData.vacation_type_id);
+  return type ? type.name : '';
 }
 
 submitVacation() {
-  if (!this.selectedEmployeeForVacation || !this.vacationData.from_date || !this.vacationData.to_date) {
+  if (!this.selectedEmployeeForVacation || !this.vacationData.vacation_type_id || !this.vacationData.from_date || !this.vacationData.to_date) {
     Swal.fire('Error', 'Please fill all required fields', 'error');
     return;
   }
 
-  const payload = {
-    user_id: this.selectedEmployeeForVacation,
-    ...this.vacationData
-  };
+  const typeName = this.getSelectedVacationTypeName();
+  if (typeName === 'Sick Leave' && !this.selectedFile) {
+    Swal.fire('Error', 'Attachment is required for sick leave', 'error');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('user_id', this.selectedEmployeeForVacation.toString());
+  formData.append('vacation_type_id', this.vacationData.vacation_type_id.toString());
+  formData.append('from_date', this.vacationData.from_date);
+  formData.append('to_date', this.vacationData.to_date);
+  formData.append('is_half_day', this.vacationData.is_half_day ? '1' : '0');
+  formData.append('allow_future_balance', this.vacationData.allow_future_balance ? '1' : '0');
+  
+  if (this.selectedFile) {
+    formData.append('attachments', this.selectedFile);
+  }
 
   this.isLoading = true;
-  this.userServ.addUserVacation(payload).subscribe(
+  this.userServ.addUserVacation(formData).subscribe(
     (res: any) => {
       this.isLoading = false;
       this.closeVacationModal();

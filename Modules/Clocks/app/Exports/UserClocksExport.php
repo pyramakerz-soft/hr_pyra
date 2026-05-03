@@ -376,44 +376,46 @@ class UserClocksExport implements WithMultipleSheets
                 $hasRequestedVacationFlag = false;
                 $hasCustomVacationFlag = false;
 
-                // Only add vacation tags if it's a working day
                 $vacationDirectApprover = '';
                 $vacationHeadApprover = '';
+
+                // Collect labels for all days (including weekends/holidays)
+                foreach ($requestedForDay as $vacation) {
+                    $typeName = optional($vacation->vacationType)->name;
+                    $isHalf = ($vacation->days_count == 0.5);
+                    $halfDaySuffix = $isHalf ? ' (Half Day)' : '';
+                    $label = $typeName
+                        ? $typeName . $halfDaySuffix
+                        : 'Vacation' . $halfDaySuffix;
+
+                    if ($typeName === 'Sick Leave' && $vacation->attachments->isNotEmpty()) {
+                        $url = $vacation->attachments->first()->file_url;
+                        $label = '=HYPERLINK("' . $url . '", "' . $label . '")';
+                    }
+
+                    $vacationTags[] = $label;
+                    if ($isHalf) {
+                        $remarksTags[] = $label;
+                    }
+                    $hasRequestedVacationFlag = true;
+                }
+
+                foreach ($customForDay as $vacation) {
+                    $label = $vacation->name;
+                    $vacationTags[] = $label;
+                    $remarksTags[] = $label;
+                    $hasCustomVacationFlag = true;
+                }
+
+                // Balance and Approver logic only for working days
                 if (!$isNonWorkingDay) {
+                    if ($hasRequestedVacation) {
+                        $totalVacationDays++;
+                    }
                     if ($hasRequestedVacation && !empty($requestedForDay)) {
                         $firstVacation = $requestedForDay[0];
                         $vacationDirectApprover = $firstVacation->directApprover ? $firstVacation->directApprover->name : '';
                         $vacationHeadApprover = $firstVacation->headApprover ? $firstVacation->headApprover->name : '';
-                    }
-                    if ($hasRequestedVacation) {
-                        $totalVacationDays++;
-                    }
-
-                    foreach ($requestedForDay as $vacation) {
-                        $typeName = optional($vacation->vacationType)->name;
-                        $isHalf = ($vacation->days_count == 0.5);
-                        $halfDaySuffix = $isHalf ? ' (Half Day)' : '';
-                        $label = $typeName
-                            ? $typeName . $halfDaySuffix
-                            : 'Vacation' . $halfDaySuffix;
-
-                        if ($typeName === 'Sick Leave' && $vacation->attachments->isNotEmpty()) {
-                            $url = $vacation->attachments->first()->file_url;
-                            $label = '=HYPERLINK("' . $url . '", "' . $label . '")';
-                        }
-
-                        $vacationTags[] = $label;
-                        if ($isHalf) {
-                            $remarksTags[] = $label;
-                        }
-                        $hasRequestedVacationFlag = true;
-                    }
-
-                    foreach ($customForDay as $vacation) {
-                        $label = $vacation->name;
-                        $vacationTags[] = $label;
-                        $remarksTags[] = $label;
-                        $hasCustomVacationFlag = true;
                     }
                 }
 
@@ -463,8 +465,8 @@ class UserClocksExport implements WithMultipleSheets
                         'row_data' => [
                             'Date' => $formattedDate,
                             'Name' => $user->name,
-                            'Clock In' => ($isVacation ? $vacationLabel : ''),
-                            'Clock Out' => ($isVacation ? $vacationLabel : ''),
+                            'Clock In' => (string) $vacationLabel,
+                            'Clock Out' => (string) $vacationLabel,
                             'Code' => $user->code,
                             'Department' => $user->department?->name ?? 'N/A',
                             'Hiring Date' => $hiringDate,
@@ -849,9 +851,9 @@ class UserClocksExport implements WithMultipleSheets
                 $clockInValue = $earliestIn ? $earliestIn->copy()->addHours($timezoneOffset)->format('h:i A') : '';
                 $clockOutValue = $latestOut ? $latestOut->copy()->addHours($timezoneOffset)->format('h:i A') : '';
 
-                if ($isVacation) {
-                    $clockInValue = $vacationLabel;
-                    $clockOutValue = $vacationLabel;
+                if ($isVacation && $vacationLabel !== '') {
+                    if (!$clockInValue) $clockInValue = (string) $vacationLabel;
+                    if (!$clockOutValue) $clockOutValue = (string) $vacationLabel;
                 }
 
                 $dailyEntries[] = [
