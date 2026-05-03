@@ -220,17 +220,15 @@ class HrAttendanceSheet implements FromCollection, WithHeadings, WithStyles, Wit
                 ]);
             }
 
-            // Total Hours shortfall (RED font)
-            $isShortfall = !empty($mark['required_minutes']) && isset($mark['worked_minutes']) && $mark['worked_minutes'] < $mark['required_minutes'];
-            if ($isShortfall) {
-                $sheet->getStyle('I' . $rowNumber)->getFont()->setColor(new Color(Color::COLOR_RED));
-            }
+            // Total Hours (column I) - always black font, no red coloring
 
-            // Late Deductions presence or Excuse Presence (RED font)
-            $hasLateDeduction = !empty($mark['deduction_rules']) || 
-                                (isset($mark['row_data']['Plan Deduction in That Day']) && $mark['row_data']['Plan Deduction in That Day'] !== '00:00' && $mark['row_data']['Plan Deduction in That Day'] !== '') ||
-                                (isset($mark['row_data']['Total Excuses in That Day']) && $mark['row_data']['Total Excuses in That Day'] !== '00:00' && $mark['row_data']['Total Excuses in That Day'] !== '');
-            if ($hasLateDeduction) {
+            // Late Deductions (column K) - RED font only when there is an actual non-zero deduction
+            $rawDeductionMinutes = $mark['raw_deduction_minutes'] ?? null;
+            $hasActualDeduction = $rawDeductionMinutes !== null && $rawDeductionMinutes > 0;
+            $hasNonZeroExcuse = isset($mark['row_data']['Total Excuses in That Day']) &&
+                                $mark['row_data']['Total Excuses in That Day'] !== '00:00' &&
+                                $mark['row_data']['Total Excuses in That Day'] !== '';
+            if ($hasActualDeduction || $hasNonZeroExcuse) {
                 $sheet->getStyle('K' . $rowNumber)->getFont()->setColor(new Color(Color::COLOR_RED));
             }
 

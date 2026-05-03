@@ -951,6 +951,7 @@ class UserClocksExport implements WithMultipleSheets
                     'issue_columns' => $entry['issue_columns'] ?? [],
                     'worked_minutes' => $entry['worked_minutes'] ?? null,
                     'required_minutes' => $entry['required_minutes'] ?? null,
+                    'raw_deduction_minutes' => $entry['raw_deduction_minutes'] ?? 0,
                     'deduction_color' => $entry['deduction_color'] ?? null,
                     'deduction_rules' => $entry['deduction_rules'] ?? [],
                     'vacation' => $entry['is_vacation'] ?? false,
