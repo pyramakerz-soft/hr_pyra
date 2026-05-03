@@ -115,7 +115,7 @@
                         <option value="fixed_minutes">Specific Minutes</option>
                         <option value="fixed_hours">Specific Hours</option>
                         <option value="fraction_day">Half/Full Day (e.g. 0.5)</option>
-                        <option value="metric_minutes">Same as Lateness Minutes</option>
+                        <option value="metric_minutes">Exact Metric (Lateness or Shortfall)</option>
                     </select>
                 </div>
 
@@ -155,12 +155,20 @@
                         <input type="time" class="premium-input !py-1 !text-sm" [(ngModel)]="rule.when['late_arrival_before']">
                     </div>
                     <div class="col-md-3" *ngIf="rule.category === 'shortfall'">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase">Missing more than (Min)</label>
-                        <input type="number" class="premium-input !py-1 !text-sm" [(ngModel)]="rule.when['shortfall_gt']">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Shortfall more than (Min)</label>
+                        <input type="number" class="premium-input !py-1 !text-sm" [(ngModel)]="rule.when['shortfall_minutes_gt']">
                     </div>
                     <div class="col-md-3" *ngIf="rule.category === 'shortfall'">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase">Missing less than (Min)</label>
-                        <input type="number" class="premium-input !py-1 !text-sm" [(ngModel)]="rule.when['shortfall_lt']">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Shortfall at least (Min)</label>
+                        <input type="number" class="premium-input !py-1 !text-sm" [(ngModel)]="rule.when['shortfall_minutes_gte']">
+                    </div>
+                    <div class="col-md-3" *ngIf="rule.category === 'shortfall'">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Shortfall less than (Min)</label>
+                        <input type="number" class="premium-input !py-1 !text-sm" [(ngModel)]="rule.when['shortfall_minutes_lt']">
+                    </div>
+                    <div class="col-md-3" *ngIf="rule.category === 'shortfall'">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Shortfall at most (Min)</label>
+                        <input type="number" class="premium-input !py-1 !text-sm" [(ngModel)]="rule.when['shortfall_minutes_lte']">
                     </div>
                     <div class="col-md-6">
                         <label class="text-[10px] font-bold text-gray-400 uppercase">Rule Description</label>

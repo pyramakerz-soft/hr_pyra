@@ -407,7 +407,7 @@ class DeductionRuleTemplateSeeder extends Seeder
                         ],
                     ],
                     [
-                        'label' => 'Shortfall: >= 1 Hour',
+                        'label' => 'Shortfall > 1 hour -> Exact Shortfall',
                         'category' => 'shortfall',
                         'scope' => 'daily',
                         'when' => [
@@ -417,7 +417,7 @@ class DeductionRuleTemplateSeeder extends Seeder
                             'type' => 'metric_minutes',
                             'metric' => 'shortfall_minutes',
                         ],
-                        'notes' => 'Shortfall of {{metrics.shortfall_minutes}} min (>= 1hr) => deduct actual minutes.',
+                        'notes' => 'Worked {{metrics.worked_minutes}}m out of {{metrics.required_minutes}}m. Shortfall is {{metrics.shortfall_minutes}}m.',
                         'color' => '#F3E5AB',
                         'stop_processing' => true,
                         'meta' => [

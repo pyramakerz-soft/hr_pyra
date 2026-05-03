@@ -173,17 +173,6 @@ class UserClocksDetailedSheet implements FromCollection, WithHeadings, WithStyle
                     ],
                 ]);
             }
-
-            $requiredMinutes = isset($mark['required_minutes']) ? (int) $mark['required_minutes'] : 0;
-            $workedMinutes = isset($mark['worked_minutes']) ? (int) $mark['worked_minutes'] : 0;
-            if ($requiredMinutes > 0 && $workedMinutes < $requiredMinutes) {
-                $sheet->getStyle('J' . $rowNumber)->applyFromArray([
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => $this->workedHoursWarningColor],
-                    ],
-                ]);
-            }
         }
     }
 

@@ -27,6 +27,7 @@ export const PLAN_PENALTY_TYPES = [
   { value: 'fraction_day', label: 'Fraction of Day' },
   { value: 'day', label: 'Full Day(s)' },
   { value: 'percentage_shortfall', label: 'Percentage of Shortfall' },
+  { value: 'metric_minutes', label: 'Exact Shortfall (Minute-for-Minute)' },
   { value: 'amount', label: 'Fixed Amount' },
 ];
 
@@ -48,7 +49,9 @@ export const PLAN_CONDITION_OPTIONS: PlanConditionOption[] = [
   { key: 'minutes_late_beyond_grace_gte', label: 'Minutes late beyond grace >=', type: 'number' },
   { key: 'minutes_late_beyond_grace_lte', label: 'Minutes late beyond grace <=', type: 'number' },
   { key: 'shortfall_minutes_gte', label: 'Shortfall minutes >=', type: 'number' },
+  { key: 'shortfall_minutes_gt', label: 'Shortfall minutes >', type: 'number' },
   { key: 'shortfall_minutes_lte', label: 'Shortfall minutes <=', type: 'number' },
+  { key: 'shortfall_minutes_lt', label: 'Shortfall minutes <', type: 'number' },
   { key: 'worked_minutes_gte', label: 'Worked minutes >=', type: 'number' },
   { key: 'worked_minutes_lte', label: 'Worked minutes <=', type: 'number' },
   { key: 'attendance_overtime_minutes_gte', label: 'Attendance overtime minutes >=', type: 'number' },

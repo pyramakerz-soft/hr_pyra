@@ -114,7 +114,8 @@ export class HrDeductionsComponent implements OnInit {
         order: this.plan.rules.length,
         penalty: { 
           type: rule.penalty?.type || 'fixed_minutes', 
-          value: rule.penalty?.value || 0 
+          value: rule.penalty?.value || 0,
+          metric: rule.penalty?.metric || null
         },
         when: { ...(rule.when || {}) },
         notes: rule.notes || null,

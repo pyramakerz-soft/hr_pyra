@@ -2,6 +2,7 @@ export interface DeductionPenalty {
   type: string;
   value?: number | null;
   unit?: string | null;
+  metric?: string | null;
   meta?: { [key: string]: any } | null;
 }
 
