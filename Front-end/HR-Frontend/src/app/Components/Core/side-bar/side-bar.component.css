@@ -12,6 +12,7 @@
     padding: 1rem;
     position: sticky;
     top: 0;
+    z-index: 100;
 }
 
 .sidebar-main {
@@ -26,27 +27,60 @@
 }
 
 .logo-section {
-    padding: 2rem 2.25rem;
+    padding: 1.5rem 1.5rem;
+    flex-shrink: 0;
 }
 
 .logo-wrapper {
     background: rgba(255, 255, 255, 0.03);
     border-radius: 12px;
-    padding: 1rem;
+    padding: 0.75rem;
     display: flex;
     justify-content: center;
     align-items: center;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.logo-wrapper img {
+    max-height: 40px;
+    object-fit: contain;
+}
+
+.nav-scroll-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-bottom: 2rem;
+}
+
+/* Custom Scrollbar for Sidebar */
+.nav-scroll-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.nav-scroll-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.nav-scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
 .menu-label {
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    padding: 0 2.25rem;
-    margin-bottom: 1rem;
+    padding: 0 1.75rem;
+    margin: 1rem 0 0.75rem 0;
+    opacity: 0.6;
+}
+
+@media (min-width: 1024px) {
+    .menu-label {
+        margin-top: 1.5rem;
+    }
 }
 
 .nav-container {
@@ -57,28 +91,31 @@
 
 .text_Style {
     position: relative;
-    padding: 0.875rem 2.25rem;
+    padding: 0.75rem 1.75rem;
     color: var(--text-secondary);
     transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
     border-left: 3px solid transparent;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.875rem;
     text-decoration: none;
     font-weight: 500;
     cursor: pointer;
+    font-size: 0.95rem;
 }
 
 .text_Style:hover {
     background: rgba(255, 255, 255, 0.03);
     color: var(--text-primary);
-    padding-left: 2.5rem;
+    padding-left: 2rem;
 }
 
 .text_Style i {
-    width: 24px;
-    font-size: 1.25rem;
+    width: 20px;
+    font-size: 1.1rem;
     transition: transform var(--transition-speed) ease;
+    display: flex;
+    justify-content: center;
 }
 
 .text_Style:hover i {
@@ -95,26 +132,34 @@
     content: '';
     position: absolute;
     left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 15px;
+    top: 0;
+    width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, rgba(56, 189, 248, 0.15) 0%, transparent 100%);
+    background: linear-gradient(90deg, rgba(56, 189, 248, 0.08) 0%, transparent 100%);
     pointer-events: none;
 }
 
 .notification-badge {
     background: var(--accent-orange);
     color: white;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 700;
-    min-width: 20px;
-    height: 20px;
-    border-radius: 20px;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 6px;
+    padding: 0 5px;
     margin-left: auto;
     box-shadow: 0 0 12px rgba(251, 146, 60, 0.3);
+}
+
+@media (max-height: 700px) {
+    .logo-section {
+        padding: 1rem;
+    }
+    .text_Style {
+        padding: 0.6rem 1.5rem;
+    }
 }

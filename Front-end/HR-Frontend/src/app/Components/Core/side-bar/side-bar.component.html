@@ -1,26 +1,28 @@
 <div class="sidebar-main">
-    <div class="logo-section">
+    <div class="logo-section hidden lg:block">
       <div class="logo-wrapper">
-        <img src="../../../../assets/images/Paragraphcontainer.png" class="w-2/3 md:w-[90%]" alt="Logo" />
+        <img src="../../../../assets/images/Paragraphcontainer.png" alt="Logo" />
       </div>
     </div>
     
-    <nav class="nav-container">
-      <p class="menu-label">Main Menu</p>
+    <div class="nav-scroll-container">
+      <nav class="nav-container">
+        <p class="menu-label">Main Menu</p>
+    
+        <div
+          *ngFor="let item of menuItems; let i = index"
+          class="text_Style"
+          [ngClass]="{ active: activeIndex === i, 'cursor-pointer': activeIndex !== null }"
+          (click)="handleMenuClick(i, item.label)"
+          [routerLink]="item.label === 'Sign Out' ? null : item.route"
+        >
+          <i [ngClass]="item.icon"></i>
+          <span class="label-text">{{ item.label }}</span>
   
-      <div
-        *ngFor="let item of menuItems; let i = index"
-        class="text_Style"
-        [ngClass]="{ active: activeIndex === i, 'cursor-pointer': activeIndex !== null }"
-        (click)="handleMenuClick(i, item.label)"
-        [routerLink]="item.label === 'Sign Out' ? null : item.route"
-      >
-        <i [ngClass]="item.icon"></i>
-        <span class="label-text">{{ item.label }}</span>
-
-        <span *ngIf="item.label === 'Issues' && issueCount != 0" class="notification-badge">
-          {{ issueCount }}
-        </span>
-      </div>
-    </nav>
+          <span *ngIf="item.label === 'Issues' && issueCount != 0" class="notification-badge">
+            {{ issueCount }}
+          </span>
+        </div>
+      </nav>
+    </div>
 </div>
