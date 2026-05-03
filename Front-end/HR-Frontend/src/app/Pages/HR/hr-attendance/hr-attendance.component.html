@@ -61,7 +61,7 @@
                    placeholder="Enter Name or Code..." class="premium-input w-full !pl-9">
             
             <!-- Autocomplete Results -->
-            <div *ngIf="filteredUsers.length > 0" class="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-xl shadow-2xl z-50 mt-2 overflow-hidden">
+            <div *ngIf="filteredUsers.length > 0" class="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-xl shadow-2xl z-50 mt-2 max-h-60 overflow-y-auto">
                 <ul class="py-1">
                     <li *ngFor="let user of filteredUsers" (click)="selectUser(user)" 
                         class="px-4 py-2.5 text-sm cursor-pointer hover:bg-gray-50 flex items-center gap-2 border-b border-gray-50 last:border-0">
