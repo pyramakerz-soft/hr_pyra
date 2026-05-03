@@ -57,8 +57,19 @@ class ExcuseController extends Controller
      */
     public function addUserExcuse(StoreExcusesRequest $request)
     {
-        //TODO make a limit two excuses per month DONE
         $authUser = Auth::user();
+        
+        // B2B Department Rules (Department ID: 2)
+        $isB2B = (int) $authUser->department_id === 2;
+
+        // Rule 3: If the user has a fixed excuse (Permission Slot), return error
+        $hasFixedExcuse = \Modules\Clocks\Models\B2bFixedPermissionSlot::where('user_id', $authUser->id)
+            ->activeOn($request->input('date'))
+            ->exists();
+
+        if ($hasFixedExcuse) {
+            return $this->returnError('You cannot request an excuse because you already have a fixed permission slot.', 422);
+        }
 
         $from = Carbon::parse($request->input('from'));
         $to = Carbon::parse($request->input('to'));
@@ -88,8 +99,14 @@ class ExcuseController extends Controller
             ->where('status', '!=', 'rejected')
             ->count();
 
-        if ($excusesCount >= 2) {
-            return $this->returnError('You have reached the limit of 2 excuses for ' . $requestedDate->format('F Y') . '.', 422);
+        // Rule 1: B2B limit is 1 per month, others are 2
+        $limit = $isB2B ? 1 : 2;
+
+        if ($excusesCount >= $limit) {
+            $limitMsg = $isB2B 
+                ? 'B2B employees are limited to 1 excuse request per month.' 
+                : 'You have reached the limit of 2 excuses for ' . $requestedDate->format('F Y') . '.';
+            return $this->returnError($limitMsg, 422);
         }
 
         $userExcuse = Excuse::create([
