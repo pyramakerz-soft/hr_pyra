@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use Modules\Users\Http\Requests\Api\Excuses\StoreExcusesRequest;
 use Modules\Users\Models\Excuse;
 use Modules\Users\Models\User;
+use Illuminate\Support\Facades\Log as FacadesLog;
+
 
 /**
  * @OA\Tag(
@@ -59,20 +61,34 @@ class ExcuseController extends Controller
     {
         $authUser = Auth::user();
         
-        // B2B Department Rules (Department ID: 2)
-        $isB2B = (int) $authUser->department_id === 2;
-
-        // Rule 3: If the user has a fixed excuse (Permission Slot), return error
-        $hasFixedExcuse = \Modules\Clocks\Models\B2bFixedPermissionSlot::where('user_id', $authUser->id)
-            ->activeOn($request->input('date'))
-            ->exists();
-
-        if ($hasFixedExcuse) {
-            return $this->returnError('You cannot request an excuse because you already have a fixed permission slot.', 422);
-        }
+        // B2B Department Rules (Identify by name as ID may change in production)
+        $departmentName = strtoupper($authUser->department?->name ?? '');
+        $isB2B = str_contains($departmentName, 'B2B');
 
         $from = Carbon::parse($request->input('from'));
         $to = Carbon::parse($request->input('to'));
+
+        // Rule 3: B2B Department Overlap Check
+        if ($isB2B) {
+            $requestedDate = Carbon::parse($request->input('date'));
+            $dayOfWeek = strtolower($requestedDate->format('l'));
+
+            $fixedSlots = \Modules\Clocks\Models\B2bFixedPermissionSlot::where('user_id', $authUser->id)
+                ->where('day_of_week', $dayOfWeek)
+                ->activeOn($request->input('date'))
+                ->get();
+            foreach ($fixedSlots as $slot) {
+                $slotFrom = Carbon::parse($slot->slot_from)->format('H:i:s');
+                $slotTo = Carbon::parse($slot->slot_to)->format('H:i:s');
+                
+                $reqFrom = $from->format('H:i:s');
+                $reqTo = $to->format('H:i:s');
+                // Overlap condition: reqFrom < slotTo AND reqTo > slotFrom
+                if ($reqFrom < $slotTo && $reqTo > $slotFrom) {
+                    return $this->returnError("The requested excuse overlaps with your fixed permission slot ({$slot->slot_from} - {$slot->slot_to}).", 422);
+                }
+            }
+        }
         
         if ($from->greaterThan($to)) {
              // Handle cases where time crosses midnight if applicable, or just reject
