@@ -341,10 +341,6 @@ class UserClocksExport implements WithMultipleSheets
             if ($isB2B) {
                 $activeSlot = \Modules\Clocks\Models\B2bFixedPermissionSlot::where('user_id', $user->id)
                     ->where('is_active', true)
-                    ->where(function ($q) use ($startDate) {
-                        $q->whereNull('expires_at')
-                            ->orWhere('expires_at', '>=', $startDate->toDateString());
-                    })
                     ->first();
             }
 
@@ -669,7 +665,11 @@ class UserClocksExport implements WithMultipleSheets
                 if ($activeSlot && !$isVacation && !$isNonWorkingDay) {
                     $localDayName = strtolower($localDate->format('l'));
                     if ($localDayName === $activeSlot->day_of_week) {
-                        $slotMinutesToday = 60; // fixed 1h
+                        // Respect expiry date
+                        $isExpired = $activeSlot->expires_at && Carbon::parse($activeSlot->expires_at)->startOfDay()->lt($localDate->copy()->startOfDay());
+                        if (!$isExpired) {
+                            $slotMinutesToday = 60; // fixed 1h
+                        }
                     }
                 }
 
