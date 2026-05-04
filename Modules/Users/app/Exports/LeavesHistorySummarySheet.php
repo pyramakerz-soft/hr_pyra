@@ -12,6 +12,7 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use Modules\Users\Models\UserVacationBalance;
 use Modules\Users\Models\VacationType;
 use Modules\Users\Models\UserVacation;
+use Modules\Users\Enums\StatusEnum;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -37,6 +38,7 @@ class LeavesHistorySummarySheet implements FromCollection, WithHeadings, WithSty
     public function collection()
     {
         $query = UserVacation::with(['user', 'vacationType', 'user.department'])
+            ->where('status', StatusEnum::Approved)
             ->select(
                 'user_id',
                 DB::raw('YEAR(from_date) as year'),

@@ -10,6 +10,7 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Modules\Users\Models\UserVacation;
+use Modules\Users\Enums\StatusEnum;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -30,7 +31,7 @@ class LeavesHistoryYearSheet implements FromCollection, WithHeadings, WithStyles
     {
         $query = UserVacation::with(['user', 'vacationType', 'user.department'])
             ->whereYear('from_date', $this->year)
-            ->whereIn('status', ['approved', 'Approved'])
+            ->where('status', StatusEnum::Approved)
             ->orderBy('user_id')
             ->orderBy('from_date', 'asc');
 
