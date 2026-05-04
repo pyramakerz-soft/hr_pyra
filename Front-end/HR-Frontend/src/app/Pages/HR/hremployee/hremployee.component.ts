@@ -268,6 +268,12 @@ closeVacationModal() {
   this.selectedFile = null;
 }
 
+onVacationDateChange() {
+  if (this.vacationData.is_half_day && this.vacationData.from_date) {
+    this.vacationData.to_date = this.vacationData.from_date;
+  }
+}
+
 onFileSelected(event: any) {
   const file = event.target.files[0];
   if (file) {

@@ -203,7 +203,7 @@
             <!-- From Date -->
             <div class="input-group">
               <label class="label-text">From Date *</label>
-              <input type="date" [(ngModel)]="vacationData.from_date" class="premium-input" />
+              <input type="date" [(ngModel)]="vacationData.from_date" (change)="onVacationDateChange()" class="premium-input" />
             </div>
 
             <!-- To Date -->
@@ -217,7 +217,7 @@
           <div class="input-group mt-2">
             <div class="flex items-center gap-3 py-3 bg-gray-50 rounded-xl px-4 border border-gray-100">
               <div class="form-check form-switch mb-0 flex items-center">
-                <input class="form-check-input h-6 w-11 cursor-pointer" type="checkbox" [(ngModel)]="vacationData.is_half_day" id="isHalfDaySwitch">
+                <input class="form-check-input h-6 w-11 cursor-pointer" type="checkbox" [(ngModel)]="vacationData.is_half_day" (change)="onVacationDateChange()" id="isHalfDaySwitch">
                 <label class="form-check-label text-sm font-bold text-gray-600 ml-3 cursor-pointer" for="isHalfDaySwitch">
                   Half Day Request
                 </label>
