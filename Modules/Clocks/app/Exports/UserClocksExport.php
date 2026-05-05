@@ -580,6 +580,47 @@ class UserClocksExport implements WithMultipleSheets
                     }
                 }
 
+                $actualEarliestIn = $earliestIn ? $earliestIn->copy() : null;
+                $actualLatestOut = $latestOut ? $latestOut->copy() : null;
+
+                $timezoneOffset = optional($user->timezone)->value ?? 0;
+                $dailyApprovedExcuses = $user->excuses()->where('status', StatusEnum::Approved)
+                    ->whereDate('date', $formattedDate)
+                    ->get();
+
+                $dailyApprovedExcuseMinutes = 0;
+                foreach ($dailyApprovedExcuses as $excuse) {
+                    $excuseFromLocal = Carbon::parse($formattedDate . ' ' . $excuse->from);
+                    $excuseToLocal = Carbon::parse($formattedDate . ' ' . $excuse->to);
+
+                    if ($excuseFromLocal->greaterThan($excuseToLocal)) {
+                        $excuseToLocal->addDay();
+                    }
+
+                    $dailyApprovedExcuseMinutes += $excuseFromLocal->diffInMinutes($excuseToLocal);
+
+                    $excuseFromUtc = $excuseFromLocal->copy()->subHours($timezoneOffset);
+                    $excuseToUtc = $excuseToLocal->copy()->subHours($timezoneOffset);
+
+                    if (!$earliestIn || $excuseFromUtc->lt($earliestIn)) {
+                        $earliestIn = $excuseFromUtc->copy();
+                    }
+                    if (!$latestOut || $excuseToUtc->gt($latestOut)) {
+                        $latestOut = $excuseToUtc->copy();
+                    }
+                }
+
+                $totalApprovedExcuseMinutes += $dailyApprovedExcuseMinutes;
+
+                // Monthly cap logic
+                $remainingPool = max(0, $monthlyExcuseLimit - $monthlyUsedExcuseMinutesAccumulator);
+                $applicableExcuseMinutes = min($dailyApprovedExcuseMinutes, $remainingPool);
+                $monthlyUsedExcuseMinutesAccumulator += $applicableExcuseMinutes;
+                $excuseMinutesRemaining = max(0, $monthlyExcuseLimit - $monthlyUsedExcuseMinutesAccumulator);
+
+                $actualWorkedMinutes = $workedMinutes;
+                $workedMinutes += $applicableExcuseMinutes;
+
                 $earliestInLocal = $earliestIn ? $earliestIn->copy()->addHours($timezoneOffset) : null;
                 $latestOutLocal = $latestOut ? $latestOut->copy()->addHours($timezoneOffset) : null;
 
@@ -633,20 +674,7 @@ class UserClocksExport implements WithMultipleSheets
                 $workedMeetsExpected = $expectedScheduledMinutes > 0 && $workedMinutes >= $expectedScheduledMinutes;
                 $workedMeetsRequired = $requiredMinutes > 0 && $workedMinutes >= $requiredMinutes;
 
-                $dailyApprovedExcuseMinutes = $user->excuses()->where('status', StatusEnum::Approved)
-                    ->whereDate('date', $formattedDate)
-                    ->get()
-                    ->sum(fn($excuse) => Carbon::parse($excuse->from)->diffInMinutes(Carbon::parse($excuse->to)));
-
-                $totalApprovedExcuseMinutes += $dailyApprovedExcuseMinutes;
-
-                // Monthly cap logic
-                $remainingPool = max(0, $monthlyExcuseLimit - $monthlyUsedExcuseMinutesAccumulator);
-                $applicableExcuseMinutes = min($dailyApprovedExcuseMinutes, $remainingPool);
-                $monthlyUsedExcuseMinutesAccumulator += $applicableExcuseMinutes;
-                $excuseMinutesRemaining = max(0, $monthlyExcuseLimit - $monthlyUsedExcuseMinutesAccumulator);
-
-                $attendanceOvertimeMinutes = $this->computeAttendanceOvertimeMinutes($workedMinutes, $formattedDate);
+                $attendanceOvertimeMinutes = $this->computeAttendanceOvertimeMinutes($actualWorkedMinutes, $formattedDate);
 
                 $overtimeRecord = $overtimeRecords->get($formattedDate);
                 $recordedOtMinutes = $overtimeRecord ? (int) $overtimeRecord->overtime_minutes : 0;
@@ -673,7 +701,7 @@ class UserClocksExport implements WithMultipleSheets
                     }
                 }
 
-                $shortfall = max(0, $requiredMinutes - $workedMinutes - $applicableExcuseMinutes - $slotMinutesToday);
+                $shortfall = max(0, $requiredMinutes - $workedMinutes - $slotMinutesToday);
 
                 $dailyLocationTypes = $dailyClocks
                     ->pluck('location_type')
@@ -732,32 +760,6 @@ class UserClocksExport implements WithMultipleSheets
                     $evaluation = $deductionEngine->evaluate($evaluationMetrics, $ruleState);
                     $appliedRules = $evaluation['applied_rules'] ?? [];
 
-                    if ($applicableExcuseMinutes > 0 && !empty($appliedRules)) {
-                        $remainingExcuse = $applicableExcuseMinutes;
-                        foreach ($appliedRules as &$rule) {
-                            $ruleDeduction = $rule['deduction_minutes'] ?? 0;
-                            if ($ruleDeduction > 0 && $remainingExcuse > 0) {
-                                $offset = min($ruleDeduction, $remainingExcuse);
-                                $rule['deduction_minutes'] -= $offset;
-                                $remainingExcuse -= $offset;
-                            }
-                        }
-                        unset($rule);
-                        
-                        $evaluation['deduction_minutes'] = array_sum(array_column($appliedRules, 'deduction_minutes'));
-                    }
-
-                    // Special Waiver: If there is an excuse and (lateness <= 2h OR shortfall <= 2h), waive the deduction
-                    if ($applicableExcuseMinutes > 0 && ($latenessMinutesActual <= 120 || $shortfall <= 120)) {
-                        $evaluation['deduction_minutes'] = 0;
-                        $evaluation['monetary_amount'] = 0.0;
-                        foreach ($appliedRules as &$rule) {
-                            $rule['deduction_minutes'] = 0;
-                            $rule['monetary_amount'] = 0.0;
-                        }
-                        unset($rule);
-                    }
-
                     $planMonetaryDeduction = $evaluation['monetary_amount'] ?? 0.0;
                     $totalPlanMonetaryAmount += $planMonetaryDeduction;
                     $rawDeductionMinutes = $hasIssue ? 0 : (int) ($evaluation['deduction_minutes'] ?? 0);
@@ -806,11 +808,11 @@ class UserClocksExport implements WithMultipleSheets
                     $deductionDetailSummary = '';
                 }
 
-                if ($workedMinutes > 0) {
+                if ($actualWorkedMinutes > 0) {
                     $totalWorkedDays++;
                 }
 
-                $totalWorkedMinutes += $workedMinutes;
+                $totalWorkedMinutes += $actualWorkedMinutes;
                 $totalRecordedOtMinutes += $recordedOtMinutes;
                 $totalAttendanceOtMinutes += $attendanceOvertimeMinutes;
                 $totalRawDeductionMinutes += $rawDeductionMinutes;
@@ -848,8 +850,8 @@ class UserClocksExport implements WithMultipleSheets
                 }
 
                 $timezoneOffset = optional($user->timezone)->value ?? 0;
-                $clockInValue = $earliestIn ? $earliestIn->copy()->addHours($timezoneOffset)->format('h:i A') : '';
-                $clockOutValue = $latestOut ? $latestOut->copy()->addHours($timezoneOffset)->format('h:i A') : '';
+                $clockInValue = $actualEarliestIn ? $actualEarliestIn->copy()->addHours($timezoneOffset)->format('h:i A') : '';
+                $clockOutValue = $actualLatestOut ? $actualLatestOut->copy()->addHours($timezoneOffset)->format('h:i A') : '';
 
                 if ($isVacation && $vacationLabel !== '') {
                     if (!$clockInValue) $clockInValue = (string) $vacationLabel;
@@ -867,7 +869,7 @@ class UserClocksExport implements WithMultipleSheets
                         'Hiring Date' => $hiringDate,
                         'Work Type' => $workType,
                         'Transportation Status' => $transportationStatus,
-                        'Total Hours in That Day' => $this->formatMinutes($workedMinutes),
+                        'Total Hours in That Day' => $this->formatMinutes($actualWorkedMinutes),
                         'Total Over time in That Day' => $this->formatMinutes($recordedOtMinutes),
                         'is_mission' => $mission_flag,
                         'OT Direct Approved By' => $directApprover,
@@ -902,7 +904,7 @@ class UserClocksExport implements WithMultipleSheets
                     'has_requested_vacation' => $hasRequestedVacationFlag,
                     'has_custom_vacation' => $hasCustomVacationFlag,
                     'is_half_day' => $isHalfDay,
-                    'worked_minutes' => $workedMinutes,
+                    'worked_minutes' => $actualWorkedMinutes,
                     'required_minutes' => $requiredMinutes,
                     'issue_columns' => $issueColumns,
                     'is_school_visit' => $isSchoolVisit,
