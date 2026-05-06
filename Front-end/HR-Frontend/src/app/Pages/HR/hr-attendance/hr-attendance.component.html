@@ -42,13 +42,13 @@
 
   <!-- Filter Control Center -->
   <section class="control-center">
-    <div class="filter-grid">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
       <!-- Date Range -->
-      <div class="filter-group">
+      <div class="filter-group xl:col-span-2">
         <label class="filter-label">Registration Range</label>
-        <div class="flex gap-2">
-            <input type="date" [(ngModel)]="from_day" class="premium-input flex-1" (change)="getAllEmployees(1, from_day, to_day)">
-            <input type="date" [(ngModel)]="to_day" class="premium-input flex-1" (change)="getAllEmployees(1, from_day, to_day)">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <input type="date" [(ngModel)]="from_day" class="premium-input w-full" (change)="getAllEmployees(1, from_day, to_day)">
+            <input type="date" [(ngModel)]="to_day" class="premium-input w-full" (change)="getAllEmployees(1, from_day, to_day)">
         </div>
       </div>
 

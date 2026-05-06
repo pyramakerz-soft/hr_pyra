@@ -91,17 +91,6 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
-.filter-grid {
-    display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-    gap: 1.25rem;
-}
-
-@media (min-width: 1024px) {
-    .filter-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-}
 
 .filter-group {
     display: flex;

@@ -107,9 +107,12 @@ export class HrDeductionsComponent implements OnInit {
     const templateRules = Array.isArray(template.rule) ? template.rule : [template.rule];
     
     templateRules.forEach((rule: any) => {
-      const newRule: DeductionRule = {
-        label: rule.label || rule.name || 'Template Rule',
-        category: rule.category || 'other',
+        let mappedCategory = rule.category || 'other';
+        if (mappedCategory === 'lateness') mappedCategory = 'late_arrival';
+        
+        const newRule: DeductionRule = {
+          label: rule.label || rule.name || 'Template Rule',
+          category: mappedCategory,
         scope: rule.scope || 'occurrence',
         order: this.plan.rules.length,
         penalty: { 

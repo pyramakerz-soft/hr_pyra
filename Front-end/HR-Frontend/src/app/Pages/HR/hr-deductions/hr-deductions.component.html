@@ -34,15 +34,6 @@
                 </div>
             </ng-container>
 
-            <!-- Template Selector -->
-            <div class="filter-group">
-                <label class="filter-label">Use Seeded Template</label>
-                <select class="premium-select" [(ngModel)]="selectedTemplate" (change)="applyTemplate(selectedTemplate)">
-                    <option [ngValue]="null" selected disabled>Pick a Template...</option>
-                    <option *ngFor="let t of templates" [ngValue]="t">{{ t.name }}</option>
-                </select>
-            </div>
-
             <div class="filter-group" [class.col-span-2]="selectedType === 'department'">
                 <label class="filter-label">Select {{ selectedType === 'department' ? 'Department' : 'Sub-Department' }}</label>
                 <select class="premium-select" [(ngModel)]="selectedId" (change)="loadPlan()">
@@ -53,6 +44,15 @@
                     <ng-container *ngIf="selectedType === 'sub-department'">
                         <option *ngFor="let s of subDepartments" [value]="s.id">{{ s.name }}</option>
                     </ng-container>
+                </select>
+            </div>
+
+            <!-- Template Selector -->
+            <div class="filter-group">
+                <label class="filter-label">Use Seeded Template</label>
+                <select class="premium-select" [(ngModel)]="selectedTemplate" (change)="applyTemplate(selectedTemplate)">
+                    <option [ngValue]="null" selected disabled>Pick a Template...</option>
+                    <option *ngFor="let t of templates" [ngValue]="t">{{ t.name }}</option>
                 </select>
             </div>
 
@@ -116,6 +116,7 @@
                         <option value="fixed_hours">Specific Hours</option>
                         <option value="fraction_day">Half/Full Day (e.g. 0.5)</option>
                         <option value="metric_minutes">Exact Metric (Lateness or Shortfall)</option>
+                        <option value="lateness_actual">Exact Lateness Minutes</option>
                     </select>
                 </div>
 
@@ -147,12 +148,24 @@
                 <label class="filter-label mb-3 d-block"><i class="fa-solid fa-clock me-2"></i> Conditions (Apply this rule if...)</label>
                 <div class="row g-3">
                     <div class="col-md-3" *ngIf="rule.category === 'late_arrival'">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase">Arriving after...</label>
-                        <input type="time" class="premium-input !py-1 !text-sm" [(ngModel)]="rule.when['late_arrival_after']">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Arriving after (Time)</label>
+                        <input type="time" class="premium-input !py-1 !text-sm" [(ngModel)]="rule.when['first_clock_in_gt']">
                     </div>
                     <div class="col-md-3" *ngIf="rule.category === 'late_arrival'">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase">Arriving before...</label>
-                        <input type="time" class="premium-input !py-1 !text-sm" [(ngModel)]="rule.when['late_arrival_before']">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Arriving before (Time)</label>
+                        <input type="time" class="premium-input !py-1 !text-sm" [(ngModel)]="rule.when['first_clock_in_lte']">
+                    </div>
+                    <div class="col-md-3" *ngIf="rule.category === 'late_arrival'">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Late Minutes (>=)</label>
+                        <input type="number" class="premium-input !py-1 !text-sm" [(ngModel)]="rule.when['minutes_late_gte']">
+                    </div>
+                    <div class="col-md-3" *ngIf="rule.category === 'late_arrival'">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Occurrence (#)</label>
+                        <input type="number" class="premium-input !py-1 !text-sm" [(ngModel)]="rule.when['occurrence_number']">
+                    </div>
+                    <div class="col-md-3" *ngIf="rule.category === 'late_arrival'">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">Occurrence (>=)</label>
+                        <input type="number" class="premium-input !py-1 !text-sm" [(ngModel)]="rule.when['occurrence_gte']">
                     </div>
                     <div class="col-md-3" *ngIf="rule.category === 'shortfall'">
                         <label class="text-[10px] font-bold text-gray-400 uppercase">Shortfall more than (Min)</label>
