@@ -106,25 +106,54 @@ public departmentServ: DepartmentService
 
   deleteLocation(id: number) {
     Swal.fire({
-      title: 'Are you sure you want to Delete This Location?',
+      title: 'Are you sure?',
+      text: "You are about to permanently delete this location",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#FF7519',
-      cancelButtonColor: '#17253E',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonColor: '#17253E',
+      cancelButtonColor: '#f3f4f6',
+      confirmButtonText: 'Yes, delete it',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      customClass: {
+        popup: 'premium-swal-popup',
+        title: 'premium-swal-title',
+        confirmButton: 'premium-swal-confirm',
+        cancelButton: 'premium-swal-cancel'
+      }
     }).then((result) => {
       if (result.isConfirmed) {
-
-        this.locationServ.DeleteByID(id).subscribe(result => {
-          if(this.tableData.length==1&&this.CurrentPageNumber-1>=1){
-            this.getAllLocations(this.CurrentPageNumber-1);
+        this.locationServ.DeleteByID(id).subscribe(
+          (result) => {
+            if (this.tableData.length == 1 && this.CurrentPageNumber - 1 >= 1) {
+              this.getAllLocations(this.CurrentPageNumber - 1);
+            } else {
+              this.getAllLocations(this.CurrentPageNumber);
+            }
+            this.getLocationsName();
+            
+            Swal.fire({
+              title: 'Deleted!',
+              text: 'Location has been successfully removed.',
+              icon: 'success',
+              timer: 2000,
+              showConfirmButton: false,
+              confirmButtonColor: '#FF7519',
+              customClass: {
+                popup: 'premium-swal-popup success',
+                title: 'premium-swal-title'
+              }
+            });
+          },
+          (error) => {
+            Swal.fire({
+              title: 'Error',
+              text: 'Could not delete location. It might be in use by other records.',
+              icon: 'error',
+              confirmButtonColor: '#17253E'
+            });
           }
-          else{
-            this.getAllLocations(this.CurrentPageNumber);
-          }
-          this.getLocationsName();
-        });
+        );
       }
     });
   }

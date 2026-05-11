@@ -233,57 +233,82 @@ export class BoundersPopUpComponent {
 
       if(this.ETime>this.STime){
       if (this.mode === 'edit' && this.lat && this.long) {
-
         this.LocationServ.EditByID(this.Boundname, this.address, Number(this.lat), Number(this.long), this.id ,this.STime,this.ETime, this.radius, this.isSchool).subscribe(
           (d: any) => {
+            Swal.fire({
+              title: 'Location Updated!',
+              text: `${this.Boundname} has been updated successfully.`,
+              icon: 'success',
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: {
+                popup: 'premium-swal-popup success'
+              }
+            });
             this.dialogRef.close();
           },
           (error) => {
-            if (error.error.message === "The name has already been taken.") {
-              Swal.fire({   
-                text: "The Location name has already been taken",
-                confirmButtonText: "OK",
-                confirmButtonColor: "#FF7519",
-              });
-            }else{
-              Swal.fire({   
-                text: "Faild to create, Please Try again later",
-                confirmButtonText: "OK",
-                confirmButtonColor: "#FF7519",
-                
-              });
+            let errorMessage = "Failed to update location, please try again later";
+            if (error.error && error.error.message === "The name has already been taken.") {
+              errorMessage = "The Location name has already been taken. Please choose a unique name.";
             }
+            
+            Swal.fire({   
+              title: 'Update Failed',
+              text: errorMessage,
+              icon: 'error',
+              confirmButtonText: "Understand",
+              confirmButtonColor: "#17253E",
+              customClass: {
+                popup: 'premium-swal-popup'
+              }
+            });
           }
         );
       } else if (this.mode === 'add' && this.lat && this.long) {
         this.LocationServ.CreateAddress(this.Boundname, this.address, Number(this.lat), Number(this.long) ,this.STime,this.ETime, this.radius, this.isSchool).subscribe(
           (d: any) => {
+            Swal.fire({
+              title: 'Location Added!',
+              text: `${this.Boundname} is now available in the system.`,
+              icon: 'success',
+              timer: 2000,
+              showConfirmButton: false,
+              customClass: {
+                popup: 'premium-swal-popup success'
+              }
+            });
             this.dialogRef.close();
           },
           (error) => {
-            if (error.error.message === "The name has already been taken.") {
-              Swal.fire({   
-                text: "The Location name has already been taken",
-                confirmButtonText: "OK",
-                confirmButtonColor: "#FF7519",
-              });
-            }else{
-              Swal.fire({   
-                text: "Faild to create, Please Try again later",
-                confirmButtonText: "OK",
-                confirmButtonColor: "#FF7519",
-                
-              });
+            let errorMessage = "Failed to create location, please try again later";
+            if (error.error && error.error.message === "The name has already been taken.") {
+              errorMessage = "The Location name has already been taken. Please choose a unique name.";
             }
+
+            Swal.fire({   
+              title: 'Creation Failed',
+              text: errorMessage,
+              icon: 'error',
+              confirmButtonText: "Understand",
+              confirmButtonColor: "#17253E",
+              customClass: {
+                popup: 'premium-swal-popup'
+              }
+            });
           }
         );
       }
-    }
-    else{
+    } else {
       Swal.fire({   
-        text: "End Time Should Be After Start Time",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#FF7519",
+        title: 'Invalid Time Range',
+        text: "The operational end time must be set after the start time.",
+        icon: 'warning',
+        confirmButtonText: "I'll fix it",
+        confirmButtonColor: "#17253E",
+        customClass: {
+          popup: 'premium-swal-popup'
+        }
       });
     }
     }
