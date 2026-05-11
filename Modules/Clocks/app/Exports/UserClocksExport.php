@@ -403,27 +403,6 @@ class UserClocksExport implements WithMultipleSheets
                     $hasCustomVacationFlag = true;
                 }
 
-                // Balance and Approver logic only for working days
-                if (!$isNonWorkingDay) {
-                    if ($hasRequestedVacation) {
-                        $totalVacationDays++;
-                    }
-                    if ($hasRequestedVacation && !empty($requestedForDay)) {
-                        $firstVacation = $requestedForDay[0];
-                        $vacationDirectApprover = $firstVacation->directApprover ? $firstVacation->directApprover->name : '';
-                        $vacationHeadApprover = $firstVacation->headApprover ? $firstVacation->headApprover->name : '';
-                    }
-                }
-
-                if ($vacationTags) {
-                    $vacationTags = array_values(array_unique($vacationTags));
-                }
-                if ($remarksTags) {
-                    $remarksTags = array_values(array_unique($remarksTags));
-                }
-
-                $vacationLabel = $vacationTags ? implode(' | ', $vacationTags) : '';
-                $remarksLabel = $remarksTags ? implode(' | ', $remarksTags) : '';
                 $isVacation = $hasRequestedVacation || $hasCustomVacation;
 
                 $isHalfDay = false;
@@ -444,11 +423,34 @@ class UserClocksExport implements WithMultipleSheets
                     }
                 }
 
+                // Balance and Approver logic only for working days
+                if (!$isNonWorkingDay) {
+                    if ($hasRequestedVacation) {
+                        $totalVacationDays += $isHalfDay ? 0.5 : 1;
+                    }
+                    if ($hasRequestedVacation && !empty($requestedForDay)) {
+                        $firstVacation = $requestedForDay[0];
+                        $vacationDirectApprover = $firstVacation->directApprover ? $firstVacation->directApprover->name : '';
+                        $vacationHeadApprover = $firstVacation->headApprover ? $firstVacation->headApprover->name : '';
+                    }
+                }
+
+                if ($vacationTags) {
+                    $vacationTags = array_values(array_unique($vacationTags));
+                }
+                if ($remarksTags) {
+                    $remarksTags = array_values(array_unique($remarksTags));
+                }
+
+                $vacationLabel = $vacationTags ? implode(' | ', $vacationTags) : '';
+                $remarksLabel = $remarksTags ? implode(' | ', $remarksTags) : '';
+
                 // Extract vacation approver names (use first vacation if multiple)
 
 
                 // Handle days without clock entries
-                if ($dailyClocks->isEmpty()) {
+                // If it's a half-day vacation, we proceed to deduction evaluation even if clocks are missing
+                if ($dailyClocks->isEmpty() && !$isHalfDay) {
                     // Check if there's an overtime record for this day
                     $overtimeRecord = $overtimeRecords->get($formattedDate);
                     $recordedOtMinutes = $overtimeRecord ? (int) $overtimeRecord->overtime_minutes : 0;
@@ -644,6 +646,9 @@ class UserClocksExport implements WithMultipleSheets
                 $isNonWorkingWeekend = $isFriday || ($isSaturday && !$worksOnSaturday);
 
                 $requiredMinutes = $isNonWorkingWeekend ? 0 : $expectedScheduledMinutes;
+                if ($isHalfDay) {
+                    $requiredMinutes = (int) round($requiredMinutes / 2);
+                }
                 $totalRequiredMinutes += $requiredMinutes;
 
                 if ($hasIssue) {
@@ -751,12 +756,16 @@ class UserClocksExport implements WithMultipleSheets
                 $appliedRules = [];
                 $planMonetaryDeduction = 0.0;
                 $rawDeductionMinutes = 0;
-                $skipDeductions = $isPartTime || $isVacation || $isNonWorkingWeekend;
+                $skipDeductions = $isPartTime || ($isVacation && !$isHalfDay) || $isNonWorkingWeekend;
 
                 if ($skipDeductions) {
                     $latenessMinutesActual = 0;
                     $latenessBeyondGrace = 0;
                 } else {
+                    if ($isHalfDay) {
+                        $latenessMinutesActual = 0;
+                        $latenessBeyondGrace = 0;
+                    }
                     $evaluation = $deductionEngine->evaluate($evaluationMetrics, $ruleState);
                     $appliedRules = $evaluation['applied_rules'] ?? [];
 
