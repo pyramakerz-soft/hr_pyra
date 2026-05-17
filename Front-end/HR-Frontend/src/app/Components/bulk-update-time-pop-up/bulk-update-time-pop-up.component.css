@@ -1,0 +1,4 @@
+/* Existing styles can be added here if needed, but Tailwind classes are used for layout */
+:host {
+    display: block;
+}

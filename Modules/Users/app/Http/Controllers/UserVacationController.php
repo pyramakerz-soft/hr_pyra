@@ -80,6 +80,15 @@ class UserVacationController extends Controller
     public function addUserVacation(StoreUserVacationRequest $request)
     {
         $authUser = Auth::user();
+        $isHrAdded = false;
+
+        if ($request->has('user_id') && ($authUser->hasRole('Hr') || $authUser->hasRole('Admin'))) {
+            $targetUser = User::find($request->input('user_id'));
+            if ($targetUser) {
+                $authUser = $targetUser;
+                $isHrAdded = true;
+            }
+        }
 
         $from = Carbon::parse($request->input('from_date'));
         $to = Carbon::parse($request->input('to_date'));
@@ -110,6 +119,22 @@ class UserVacationController extends Controller
             $vacationType = VacationType::where('name', $defaultName)->first();
             if (!$vacationType) {
                 return $this->returnError("Vacation type '{$defaultName}' is not configured", 422);
+            }
+        }
+
+        // Hajj / Umrah B2B Logic: Calculated as casual leave if < 10 years of service
+        $departmentName = strtoupper($authUser->department?->name ?? '');
+        if (str_contains($departmentName, 'B2B') && $vacationType->name === self::HAJJ_LEAVE_NAME) {
+            $userDetail = $authUser->user_detail;
+            if ($userDetail && $userDetail->hiring_date) {
+                $hiringDate = Carbon::parse($userDetail->hiring_date);
+                $yearsEmployed = $hiringDate->diffInYears(Carbon::now());
+                if ($yearsEmployed < 10) {
+                    $casualType = VacationType::where('name', self::CASUAL_LEAVE_NAME)->first();
+                    if ($casualType) {
+                        $vacationType = $casualType;
+                    }
+                }
             }
         }
         $attachments = $request->file('attachments');
@@ -155,7 +180,7 @@ class UserVacationController extends Controller
 
 
         // Create vacation(s) based on available balance
-        return $this->createVacationRecords($authUser, $vacationType, $from, $to, $daysCount, $availableDays, $attachments);
+        return $this->createVacationRecords($authUser, $vacationType, $from, $to, $daysCount, $availableDays, $attachments, $isHrAdded);
     }
 
     /**
@@ -983,8 +1008,12 @@ class UserVacationController extends Controller
         return $balance->remaining_days;
     }
 
-    protected function createVacationRecords(User $user, VacationType $vacationType, Carbon $from, Carbon $to, float $daysCount, float $availableDays, $attachments = null)
+    protected function createVacationRecords(User $user, VacationType $vacationType, Carbon $from, Carbon $to, float $daysCount, float $availableDays, $attachments = null, bool $isHrAdded = false)
     {
+        $status = $isHrAdded ? StatusEnum::Approved : StatusEnum::Pending;
+        $directApprovedBy = $isHrAdded ? Auth::id() : null;
+        $headApprovedBy = $isHrAdded ? Auth::id() : null;
+
         // Sufficient balance - create single vacation record
         if ($availableDays >= $daysCount) {
             $vacation = UserVacation::create([
@@ -993,12 +1022,18 @@ class UserVacationController extends Controller
                 'from_date' => $from,
                 'to_date' => $to,
                 'days_count' => $daysCount,
-                'status' => StatusEnum::Pending,
-                'approval_of_direct' => StatusEnum::Pending,
-                'approval_of_head' => StatusEnum::Pending,
+                'status' => $status,
+                'approval_of_direct' => $status,
+                'approval_of_head' => $status,
+                'direct_approved_by' => $directApprovedBy,
+                'head_approved_by' => $headApprovedBy,
             ]);
 
             $this->processAttachments($vacation, $attachments);
+
+            if ($isHrAdded) {
+                $this->syncVacationBalance($vacation, StatusEnum::Pending->value);
+            }
 
             return $this->returnData('Vacation', $vacation->fresh(['vacationType']), 'User Vacation created successfully');
         }
@@ -1016,12 +1051,18 @@ class UserVacationController extends Controller
                 'from_date' => $from,
                 'to_date' => $to,
                 'days_count' => $daysCount,
-                'status' => StatusEnum::Pending,
-                'approval_of_direct' => StatusEnum::Pending,
-                'approval_of_head' => StatusEnum::Pending,
+                'status' => $status,
+                'approval_of_direct' => $status,
+                'approval_of_head' => $status,
+                'direct_approved_by' => $directApprovedBy,
+                'head_approved_by' => $headApprovedBy,
             ]);
 
             $this->processAttachments($vacation, $attachments);
+
+            if ($isHrAdded) {
+                $this->syncVacationBalance($vacation, StatusEnum::Pending->value);
+            }
 
             return $this->returnData('Vacation', $vacation->fresh(['vacationType']), 'Insufficient balance. Request converted to Unpaid Leave.');
         }
@@ -1047,12 +1088,18 @@ class UserVacationController extends Controller
                 'from_date' => $from,
                 'to_date' => $paidTo,
                 'days_count' => $availableDays,
-                'status' => StatusEnum::Pending,
-                'approval_of_direct' => StatusEnum::Pending,
-                'approval_of_head' => StatusEnum::Pending,
+                'status' => $status,
+                'approval_of_direct' => $status,
+                'approval_of_head' => $status,
+                'direct_approved_by' => $directApprovedBy,
+                'head_approved_by' => $headApprovedBy,
             ]);
 
             $this->processAttachments($vacationPaid, $attachments);
+
+            if ($isHrAdded) {
+                $this->syncVacationBalance($vacationPaid, StatusEnum::Pending->value);
+            }
 
             // 2. Unpaid Portion
             $unpaidFrom = (clone $paidTo);
@@ -1067,10 +1114,16 @@ class UserVacationController extends Controller
                 'from_date' => $unpaidFrom,
                 'to_date' => $to,
                 'days_count' => $unpaidDays,
-                'status' => StatusEnum::Pending,
-                'approval_of_direct' => StatusEnum::Pending,
-                'approval_of_head' => StatusEnum::Pending,
+                'status' => $status,
+                'approval_of_direct' => $status,
+                'approval_of_head' => $status,
+                'direct_approved_by' => $directApprovedBy,
+                'head_approved_by' => $headApprovedBy,
             ]);
+
+            if ($isHrAdded) {
+                $this->syncVacationBalance($vacationUnpaid, StatusEnum::Pending->value);
+            }
 
             return $this->returnData('Vacation', [
                 'paid_vacation' => $vacationPaid->fresh(['vacationType']),

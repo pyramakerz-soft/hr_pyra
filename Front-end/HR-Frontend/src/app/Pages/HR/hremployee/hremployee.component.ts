@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SideBarComponent } from '../../../Components/Core/side-bar/side-bar.component';
 import { CommonModule } from '@angular/common';
@@ -11,6 +11,8 @@ import Swal from 'sweetalert2';
 import { ClockService } from '../../../Services/clock.service';
 import { EmployeeHrProfileDialogComponent } from '../../../Components/employee-hr-profile-dialog/employee-hr-profile-dialog.component';
 import { HrStateService } from '../../../Services/SaveState/hr-state.service';
+import { BulkUpdateTimePopUpComponent } from '../../../Components/bulk-update-time-pop-up/bulk-update-time-pop-up.component';
+import { B2bSlotService } from '../../../Services/b2b-slot.service';
 
 interface data {
   Name: string,
@@ -31,7 +33,7 @@ interface data {
 })
 export class HREmployeeComponent {
 
-  constructor(public dialog: MatDialog, private router: Router, public userServ: UserServiceService , private clockService: ClockService, private hrStateService: HrStateService) { }
+  constructor(public dialog: MatDialog, private router: Router, public userServ: UserServiceService , private clockService: ClockService, private hrStateService: HrStateService, private b2bSlotService: B2bSlotService) { }
 
   tableData: UserModel[] = [];
   isMenuOpen: boolean = false;
@@ -43,6 +45,145 @@ export class HREmployeeComponent {
   UsersNames: string[] = [];
   filteredUsers: string[] = [];
   isLoading: boolean = false; // Add isLoading state
+  
+  activeDropdownId: number | null = null;
+  isVacationModalOpen: boolean = false;
+  selectedEmployeeForVacation: number | null = null;
+  vacationTypes: any[] = [];
+  vacationData: any = {
+    vacation_type_id: null,
+    from_date: '',
+    to_date: '',
+    is_half_day: false,
+    allow_future_balance: false
+  };
+  selectedFile: File | null = null;
+
+  // B2B Fixed Excuse logic
+  showFixedExcusePopup = false;
+  selectedB2BEmployee: any = null;
+  activeSlotForEmployee: any = null;
+  slotFormLoading = false;
+  slotForm = {
+    day_of_week: 'sunday',
+    position: 'start',
+    slot_from: '09:00',
+    expires_at: ''
+  };
+
+  isB2BEmployee(row: any): boolean {
+    return (row.department ?? '').toUpperCase().includes('B2B');
+  }
+
+  openFixedExcusePopup(row: any) {
+    this.selectedB2BEmployee = row;
+    this.activeSlotForEmployee = null;
+    this.showFixedExcusePopup = true;
+    this.activeDropdownId = null;
+    
+    this.b2bSlotService.getActiveSlotForUser(row.id).subscribe({
+      next: (res: any) => {
+        this.activeSlotForEmployee = res.slot ?? null;
+        if (this.activeSlotForEmployee) {
+          this.slotForm.day_of_week = this.activeSlotForEmployee.day_of_week;
+          this.slotForm.position = this.activeSlotForEmployee.position;
+          this.slotForm.slot_from = this.activeSlotForEmployee.slot_from.substring(0, 5);
+          this.slotForm.expires_at = this.activeSlotForEmployee.expires_at ? this.activeSlotForEmployee.expires_at.split('T')[0] : '';
+        } else {
+          this.slotForm = {
+            day_of_week: 'sunday',
+            position: 'start',
+            slot_from: '09:00',
+            expires_at: ''
+          };
+        }
+      },
+      error: () => {
+        this.activeSlotForEmployee = null;
+      }
+    });
+  }
+
+  closeFixedExcusePopup() {
+    this.showFixedExcusePopup = false;
+    this.selectedB2BEmployee = null;
+    this.activeSlotForEmployee = null;
+    this.slotForm = {
+      day_of_week: 'sunday',
+      position: 'start',
+      slot_from: '09:00',
+      expires_at: ''
+    };
+  }
+
+  saveFixedExcuse() {
+    if (!this.selectedB2BEmployee) return;
+    this.slotFormLoading = true;
+    const payload = {
+      user_id: this.selectedB2BEmployee.id,
+      ...this.slotForm
+    };
+    this.b2bSlotService.createSlot(payload).subscribe({
+      next: () => {
+        this.slotFormLoading = false;
+        this.closeFixedExcusePopup();
+        Swal.fire({
+          title: 'Saved',
+          text: 'Fixed excuse slot assigned successfully.',
+          icon: 'success',
+          confirmButtonColor: '#FF7519'
+        });
+      },
+      error: (err: any) => {
+        this.slotFormLoading = false;
+        Swal.fire({
+          title: 'Error',
+          text: err.error?.message || 'Failed to save slot.',
+          icon: 'error',
+          confirmButtonColor: '#FF7519'
+        });
+      }
+    });
+  }
+
+  deactivateFixedExcuse() {
+    if (!this.activeSlotForEmployee) return;
+    
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You want to deactivate this fixed excuse slot?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#FF7519',
+      cancelButtonColor: '#17253E',
+      confirmButtonText: 'Yes, deactivate it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.slotFormLoading = true;
+        this.b2bSlotService.deactivateSlot(this.activeSlotForEmployee.id).subscribe({
+          next: () => {
+            this.slotFormLoading = false;
+            this.closeFixedExcusePopup();
+            Swal.fire({
+              title: 'Deactivated!',
+              text: 'The fixed excuse slot has been deactivated.',
+              icon: 'success',
+              confirmButtonColor: '#FF7519'
+            });
+          },
+          error: (err: any) => {
+            this.slotFormLoading = false;
+            Swal.fire({
+              title: 'Error',
+              text: err.error?.message || 'Failed to deactivate slot.',
+              icon: 'error',
+              confirmButtonColor: '#FF7519'
+            });
+          }
+        });
+      }
+    });
+  }
 
   isNavigateingToImportPopUp = false
 
@@ -71,10 +212,116 @@ ngOnInit() {
   }
   
   this.getUsersName();
+  this.getVacationTypes();
   
   localStorage.setItem('HrLocationsCN', "1");
   localStorage.setItem('HrAttendaceCN', "1");
   localStorage.setItem('HrAttanceDetailsCN', "1");
+}
+
+@HostListener('document:click', ['$event'])
+onDocumentClick(event: MouseEvent) {
+  const target = event.target as HTMLElement;
+  if (!target.closest('.action-dropdown-container')) {
+    this.activeDropdownId = null;
+  }
+}
+
+getVacationTypes() {
+  this.userServ.getVacationTypes().subscribe(
+    (res: any) => {
+      // Filter out Annual Leave, Official Holiday, and Exceptional Leave
+      this.vacationTypes = res.data.filter((type: any) => 
+        !['Annual Leave', 'Official Holiday', 'Exceptional Leave'].includes(type.name)
+      );
+    },
+    (err) => console.error('Error fetching vacation types', err)
+  );
+}
+
+toggleDropdown(id: number, event: Event) {
+  event.stopPropagation();
+  if (this.activeDropdownId === id) {
+    this.activeDropdownId = null;
+  } else {
+    this.activeDropdownId = id;
+  }
+}
+
+openVacationModal(id: number) {
+  this.selectedEmployeeForVacation = id;
+  this.isVacationModalOpen = true;
+  this.activeDropdownId = null; // close dropdown
+  this.selectedFile = null;
+  this.vacationData = {
+    vacation_type_id: null,
+    from_date: '',
+    to_date: '',
+    is_half_day: false,
+    allow_future_balance: false
+  };
+}
+
+closeVacationModal() {
+  this.isVacationModalOpen = false;
+  this.selectedEmployeeForVacation = null;
+  this.selectedFile = null;
+}
+
+onVacationDateChange() {
+  if (this.vacationData.is_half_day && this.vacationData.from_date) {
+    this.vacationData.to_date = this.vacationData.from_date;
+  }
+}
+
+onFileSelected(event: any) {
+  const file = event.target.files[0];
+  if (file) {
+    this.selectedFile = file;
+  }
+}
+
+getSelectedVacationTypeName(): string {
+  const type = this.vacationTypes.find(t => t.id == this.vacationData.vacation_type_id);
+  return type ? type.name : '';
+}
+
+submitVacation() {
+  if (!this.selectedEmployeeForVacation || !this.vacationData.vacation_type_id || !this.vacationData.from_date || !this.vacationData.to_date) {
+    Swal.fire('Error', 'Please fill all required fields', 'error');
+    return;
+  }
+
+  const typeName = this.getSelectedVacationTypeName();
+  if (typeName === 'Sick Leave' && !this.selectedFile) {
+    Swal.fire('Error', 'Attachment is required for sick leave', 'error');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('user_id', this.selectedEmployeeForVacation.toString());
+  formData.append('vacation_type_id', this.vacationData.vacation_type_id.toString());
+  formData.append('from_date', this.vacationData.from_date);
+  formData.append('to_date', this.vacationData.to_date);
+  formData.append('is_half_day', this.vacationData.is_half_day ? '1' : '0');
+  formData.append('allow_future_balance', this.vacationData.allow_future_balance ? '1' : '0');
+  
+  if (this.selectedFile) {
+    formData.append('attachments', this.selectedFile);
+  }
+
+  this.isLoading = true;
+  this.userServ.addUserVacation(formData).subscribe(
+    (res: any) => {
+      this.isLoading = false;
+      this.closeVacationModal();
+      Swal.fire('Success', 'Vacation successfully added and approved', 'success');
+    },
+    (err: any) => {
+      this.isLoading = false;
+      Swal.fire('Error', err.error?.message || 'Failed to add vacation', 'error');
+    }
+  );
 }
 
    downloadExcelTemplate() {
@@ -126,6 +373,18 @@ ngOnInit() {
 
   NavigateToAddEmployee() {
     this.router.navigateByUrl("HR/HREmployeeDetailsAdd")
+  }
+
+  OpenBulkUpdateTimePopUp() {
+    const dialogRef = this.dialog.open(BulkUpdateTimePopUpComponent, {
+      width: '500px',
+      maxWidth: '95vw'
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.getAllEmployees(this.CurrentPageNumber);
+      }
+    });
   }
 
 NavigateToEmployeeDetails(id: number) {
@@ -276,6 +535,7 @@ NavigateToEmployeeDetails(id: number) {
       data: { userId },
       width: '900px',
       maxWidth: '95vw',
+      panelClass: 'employee-hr-profile-dialog-panel'
     });
   }
 }

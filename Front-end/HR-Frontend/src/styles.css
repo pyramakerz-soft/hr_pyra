@@ -78,13 +78,16 @@ body {
 .employee-hr-profile-dialog-panel .mat-mdc-dialog-surface {
     width: 100% !important;
     max-width: min(900px, 95vw) !important;
-    border-radius: 16px;
+    border-radius: 24px !important;
     padding: 0;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 .employee-hr-profile-dialog-panel .mat-mdc-dialog-container {
     padding: 0;
     overflow: visible;
+    background: transparent !important;
 }
 
 /* Custom Dialog Styles */
@@ -105,4 +108,41 @@ body {
 
 .cdk-overlay-pane {
     position: static !important;
+}
+
+/* Premium SweetAlert2 Styles */
+.premium-swal-popup {
+    border-radius: 20px !important;
+    padding: 2rem !important;
+    box-shadow: 0 25px 50px -12px rgba(23, 37, 62, 0.25) !important;
+    font-family: 'Poppins', sans-serif !important;
+}
+
+.premium-swal-popup.success {
+    border-bottom: 6px solid #10b981;
+}
+
+.premium-swal-title {
+    color: #17253e !important;
+    font-weight: 800 !important;
+    font-size: 1.5rem !important;
+}
+
+.premium-swal-confirm {
+    background-color: #17253e !important;
+    border-radius: 10px !important;
+    padding: 0.75rem 2rem !important;
+    font-weight: 600 !important;
+}
+
+.premium-swal-cancel {
+    background-color: #f3f4f6 !important;
+    color: #4b5563 !important;
+    border-radius: 10px !important;
+    padding: 0.75rem 2rem !important;
+    font-weight: 600 !important;
+}
+
+.premium-swal-confirm:hover {
+    background-color: #fb923c !important;
 }

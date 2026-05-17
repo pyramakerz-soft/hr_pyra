@@ -15,7 +15,7 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $timezoneValue = $this->timezone ? $this->timezone->value : 3;  // Default to +3 if no timezone
+        $timezoneValue = $this->timezone ? $this->timezone->value : 0;  // Default to 0 if no timezone
 
         // Support date filtering
         $from_day = $request->get('from_day');
@@ -71,10 +71,8 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'code' => $this->code,
-            'department' => $this->department != null ? $this->department->name :
-                ($this->subDepartment != null ?
-                    $this->subDepartment->name :
-                    null),
+            'department' => $this->department?->name,
+            'sub_department' => $this->subDepartment?->name,
             'position' => $this->user_detail->emp_type ?? null,
             'role' => $this->getRoleName(),
             'email' => $this->email,

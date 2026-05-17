@@ -1,74 +1,64 @@
-<div>
-    <div class="flex justify-between items-center">
-      <div class="flex items-center space-x-4">
-        <!-- Back Button -->
-        <button (click)="goBack()" 
-                class="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                title="Go back">
-          <i class="fa-solid fa-arrow-left text-gray-600"></i>
-        </button>
-        
-        <div>
-          <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Sub Department</p>
-        </div>
-      </div>
-      
-      <button class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg"
-      (click)="NavigateToAddSubDepartment()"
-      [disabled]="AddButton"
-      >
-        Add
+<div class="page-container pb-10">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="hero-title">
+      <button (click)="goBack()" class="back-btn" title="Back to Departments">
+        <i class="fa-solid fa-arrow-left"></i>
       </button>
+      <h1 class="page-title">Sub-Departments</h1>
     </div>
-  
-    <div class="mt-5 overflow-x-auto rounded-2xl border border-[#EAECF0]">
-      <table class="w-full md:table-fixed table-auto bg-[#FFFFFF] text-left text-[#475467]">
-        <thead class="bg-[#F9FAFB] text-sm md:text-base">
+    
+    <button (click)="NavigateToAddSubDepartment()" [disabled]="AddButton" class="btn-add">
+      <i class="fa-solid fa-plus"></i>
+      <span>Add New Sub-Department</span>
+    </button>
+  </header>
+
+  <!-- Sub-Department List Card -->
+  <div class="table-card">
+    <div class="overflow-x-auto">
+      <table class="modern-table">
+        <thead>
           <tr>
-            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-              ID  
-            </th>
-            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-              Department Name  
-            </th>
-            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-              Team Lead Name  
-            </th>
-        
-            <th class="py-3 px-4 min-w-[120px] whitespace-nowrap">
-              Actions  
-            </th>
+            <th class="w-20">UID</th>
+            <th>Functional Identity</th>
+            <th>Designated Team Lead</th>
+            <th class="text-right px-6" *ngIf="subDepts.length !== 0">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <!-- No Data Row -->
+          <!-- Empty State -->
           <tr *ngIf="subDepts.length === 0">
-            <td colspan="5" class="px-4 py-2 h-[72px] text-center border-t border-gray-300 text-xs md:text-sm">
-              No Data Found
+            <td colspan="4">
+              <div class="empty-state">
+                <i class="fa-solid fa-sitemap"></i>
+                <p class="font-medium">No sub-departments established</p>
+                <p class="text-xs mt-1">Refine your organizational hierarchy here</p>
+              </div>
             </td>
           </tr>
-  
+
           <!-- Data Rows -->
-          <tr *ngFor="let row of subDepts; let i = index"
-              [ngClass]="{'bg-[#F4F4F4]': i % 2 === 0, 'bg-white': i % 2 !== 0}"
-              class="border-t border-gray-300 text-xs md:text-sm">
-  
-            <td class="py-5 px-4">{{ row.id }}</td>
-            <td class="py-5 px-4">{{ row.name }}</td>
-            <td class="py-5 px-4">
-              {{row.teamLeadName}}
+          <tr *ngFor="let row of subDepts; let i = index">
+            <td class="id-text">#{{ row.id }}</td>
+            <td class="dept-name">{{ row.name }}</td>
+            <td>
+              <div class="lead-badge" *ngIf="row.teamLeadName">
+                <i class="fa-solid fa-user-gear text-[10px] opacity-50"></i>
+                {{ row.teamLeadName }}
+              </div>
+              <span *ngIf="!row.teamLeadName" class="text-gray-300 italic text-xs">Unassigned</span>
             </td>
-
-            <td class="py-5 px-4">
-              <div class="px-2">
-                <button (click)="EditSubDepartment(row.id)"
-                [disabled]="AddButton"
-
-                >
-                  <i class="fas fa-edit text-[#101828] w-3 md:w-4"></i>
+            
+            <td class="text-right px-6" *ngIf="subDepts.length !== 0">
+              <div class="flex justify-end gap-2">
+                <button [disabled]="AddButton" class="action-btn edit-btn" title="Modify Sub-Department"
+                        (click)="EditSubDepartment(row.id)">
+                  <i class="fas fa-edit"></i>
                 </button>
-                <button (click)="deleteSubDepartment(row.id)">
-                  <i class="fa fa-trash text-[#CC161D] ml-2 w-3 md:w-4"></i>
+                <button class="action-btn delete-btn" title="Remove Sub-Department" 
+                        (click)="deleteSubDepartment(row.id)">
+                  <i class="fa fa-trash"></i>
                 </button>
               </div>
             </td>
@@ -77,4 +67,4 @@
       </table>
     </div>
   </div>
-  
+</div>

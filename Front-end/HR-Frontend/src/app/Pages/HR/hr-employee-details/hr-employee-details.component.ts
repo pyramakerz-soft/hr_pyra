@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
 import { HrStateService } from '../../../Services/SaveState/hr-state.service';
+import { B2bSlotService } from '../../../Services/b2b-slot.service';
 
 @Component({
   selector: 'app-hr-employee-details',
@@ -22,8 +23,10 @@ export class HrEmployeeDetailsComponent {
   PasswordError: string = ""; 
   isChange = false;
   has_serial_number = false;
+  isB2BEmployee = false;
+  activeSlot: any = null;
 
-  constructor(public router:Router, public activeRoute:ActivatedRoute, public userService:UserServiceService, private hrStateService: HrStateService){}
+  constructor(public router:Router, public activeRoute:ActivatedRoute, public userService:UserServiceService, private hrStateService: HrStateService, private b2bSlotService: B2bSlotService){}
 
   ngOnInit(): void {
     this.activeRoute.params.subscribe(params => {
@@ -43,6 +46,20 @@ goBack() {
         d.User.end_time = this.convertTimeFormate(d.User.end_time)
         d.User.working_hours_day = this.convertToTimeString(d.User.working_hours_day)
         this.employee = d.User;
+        
+        const deptName = (d.User.deparment_name ?? '').toUpperCase();
+        this.isB2BEmployee = deptName.includes('B2B');
+        if (this.isB2BEmployee && this.empId) {
+          this.b2bSlotService.getActiveSlotForUser(this.empId).subscribe({
+            next: (res: any) => {
+              this.activeSlot = res.slot ?? null;
+            },
+            error: () => {
+              this.activeSlot = null;
+            }
+          });
+        }
+
         this.userService.checkSerialNumber(d.User.id).subscribe(
           (d:any) => {
             this.has_serial_number = d.has_serial_number

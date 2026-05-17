@@ -46,6 +46,7 @@ class UserDetailResource extends JsonResource
             "gender" => $this->user->gender,
             "department_id" => $this->user->department_id ?? null,
             "sub_department_id" => $this->user->sub_department_id ?? null,
+            "sub_department_name" => $this->user->subDepartment->name ?? null,
             "timezone_id" => $this->user->timezone_id ?? null,
 
             "deparment_name" => $this->user->department->name ?? null,

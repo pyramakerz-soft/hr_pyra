@@ -6,6 +6,7 @@ export class UserModel {
         public phone: string,
         public working_hours: string,
         public department: string,
+        public sub_department: string,
         public role : string ,
         public position : string ,
         public code : string ,
