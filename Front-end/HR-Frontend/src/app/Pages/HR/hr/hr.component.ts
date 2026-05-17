@@ -23,11 +23,13 @@ export class HRComponent {
     { label: 'Attendance ', icon: 'fi fi-rr-clock', route: '/HR/HRAttendance', notificationCount: 0 },
     { label: 'Locations', icon: 'fi fi-rr-map', route: '/HR/HRBounders', notificationCount: 0 },
     { label: 'Departments', icon: 'fi fi-rr-building', route: '/HR/HRDepartment', notificationCount: 0 },
+    { label: 'Deductions', icon: 'fi fi-rr-percentage', route: '/HR/HRDeductions', notificationCount: 0 },
     // { label: 'Issues', icon: 'fi fi-rr-chart-simple', route: '/HR/HRIssues', notificationCount: this.count }, 
     { label: 'Custom Vacations', icon: 'fi fi-rr-calendar-star', route: '/HR/HRCustomVacations', notificationCount: 0 },
     // { label: 'Service Actions', icon: 'fi fi-rr-tools', route: '/HR/HRServiceActions', notificationCount: 0 },
     { label: 'TimeZones', icon: 'fi fi-rr-world', route: '/HR/ShowTimezones', notificationCount: 0 },
     { label: 'Notifications', icon: 'fi fi-rr-bell', route: '/HR/HRNotifications', notificationCount: 0 },
+    { label: 'Adjustments', icon: 'fi fi-rr-settings-sliders', route: '/HR/HRAdjustments', notificationCount: 0 },
     { label: 'Sign Out', icon: 'fi fi-bs-sign-out-alt transform rotate-180', route: '', notificationCount: 0 },
 
   ];

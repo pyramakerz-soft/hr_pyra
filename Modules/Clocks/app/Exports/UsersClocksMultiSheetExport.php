@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Modules\Clocks\Exports\Sheets\UserClocksAggregatedSheet;
 use Modules\Clocks\Exports\Sheets\UserClocksDetailedSheet;
 use Modules\Clocks\Exports\Sheets\UserClocksSummarySheet;
+use Modules\Clocks\Exports\Sheets\HrAttendanceSheet;
 use Modules\Clocks\Exports\UserClocksExport;
 use Modules\Users\Models\User;
 
@@ -54,6 +55,12 @@ class UsersClocksMultiSheetExport implements WithMultipleSheets
             $summaryExport->getSummaryComparisons()
         );
         $sheets[] = new UserClocksAggregatedSheet($summaryExport->getAggregatedRows());
+
+        $sheets[] = new HrAttendanceSheet(
+            $summaryExport->getDetailedRows(),
+            $summaryExport->getRowStyles(),
+            "Attendance"
+        );
 
         foreach ($this->users as $user) {
             if (! $user instanceof User) {

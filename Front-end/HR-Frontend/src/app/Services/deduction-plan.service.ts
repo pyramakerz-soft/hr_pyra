@@ -34,6 +34,12 @@ export class DeductionPlanService {
       .pipe(map((response) => this.extractPlan(response)));
   }
 
+  getTemplates(): Observable<any[]> {
+    return this.http
+      .get<any>(`${this.api.BaseUrl}/deduction-rule-templates`, { headers: this.getHeaders() })
+      .pipe(map((response) => response?.data?.templates ?? []));
+  }
+
   saveSubDepartmentPlan(subDepartmentId: number, plan: DeductionPlan): Observable<DeductionPlan> {
     return this.http
       .post<any>(`${this.baseUrl}/sub-department/${subDepartmentId}`, this.preparePayload(plan), {

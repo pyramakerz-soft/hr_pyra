@@ -1,226 +1,205 @@
-<div class="p-6 space-y-8">
-  <section class="bg-white rounded-lg shadow p-6">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-semibold text-gray-800">
-        {{ isEditing ? 'Edit Custom Vacation' : 'Add Custom Vacation' }}
+<div class="page-container pb-20">
+  
+  <!-- Vacation Configuration Form -->
+  <section class="section-card">
+    <header class="section-header">
+      <h2 class="section-title">
+        {{ isEditing ? 'Modify Vacation Configuration' : 'Define New Custom Vacation' }}
       </h2>
-      <button
-        *ngIf="isEditing"
-        type="button"
-        (click)="resetForm()"
-        class="text-sm text-blue-600 hover:underline"
-      >
-        Cancel edit
+      <button *ngIf="isEditing" type="button" (click)="resetForm()" class="action-link link-blue">
+        <i class="fa-solid fa-xmark mr-1"></i> Cancel Modifications
       </button>
-    </div>
+    </header>
 
-    <form [formGroup]="vacationForm" (ngSubmit)="submitForm()" class="grid gap-4 md:grid-cols-2">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Name <span class="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          formControlName="name"
-          class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
-          placeholder="Christmas Vacation"
-        />
-        <p *ngIf="vacationForm.get('name')?.invalid && vacationForm.get('name')?.touched" class="text-xs text-red-500 mt-1">
-          Name is required.
+    <form [formGroup]="vacationForm" (ngSubmit)="submitForm()" class="grid gap-6 md:grid-cols-2">
+      <!-- Name -->
+      <div class="input-group">
+        <label class="label-text">Vacation Identity <span class="text-red-500">*</span></label>
+        <input type="text" formControlName="name" class="premium-input" placeholder="e.g. Annual Winter Break">
+        <p *ngIf="vacationForm.get('name')?.invalid && vacationForm.get('name')?.touched" class="error-text">
+          Identification name is required.
         </p>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Is full day?
-        </label>
-        <div class="flex items-center space-x-3 border rounded px-3 py-2">
-          <input type="checkbox" formControlName="is_full_day" id="is_full_day" class="h-4 w-4 text-blue-600" />
-          <label for="is_full_day" class="text-sm text-gray-700">Applies to entire day</label>
+      <!-- Is Full Day -->
+      <div class="input-group">
+        <label class="label-text">Duration Protocol</label>
+        <div class="custom-checkbox-wrapper" [class.checked]="vacationForm.get('is_full_day')?.value" (click)="vacationForm.get('is_full_day')?.setValue(!vacationForm.get('is_full_day')?.value)">
+          <div class="custom-check">
+            <i class="fa-solid fa-check"></i>
+          </div>
+          <span class="text-sm font-bold text-gray-700">Applies to Entire Day</span>
         </div>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Start date <span class="text-red-500">*</span>
-        </label>
-        <input
-          type="date"
-          formControlName="start_date"
-          class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
-        />
-        <p *ngIf="vacationForm.get('start_date')?.invalid && vacationForm.get('start_date')?.touched" class="text-xs text-red-500 mt-1">
-          Start date is required.
+      <!-- Start Date -->
+      <div class="input-group">
+        <label class="label-text">Commencement Date <span class="text-red-500">*</span></label>
+        <input type="date" formControlName="start_date" class="premium-input">
+        <p *ngIf="vacationForm.get('start_date')?.invalid && vacationForm.get('start_date')?.touched" class="error-text">
+          Start date must be specified.
         </p>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          End date <span class="text-red-500">*</span>
-        </label>
-        <input
-          type="date"
-          formControlName="end_date"
-          class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
-        />
-        <p *ngIf="vacationForm.get('end_date')?.invalid && vacationForm.get('end_date')?.touched" class="text-xs text-red-500 mt-1">
-          End date is required.
+      <!-- End Date -->
+      <div class="input-group">
+        <label class="label-text">Conclusion Date <span class="text-red-500">*</span></label>
+        <input type="date" formControlName="end_date" class="premium-input">
+        <p *ngIf="vacationForm.get('end_date')?.invalid && vacationForm.get('end_date')?.touched" class="error-text">
+          Conclusion date must be specified.
         </p>
       </div>
 
-      <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Applies to departments
-        </label>
-        <select
-          multiple
-          formControlName="department_ids"
-          class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200 min-h-[120px]"
-        >
-          <option *ngFor="let department of departments" [value]="department.id">
+      <!-- Departments -->
+      <div class="md:col-span-2 input-group">
+        <label class="label-text">Departmental Scope</label>
+        <select multiple formControlName="department_ids" class="premium-input min-h-[140px] focus:ring-0">
+          <option *ngFor="let department of departments" [value]="department.id" class="p-2 border-b border-gray-50">
             {{ department.name }}
           </option>
         </select>
-        <p class="text-xs text-gray-500 mt-1">Select one or more departments. Leave empty to configure sub departments only.</p>
+        <p class="text-[10px] text-gray-400 italic">Select target departments. Leave empty for global application.</p>
       </div>
 
-      <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Applies to sub departments
-        </label>
-        <div class="border rounded px-3 py-2">
-          <div *ngIf="loadingSubDepartments" class="text-xs text-gray-500 mb-2">
-            Loading sub departments...
+      <!-- Sub Departments -->
+      <div class="md:col-span-2 input-group">
+        <label class="label-text">Functional Unit Scope (Sub-Departments)</label>
+        <div class="relative">
+          <div *ngIf="loadingSubDepartments" class="absolute inset-0 bg-white/80 z-10 flex items-center justify-center rounded-xl">
+            <i class="fa-solid fa-spinner fa-spin text-primary-navy"></i>
           </div>
-          <select
-            multiple
-            formControlName="sub_department_ids"
-            class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200 min-h-[120px]"
-          >
-            <option *ngFor="let subDept of availableSubDepartments" [value]="subDept.id">
+          <select multiple formControlName="sub_department_ids" class="premium-input min-h-[140px] w-full focus:ring-0">
+            <option *ngFor="let subDept of availableSubDepartments" [value]="subDept.id" class="p-2 border-b border-gray-50">
               {{ subDept.name }}
             </option>
           </select>
-          <p class="text-xs text-gray-500 mt-1">Sub departments list updates based on selected departments.</p>
         </div>
+        <p class="text-[10px] text-gray-400 italic">Functional units update automatically based on selected departments.</p>
       </div>
 
-      <div class="md:col-span-2">
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Description
-        </label>
-        <textarea
-          formControlName="description"
-          rows="3"
-          class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
-          placeholder="Optional details about this vacation"
-        ></textarea>
+      <!-- Description -->
+      <div class="md:col-span-2 input-group">
+        <label class="label-text">Operational Notes & Context</label>
+        <textarea formControlName="description" rows="3" class="premium-input" placeholder="Specify additional details..."></textarea>
       </div>
 
-      <div class="md:col-span-2 flex items-center space-x-3 pt-2">
-        <button
-          type="submit"
-          [disabled]="saveInProgress"
-          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {{ saveInProgress ? 'Saving...' : (isEditing ? 'Update Vacation' : 'Create Vacation') }}
+      <!-- Form Actions -->
+      <div class="md:col-span-2 flex items-center gap-6 pt-4 border-t border-gray-50">
+        <button type="submit" [disabled]="saveInProgress" class="btn-primary">
+          <i class="fa-solid" [class.fa-spinner]="saveInProgress" [class.fa-spin]="saveInProgress" [class.fa-check]="!saveInProgress"></i>
+          {{ saveInProgress ? 'Commiting Changes...' : (isEditing ? 'Update Configuration' : 'Activate Vacation') }}
         </button>
-        <button type="button" class="text-sm text-gray-600 hover:underline" (click)="resetForm()">Clear form</button>
+        <button type="button" class="action-link text-gray-400 hover:text-gray-600" (click)="resetForm()">
+          <i class="fa-solid fa-rotate-left mr-1"></i> Clear Selection
+        </button>
       </div>
     </form>
 
-    <div *ngIf="formError" class="mt-4 text-sm text-red-500">
+    <div *ngIf="formError" class="mt-6 p-4 bg-red-50 rounded-xl text-red-600 text-sm font-bold flex items-center gap-2">
+      <i class="fa-solid fa-circle-exclamation"></i>
       {{ formError }}
     </div>
   </section>
 
-  <section class="bg-white rounded-lg shadow p-6">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
-      <h2 class="text-xl font-semibold text-gray-800">Configured vacations</h2>
-      <div class="text-sm text-gray-500">
-        Total: {{ pagination.total }}
+  <!-- Configured Vacations List -->
+  <section class="section-card">
+    <header class="section-header">
+      <h2 class="section-title">Active Vacation Schedule</h2>
+      <div class="date-pill bg-gray-50">
+        <i class="fa-solid fa-layer-group opacity-40"></i>
+        <span>Total Records: {{ pagination.total }}</span>
       </div>
-    </div>
+    </header>
 
-    <div *ngIf="listError" class="text-sm text-red-500 mb-4">
+    <!-- Error/Loading states -->
+    <div *ngIf="listError" class="p-4 bg-red-50 text-red-600 rounded-xl text-sm mb-6 font-bold">
       {{ listError }}
     </div>
 
-    <div *ngIf="isLoading" class="text-sm text-gray-500">
-      Loading vacations...
+    <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-20 text-gray-400 gap-4">
+      <i class="fa-solid fa-circle-notch fa-spin text-4xl"></i>
+      <p class="font-medium">Retrieving vacation records...</p>
     </div>
 
-    <div *ngIf="!isLoading && vacations.length === 0" class="text-sm text-gray-500">
-      No custom vacations configured yet.
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && vacations.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-300 gap-4">
+      <i class="fa-solid fa-calendar-day text-6xl opacity-20"></i>
+      <p class="font-medium text-lg">No custom vacations defined</p>
+      <p class="text-xs">Establish a new vacation using the form above.</p>
     </div>
 
+    <!-- Data Table -->
     <div *ngIf="!isLoading && vacations.length > 0" class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200 text-sm">
-        <thead class="bg-gray-50">
+      <table class="modern-table">
+        <thead>
           <tr>
-            <th class="px-4 py-2 text-left font-medium text-gray-700 uppercase tracking-wider">Name</th>
-            <th class="px-4 py-2 text-left font-medium text-gray-700 uppercase tracking-wider">Dates</th>
-            <th class="px-4 py-2 text-left font-medium text-gray-700 uppercase tracking-wider">Scope</th>
-            <th class="px-4 py-2 text-left font-medium text-gray-700 uppercase tracking-wider">Description</th>
-            <th class="px-4 py-2 text-right font-medium text-gray-700 uppercase tracking-wider">Actions</th>
+            <th>Vacation Identity</th>
+            <th>Effective Dates</th>
+            <th>Organizational Scope</th>
+            <th>Notes</th>
+            <th class="text-right">Management</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200">
+        <tbody>
           <tr *ngFor="let vacation of vacations">
-            <td class="px-4 py-2">
-              <div class="font-semibold text-gray-800">{{ vacation.name }}</div>
-              <div class="text-xs text-gray-500">{{ vacation.is_full_day ? 'Full day' : 'Partial day' }}</div>
+            <td>
+              <div class="vacation-name">{{ vacation.name }}</div>
+              <span class="type-badge" [class.type-full]="vacation.is_full_day" [class.type-partial]="!vacation.is_full_day">
+                {{ vacation.is_full_day ? 'Entire Shift' : 'Partial Protocol' }}
+              </span>
             </td>
-            <td class="px-4 py-2">
-              <div>{{ vacation.start_date }} → {{ vacation.end_date }}</div>
-            </td>
-            <td class="px-4 py-2 space-y-1">
-              <div *ngIf="vacation.departments?.length" class="text-xs text-gray-600">
-                Departments: {{ formatDepartmentNames(vacation) }}
-              </div>
-              <div *ngIf="vacation.sub_departments?.length" class="text-xs text-gray-600">
-                Sub departments: {{ formatSubDepartmentNames(vacation) }}
-              </div>
-              <div *ngIf="!vacation.departments?.length && !vacation.sub_departments?.length" class="text-xs text-gray-500">
-                Applies globally
+            <td>
+              <div class="date-pill">
+                <i class="fa-regular fa-calendar-check text-orange-400"></i>
+                {{ vacation.start_date }} <span class="text-gray-300 mx-1">→</span> {{ vacation.end_date }}
               </div>
             </td>
-            <td class="px-4 py-2">
-              <span class="text-sm text-gray-700">{{ vacation.description || '—' }}</span>
+            <td>
+              <div class="scope-text">
+                <div *ngIf="vacation.departments?.length">
+                  <strong>Departments:</strong> {{ formatDepartmentNames(vacation) }}
+                </div>
+                <div *ngIf="vacation.sub_departments?.length">
+                  <strong>Units:</strong> {{ formatSubDepartmentNames(vacation) }}
+                </div>
+                <div *ngIf="!vacation.departments?.length && !vacation.sub_departments?.length" class="text-emerald-600 font-bold flex items-center gap-1">
+                  <i class="fa-solid fa-globe text-[10px]"></i> Global Application
+                </div>
+              </div>
             </td>
-            <td class="px-4 py-2 text-right space-x-4">
-              <button type="button" (click)="editVacation(vacation)" class="text-blue-600 hover:underline">
-                Edit
-              </button>
-              <button type="button" (click)="deleteVacation(vacation)" class="text-red-600 hover:underline">
-                Delete
-              </button>
+            <td>
+              <p class="text-xs text-gray-600 max-w-[200px] truncate" title="{{ vacation.description }}">
+                {{ vacation.description || 'No descriptive notes provided' }}
+              </p>
+            </td>
+            <td class="text-right">
+              <div class="flex justify-end gap-6">
+                <button (click)="editVacation(vacation)" class="action-link link-blue">
+                  <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+                </button>
+                <button (click)="deleteVacation(vacation)" class="action-link link-red">
+                  <i class="fa-solid fa-trash-can mr-1"></i> Delete
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div *ngIf="pagination.last_page > 1" class="flex items-center justify-between mt-6">
-      <button
-        type="button"
-        (click)="changePage('prev')"
-        [disabled]="pagination.current_page === 1"
-        class="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Previous
+    <!-- Pagination -->
+    <footer *ngIf="pagination.last_page > 1" class="pagination-tray">
+      <button type="button" (click)="changePage('prev')" [disabled]="pagination.current_page === 1" class="page-btn">
+        <i class="fa-solid fa-chevron-left mr-2"></i> Previous
       </button>
-      <span class="text-sm text-gray-600">
-        Page {{ pagination.current_page }} of {{ pagination.last_page }}
-      </span>
-      <button
-        type="button"
-        (click)="changePage('next')"
-        [disabled]="pagination.current_page === pagination.last_page"
-        class="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Next
+      
+      <div class="page-indicator">
+        Page <span class="text-primary-navy">{{ pagination.current_page }}</span> of {{ pagination.last_page }}
+      </div>
+
+      <button type="button" (click)="changePage('next')" [disabled]="pagination.current_page === pagination.last_page" class="page-btn">
+        Next <i class="fa-solid fa-chevron-right ml-2"></i>
       </button>
-    </div>
+    </footer>
   </section>
 </div>

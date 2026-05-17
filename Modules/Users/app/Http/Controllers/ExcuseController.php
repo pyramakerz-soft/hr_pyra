@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use Modules\Users\Http\Requests\Api\Excuses\StoreExcusesRequest;
 use Modules\Users\Models\Excuse;
 use Modules\Users\Models\User;
+use Illuminate\Support\Facades\Log as FacadesLog;
+
 
 /**
  * @OA\Tag(
@@ -57,8 +59,47 @@ class ExcuseController extends Controller
      */
     public function addUserExcuse(StoreExcusesRequest $request)
     {
-        //TODO make a limit two excuses per month DONE
         $authUser = Auth::user();
+        
+        // B2B Department Rules (Identify by name as ID may change in production)
+        $departmentName = strtoupper($authUser->department?->name ?? '');
+        $isB2B = str_contains($departmentName, 'B2B');
+
+        $from = Carbon::parse($request->input('from'));
+        $to = Carbon::parse($request->input('to'));
+
+        // Rule 3: B2B Department Overlap Check
+        if ($isB2B) {
+            $requestedDate = Carbon::parse($request->input('date'));
+            $dayOfWeek = strtolower($requestedDate->format('l'));
+
+            $fixedSlots = \Modules\Clocks\Models\B2bFixedPermissionSlot::where('user_id', $authUser->id)
+                ->where('day_of_week', $dayOfWeek)
+                ->activeOn($request->input('date'))
+                ->get();
+            foreach ($fixedSlots as $slot) {
+                $slotFrom = Carbon::parse($slot->slot_from)->format('H:i:s');
+                $slotTo = Carbon::parse($slot->slot_to)->format('H:i:s');
+                
+                $reqFrom = $from->format('H:i:s');
+                $reqTo = $to->format('H:i:s');
+                // Overlap condition: reqFrom < slotTo AND reqTo > slotFrom
+                if ($reqFrom < $slotTo && $reqTo > $slotFrom) {
+                    return $this->returnError("The requested excuse overlaps with your fixed permission slot ({$slot->slot_from} - {$slot->slot_to}).", 422);
+                }
+            }
+        }
+        
+        if ($from->greaterThan($to)) {
+             // Handle cases where time crosses midnight if applicable, or just reject
+             $to->addDay();
+        }
+        
+        $durationMinutes = $from->diffInMinutes($to);
+
+        if ($durationMinutes > 120) {
+            return $this->returnError('An excuse cannot exceed 2 hours.', 422);
+        }
 
         $requestedDate = Carbon::parse($request->input('date'));
         if ($requestedDate->day > 25) {
@@ -74,8 +115,14 @@ class ExcuseController extends Controller
             ->where('status', '!=', 'rejected')
             ->count();
 
-        if ($excusesCount >= 2) {
-            return $this->returnError('You have reached the limit of 2 excuses for ' . $requestedDate->format('F Y') . '.', 422);
+        // Rule 1: B2B limit is 1 per month, others are 2
+        $limit = $isB2B ? 1 : 2;
+
+        if ($excusesCount >= $limit) {
+            $limitMsg = $isB2B 
+                ? 'B2B employees are limited to 1 excuse request per month.' 
+                : 'You have reached the limit of 2 excuses for ' . $requestedDate->format('F Y') . '.';
+            return $this->returnError($limitMsg, 422);
         }
 
         $userExcuse = Excuse::create([

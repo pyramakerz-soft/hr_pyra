@@ -7,6 +7,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Modules\Users\Models\UserVacation;
+use Modules\Users\Enums\StatusEnum;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
@@ -32,7 +33,8 @@ class LeavesHistoryExport implements WithMultipleSheets
         $sheets = [];
 
         // Determine years
-        $query = UserVacation::query();
+        $query = UserVacation::query()
+            ->where('status', StatusEnum::Approved);
         if ($this->userIds && is_array($this->userIds)) {
             $query->whereIn('user_id', $this->userIds);
         } elseif ($this->userIds) {
