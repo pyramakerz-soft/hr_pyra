@@ -199,8 +199,8 @@ trait ClockCalculationsHelperTrait
 
         // Group clocks by date
         $groupedClocks = $clocks->groupBy(function ($clock) {
-            $timezoneValue = $clock->user->timezone ? $clock->user->timezone->value : 3;  // Default to +3 if no timezone
-            return Carbon::parse($clock->clock_in)->addHours(value: $timezoneValue)->toDateString(); // Apply +3 offset
+            $timezoneOffset = $clock->user->timezone ? $clock->user->timezone->value : 0;
+            return Carbon::parse($clock->clock_in)->addHours($timezoneOffset)->toDateString();
         });
 
         $data = [];
@@ -211,7 +211,8 @@ trait ClockCalculationsHelperTrait
 
             // Sort clocks by adjusted clock_in time (descending)
             $sortedClocks = $clocksForDay->sortByDesc(function ($clock) {
-                return Carbon::parse($clock->clock_in)->addHours(3);
+                $timezoneOffset = $clock->user->timezone ? $clock->user->timezone->value : 0;
+                return Carbon::parse($clock->clock_in)->addHours($timezoneOffset);
             })->values(); // Reset array keys
 
             // Format each clock and apply +3 offset
@@ -441,8 +442,6 @@ trait ClockCalculationsHelperTrait
 
     protected function updateClockRecord($clock, $clockIn, $clockOut, $duration, $lateArrive, $earlyLeave)
     {
-        $clockIn = Carbon::parse($clockIn)->subHours(3);
-        $clockOut = Carbon::parse($clockOut)->subHours(3);
         $clock->update([
             'clock_in' => $clockIn->format('Y-m-d H:i:s'),
             'clock_out' => $clockOut->format('Y-m-d H:i:s'),

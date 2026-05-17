@@ -191,14 +191,7 @@ class UserClocksSummarySheet implements FromCollection, WithHeadings, WithStyles
                     $requiredMinutes = (int) ($comparison['required_minutes'] ?? 0);
                     $workedMinutes = (int) ($comparison['worked_minutes'] ?? 0);
 
-                    if ($requiredMinutes > 0 && $workedMinutes < $requiredMinutes) {
-                        $sheet->getStyle('E' . $rowNumber)->applyFromArray([
-                            'fill' => [
-                                'fillType' => Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => $this->workedHoursWarningColor],
-                            ],
-                        ]);
-                    }
+                    // Conditional warning color removed to keep total hours plain/black
                 }
             },
         ];

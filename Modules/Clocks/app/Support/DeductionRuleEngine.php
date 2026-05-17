@@ -43,7 +43,7 @@ class DeductionRuleEngine
             }
 
             $penalty = $rule['penalty'] ?? [];
-            $deductionMinutes = $this->penaltyToMinutes($penalty, $metrics, $currentOccurrence);
+            $deductionMinutes = $this->penaltyToMinutes($penalty, $metrics, $currentOccurrence, $category);
             $monetaryAmount = null;
 
             if (($penalty['type'] ?? null) === 'amount') {
@@ -148,8 +148,18 @@ class DeductionRuleEngine
                         return false;
                     }
                     break;
+                case 'shortfall_minutes_gt':
+                    if (($metrics['shortfall_minutes'] ?? 0) <= (float) $value) {
+                        return false;
+                    }
+                    break;
                 case 'shortfall_minutes_lte':
                     if (($metrics['shortfall_minutes'] ?? 0) > (float) $value) {
+                        return false;
+                    }
+                    break;
+                case 'shortfall_minutes_lt':
+                    if (($metrics['shortfall_minutes'] ?? 0) >= (float) $value) {
                         return false;
                     }
                     break;
@@ -471,7 +481,7 @@ class DeductionRuleEngine
         }
     }
 
-    protected function penaltyToMinutes(array $penalty, array $metrics, int $occurrence = 1): int
+    protected function penaltyToMinutes(array $penalty, array $metrics, int $occurrence = 1, string $category = 'other'): int
     {
         $type = $penalty['type'] ?? 'fixed_minutes';
         $value = $penalty['value'] ?? null;
@@ -500,7 +510,13 @@ class DeductionRuleEngine
             case 'metric_minutes':
                 $metricKey = is_string($penalty['metric'] ?? null) ? $penalty['metric'] : null;
                 if ($metricKey === null) {
-                    return 0;
+                    if ($category === 'lateness') {
+                        $metricKey = 'lateness_minutes_actual';
+                    } elseif ($category === 'shortfall') {
+                        $metricKey = 'shortfall_minutes';
+                    } else {
+                        return 0;
+                    }
                 }
                 $metricValue = $metrics[$metricKey] ?? 0;
                 if ($metricValue === null) {

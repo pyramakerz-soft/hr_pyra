@@ -22,6 +22,7 @@ export class HrSubDepartmentAddComponent {
   TeamLeadNames: TeamLead[] = [];
   nameSelected: string = ""
   isDropdownOpen: boolean = false
+  useDepartmentManager: boolean = false;
   DeptName: string = ""
   mode: string = ""
   DeptId: number = 1;
@@ -57,10 +58,10 @@ export class HrSubDepartmentAddComponent {
   ngOnInit() {
 
     this.route.params.subscribe(params => {
-      console.log(params);
+
 
       if (params['deptId'] && params['subDeptId']) {
-        console.log('/ssss');
+
 
         this.DeptId = params['deptId'];
         this.subDeptId = params['subDeptId'];
@@ -74,7 +75,7 @@ export class HrSubDepartmentAddComponent {
         this.GetByID();
       } else if (params['deptId']) {
         this.DeptId = params['deptId'];
-        console.log(this.DeptId);
+
 
         this.subDeptSer.setDeptId(this.DeptId);
 
@@ -102,7 +103,7 @@ export class HrSubDepartmentAddComponent {
   getTeamLeadsNames() {
     this.teamLeadSer.getall().subscribe(
       (d: any) => {
-        // console.log(d);  // Add this log
+
         this.TeamLeadNames =d.teamLeadNames
    
 
@@ -120,32 +121,24 @@ export class HrSubDepartmentAddComponent {
   }
 
   Save() {
-    if (this.nameSelected == "" || this.DeptName == "" ) {
-      // Swal.fire({
-      //   text: "Complete all required fields.",
-      //   confirmButtonText: "OK",
-      //   confirmButtonColor: "#FF7519",
+    this.DeptNameError = "";
+    this.TeamLeadError = "";
 
-      // });
-        this.DeptNameError = ""; 
-        this.TeamLeadError = "";  
-        if (this.DeptName == "" && this.nameSelected == "" ) {
-          this.DeptNameError = '*Department Name Can not be empty';
-          this.TeamLeadError = '*Choose a TeamLead';
-        } else if (this.DeptName == "" ) {
-          this.DeptNameError = '*Department Name Can not be empty';
-        } else if (this.nameSelected == "") {
-          this.TeamLeadError = '*Choose a TeamLead';
-        } 
-      }
-    else {
+    if (this.DeptName == "") {
+      this.DeptNameError = '*Department Name Can not be empty';
+    }
+
+    if (!this.useDepartmentManager && this.nameSelected == "") {
+      this.TeamLeadError = '*Choose a TeamLead';
+    }
+
+    if (this.DeptNameError === "" && this.TeamLeadError === "") {
       this.SaveButton=true;
       if (this.mode == "Edit") {
         this.UpdateDepartment();
       }
       else if (this.mode == "Add") {
         this.CreateDepartment();
-
       }
     }
   }
@@ -153,53 +146,53 @@ export class HrSubDepartmentAddComponent {
 
   CreateDepartment(): void {
 
-    const manager = this.TeamLeadNames.find(manager => manager.team_lead_name === this.nameSelected);
-    if (manager) {
-      const teamLead_id = manager.team_lead_id;
-    
+    let teamLead_id: number | null = null;
 
-      this.subDeptSer.createDepartment(this.DeptName, teamLead_id ).subscribe(
-        (response: any) => {
-          this.router.navigateByUrl("/HR/HRSubDepartment/" + this.DeptId);
+    if (!this.useDepartmentManager) {
+      const manager = this.TeamLeadNames.find(manager => manager.team_lead_name === this.nameSelected);
+      if (manager) {
+        teamLead_id = manager.team_lead_id;
+      } else {
+        this.SaveButton=false;
+        Swal.fire({
+          text: "No TeamLead found with the selected name",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#FF7519",
+        });
+        return;
+      }
+    }
 
-
-        },
-        (error: any) => {
-          this.SaveButton=false;
-          if (error.error.message === "The name has already been taken.") {
-            Swal.fire({   
-              text: "The Sub Departmen name has already been taken",
-              confirmButtonText: "OK",
-              confirmButtonColor: "#FF7519",
-            });
-          }else{
-          Swal.fire({
-            text: "Faild to create, Please Try again later",
+    this.subDeptSer.createDepartment(this.DeptName, teamLead_id, this.useDepartmentManager).subscribe(
+      (response: any) => {
+        this.router.navigateByUrl("/HR/HRSubDepartment/" + this.DeptId);
+      },
+      (error: any) => {
+        this.SaveButton=false;
+        if (error.error.message === "The name has already been taken.") {
+          Swal.fire({   
+            text: "The Sub Departmen name has already been taken",
             confirmButtonText: "OK",
             confirmButtonColor: "#FF7519",
-
           });
-        }
-        }
-      );
-    } else {
-      this.SaveButton=false;
-      Swal.fire({
-        text: "No TeamLead found with the selected name",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#FF7519",
-
-      });
-    }
+        }else{
+        Swal.fire({
+          text: "Faild to create, Please Try again later",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#FF7519",
+        });
+      }
+      }
+    );
   }
 
 
 GetByID(){
   this.subDeptSer.GetByID(this.subDeptId).subscribe(
     (d: any) => {
-      console.log('/////');
+
       
-      console.log(d);
+
       
       this.DeptName = d.data.name;
       this.nameSelected = d.data.team_lead.name;
@@ -213,45 +206,45 @@ cancel(){
 }
 
 UpdateDepartment(){
-  const teamLead = this.TeamLeadNames.find(teamLead => teamLead.team_lead_name === this.nameSelected);
-  if (teamLead) {
-    const teamLeadId = teamLead.team_lead_id;
+  let teamLeadId: number | null = null;
 
-    this.subDeptSer.UpdateDept(this.subDeptId, this.DeptName, teamLeadId ).subscribe(
-      (response: any) => {
-        this.router.navigateByUrl("/HR/HRSubDepartment/" + this.DeptId);
+  if (!this.useDepartmentManager) {
+    const teamLead = this.TeamLeadNames.find(teamLead => teamLead.team_lead_name === this.nameSelected);
+    if (teamLead) {
+      teamLeadId = teamLead.team_lead_id;
+    } else {
+      this.SaveButton = false;
+      Swal.fire({
+        text: 'No TeamLead found with the selected name',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#FF7519',
+      });
+      return;
+    }
+  }
 
-
-
-      },
-      (error: any) => {
-        this.SaveButton=false;
-        if (error.error.message === "The name has already been taken.") {
-          Swal.fire({   
-            text: "The Sub Department name has already been taken",
-            confirmButtonText: "OK",
-            confirmButtonColor: "#FF7519",
-          });
-        }else{
-        Swal.fire({
-          text: "Faild to create, Please Try again later",
+  this.subDeptSer.UpdateDept(this.subDeptId, this.DeptName, teamLeadId, this.useDepartmentManager).subscribe(
+    (response: any) => {
+      this.router.navigateByUrl("/HR/HRSubDepartment/" + this.DeptId);
+    },
+    (error: any) => {
+      this.SaveButton=false;
+      if (error.error.message === "The name has already been taken.") {
+        Swal.fire({   
+          text: "The Sub Department name has already been taken",
           confirmButtonText: "OK",
           confirmButtonColor: "#FF7519",
-
         });
-      }
-      }
-    );
-  } else {
-    this.SaveButton = false;
-    Swal.fire({
-      text: 'No manager found with the selected name',
-      confirmButtonText: 'OK',
-      confirmButtonColor: '#FF7519',
-    });
-  }
-
-  }
+      }else{
+      Swal.fire({
+        text: "Faild to update, Please Try again later",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#FF7519",
+      });
+    }
+    }
+  );
+}
 
   private initializePlan(plan?: DeductionPlan): void {
     this.planEditor.setPlan(plan);

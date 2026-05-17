@@ -1,56 +1,75 @@
-<div>
-    <div class="flex justify-between mb-5 items-center">
-        <div>
-            <p class="text-[#272D37] font-semibold text-2xl md:text-3xl">Roles</p>
-        </div>
-        <div class ="flex space-x-1">
-            <button class="bg-[#17253E] text-white font-bold text-xs md:text-sm py-2 md:py-3 px-4 md:px-5 rounded-lg" 
-            (click)="save()"
-            [disabled]="isSaving">
-                Save
-            </button>
-            <button class="font-bold text-xs md:text-sm text-[#707070] py-2 md:py-3 px-4 md:px-5 rounded-lg border border-[#9F9999]"
-            (click)="cancel()">
-            Cancel
-          </button>
-        </div>
+<div class="page-container pb-20">
+  <!-- Header & Global Actions -->
+  <header class="header-nav">
+    <div class="hero-title">
+      <button (click)="goBack()" class="back-btn" title="Back to Roles">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <h1 class="page-title">{{ RoleName ? 'Modify Role' : 'Define New Role' }}</h1>
+    </div>
+    
+    <div class="flex gap-3">
+      <button class="btn-premium btn-outline" (click)="cancel()">Cancel</button>
+      <button class="btn-premium btn-primary" (click)="save()" [disabled]="isSaving">
+        <i class="fa-solid fa-floppy-disk mr-2"></i>
+        Save Changes
+      </button>
+    </div>
+  </header>
+
+  <!-- Role Definition Card -->
+  <main class="form-card">
+    <!-- Role Name Input -->
+    <div class="input-group">
+      <label for="role" class="label-text">
+        Role Descriptor
+        <span *ngIf="RoleNameError" class="error-text ml-2">{{ RoleNameError }}</span>
+      </label>
+      <input id="role" type="text" class="premium-input" placeholder="e.g. Operations Manager" 
+             [(ngModel)]="RoleName" maxlength="50" (input)="onRoleChange()">
+      <p class="text-[10px] text-gray-400 mt-1 italic">The descriptive name as it will appear in the system hierarchy.</p>
     </div>
 
-    <div class="border border-[#ECECEC] rounded-lg p-4 md:p-8 shadow-md shadow-[#0000001F]">
-        <label htmlFor="role" class="block mb-3 font-semibold text-xs md:text-sm text-[#3A3A3C]">
-            Role
-            <span *ngIf="RoleNameError" class="text-red-500 text-sm ml-2 font-normal">{{ RoleNameError }}</span>
-        </label>
-        <input id="role" type="text" class="border border-[#E5E5EA] rounded-lg w-full p-2 md:p-4 text-xs md:text-base"
-            placeholder="Enter Role" [(ngModel)]="RoleName"
-            maxlength="50"
-            (input)="onRoleChange()">
-            <div class="mt-4 text-xs md:text-sm">
-                <label class="font-semibold block mb-2 md:mb-3">Permissions</label>
-                <div class="">
-                    <!-- Dropdown toggle -->
-                    <div class="w-full p-2 md:p-4 border border-[#E5E5EA] rounded-xl cursor-pointer" (click)="toggleDropdown()">
-                        <span *ngIf="!isDropdownOpen">Choose Permissions</span>
-                        <span *ngIf="namesArrayError" class="text-red-500 text-sm ml-2 font-normal">{{ namesArrayError }}</span>
-                    </div>
-            
-                    <!-- Dropdown content -->
-                    <div *ngIf="isDropdownOpen" class="dropdown-container w-full border border-[#E5E5EA] rounded-xl bg-white mt-1 max-h-60 overflow-y-auto">
-                        @if(permissions.length !==0 ) {
-                            <div *ngFor="let permission of permissions" class="p-2 hover:bg-gray-100">
-                                <input type="checkbox" id="permission{{permission.name}}" [(ngModel)]="permission.selected" class="mr-2" (input)="onArrayChange()">
-                                <label for="permission{{permission.name}}" class="text-xs md:text-sm">{{ permission.name }}</label>
-                            </div>
-                        }@else {
-                            <div class="p-2">No Data Found</div>
-                        }
-                    </div>
-                </div>
+    <!-- Permissions Multi-Select -->
+    <div class="input-group">
+      <label class="label-text">
+        System Privileges
+        <span *ngIf="namesArrayError" class="error-text ml-2">{{ namesArrayError }}</span>
+      </label>
+      
+      <div class="relative">
+        <!-- Selector Box -->
+        <div class="permission-selector" (click)="toggleDropdown()">
+          <div class="selected-chips" *ngIf="permissions.length > 0">
+            <ng-container *ngFor="let permission of permissions">
+                <span *ngIf="permission.selected" class="permission-chip">
+                    {{ permission.name }}
+                </span>
+            </ng-container>
+            <span *ngIf="!RoleName && !hasSelectedPermissions" class="text-gray-400">Select required permissions...</span>
+          </div>
+          <i class="fa-solid fa-chevron-down text-gray-400"></i>
+        </div>
+
+        <!-- Dropdown Menu -->
+        <div *ngIf="isDropdownOpen" class="permission-dropdown absolute w-full mt-2">
+          <div *ngIf="permissions.length > 0; else noData">
+            <div *ngFor="let permission of permissions" 
+                 class="multi-option" 
+                 [class.option-checked]="permission.selected"
+                 (click)="$event.stopPropagation(); permission.selected = !permission.selected; onArrayChange()">
+              <div class="custom-checkbox">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <span class="option-text">{{ permission.name }}</span>
             </div>
-            
+          </div>
+          <ng-template #noData>
+            <div class="p-4 text-center text-gray-400 italic">No privileges available to assign.</div>
+          </ng-template>
+        </div>
+      </div>
+      <p class="text-[10px] text-gray-400 mt-1">Assign critical functional access points to this role definition.</p>
     </div>
+  </main>
 </div>
-
-
-
-

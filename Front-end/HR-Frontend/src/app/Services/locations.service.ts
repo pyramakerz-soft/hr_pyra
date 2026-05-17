@@ -30,8 +30,8 @@ export class LocationsService {
     return this.http.get<Location>(`${this.baseurl}/{id}`, { headers });
   }
 
-  EditByID(name:string , address:string ,latitude: number, longitude: number , id:number ,start_time:string, end_time:string, range:string){
-    const body = { name , address ,latitude, longitude ,start_time,end_time, range };
+  EditByID(name:string , address:string ,latitude: number, longitude: number , id:number ,start_time:string, end_time:string, range:string, is_school: boolean = true){
+    const body = { name , address ,latitude, longitude ,start_time,end_time, range, is_school };
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
@@ -39,8 +39,8 @@ export class LocationsService {
 
   }
 
-  CreateAddress(name:string , address:string ,latitude: number, longitude: number ,start_time:string, end_time:string, range:string ){
-    const body = { name , address ,latitude, longitude ,start_time,end_time, range };
+  CreateAddress(name:string , address:string ,latitude: number, longitude: number ,start_time:string, end_time:string, range:string, is_school: boolean = true ){
+    const body = { name , address ,latitude, longitude ,start_time,end_time, range, is_school };
     const token = localStorage.getItem("token");
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 

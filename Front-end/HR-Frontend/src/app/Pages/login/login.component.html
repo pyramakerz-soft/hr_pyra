@@ -1,40 +1,69 @@
-<div class="lg:h-[100vh] flex flex-col-reverse lg:flex-row">
-    <div class="w-full lg:w-1/3 bg-white flex flex-col justify-center items-center p-12 md:p-20">
-        <img src="../../../assets/images/Paragraphcontainer.png" alt="Logo" class="w-[63%]">
-        <p class="h5 text-[#111111] py-3">Hello, please sign into your account</p>
-
-        <div class="w-full text-start">
-            <label htmlFor="email" class="h-4 font-medium text-[#344054] block mb-1" >
-                Email
-            </label>
-            <input id="email" type="email" placeholder="Enter your email" 
-            [(ngModel)]="email"
-            (input)="onEmailChange()"
-            class="h5 w-full bg-white border rounded border-[#D0D5DD] shadow-sm shadow-[#1018280D] h-[22%]  py-[7.5px] px-[10.5px]"   [(ngModel)]="email">
-            <span *ngIf="emailError" class="text-red-500 text-sm ml-2 font-normal">{{ emailError }}</span>
-            
-            <label htmlFor="pass" class="h-4 font-medium text-[#344054] block mb-1 mt-4"  >
-                Password
-            </label>
-            <input id="pass" type="password"
-            [(ngModel)]="password"
-            (input)="onPasswordChange()"
-            class="h5 w-full bg-white border rounded border-[#D0D5DD] shadow-sm shadow-[#1018280D] h-[22%] py-[7.5px] px-[10.5px]" [(ngModel)]="password">
-            <span *ngIf="passwordError" class="text-red-500 text-sm ml-2 font-normal">{{ passwordError }}</span>
-
-        </div>
-
-        <button class="mt-4 w-full text-white font-semibold text-xs shadow-sm bg-[#17253E] border border-[#17253E] py-2 rounded-md"
-        (click)="SignIn()">Sign in</button>
+<div class="login-wrapper">
+  <!-- Form Side -->
+  <main class="form-side">
+    <!-- Logo -->
+    <div class="logo-container">
+      <img src="../../../assets/images/Paragraphcontainer.png" alt="Pyramakerz Logo" class="logo-img">
     </div>
 
-    <div class="w-full lg:w-2/3 bgLinearGradient text-white flex flex-col items-center justify-center p-3 lg:p-0">
-        <p class="text-xl md:text-4xl font-bold mb-8">Do more <span class="font-normal">with Pyramakerz</span></p>
+    <!-- Greeting -->
+    <header class="form-header">
+      <h1 class="welcome-text">Welcome Back</h1>
+      <p class="subtitle-text">Please sign in to access your HR workspace</p>
+    </header>
 
-        <div class="flex flex-col items-center justify-center">
-            <img src="../../../assets/images/Layer 2.png" alt="calender" class="w-[83%] mb-6">
+    <!-- Sign-in Form -->
+    <div class="form-container">
+      <!-- Email Field -->
+      <div class="input-group">
+        <label for="email" class="label-text">Institutional Email</label>
+        <input id="email" type="email" placeholder="name@company.com" 
+               [(ngModel)]="email" (input)="onEmailChange()"
+               class="premium-input" autocomplete="email">
+        <div class="h-4">
+          <span *ngIf="emailError" class="error-text animate-in fade-in slide-in-from-top-1">
+            <i class="fa-solid fa-circle-exclamation mr-1"></i> {{ emailError }}
+          </span>
         </div>
+      </div>
 
+      <!-- Password Field -->
+      <div class="input-group">
+        <label for="pass" class="label-text">Security Password</label>
+        <input id="pass" type="password" placeholder="••••••••" 
+               [(ngModel)]="password" (input)="onPasswordChange()"
+               class="premium-input" autocomplete="current-password">
+        <div class="h-4">
+          <span *ngIf="passwordError" class="error-text animate-in fade-in slide-in-from-top-1">
+            <i class="fa-solid fa-circle-exclamation mr-1"></i> {{ passwordError }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button class="btn-signin flex items-center justify-center gap-2" (click)="SignIn()">
+        <span>Login</span>
+        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+      </button>
+      
+      <!-- Footer Note (Optional) -->
+      <p class="text-[10px] text-center text-gray-400 mt-8 font-bold uppercase tracking-widest">
+        Secured by Enterprise Authentication
+      </p>
     </div>
+  </main>
+
+  <!-- Branding Side -->
+  <aside class="branding-side">
+    <div class="branding-content">
+      <h2 class="slogan">
+        Do more <br>
+        <span>with Pyramakerz</span>
+      </h2>
+      
+      <div class="hero-image-container">
+        <img src="../../../assets/images/Layer 2.png" alt="Strategic HR Management" class="hero-img">
+      </div>
+    </div>
+  </aside>
 </div>
-    

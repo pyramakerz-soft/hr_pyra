@@ -32,7 +32,7 @@ class UpdateLocationRequest extends FormRequest
             'start_time' => ['sometimes', 'date_format:H:i'],
             'end_time' => ['sometimes', 'date_format:H:i', 'after:start_time'],
             'range' => ['sometimes', 'integer'],
-
+            'is_school' => ['sometimes', 'boolean'],
         ];
     }
 }

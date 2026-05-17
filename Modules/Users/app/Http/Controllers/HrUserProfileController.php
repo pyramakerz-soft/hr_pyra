@@ -11,6 +11,7 @@ use Modules\Users\Models\User;
 use Modules\Users\Models\UserDetail;
 use Modules\Users\Models\UserVacationBalance;
 use Modules\Users\Models\VacationType;
+use Modules\Users\Http\Requests\Hr\BulkUpdateTimeRequest;
 use Carbon\Carbon;
 
 class HrUserProfileController extends Controller
@@ -236,6 +237,52 @@ class HrUserProfileController extends Controller
         }
 
         return null;
+    }
+
+    public function bulkUpdateTime(BulkUpdateTimeRequest $request)
+    {
+        $payload = $request->validated();
+        $departmentId = $payload['department_id'] ?? null;
+        $subDepartmentId = $payload['sub_department_id'] ?? null;
+        $startTime = $payload['start_time'] ?? null;
+        $endTime = $payload['end_time'] ?? null;
+        $workingHours = $payload['working_hours_day'] ?? null;
+
+        $query = User::query();
+
+        if ($subDepartmentId) {
+            $query->where('sub_department_id', $subDepartmentId);
+        } elseif ($departmentId) {
+            $query->where('department_id', $departmentId);
+        }
+
+        $userIds = $query->pluck('id');
+
+        if ($userIds->isEmpty()) {
+            return $this->returnError('No employees found for the selected criteria', 404);
+        }
+
+        DB::transaction(function () use ($userIds, $startTime, $endTime, $workingHours) {
+            foreach ($userIds as $userId) {
+                $detail = UserDetail::firstOrNew(['user_id' => $userId]);
+                
+                if ($startTime) {
+                    $detail->start_time = $startTime;
+                }
+                
+                if ($endTime) {
+                    $detail->end_time = $endTime;
+                }
+
+                if ($workingHours) {
+                    $detail->working_hours_day = $workingHours;
+                }
+                
+                $detail->save();
+            }
+        });
+
+        return $this->returnSuccessMessage('Employee times updated successfully');
     }
 }
 

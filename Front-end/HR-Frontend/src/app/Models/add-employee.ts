@@ -9,6 +9,7 @@ export class AddEmployee {
         public department_id: number | null = null,
         public sub_department_id: number | null = null,
         public deparment_name: string | null = null,
+        public sub_department_name: string | null = null,
         public emp_type: string = '',
         public phone: string = '',
         public contact_phone: string = '',

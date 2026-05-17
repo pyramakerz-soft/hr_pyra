@@ -1,20 +1,36 @@
-<div class="lg:hidden flex justify-end relative z-50">
-    <div class="lg:hidden block cursor-pointer pt-5 pr-7"  (click)="OpenMenu()">
-        <div class="h-1 w-7 md:h-[6px] md:w-10 mb-1 bg-[#454950] rounded"></div>
-        <div class="h-1 w-7 md:h-[6px] md:w-10 mb-1 bg-[#454950] rounded"></div>
-        <div class="h-1 w-7 md:h-[6px] md:w-10 bg-[#454950] rounded"></div>
+<!-- Mobile Header & Burger Menu -->
+<div class="lg:hidden flex items-center justify-between px-6 py-4 bg-[#1a2333] relative z-[100] shadow-lg">
+    <div class="h-8">
+        <img src="../../../../assets/images/Paragraphcontainer.png" alt="Logo" class="h-full object-contain" />
     </div>
-    <div [ngClass]="{'burger absolute top-12 right-0 block h-[100vh] w-full md:w-[50%]': isMenuOpen, 'hidden': !isMenuOpen}">
-        <app-side-bar [menuItems]="menuItems" [closeMenu]="closeMenu.bind(this)"></app-side-bar>
+    <div class="cursor-pointer p-2" (click)="OpenMenu()">
+        <div class="space-y-1.5">
+            <div class="h-0.5 w-6 bg-white rounded-full transition-all" [ngClass]="{'rotate-45 translate-y-2': isMenuOpen}"></div>
+            <div class="h-0.5 w-6 bg-white rounded-full transition-all" [ngClass]="{'opacity-0': isMenuOpen}"></div>
+            <div class="h-0.5 w-6 bg-white rounded-full transition-all" [ngClass]="{'-rotate-45 -translate-y-2': isMenuOpen}"></div>
+        </div>
     </div>
 </div>
 
-<div class="flex min-h-[100vh]">
-    <div class="w-1/5 hidden lg:block">
+<!-- Mobile Sidebar Overlay -->
+<div *ngIf="isMenuOpen" class="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] transition-opacity" (click)="closeMenu()"></div>
+<div class="lg:hidden fixed top-0 right-0 h-full w-[320px] z-[95] transform transition-transform duration-300 ease-in-out bg-[#111827]"
+     [ngClass]="isMenuOpen ? 'translate-x-0' : 'translate-x-full'">
+    <app-side-bar [menuItems]="menuItems" [closeMenu]="closeMenu.bind(this)"></app-side-bar>
+</div>
+
+<!-- Main Layout -->
+<div class="flex min-h-screen bg-gray-50">
+    <!-- Desktop Sidebar -->
+    <aside class="hidden lg:block w-[320px] xl:w-[370px] flex-shrink-0">
         <app-side-bar [menuItems]="menuItems" [closeMenu]="closeMenu.bind(this)"></app-side-bar>
-    </div>
-    <div class="lg:w-4/5 w-full py-5 px-6">
-         <router-outlet></router-outlet>
-    </div>
+    </aside>
+
+    <!-- Content Area -->
+    <main class="flex-grow min-w-0">
+         <div class="max-w-[1600px] mx-auto py-6 px-4 md:px-8">
+            <router-outlet></router-outlet>
+         </div>
+    </main>
 </div>
 

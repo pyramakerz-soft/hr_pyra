@@ -1,0 +1,247 @@
+
+
+.title-text {
+    font-size: 1.875rem;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: -0.025em;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Filter Bar Styles */
+.filter-bar-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    margin-top: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.filter-group {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-end;
+}
+
+/* Premium Table Customizations */
+.table-card {
+    background: white;
+    border-radius: 1.25rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    overflow: hidden;
+}
+
+.premium-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.premium-table th {
+    background: #f8fafc;
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.premium-table td {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+}
+
+.premium-table tr:hover td {
+    background: #fcfdfe;
+}
+
+/* Buttons and Icons */
+.btn-premium {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #FF7519;
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #e66400;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 117, 25, 0.3);
+}
+
+.btn-outline {
+    background: white;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.btn-outline:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
+
+.btn-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-edit {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.btn-edit:hover {
+    background: #dbeafe;
+    transform: scale(1.05);
+}
+
+.btn-delete {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+.btn-delete:hover {
+    background: #fee2e2;
+    transform: scale(1.05);
+}
+
+/* Modals */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.modal-card {
+    background: white;
+    width: 100%;
+    max-width: 600px;
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.icon-box {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-body {
+    padding: 2rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* Inputs */
+.premium-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.premium-input:focus {
+    border-color: #FF7519;
+    box-shadow: 0 0 0 4px rgba(255, 117, 25, 0.1);
+    outline: none;
+}
+
+.label-text {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+/* Animations */
+.animate-fade-in-up {
+    animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Spinner */
+.spinner {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #FF7519;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
