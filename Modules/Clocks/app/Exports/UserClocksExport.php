@@ -362,9 +362,14 @@ class UserClocksExport implements WithMultipleSheets
                 $workType = $isPartTime ? 'Part-Time' : 'Full-Time';
 
                 $transportationStatus = '';
-                if (str_contains(strtolower($user->department?->name ?? ''), 'b2b')) {
+                $isB2bDept = str_contains(strtolower($user->department?->name ?? ''), 'b2b');
+                $subDeptName = $user->subDepartment?->name ?? $user->sub_department?->name ?? '';
+                $hasBusInSubDept = (bool) preg_match('/(^|[^a-zA-Z0-9])bus([^a-zA-Z0-9]|$)/iu', $subDeptName)
+                    && !preg_match('/(^|[^a-zA-Z0-9])no[-_ ]?bus([^a-zA-Z0-9]|$)/iu', $subDeptName);
+
+                if ($isB2bDept || $hasBusInSubDept) {
                     $hasBusRule = collect($resolvedPlan['rules'])->contains('template_key', 'academic_bus_users');
-                    $transportationStatus = $hasBusRule ? 'Bus' : 'No Bus';
+                    $transportationStatus = ($hasBusRule || $hasBusInSubDept) ? 'Bus' : 'No Bus';
                 }
 
                 $vacationTags = [];
